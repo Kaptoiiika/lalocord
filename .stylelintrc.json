@@ -1,0 +1,10 @@
+{
+  "extends": "stylelint-config-standard-scss",
+  "rules": {
+    "indentation": [2],
+    "selector-class-pattern": null,
+    "custom-property-empty-line-before": null,
+    "no-empty-source": null,
+    "color-function-notation": null
+  }
+}

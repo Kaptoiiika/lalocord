@@ -1,0 +1,11 @@
+@import "reset";
+@import "variables/global";
+
+:root {
+  --app-max-width: 1366px;
+}
+
+.app {
+  min-height: 100vh;
+  background: var(--bg-app);
+}
