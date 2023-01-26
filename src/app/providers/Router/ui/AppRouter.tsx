@@ -5,24 +5,14 @@ import {
   AppRouteProps,
   routeConfig,
 } from "@/shared/config/routeConfig/routeConfig"
-import { RequireAuth } from "./RequireAuth/RequireAuth"
 
 export const AppRouter = () => {
   const routerWrapper = useCallback(
     (path: string, routerProps: AppRouteProps) => {
-      if (routerProps.authRequire)
-        return (
-          <Route
-            key={path}
-            path={routerProps.path}
-            element={<RequireAuth>{routerProps.element}</RequireAuth>}
-          />
-        )
-
       return (
         <Route
           key={path}
-          path={routerProps.path}
+          path={routerProps.path ?? path}
           element={routerProps.element}
         />
       )

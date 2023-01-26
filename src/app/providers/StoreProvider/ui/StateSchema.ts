@@ -7,6 +7,7 @@ import {
 } from "@reduxjs/toolkit"
 import { AxiosInstance } from "axios"
 import { rtkApi } from "@/shared/api/RtkApi"
+import { Socket } from "socket.io-client"
 
 export interface StateSchema {
   scrollSaver?: unknown
@@ -28,6 +29,7 @@ export interface ReduxStoreWithManager extends EnhancedStore<StateSchema> {
 
 export interface ThunkExtraArg {
   api: AxiosInstance
+  socket: Socket
 }
 
 export interface ThunkConfig<T> {

@@ -25,7 +25,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <ThemeContext.Provider value={defaultProps}>
-      <div className={`ThemeProvider ${theme}`}>{children}</div>
+      {children}
     </ThemeContext.Provider>
   )
 }

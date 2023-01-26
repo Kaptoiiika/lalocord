@@ -33,7 +33,7 @@ module.exports = {
         extensions: [".js", ".jsx", ".tsx"],
       },
     ],
-    "react/jsx-props-no-spreading": "warn",
+    "react/jsx-props-no-spreading": "off",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["warn", { args: "after-used" }],
     "react/require-default-props": "off",
@@ -47,7 +47,7 @@ module.exports = {
     "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
     "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies,
     "import/no-internal-modules": "off",
-    "import/order": "warn",
+    "import/order": "off",
     "import/no-unresolved": "off",
     "import/prefer-default-export": "off",
   },

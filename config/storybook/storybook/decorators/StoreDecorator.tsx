@@ -1,8 +1,7 @@
-/* eslint-disable boundaries/element-types */ // used for storybook
-import { ReducersMapObject } from "@reduxjs/toolkit"
+import { DeepPartial, ReducersMapObject } from "@reduxjs/toolkit"
 import { Story } from "@storybook/react"
-import { StoreProvider } from "@/app/providers/StoreProvider"
-import { StateSchema } from "@/shared/config/storeConfig"
+import { StoreProvider } from "../../../../src/app/providers/StoreProvider"
+import { StateSchema } from "../../../../src/shared/config/storeConfig"
 
 const defaultAsyncReducers: DeepPartial<ReducersMapObject<StateSchema>> = {}
 

@@ -1,11 +1,10 @@
-.scrollWrapper {
-  overflow: auto;
-  height: calc(100vh - var(--navbar-height) - var(--footer-height) - 2em);
-  padding: 1em;
+.PageWrapper {
+  height: calc(100vh - 2em);
+  width: 100%;
+  padding: 1em 1em 1em 0;
 }
 
-.PageWrapper {
-  min-height: 100%;
-  max-width: var(--app-max-width);
-  margin: auto;
+.container {
+  height: calc(100% - 2em);
+  padding: 1em;
 }

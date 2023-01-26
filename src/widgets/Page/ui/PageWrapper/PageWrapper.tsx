@@ -1,18 +1,19 @@
 import { PropsWithChildren } from "react"
-import { classNames } from "@/shared/lib/classNames/classNames"
-
 import styles from "./PageWrapper.module.scss"
+import { Paper } from "@mui/material"
 
 type PageWrapperProps = {
   className?: string
 } & PropsWithChildren
 
 export const PageWrapper = (props: PageWrapperProps) => {
-  const { children, className } = props
+  const { children } = props
 
   return (
-    <main className={classNames([styles.scrollWrapper, className])}>
-      <div className={styles.PageWrapper}>{children}</div>
+    <main className={styles.PageWrapper}>
+      <Paper className={styles.container} square>
+        {children}
+      </Paper>
     </main>
   )
 }
