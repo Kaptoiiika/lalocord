@@ -1,25 +1,10 @@
-import { memo, PropsWithChildren, useMemo, useState } from "react"
-import { WindowContext } from "../../lib/WindowContext/WindowContext"
+import { PropsWithChildren } from "react"
 import styles from "./VirtualWindowContainer.module.scss"
 
 type VirtualWindowContainerProps = {} & PropsWithChildren
 
-export const VirtualWindowContainer = memo(
-  (props: VirtualWindowContainerProps) => {
-    const { children } = props
-    const [lastIndex, setIastIndex] = useState(0)
+export const VirtualWindowContainer = (props: VirtualWindowContainerProps) => {
+  const { children } = props
 
-    const incrementIndex = () => {
-      setIastIndex((prev) => prev + 1)
-      return lastIndex
-    }
-
-    return (
-      <WindowContext.Provider
-        value={{ getNextIndex: incrementIndex, lastUsedIndex: lastIndex }}
-      >
-        <div className={styles.VirtualWindowContainer}>{children}</div>
-      </WindowContext.Provider>
-    )
-  }
-)
+  return <div className={styles.VirtualWindowContainer}>{children}</div>
+}

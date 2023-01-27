@@ -1,0 +1,15 @@
+.StreamViewer {
+  position: relative;
+  display: grid;
+  height: 100%;
+  gap: 8px;
+  overflow: visible;
+}
+
+.item {
+  display: flex;
+
+  > * {
+    width: 100%;
+  }
+}

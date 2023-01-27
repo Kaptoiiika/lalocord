@@ -1,22 +1,19 @@
-import { VirtualWindow, VirtualWindowContainer } from "@/features/VirtualWindow"
 import { PageWrapper } from "@/widgets/Page"
-import { Paper } from "@mui/material"
 
-import icon from "@/shared/assets/icons/DefaultAudioIcon.png"
+import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
+
+const panels = new Array(3).fill(0)
 
 export const MainPage = () => {
   return (
     <PageWrapper>
-      <VirtualWindowContainer>
-        <VirtualWindow>
-          <img style={{ width: "100%", height: "100%" }} src={icon}></img>
-        </VirtualWindow>
-
-        <VirtualWindow>
-          Minim sunt exercitation fugiat occaecat fugiat tempor sunt ipsum
-          officia laboris eiusmod.
-        </VirtualWindow>
-      </VirtualWindowContainer>
+      <StreamViewer>
+        {panels.map((num, index) => (
+          <div style={{ fontSize: 64 }} key={index}>
+            {index}
+          </div>
+        ))}
+      </StreamViewer>
     </PageWrapper>
   )
 }

@@ -4,12 +4,12 @@ import { PartsType } from "../../model/types/WindowParams"
 import styles from "./ResizeFrame.module.scss"
 
 type ResizeFrameProps = {
-  onMouseDown: (
+  onMouseDown?: (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
     active: PartsType
   ) => void
-  onDoubleClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
-  resizable?: boolean
+  onDoubleClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+  disabled?: boolean
 }
 
 export const ResizeBorders: PartsType[] = [
@@ -21,22 +21,22 @@ export const ResizeBorders: PartsType[] = [
   "right-top",
   "left-bottom",
   "right-bottom",
-  "body",
+  "body"
 ]
 export const BorderBody: PartsType[] = ["body"]
 
 export const ResizeFrame = memo((props: ResizeFrameProps) => {
-  const { onMouseDown, onDoubleClick, resizable } = props
+  const { onMouseDown, onDoubleClick, disabled } = props
 
   return (
     <div className={styles.borders}>
       {ResizeBorders.map((border) => (
         <div
           key={border}
-          onMouseDown={(e) => onMouseDown(e, border)}
           onDoubleClick={onDoubleClick}
+          onMouseDown={(e) => onMouseDown?.(e, border)}
           className={classNames(styles[border], {
-            [styles.disabled]: !resizable,
+            [styles.disabled]: disabled,
           })}
         />
       ))}
@@ -45,7 +45,7 @@ export const ResizeFrame = memo((props: ResizeFrameProps) => {
           key={borderBody}
           onDoubleClick={onDoubleClick}
           className={classNames(styles[borderBody], {
-            [styles.disabled]: resizable,
+            [styles.disabled]: !disabled,
           })}
         />
       ))}

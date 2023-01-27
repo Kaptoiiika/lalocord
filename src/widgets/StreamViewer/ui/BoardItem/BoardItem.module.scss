@@ -1,0 +1,19 @@
+.item {
+  position: relative;
+  display: flex;
+
+  border: 1px solid black;
+  > * {
+    width: 100%;
+  }
+}
+
+.fullscreen {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: antiquewhite;
+  z-index: 10;
+}

@@ -1,6 +1,5 @@
-import { useCallback, useContext, useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { PartsType, WindowParams } from "../../model/types/WindowParams"
-import { WindowContext } from "../WindowContext/WindowContext"
 
 type useWindowProps = WindowParams
 
@@ -70,10 +69,7 @@ export const useWindow = (windowParams: useWindowProps) => {
     y: windowParams.y,
     fullScreen: windowParams.fullScreen,
   })
-  const [index, setIndex] = useState(windowParams.index || 0)
   const [draggingPart, setDraggingPart] = useState<PartsType | null>(null)
-
-  const { getNextIndex } = useContext(WindowContext)
 
   const onMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -101,11 +97,10 @@ export const useWindow = (windowParams: useWindowProps) => {
   const onMouseDown = useCallback(
     (e: React.MouseEvent<HTMLElement, MouseEvent>, active: PartsType) => {
       e.stopPropagation()
-      const nextIndex = getNextIndex()
-      setIndex(nextIndex)
+
       setDraggingPart(active)
     },
-    [getNextIndex]
+    []
   )
 
   const stopResize = useCallback(() => {
@@ -139,5 +134,5 @@ export const useWindow = (windowParams: useWindowProps) => {
     }
   }, [onMouseMove, stopResize])
 
-  return { onMouseDown, togleFullScreen, index, ...windowParam }
+  return { onMouseDown, togleFullScreen, ...windowParam }
 }

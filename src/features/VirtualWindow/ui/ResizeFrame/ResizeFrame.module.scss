@@ -6,17 +6,16 @@
   left: 0px;
   pointer-events: none;
   user-select: none;
+  border: 1px solid black;
+  &:hover {
+    background-color: rgba(231, 231, 231, 0.397);
+  }
 }
 
 .borders > * {
   position: absolute;
   pointer-events: all;
-  opacity: 1;
   transition: opacity 0.3s;
-  
-  &:hover {
-    opacity: 1;
-  }
 }
 
 .disabled {
@@ -29,7 +28,6 @@
   top: 4px;
   right: 4px;
   bottom: 4px;
-  background-color: rgba(255, 143, 143, 0);
 }
 
 .top {
