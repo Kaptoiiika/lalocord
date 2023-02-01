@@ -18,7 +18,7 @@ if (!container) {
 const root = createRoot(container)
 
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <ErrorBoundary>
       <StoreProvider>
         <BrowserRouter>
@@ -28,5 +28,5 @@ root.render(
         </BrowserRouter>
       </StoreProvider>
     </ErrorBoundary>
-  </React.StrictMode>
+  // </React.StrictMode>
 )

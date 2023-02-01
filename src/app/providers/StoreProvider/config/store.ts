@@ -8,7 +8,6 @@ import { apiClient } from "@/shared/api/apiClient"
 import { rtkApi } from "@/shared/api/RtkApi"
 import { StateSchema, ThunkExtraArg } from "@/shared/config/storeConfig"
 import { createReducerManager } from "./ReducerManager"
-import { socketClient } from "@/shared/api/socket"
 
 export function createReduxStore(
   initialState?: StateSchema,
@@ -22,7 +21,6 @@ export function createReduxStore(
 
   const extraArg: ThunkExtraArg = {
     api: apiClient,
-    socket: socketClient,
   }
 
   const store = configureStore({

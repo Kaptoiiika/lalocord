@@ -1,10 +1,8 @@
 import { Suspense, useCallback } from "react"
 import { Routes, Route } from "react-router-dom"
 import { PageLoader } from "@/widgets/PageLoader"
-import {
-  AppRouteProps,
-  routeConfig,
-} from "@/shared/config/routeConfig/routeConfig"
+import { AppRouteProps } from "@/shared/config/routeConfig/routeConfig"
+import { RoutesConfig } from "./Routes"
 
 export const AppRouter = () => {
   const routerWrapper = useCallback(
@@ -23,7 +21,7 @@ export const AppRouter = () => {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {Object.entries(routeConfig).map(([path, routerProps]) =>
+        {Object.entries(RoutesConfig).map(([path, routerProps]) =>
           routerWrapper(path, routerProps)
         )}
       </Routes>
