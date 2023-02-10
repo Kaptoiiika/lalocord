@@ -4,6 +4,20 @@ import { Stack } from "@mui/system"
 import { Link } from "react-router-dom"
 import HomeIcon from "@mui/icons-material/Home"
 import styles from "./Navbar.module.scss"
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+
+const links = [
+  {
+    to: AppRoutes.INDEX,
+    label: "home",
+    icon: <HomeIcon />,
+  },
+  {
+    to: AppRoutes.THREEJS,
+    label: "3d",
+    icon: <ViewInArIcon />,
+  },
+]
 
 export const Navbar = () => {
   return (
@@ -13,12 +27,12 @@ export const Navbar = () => {
         justifyContent="space-between"
         spacing={4}
       >
-        <Stack alignItems="center" spacing={2}>
-          <Link to={AppRoutes.INDEX} aria-label="home">
-            <IconButton>
-              <HomeIcon />
-            </IconButton>
-          </Link>
+        <Stack alignItems="center" spacing={1}>
+          {links.map((link) => (
+            <Link key={link.to} to={link.to} aria-label={link.label}>
+              <IconButton>{link.icon}</IconButton>
+            </Link>
+          ))}
         </Stack>
 
         <div>xs=8</div>

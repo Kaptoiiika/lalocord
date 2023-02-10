@@ -8,4 +8,9 @@ export const enum SocketActions {
   RELAY_ICE = "relay-ice",
   ICE_CANDIDATE = "ice-candidate",
   SESSION_DESCRIPTION = "session-description",
+
+
+  OFFER = "offer",
+  ANSWER = "answer",
+  CNADIDATE = "candidate",
 }

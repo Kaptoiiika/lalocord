@@ -5,9 +5,9 @@ export const enum AppRoutes {
 
   INDEX = "/",
   ROOM_ID = "/room/:id",
+  THREEJS = "/test",
 }
 
 export type AppRouteProps = {
   authRequire?: boolean
 } & RouteProps
-

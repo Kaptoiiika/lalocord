@@ -7,7 +7,7 @@ import {
 } from "@reduxjs/toolkit"
 import { AxiosInstance } from "axios"
 import { rtkApi } from "@/shared/api/RtkApi"
-import { RoomSchema } from "@/entities/Room"
+import { RoomSchema } from "@/pages/RoomPage/model/types/RoomSchema"
 
 export interface StateSchema {
   stream?: unknown

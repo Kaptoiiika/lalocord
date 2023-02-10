@@ -54,6 +54,12 @@ module.exports = {
     "import/prefer-default-export": "off",
     "@typescript-eslint/no-empty-function": "warn",
     "@typescript-eslint/no-empty-interface": "warn",
+    "@typescript-eslint/ban-types": "warn",
+    "@typescript-eslint/no-non-null-assertion": "off",
+
+
+    // not work with threeJS
+    "react/no-unknown-property": 'off'
   },
   globals: {
     __IS_DEV__: true,

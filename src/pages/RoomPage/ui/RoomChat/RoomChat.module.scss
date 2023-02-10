@@ -1,0 +1,33 @@
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,600);
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  height: 100%;
+  overflow: hidden;
+
+  header {
+    background-color: #09f;
+    color: #000;
+    padding: 0.75em 1em;
+  }
+}
+
+.chatMessages {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+
+  & > ul {
+    bottom: 0;
+  }
+  & > ul > li {
+    margin-top: 8px;
+  }
+}
+
+.input {
+  width: 100%;
+  display: flex;
+}

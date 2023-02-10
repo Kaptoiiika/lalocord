@@ -1,1 +1,1 @@
-export { RoomPage } from "./ui/RoomPage"
+export { RoomPage } from "./ui/RoomPage/RoomPage"
