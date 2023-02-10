@@ -4,18 +4,12 @@ import { Stack } from "@mui/system"
 import { Link } from "react-router-dom"
 import HomeIcon from "@mui/icons-material/Home"
 import styles from "./Navbar.module.scss"
-import ViewInArIcon from '@mui/icons-material/ViewInAr';
 
 const links = [
   {
     to: AppRoutes.INDEX,
     label: "home",
     icon: <HomeIcon />,
-  },
-  {
-    to: AppRoutes.THREEJS,
-    label: "3d",
-    icon: <ViewInArIcon />,
   },
 ]
 
