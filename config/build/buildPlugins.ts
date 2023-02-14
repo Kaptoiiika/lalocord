@@ -11,7 +11,7 @@ import { BuildOptions } from "./types/config"
 export function buildPlugins(
   options: BuildOptions
 ): webpack.WebpackPluginInstance[] {
-  const { paths } = options
+  const { paths, isDev } = options
   const plugins = [
     new HTMLWebpackPlugin({
       template: paths.html,
@@ -38,12 +38,12 @@ export function buildPlugins(
     }),
   ]
 
-  // if (isDev) {
-  //   plugins.push(new BundleAnalyzerPlugin())
-  // }
-  if (true) {
-    plugins.push(new BundleAnalyzerPlugin({}))
+  if (isDev) {
+    plugins.push(new BundleAnalyzerPlugin())
   }
+  // if (true) {
+  //   plugins.push(new BundleAnalyzerPlugin({}))
+  // }
 
   return plugins
 }
