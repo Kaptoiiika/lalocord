@@ -1,11 +1,16 @@
 import { socketClient } from "@/shared/api/socket/socket"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 
-type Answer = { answer: RTCSessionDescription }
-type Offer = { offer: RTCSessionDescription }
-type Ice = { ice: RTCIceCandidateInit }
-type ClientId = { id: string }
-type MessageType = "offer" | "ice" | "answer" | "request_new_offer" | "data"
+export type Answer = { answer: RTCSessionDescription }
+export type Offer = { offer: RTCSessionDescription }
+export type Ice = { ice: RTCIceCandidateInit }
+export type ClientId = { id: string }
+export type MessageType =
+  | "offer"
+  | "ice"
+  | "answer"
+  | "request_new_offer"
+  | "data"
 
 export class RTCClient extends Emitter {
   id: string
@@ -19,10 +24,6 @@ export class RTCClient extends Emitter {
     super()
     this.id = id
     this.peer = new RTCPeerConnection()
-
-    socketClient.on("new_answer", this.saveAnswer.bind(this))
-    socketClient.on("new_offer", this.createAnswer.bind(this))
-    socketClient.on("new_ice", this.saveIce.bind(this))
 
     this.channel = this.peer.createDataChannel("text")
     this.channel.onopen = () => {
@@ -67,14 +68,14 @@ export class RTCClient extends Emitter {
     this.offerCreater = !this.offerCreater
   }
 
-  async createAnswer(data: Offer) {
+  async createAnswer(offer: RTCSessionDescription) {
     if (!this.peer) return
-    const { offer } = data
+    console.log(offer)
     await this.peer.setRemoteDescription(offer)
     const answer = await this.peer.createAnswer()
     await this.peer.setLocalDescription(answer)
     const resp = { id: this.id, answer: answer }
-    if (this.channelIsOpen) this.sendData("answer", resp)
+    if (this.channelIsOpen) this.sendData("answer", answer)
     else socketClient.emit("new_answer", resp)
   }
 
@@ -83,23 +84,25 @@ export class RTCClient extends Emitter {
     const offer = await this.peer.createOffer()
     await this.peer.setLocalDescription(offer)
     const data = { id: this.id, offer: offer }
-    if (this.channelIsOpen) this.sendData("offer", data)
+    if (this.channelIsOpen) this.sendData("offer", offer)
     else socketClient.emit("new_offer", data)
   }
 
-  async saveAnswer(data: Answer & ClientId) {
-    const { answer } = data
+  async saveAnswer(answer: RTCSessionDescription) {
     await this.peer?.setRemoteDescription(answer)
   }
 
-  saveIce(data: Ice & ClientId) {
-    const { ice } = data
+  saveIce(ice: RTCIceCandidateInit) {
     this.peer?.addIceCandidate(ice)
   }
 
   close() {
-    this.peer?.close()
+    if(!this.peer) return console.warn('Connection already close')
+
+    this.peer.close()
+    this.channel.close()
     this.peer = null
+    this.emit("close")
   }
 
   sendMessage(msg: string) {

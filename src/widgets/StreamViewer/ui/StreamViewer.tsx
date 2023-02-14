@@ -24,12 +24,7 @@ export const StreamViewer = (props: StreamViewerProps) => {
   const rows = sliceIntoTotalChunks(children, totalRows)
 
   return (
-    <div
-      style={{
-        gridTemplateRows: `repeat(${totalRows}, ${100 / totalRows}%)`,
-      }}
-      className={classNames([styles["StreamViewer"], className])}
-    >
+    <div className={classNames([styles["StreamViewer"], className])}>
       {rows.map((rowChildren, index) => (
         <div
           key={`${totalRows}-${index}-${rowChildren.length}`}
