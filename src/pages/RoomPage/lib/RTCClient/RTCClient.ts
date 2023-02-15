@@ -1,5 +1,7 @@
 import { socketClient } from "@/shared/api/socket/socket"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
+//@ts-ignore // no types
+import freeice from "freeice"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
@@ -25,7 +27,7 @@ export class RTCClient extends Emitter {
     super()
     this.id = id
     this.peer = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      iceServers: freeice(),
     })
 
     this.channel = this.peer.createDataChannel("text")

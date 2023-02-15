@@ -5,6 +5,7 @@ import VideocamIcon from "@mui/icons-material/Videocam"
 import AspectRatioIcon from "@mui/icons-material/AspectRatio"
 import { useState } from "react"
 
+
 type RoomActionsProps = {
   startWebCamStream?: (stream: MediaStream) => void
   startDisplayMediaStream?: (stream: MediaStream) => void
