@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.tsx",
   "scripts": {
-    "start": "webpack serve --env mode=development port=3000 apiURL=http://localhost:1337",
-    "build": "webpack --env mode=production apiURL=/api",
+    "start": "webpack serve --env mode=development",
+    "build": "webpack --env mode=production",
     "build:dev": "webpack --env mode=development",
     "lint": "npm run lint:ts && npm run lint:scss",
     "lint:fix": "npm run lint:ts:fix && npm run lint:scss:fix",
@@ -68,6 +68,7 @@
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "dependency-cruiser": "^12.6.0",
+    "dotenv": "^16.0.3",
     "eslint": "^8.25.0",
     "eslint-import-resolver-typescript": "^3.5.2",
     "eslint-plugin-boundaries": "^3.0.0",

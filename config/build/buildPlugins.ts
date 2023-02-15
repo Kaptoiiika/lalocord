@@ -38,9 +38,9 @@ export function buildPlugins(
     }),
   ]
 
-  if (isDev) {
-    plugins.push(new BundleAnalyzerPlugin())
-  }
+  // if (isDev) {
+  //   plugins.push(new BundleAnalyzerPlugin())
+  // }
   // if (true) {
   //   plugins.push(new BundleAnalyzerPlugin({}))
   // }
