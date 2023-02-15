@@ -7,7 +7,7 @@ import { FormateAtributedRoom } from "../service/formateRoom"
 const RoomApi = rtkApi.injectEndpoints({
   endpoints: (build) => ({
     getRooms: build.query({
-      query: () => `/rooms`,
+      query: () => `/room`,
       transformResponse: (baseQueryReturnValue: {
         data: RoomModel[]
       }): RoomModel[] => {

@@ -1,6 +1,5 @@
 import { Backdrop, SpeedDial, SpeedDialAction } from "@mui/material"
 import styles from "./RoomActions.module.scss"
-
 import SpeedDialIcon from "@mui/material/SpeedDialIcon"
 import VideocamIcon from "@mui/icons-material/Videocam"
 import AspectRatioIcon from "@mui/icons-material/AspectRatio"
@@ -29,7 +28,7 @@ export const RoomActions = (props: RoomActionsProps) => {
   const hundleAppStream = async () => {
     const stream = await navigator.mediaDevices.getDisplayMedia({
       audio: true,
-      video: true,
+      video: { frameRate: 60, width: 1920, height: 1024 },
     })
     startDisplayMediaStream?.(stream)
     handleClose()

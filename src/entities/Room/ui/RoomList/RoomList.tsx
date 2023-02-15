@@ -3,8 +3,6 @@ import { useGetRooms } from "../../model/api/RoomApi"
 import { Button, Stack, TextField } from "@mui/material"
 import { Link, useNavigate } from "react-router-dom"
 import { AppRoutes } from "@/shared/config/routeConfig/routeConfig"
-import { useAppDispatch } from "@/shared/lib/hooks/useAppDispatch/useAppDispatch"
-import { createRoomApi } from "../../model/service/createRoomApi"
 
 type RoomListProps = {
   className?: string

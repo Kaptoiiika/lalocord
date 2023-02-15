@@ -10,6 +10,7 @@ export type MessageType =
   | "ice"
   | "answer"
   | "request_new_offer"
+  | "getTrack"
   | "data"
 
 export class RTCClient extends Emitter {
@@ -37,6 +38,7 @@ export class RTCClient extends Emitter {
       const { streams, track } = event
       if (track.kind === "video") {
         this.video = streams[0]
+        this.sendData("getTrack")
         this.emit("startStreamVideo", streams[0])
       }
     }
@@ -70,7 +72,6 @@ export class RTCClient extends Emitter {
 
   async createAnswer(offer: RTCSessionDescription) {
     if (!this.peer) return
-    console.log(offer)
     await this.peer.setRemoteDescription(offer)
     const answer = await this.peer.createAnswer()
     await this.peer.setLocalDescription(answer)
@@ -97,7 +98,7 @@ export class RTCClient extends Emitter {
   }
 
   close() {
-    if(!this.peer) return console.warn('Connection already close')
+    if (!this.peer) return console.warn("Connection already close")
 
     this.peer.close()
     this.channel.close()
@@ -127,8 +128,9 @@ export class RTCClient extends Emitter {
       if (senderAudio && track.kind === "audio") {
         return senderAudio.replaceTrack(track)
       }
+      if (!this.peer) return
 
-      return this.peer?.addTrack(track, stream)
+      this.peer.addTrack(track, stream)
     })
   }
 
@@ -136,6 +138,21 @@ export class RTCClient extends Emitter {
     const json = JSON.stringify({ type: type, data: msg })
     console.info("Message send to", this.id, { type: type, data: msg })
     this.channel.send(json)
+  }
+
+  async updateBitrate() {
+    const videoSender = this.peer
+      ?.getSenders()
+      .filter((sender) => sender.track?.kind === "video")
+    videoSender?.forEach((sender) => {
+      const params = sender.getParameters()
+      params.encodings.forEach((encod) => {
+        encod.maxBitrate = 1024 * 1024 * 50
+        encod.priority = "medium"
+        encod.scaleResolutionDownBy = 1.0
+      })
+      sender.setParameters(params)
+    })
   }
 
   private initDataChanel(e: MessageEvent) {
@@ -149,6 +166,9 @@ export class RTCClient extends Emitter {
       switch (type) {
         case "request_new_offer":
           this.requestNewOffer()
+          break
+        case "getTrack":
+          this.updateBitrate()
           break
         case "answer":
           this.saveAnswer(data)

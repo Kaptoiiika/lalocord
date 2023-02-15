@@ -9,11 +9,13 @@ type RoomStreamsProps = {
 }
 
 export const RoomStreams = (props: RoomStreamsProps) => {
-  const { users } = props
+  const { users, localStream } = props
+
+  const streams = [{ id: "local", video: localStream }, ...users]
 
   return (
     <StreamViewer>
-      {users.map((user) => (
+      {streams.map((user) => (
         <div
           key={user.id}
           className={styles.stream}
