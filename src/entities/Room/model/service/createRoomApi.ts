@@ -13,7 +13,7 @@ export const createRoomApi = createAsyncThunk<
         name: name,
       },
     }
-    await thunkApi.extra.api.post(`/api/rooms`, body)
+    await thunkApi.extra.api.post(`/rooms`, body)
 
     return
   } catch (e) {

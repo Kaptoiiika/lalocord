@@ -5,7 +5,7 @@
   "main": "index.tsx",
   "scripts": {
     "start": "webpack serve --env mode=development port=3000 apiURL=http://localhost:1337",
-    "build": "webpack --env mode=production apiURL=http://kapitoxa.ru",
+    "build": "webpack --env mode=production apiURL=/api",
     "build:dev": "webpack --env mode=development",
     "lint": "npm run lint:ts && npm run lint:scss",
     "lint:fix": "npm run lint:ts:fix && npm run lint:scss:fix",
