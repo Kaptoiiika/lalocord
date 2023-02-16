@@ -12,16 +12,20 @@ export type MessageType =
   | "ice"
   | "answer"
   | "request_new_offer"
-  | "getTrack"
+  | "receiveTrack"
+  | "stopTrack"
   | "data"
 
-export class RTCClient extends Emitter {
+export type RTCClientEvents = "streamVideo" | "close" | "newMessage"
+
+export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
   peer: RTCPeerConnection | null
   channel: RTCDataChannel
   channelIsOpen = false
   video: MediaStream | null = null
   offerCreater: boolean
+  messages: string[] = []
 
   constructor(id: string, sendOffer?: boolean) {
     super()
@@ -33,6 +37,9 @@ export class RTCClient extends Emitter {
     this.channel = this.peer.createDataChannel("text")
     this.channel.onopen = () => {
       this.channelIsOpen = true
+      this.messages.forEach((json) => {
+        this.channel.send(json)
+      })
     }
     this.channel.onclose = () => {
       this.channelIsOpen = false
@@ -42,8 +49,8 @@ export class RTCClient extends Emitter {
       const { streams, track } = event
       if (track.kind === "video") {
         this.video = streams[0]
-        this.sendData("getTrack")
-        this.emit("startStreamVideo", streams[0])
+        this.emit("streamVideo", streams[0])
+        this.sendData("receiveTrack")
       }
     }
 
@@ -103,7 +110,6 @@ export class RTCClient extends Emitter {
 
   close() {
     if (!this.peer) return console.warn("Connection already close")
-
     this.peer.close()
     this.channel.close()
     this.peer = null
@@ -138,9 +144,22 @@ export class RTCClient extends Emitter {
     })
   }
 
+  stopStream() {
+    const senderVideo = this.peer
+      ?.getSenders()
+      .find((s) => s.track?.kind === "video")
+    if (senderVideo) {
+      this.sendData("stopTrack")
+      this.peer?.removeTrack(senderVideo)
+    }
+  }
+
   private sendData(type: MessageType, msg?: unknown) {
     const json = JSON.stringify({ type: type, data: msg })
-    console.info("Message send to", this.id, { type: type, data: msg })
+    if (!this.channelIsOpen) {
+      this.messages.push(json)
+      return
+    }
     this.channel.send(json)
   }
 
@@ -163,7 +182,6 @@ export class RTCClient extends Emitter {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const msg: { type: MessageType; data: any } = JSON.parse(e.data)
-      console.info("Recived message from", this.id, e.data)
       if (!msg.type) return
       const { data, type } = msg
 
@@ -171,7 +189,7 @@ export class RTCClient extends Emitter {
         case "request_new_offer":
           this.requestNewOffer()
           break
-        case "getTrack":
+        case "receiveTrack":
           this.updateBitrate()
           break
         case "answer":
@@ -182,6 +200,13 @@ export class RTCClient extends Emitter {
           break
         case "ice":
           this.saveIce(data)
+          break
+        case "ice":
+          this.saveIce(data)
+          break
+        case "stopTrack":
+          this.video = null
+          this.emit("streamVideo", null)
           break
         case "data":
         default:

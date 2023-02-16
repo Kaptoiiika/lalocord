@@ -2,19 +2,18 @@
   position: relative;
   border-radius: 8px;
   overflow: hidden;
-  pointer-events: none;
-  background-color: rgba(0, 0, 0, 0.1);
+  // pointer-events: none;
+  background-color: rgba(0, 0, 0, 10%);
 }
 
 .wrapper {
-  pointer-events: all;
+  // pointer-events: all;
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   top: 0;
   opacity: 0;
-
   padding: 8px;
   transition: 0.3s opacity;
 

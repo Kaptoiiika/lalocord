@@ -57,6 +57,9 @@ module.exports = {
     "@typescript-eslint/ban-types": "warn",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-explicit-any": "off", //['warn', { allowExplicitAny: true }],
+    "react/display-name": "warn",
+    "react/jsx-no-leaked-render": ["warn", { validStrategies: ["coerce"] }],
   },
   globals: {
     __IS_DEV__: true,

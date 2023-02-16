@@ -23,8 +23,8 @@ export const Navbar = () => {
       >
         <Stack alignItems="center" spacing={1}>
           {links.map((link) => (
-            <Link key={link.to} to={link.to} aria-label={link.label}>
-              <IconButton>{link.icon}</IconButton>
+            <Link key={link.to} to={link.to}>
+              <IconButton aria-label={link.label}>{link.icon}</IconButton>
             </Link>
           ))}
         </Stack>

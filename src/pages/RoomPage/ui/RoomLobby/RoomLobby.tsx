@@ -9,6 +9,7 @@ export const RoomLobby = () => {
   const {
     hundleSendMessage,
     hundleStartLocalStream,
+    hundleStopLocalStream,
     localStream,
     messages,
     users,
@@ -21,6 +22,7 @@ export const RoomLobby = () => {
         <RoomActions
           startWebCamStream={hundleStartLocalStream}
           startDisplayMediaStream={hundleStartLocalStream}
+          stopStream={localStream ? hundleStopLocalStream : undefined}
         />
       </div>
 

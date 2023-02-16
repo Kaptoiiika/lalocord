@@ -19,14 +19,14 @@ const root = createRoot(container)
 
 root.render(
   // <React.StrictMode>
-    <ErrorBoundary>
-      <StoreProvider>
-        <BrowserRouter>
-          <ThemeProvider>
-            <App />
-          </ThemeProvider>
-        </BrowserRouter>
-      </StoreProvider>
-    </ErrorBoundary>
+  <ErrorBoundary>
+    <StoreProvider>
+      <BrowserRouter>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </BrowserRouter>
+    </StoreProvider>
+  </ErrorBoundary>
   // </React.StrictMode>
 )

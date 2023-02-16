@@ -1,21 +1,53 @@
 import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
 import { Typography } from "@mui/material"
+import { memo, useEffect, useState } from "react"
 import { RTCClient } from "../../lib/RTCClient/RTCClient"
 import styles from "./RoomStreams.module.scss"
 
 type RoomStreamsProps = {
-  users: Pick<RTCClient, "id" | "video">[]
+  users: RTCClient[]
   localStream: MediaStream | null
 }
 
-export const RoomStreams = (props: RoomStreamsProps) => {
+export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
   const { users, localStream } = props
+  const [, update] = useState(0)
 
-  const streams = [{ id: "local", video: localStream }, ...users]
+  useEffect(() => {
+    users.forEach((user) => {
+      user.on("streamVideo", () => {
+        update((prev) => prev + 1)
+      })
+    })
+  }, [users])
+
+  console.log(users)
 
   return (
     <StreamViewer>
-      {streams.map((user) => (
+      <div
+        className={styles.stream}
+        onDoubleClick={(e) => {
+          e.currentTarget.requestFullscreen()
+        }}
+      >
+        <div className={styles.wrapper}>
+          <Typography>{"local"}</Typography>
+        </div>
+        <video
+          style={{ width: "100%", height: "100%" }}
+          ref={(node) => {
+            if (node && node.srcObject !== localStream) {
+              node.srcObject = localStream
+            }
+          }}
+          autoPlay
+          muted
+          controls
+          playsInline
+        />
+      </div>
+      {users.map((user) => (
         <div
           key={user.id}
           className={styles.stream}
@@ -34,6 +66,7 @@ export const RoomStreams = (props: RoomStreamsProps) => {
               }
             }}
             autoPlay
+            controls
             muted
             playsInline
           />
@@ -41,4 +74,4 @@ export const RoomStreams = (props: RoomStreamsProps) => {
       ))}
     </StreamViewer>
   )
-}
+})

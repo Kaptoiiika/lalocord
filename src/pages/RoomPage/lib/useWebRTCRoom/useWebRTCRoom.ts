@@ -5,7 +5,6 @@ import { Answer, ClientId, Ice, Offer, RTCClient } from "../RTCClient/RTCClient"
 
 export const useWebRTCRoom = () => {
   const [messages, setMessages] = useState<Message[]>([])
-  const [, update] = useState(0)
   const [users, setUsers] = useState<RTCClient[]>([])
   const [localStream, setLocalStream] = useState<MediaStream | null>(null)
 
@@ -18,9 +17,6 @@ export const useWebRTCRoom = () => {
     const newUser = new RTCClient(user, createOffer)
     newUser.on("newMessage", (msg: string) => {
       setMessages((prev) => [...prev, { user: user, data: msg }])
-    })
-    newUser.on("startStreamVideo", () => {
-      update((prev) => prev + 1)
     })
 
     if (localStreamRef.current) newUser.sendStream(localStreamRef.current)
@@ -110,10 +106,21 @@ export const useWebRTCRoom = () => {
     })
   }
 
+  const hundleStopLocalStream = () => {
+    localStream?.getTracks().forEach((track) => {
+      track.stop()
+    })
+    setLocalStream(null)
+    users.forEach((user) => {
+      user.stopStream()
+    })
+  }
+
   return {
     users,
     messages,
     localStream,
+    hundleStopLocalStream,
     hundleStartLocalStream,
     hundleSendMessage,
   }

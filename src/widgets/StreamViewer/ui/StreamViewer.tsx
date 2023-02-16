@@ -1,30 +1,21 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { sliceIntoTotalChunks } from "@/shared/lib/utils/Arrays"
-import { ReactNode } from "react"
+import { Children, PropsWithChildren } from "react"
 import styles from "./StreamViewer.module.scss"
 
 type StreamViewerProps = {
-  children?: ReactNode[] | ReactNode
   className?: string
-}
+} & PropsWithChildren
 
 export const StreamViewer = (props: StreamViewerProps) => {
   const { children, className } = props
+  const childrenArr = Children.toArray(children)
 
-  if (!Array.isArray(children)) {
-    return (
-      <div className={classNames([styles["StreamViewer"], className])}>
-        <div className={styles.row}>{children}</div>
-      </div>
-    )
-  }
-
-  const totalRows = Math.round(Math.sqrt(children.length))
-
-  const rows = sliceIntoTotalChunks(children, totalRows)
+  const totalRows = Math.round(Math.sqrt(childrenArr.length))
+  const rows = sliceIntoTotalChunks(childrenArr, totalRows)
 
   return (
-    <div className={classNames([styles["StreamViewer"], className])}>
+    <div className={classNames([styles.StreamViewer, className])}>
       {rows.map((rowChildren, index) => (
         <div
           key={`${totalRows}-${index}-${rowChildren.length}`}
