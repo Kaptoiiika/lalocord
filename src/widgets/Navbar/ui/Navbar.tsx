@@ -1,5 +1,5 @@
 import { AppRoutes } from "@/shared/config/routeConfig/routeConfig"
-import { IconButton, Paper } from "@mui/material"
+import { IconButton } from "@mui/material"
 import { Stack } from "@mui/material"
 import { Link } from "react-router-dom"
 import HomeIcon from "@mui/icons-material/Home"
@@ -15,13 +15,19 @@ const links = [
 
 export const Navbar = () => {
   return (
-    <Paper square className={styles.NavbarContainer}>
+    <nav className={styles.NavbarContainer}>
       <Stack
         className={styles.stack}
         justifyContent="space-between"
         spacing={4}
       >
         <Stack alignItems="center" spacing={1}>
+          <Link className={styles.headerLink} to={AppRoutes.INDEX}>
+            <IconButton aria-label="home">
+              <HomeIcon />
+            </IconButton>
+          </Link>
+
           {links.map((link) => (
             <Link key={link.to} to={link.to}>
               <IconButton aria-label={link.label}>{link.icon}</IconButton>
@@ -29,8 +35,12 @@ export const Navbar = () => {
           ))}
         </Stack>
 
-        <div>xs=8</div>
+        <Link className={styles.headerLink} to={AppRoutes.AUTH}>
+          <IconButton aria-label="home">
+            <HomeIcon />
+          </IconButton>
+        </Link>
       </Stack>
-    </Paper>
+    </nav>
   )
 }

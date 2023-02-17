@@ -9,11 +9,13 @@ import { AxiosInstance } from "axios"
 import { rtkApi } from "@/shared/api/RtkApi"
 import { RoomSchema } from "@/pages/RoomPage/model/types/RoomSchema"
 import { UserSchema } from "@/entities/User"
+import { AuthByUsernameSchema } from "@/features/AuthByUsername"
 
 export interface StateSchema {
   user: UserSchema
   [rtkApi.reducerPath]: ReturnType<typeof rtkApi.reducer>
 
+  authByUsername?: AuthByUsernameSchema
   rooms?: RoomSchema
 }
 

@@ -42,7 +42,7 @@ export const RoomActions = (props: RoomActionsProps) => {
   }
 
   return (
-    <Paper className={styles.RoomActions} variant="outlined" square>
+    <div className={styles.RoomActions}>
       {!!startWebCamStream && (
         <IconButton
           onClick={hundleWebCamStream}
@@ -62,6 +62,6 @@ export const RoomActions = (props: RoomActionsProps) => {
           <VideocamOffIcon />
         </IconButton>
       )}
-    </Paper>
+    </div>
   )
 }

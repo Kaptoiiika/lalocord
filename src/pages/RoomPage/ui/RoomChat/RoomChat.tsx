@@ -1,5 +1,5 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
-import { Paper, TextField } from "@mui/material"
+import { TextField } from "@mui/material"
 import { useCallback, useState } from "react"
 import { Message } from "../../model/types/RoomSchema"
 import styles from "./RoomChat.module.scss"
@@ -11,7 +11,6 @@ type RoomChatProps = {
 
 export const RoomChat = (props: RoomChatProps) => {
   const [text, setText] = useState("")
-  const [collapsed, setCollapsed] = useState(false)
   const { messages, onSendMessage } = props
 
   const hundleChangeText = useCallback(
@@ -27,18 +26,30 @@ export const RoomChat = (props: RoomChatProps) => {
     setText("")
   }
 
+  const MessageItem = (message: Message, index: number, arr: Message[]) => {
+    if (index && arr[index - 1]?.user === message.user) {
+      return (
+        <li
+          className={classNames([styles.message, styles.messageGroup])}
+          key={index}
+        >
+          <div className={styles.messageText}>{message.data}</div>
+        </li>
+      )
+    }
+    return (
+      <li className={styles.message} key={index}>
+        <div className={styles.messageUser}>{message.user}</div>
+        <div className={styles.messageText}>{message.data}</div>
+      </li>
+    )
+  }
+
   return (
-    <Paper className={styles.sidebar}>
+    <div className={styles.sidebar}>
       <header className={styles.header}>Chat</header>
       <div className={styles.chatMessages}>
-        <ul>
-          {messages.map((message, index) => (
-            <li className={styles.message} key={index}>
-              <div className={styles.messageUser}>{message.user}</div>
-              <div className={styles.messageText}>{message.data}</div>
-            </li>
-          ))}
-        </ul>
+        <ul>{messages.map(MessageItem)}</ul>
       </div>
       <form onSubmit={hundleSendMessage} className={styles.form}>
         <TextField
@@ -49,6 +60,6 @@ export const RoomChat = (props: RoomChatProps) => {
           className={styles.input}
         />
       </form>
-    </Paper>
+    </div>
   )
 }

@@ -10,11 +10,13 @@
   width: 300px;
   flex: 0 0 300px;
   height: 100%;
+  border-left: var(--box-border);
 }
 
 .header {
   height: var(--header-height);
   flex: 0 0 var(--header-height);
+  border-bottom: var(--box-border);
 }
 
 .collapsed {
@@ -42,12 +44,6 @@
     justify-content: flex-end;
     overflow: auto;
     height: 100%;
-    width: 100%;
-    bottom: 0;
-  }
-
-  & > ul > li {
-    margin-top: 8px;
   }
 }
 
@@ -57,10 +53,11 @@
 }
 
 .message {
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
+  margin-top: 8px;
 
+  &Group {
+    margin-top: 0;
+  }
   &User {
     font-size: 1.25em;
     font-weight: bold;
@@ -69,5 +66,8 @@
   &Text {
     margin-left: 4px;
     overflow-wrap: break-word;
+  }
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
   }
 }

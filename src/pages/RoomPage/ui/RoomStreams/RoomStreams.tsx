@@ -11,11 +11,11 @@ type RoomStreamsProps = {
 
 export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
   const { users, localStream } = props
-  const [userStreams, setUserStreams] = useState(() =>
-    users.filter((usr) => !!usr.video)
-  )
+  const [userStreams, setUserStreams] = useState<RTCClient[]>([])
 
   useEffect(() => {
+    setUserStreams(users.filter((usr) => !!usr.video))
+
     const listeners = users.map((user) => {
       const fn = (stream: MediaStream | null) => {
         if (stream) setUserStreams((prev) => [...prev, user])
@@ -38,7 +38,9 @@ export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
         <div
           className={styles.stream}
           onDoubleClick={(e) => {
-            e.currentTarget.requestFullscreen()
+            e.currentTarget.requestFullscreen().catch((e) => {
+              console.error(e)
+            })
           }}
         >
           <div className={styles.wrapper}>
@@ -63,7 +65,9 @@ export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
           key={user.id}
           className={styles.stream}
           onDoubleClick={(e) => {
-            e.currentTarget.requestFullscreen()
+            e.currentTarget.requestFullscreen().catch((e) => {
+              console.error(e)
+            })
           }}
         >
           <div className={styles.wrapper}>

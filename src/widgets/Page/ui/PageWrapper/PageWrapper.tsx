@@ -1,3 +1,4 @@
+import { classNames } from "@/shared/lib/classNames/classNames"
 import { PropsWithChildren } from "react"
 import styles from "./PageWrapper.module.scss"
 
@@ -6,7 +7,11 @@ type PageWrapperProps = {
 } & PropsWithChildren
 
 export const PageWrapper = (props: PageWrapperProps) => {
-  const { children } = props
+  const { children, className } = props
 
-  return <main className={styles.PageWrapper}>{children}</main>
+  return (
+    <main className={classNames([styles.PageWrapper, className])}>
+      {children}
+    </main>
+  )
 }

@@ -1,8 +1,16 @@
 .NavbarContainer {
-  width: 64px;
+  width: var(--navbar-width);
   flex-shrink: 0;
+  border-right: var(--box-border);
 }
 
 .stack {
   height: 100%;
+}
+
+.headerLink {
+  display: flex;
+  justify-content: center;
+  height: var(--header-height);
+  width: 100%;
 }

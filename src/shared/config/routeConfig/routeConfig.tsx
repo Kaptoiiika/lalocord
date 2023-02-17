@@ -5,6 +5,8 @@ export const enum AppRoutes {
 
   INDEX = "/",
   ROOM_ID = "/room/:id",
+  AUTH = "auth",
+  PROFILE = "/",
 }
 
 export type AppRouteProps = {

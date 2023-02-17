@@ -1,0 +1,16 @@
+.AuthorizationByUsername {
+  margin: 0 auto;
+  padding: 1em;
+  max-width: 650px;
+}
+
+.selectTypeAuth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.content {
+  max-width: 300px;
+  width: 100%;
+  margin: 1em auto;
+}

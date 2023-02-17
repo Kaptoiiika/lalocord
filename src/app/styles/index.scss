@@ -1,7 +1,8 @@
 @import "reset";
 @import "variables/global";
+@import "theme/light";
 
-:root {
+root {
   --app-max-width: 1366px;
 }
 
