@@ -11,43 +11,54 @@ type RoomStreamsProps = {
 
 export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
   const { users, localStream } = props
-  const [, update] = useState(0)
+  const [userStreams, setUserStreams] = useState(() =>
+    users.filter((usr) => !!usr.video)
+  )
 
   useEffect(() => {
-    users.forEach((user) => {
-      user.on("streamVideo", () => {
-        update((prev) => prev + 1)
-      })
+    const listeners = users.map((user) => {
+      const fn = (stream: MediaStream | null) => {
+        if (stream) setUserStreams((prev) => [...prev, user])
+        else setUserStreams((prev) => prev.filter((usr) => user.id !== usr.id))
+      }
+      user.on("streamVideo", fn)
+      return { user, fn }
     })
-  }, [users])
 
-  console.log(users)
+    return () => {
+      listeners.forEach(({ user, fn }) => {
+        user.off("streamVideo", fn)
+      })
+    }
+  }, [users])
 
   return (
     <StreamViewer>
-      <div
-        className={styles.stream}
-        onDoubleClick={(e) => {
-          e.currentTarget.requestFullscreen()
-        }}
-      >
-        <div className={styles.wrapper}>
-          <Typography>{"local"}</Typography>
-        </div>
-        <video
-          style={{ width: "100%", height: "100%" }}
-          ref={(node) => {
-            if (node && node.srcObject !== localStream) {
-              node.srcObject = localStream
-            }
+      {!!localStream && (
+        <div
+          className={styles.stream}
+          onDoubleClick={(e) => {
+            e.currentTarget.requestFullscreen()
           }}
-          autoPlay
-          muted
-          controls
-          playsInline
-        />
-      </div>
-      {users.map((user) => (
+        >
+          <div className={styles.wrapper}>
+            <Typography>{"local"}</Typography>
+          </div>
+          <video
+            style={{ width: "100%", height: "100%" }}
+            ref={(node) => {
+              if (node && node.srcObject !== localStream) {
+                node.srcObject = localStream
+              }
+            }}
+            autoPlay
+            muted
+            controls
+            playsInline
+          />
+        </div>
+      )}
+      {userStreams.map((user) => (
         <div
           key={user.id}
           className={styles.stream}

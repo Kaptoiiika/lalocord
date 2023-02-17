@@ -156,6 +156,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   private sendData(type: MessageType, msg?: unknown) {
     const json = JSON.stringify({ type: type, data: msg })
+    console.log("sendData", json)
     if (!this.channelIsOpen) {
       this.messages.push(json)
       return
@@ -182,6 +183,8 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const msg: { type: MessageType; data: any } = JSON.parse(e.data)
+      console.log("reciveData", msg)
+
       if (!msg.type) return
       const { data, type } = msg
 

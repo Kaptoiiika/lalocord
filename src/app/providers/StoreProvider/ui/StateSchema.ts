@@ -8,11 +8,13 @@ import {
 import { AxiosInstance } from "axios"
 import { rtkApi } from "@/shared/api/RtkApi"
 import { RoomSchema } from "@/pages/RoomPage/model/types/RoomSchema"
+import { UserSchema } from "@/entities/User"
 
 export interface StateSchema {
-  stream?: unknown
-  rooms?: RoomSchema
+  user: UserSchema
   [rtkApi.reducerPath]: ReturnType<typeof rtkApi.reducer>
+
+  rooms?: RoomSchema
 }
 
 export type StateSchemaKey = keyof StateSchema

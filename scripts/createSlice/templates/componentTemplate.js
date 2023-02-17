@@ -6,7 +6,7 @@ type ${componentName}Props = {
   className?: string
 }
 
-export const ${componentName} = memo((props: ${componentName}Props) => {
+export const ${componentName} = memo(function ${componentName} (props: ${componentName}Props) {
   const { className } = props
 
   return <div className={classNames([styles.${componentName}, className])}>

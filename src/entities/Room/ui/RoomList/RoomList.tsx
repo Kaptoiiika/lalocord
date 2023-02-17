@@ -8,7 +8,7 @@ type RoomListProps = {
   className?: string
 }
 
-export const RoomList = memo((props: RoomListProps) => {
+export const RoomList = memo(function RoomList(props: RoomListProps) {
   const { data } = useGetRooms({})
   const navigate = useNavigate()
   const [roomName, setRoomName] = useState("")
@@ -29,7 +29,11 @@ export const RoomList = memo((props: RoomListProps) => {
           value={roomName}
           onChange={hundleChangeRoomName}
         />
-        <Button onClick={hundleCreateRoom} variant="contained">
+        <Button
+          disabled={!roomName}
+          onClick={hundleCreateRoom}
+          variant="contained"
+        >
           CreateRoom
         </Button>
       </Stack>

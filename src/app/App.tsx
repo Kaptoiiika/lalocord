@@ -1,5 +1,5 @@
 import { Navbar } from "@/widgets/Navbar"
-import { Stack } from "@mui/system"
+import { Stack } from "@mui/material"
 import { Suspense } from "react"
 import { AppRouter } from "./providers/Router/ui/AppRouter"
 

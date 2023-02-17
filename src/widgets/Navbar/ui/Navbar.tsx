@@ -1,6 +1,6 @@
 import { AppRoutes } from "@/shared/config/routeConfig/routeConfig"
 import { IconButton, Paper } from "@mui/material"
-import { Stack } from "@mui/system"
+import { Stack } from "@mui/material"
 import { Link } from "react-router-dom"
 import HomeIcon from "@mui/icons-material/Home"
 import styles from "./Navbar.module.scss"
