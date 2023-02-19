@@ -1,3 +1,10 @@
+.RoomStreams {
+  border-bottom: var(--box-border);
+  border-top: var(--box-border);
+  padding: 8px 0;
+  height: calc(100% - 16px);
+}
+
 .stream {
   position: relative;
   border-radius: 8px;

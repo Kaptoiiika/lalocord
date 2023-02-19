@@ -33,7 +33,7 @@ export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
   }, [users])
 
   return (
-    <StreamViewer>
+    <StreamViewer className={styles.RoomStreams}>
       {!!localStream && (
         <div
           className={styles.stream}

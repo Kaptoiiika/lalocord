@@ -13,18 +13,15 @@ export interface FileRespounce {
   provider?: string
   createdAt?: string
   updatedAt?: string
-  formats?: {
-    large: imageFormats
-    small: imageFormats
-    medium: imageFormats
-    thumbnail: imageFormats
-  }
+  formats?: ImageFormats
   // ??
   caption?: any
   provider_metadata?: any
 }
 
-type imageFormats = {
+export type ImageFormats = Record<imageFormatVariant, imageFormat>
+
+export type imageFormat = {
   url: string
   ext?: string
   hash?: string
@@ -35,3 +32,5 @@ type imageFormats = {
   width?: number
   height?: number
 }
+
+export type imageFormatVariant = "large" | "small" | "medium" | "thumbnail"

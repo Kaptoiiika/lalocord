@@ -3,6 +3,7 @@ import { saveTokenToApi } from "@/shared/api/AuthorizationToken/saveTokenToApi"
 import type { ThunkConfig } from "@/shared/config/storeConfig"
 import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
 import { UserModel } from "../../types/userSchema"
+import { FormateFile } from "@/shared/lib/formaters/FormateAtributesFile/FormateAtributesFile"
 
 export const initalAuthData = createAsyncThunk<
   UserModel,
@@ -27,7 +28,7 @@ export const initalAuthData = createAsyncThunk<
       id: data.id,
       username: data.username,
       email: data.email,
-      avatar: data.avatar || undefined,
+      avatar: data.avatar ? FormateFile(data.avatar) : undefined,
     }
   } catch (error: any) {
     localStorage.removeItem(localstorageKeys.TOKEN)

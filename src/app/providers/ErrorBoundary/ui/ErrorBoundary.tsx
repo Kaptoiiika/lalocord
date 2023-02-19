@@ -3,7 +3,7 @@ import { PageError } from "@/widgets/PageError"
 
 type ErrorBoundaryProps = {} & PropsWithChildren
 
-type ErrorBoundaryState = { hasError: boolean }
+type ErrorBoundaryState = { hasError: boolean; error: any }
 
 export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
@@ -11,12 +11,12 @@ export class ErrorBoundary extends Component<
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false }
+    this.state = { hasError: false, error: null }
   }
 
   static getDerivedStateFromError() {
     // Update state so the next render will show the fallback UI.
-    return { hasError: true }
+    return { hasError: true,  }
   }
 
   componentDidCatch(error: any, errorInfo: any) {
@@ -25,7 +25,7 @@ export class ErrorBoundary extends Component<
   }
 
   render() {
-    const { hasError } = this.state
+    const { hasError, error } = this.state
     const { children } = this.props
     if (hasError) {
       return (

@@ -30,6 +30,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   constructor(id: string, sendOffer?: boolean) {
     super()
     this.id = id
+    if(!RTCPeerConnection) throw new Error('Your browser does not support WEBRTC')
     this.peer = new RTCPeerConnection({
       iceServers: freeice(),
     })
