@@ -1,67 +1,72 @@
-import { Backdrop, SpeedDial, IconButton, Paper } from "@mui/material"
-import SpeedDialIcon from "@mui/material/SpeedDialIcon"
+import { IconButton, Tooltip } from "@mui/material"
 import VideocamIcon from "@mui/icons-material/Videocam"
-import AspectRatioIcon from "@mui/icons-material/AspectRatio"
 import VideocamOffIcon from "@mui/icons-material/VideocamOff"
 import styles from "./RoomActions.module.scss"
 import { useState } from "react"
+import { useRoomRTCStore } from "../../model/store/store/RoomRTCStore"
+import {
+  getActionSetWebCamStream,
+  getStreamSettings,
+  getWebCamStream,
+} from "../../model/store/selectors/RoomRTCSelectors"
+import { ShareScreenMenu } from "./ShareScreenMenu/ShareScreenMenu"
 
-type RoomActionsProps = {
-  startWebCamStream?: (stream: MediaStream) => void
-  startDisplayMediaStream?: (stream: MediaStream) => void
-  stopStream?: () => void
-}
+type RoomActionsProps = {}
 
 export const RoomActions = (props: RoomActionsProps) => {
-  const { startWebCamStream, startDisplayMediaStream, stopStream } = props
+  const webCamStream = useRoomRTCStore(getWebCamStream)
+  const streamSettings = useRoomRTCStore(getStreamSettings)
+  const setWebCamStream = useRoomRTCStore(getActionSetWebCamStream)
+
   const [error, setError] = useState({ usermedia: null })
 
   const hundleWebCamStream = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { frameRate: 60, width: 1920, height: 1024 },
+        video: streamSettings,
       })
-      startWebCamStream?.(stream)
+      setWebCamStream(stream)
+      stream.getVideoTracks().forEach((track) => {
+        track.onended = () => {
+          setWebCamStream(null)
+        }
+      })
     } catch (error: any) {
       setError((prev) => ({ ...prev, usermedia: error?.message }))
     }
   }
 
-  const hundleAppStream = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        audio: true,
-        video: { frameRate: 60, width: 1920, height: 1024 },
-      })
-      startDisplayMediaStream?.(stream)
-    } catch (error: any) {}
-  }
-
-  const hundleStopStream = () => {
-    stopStream?.()
+  const hundleStopWebCamStream = () => {
+    webCamStream?.getTracks().forEach((track) => {
+      track.stop()
+      setWebCamStream(null)
+    })
   }
 
   return (
     <div className={styles.RoomActions}>
-      {!!startWebCamStream && (
-        <IconButton
-          onClick={hundleWebCamStream}
-          aria-label={error.usermedia || "Turn on camera"}
-          disabled={!!error.usermedia}
-        >
-          <VideocamIcon />
-        </IconButton>
+      {webCamStream ? (
+        <Tooltip title="Turn off camera" arrow>
+          <IconButton
+            onClick={hundleStopWebCamStream}
+            aria-label={"Turn off camera"}
+          >
+            <VideocamOffIcon />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip title="Turn on camera" arrow>
+          <IconButton
+            onClick={hundleWebCamStream}
+            aria-label={error.usermedia || "Turn on camera"}
+            disabled={!!error.usermedia}
+          >
+            <VideocamIcon />
+          </IconButton>
+        </Tooltip>
       )}
-      {!!startDisplayMediaStream && (
-        <IconButton onClick={hundleAppStream} aria-label={"Share your screen"}>
-          <AspectRatioIcon />
-        </IconButton>
-      )}
-      {!!stopStream && (
-        <IconButton onClick={hundleStopStream} aria-label={"Stop stream"}>
-          <VideocamOffIcon />
-        </IconButton>
-      )}
+
+      <ShareScreenMenu />
     </div>
   )
 }

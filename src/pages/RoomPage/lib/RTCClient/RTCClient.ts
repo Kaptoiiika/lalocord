@@ -2,6 +2,8 @@ import { socketClient } from "@/shared/api/socket/socket"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 //@ts-ignore // no types
 import freeice from "freeice"
+import { useRoomRTCStore } from "../../model/store/store/RoomRTCStore"
+import { MediaStreamTypes } from "../../model/store/types/RoomRTCSchema"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
@@ -12,28 +14,42 @@ export type MessageType =
   | "ice"
   | "answer"
   | "request_new_offer"
-  | "receiveTrack"
-  | "stopTrack"
+  | "sendNewStream"
+  | "stopStream"
+  | "streamAccepted"
   | "data"
 
-export type RTCClientEvents = "streamVideo" | "close" | "newMessage"
+export type RTCClientEvents = "updateStreams" | "close" | "newMessage"
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
   peer: RTCPeerConnection | null
   channel: RTCDataChannel
-  channelIsOpen = false
-  video: MediaStream | null = null
-  offerCreater: boolean
+  video: Record<MediaStreamTypes, MediaStream | null> = {
+    media: null,
+    webCam: null,
+  }
   messages: string[] = []
+
+  private unknownVideo: MediaStream | null = null
+  private unknownVideoType: MediaStreamTypes | null = null
+  private channelIsOpen = false
+  private offerCreater: boolean
+  private senders: Record<MediaStreamTypes, RTCRtpSender[] | null> = {
+    media: null,
+    webCam: null,
+  }
+  private encodingSettings: RTCRtpEncodingParameters = {}
 
   constructor(id: string, sendOffer?: boolean) {
     super()
     this.id = id
-    if(!RTCPeerConnection) throw new Error('Your browser does not support WEBRTC')
+    if (!RTCPeerConnection)
+      throw new Error("Your browser does not support WEBRTC")
     this.peer = new RTCPeerConnection({
       iceServers: freeice(),
     })
+    this.log("client:", id, this)
 
     this.channel = this.peer.createDataChannel("text")
     this.channel.onopen = () => {
@@ -46,14 +62,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       this.channelIsOpen = false
     }
 
-    this.peer.ontrack = (event) => {
-      const { streams, track } = event
-      if (track.kind === "video") {
-        this.video = streams[0]
-        this.emit("streamVideo", streams[0])
-        this.sendData("receiveTrack")
-      }
-    }
+    this.peer.ontrack = this.reciveTrack.bind(this)
 
     this.peer.ondatachannel = (event) => {
       const remoteChannel = event.channel
@@ -70,6 +79,46 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       if (!this.offerCreater) this.createOffer()
       else this.requestNewOffer()
     }
+
+    useRoomRTCStore.getState().addConnectedUsers(this)
+    const sub = this.initStoreSubscribe()
+    this.peer.onconnectionstatechange = (e) => {
+      switch (this.peer?.connectionState) {
+        case "disconnected":
+        case "closed":
+          sub()
+          this.close()
+        case "new":
+        case "connected":
+        case "failed":
+        default:
+          break
+      }
+    }
+  }
+
+  private initStoreSubscribe() {
+    const { encodingSettings, webCamStream, displayMediaStream } =
+      useRoomRTCStore.getState()
+    this.encodingSettings = encodingSettings
+
+    if (displayMediaStream) this.sendStream(displayMediaStream, "media")
+    if (webCamStream) this.sendStream(webCamStream, "webCam")
+
+    const sub = useRoomRTCStore.subscribe((state) => {
+      if (state.webCamStream) this.sendStream(state.webCamStream, "webCam")
+      else this.stopStream("webCam")
+      if (state.displayMediaStream)
+        this.sendStream(state.displayMediaStream, "media")
+      else this.stopStream("media")
+
+      if (state.encodingSettings !== this.encodingSettings) {
+        this.encodingSettings = state.encodingSettings
+        this.updateBitrate()
+      }
+    })
+
+    return sub
   }
 
   private requestNewOffer() {
@@ -121,43 +170,90 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.sendData("data", msg)
   }
 
-  sendStream(stream: MediaStream) {
+  async sendStream(stream: MediaStream, type: MediaStreamTypes) {
+    if (!this.peer) return
     const [videoStream] = stream.getVideoTracks()
     const [audioStream] = stream.getAudioTracks()
+    const currentSenders = this.senders[type]
 
-    const senderVideo = this.peer
-      ?.getSenders()
-      .find((s) => s.track?.kind === videoStream?.kind)
-    const senderAudio = this.peer
-      ?.getSenders()
-      .find((s) => s.track?.kind === audioStream?.kind)
+    const senderVideo = currentSenders?.find(
+      (s) => s.track?.kind === videoStream?.kind
+    )
+    const senderAudio = currentSenders?.find(
+      (s) => s.track?.kind === audioStream?.kind
+    )
 
-    stream.getTracks().forEach((track) => {
+    const senders = stream.getTracks().map(async (track) => {
       if (senderVideo && track.kind === "video") {
-        return senderVideo.replaceTrack(track)
+        await senderVideo.replaceTrack(track)
+        return senderVideo
       }
       if (senderAudio && track.kind === "audio") {
-        return senderAudio.replaceTrack(track)
+        await senderAudio.replaceTrack(track)
+        return senderAudio
       }
-      if (!this.peer) return
 
-      this.peer.addTrack(track, stream)
+      this.sendData("sendNewStream", type)
+      return this.peer!.addTrack(track, stream) // this.peer checked from the top
     })
+
+    this.senders[type] = await Promise.all(senders)
   }
 
-  stopStream() {
-    const senderVideo = this.peer
-      ?.getSenders()
-      .find((s) => s.track?.kind === "video")
-    if (senderVideo) {
-      this.sendData("stopTrack")
-      this.peer?.removeTrack(senderVideo)
+  stopStream(type: MediaStreamTypes) {
+    const senders = this.senders[type]
+    if (!senders || senders.length === 0) return
+
+    const transceivers = this.peer?.getTransceivers()
+    transceivers?.forEach((transceiver) => {
+      if (transceiver.currentDirection === "inactive") transceiver.stop()
+    })
+    this.senders[type] = null
+    this.sendData("stopStream", type)
+  }
+
+  private reciveTrack(event: RTCTrackEvent) {
+    const stream = event.streams[0]
+    const track = event.track
+    this.log("reciveTrack")
+    if (track.kind === "video") {
+      this.unknownVideo = stream
     }
+    this.accpetStream()
+  }
+
+  private acceptStreamType(type: MediaStreamTypes) {
+    this.unknownVideoType = type
+    this.accpetStream()
+  }
+
+  private accpetStream() {
+    console.log(this)
+    if (!this.unknownVideo) return
+    const type = this.unknownVideoType
+    switch (type) {
+      case "media":
+        this.video.media = this.unknownVideo
+        break
+      case "webCam":
+        this.video.webCam = this.unknownVideo
+        break
+      default:
+        return
+    }
+    this.unknownVideo = null
+    this.sendData("streamAccepted")
+    this.emit("updateStreams")
+  }
+
+  private remoteClosedStream(type: MediaStreamTypes) {
+    this.video[type] = null
+    this.emit("updateStreams")
   }
 
   private sendData(type: MessageType, msg?: unknown) {
     const json = JSON.stringify({ type: type, data: msg })
-    console.log("sendData", json)
+    this.log("sendData", { type: type, data: msg })
     if (!this.channelIsOpen) {
       this.messages.push(json)
       return
@@ -165,26 +261,29 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.channel.send(json)
   }
 
-  async updateBitrate() {
+  updateBitrate() {
     const videoSender = this.peer
       ?.getSenders()
       .filter((sender) => sender.track?.kind === "video")
-    videoSender?.forEach((sender) => {
+    if (!videoSender) return
+    videoSender?.map((sender) => {
       const params = sender.getParameters()
-      params.encodings.forEach((encod) => {
-        encod.maxBitrate = 1024 * 1024 * 50
-        encod.priority = "medium"
-        encod.scaleResolutionDownBy = 1.0
+      const encoders = params.encodings.map((encod) => {
+        return {
+          ...encod,
+          ...this.encodingSettings,
+          networkPriority: this.encodingSettings.priority,
+        }
       })
+      params.encodings = encoders
       sender.setParameters(params)
     })
   }
 
   private initDataChanel(e: MessageEvent) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const msg: { type: MessageType; data: any } = JSON.parse(e.data)
-      console.log("reciveData", msg)
+      this.log("reciveData", msg)
 
       if (!msg.type) return
       const { data, type } = msg
@@ -192,9 +291,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       switch (type) {
         case "request_new_offer":
           this.requestNewOffer()
-          break
-        case "receiveTrack":
-          this.updateBitrate()
           break
         case "answer":
           this.saveAnswer(data)
@@ -208,18 +304,27 @@ export class RTCClient extends Emitter<RTCClientEvents> {
         case "ice":
           this.saveIce(data)
           break
-        case "stopTrack":
-          this.video = null
-          this.emit("streamVideo", null)
+        case "sendNewStream":
+          this.acceptStreamType(data)
+          break
+        case "stopStream":
+          this.remoteClosedStream(data)
+          break
+        case "streamAccepted":
+          this.updateBitrate()
           break
         case "data":
-        default:
-          console.log(msg)
           this.emit("newMessage", data)
+        default:
+          this.log(msg)
           break
       }
     } catch (error) {
       console.error(error)
     }
+  }
+
+  private log(...message: any) {
+    if (__IS_DEV__) console.log(...message)
   }
 }

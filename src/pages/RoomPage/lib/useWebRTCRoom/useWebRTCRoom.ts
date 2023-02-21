@@ -1,17 +1,22 @@
 import { socketClient } from "@/shared/api/socket/socket"
 import { useState, useRef, useEffect } from "react"
-import { Message, User } from "../../model/types/RoomSchema"
+import {
+  getActionDeleteConnectedUsers,
+  getRoomUsers,
+} from "../../model/store/selectors/RoomRTCSelectors"
+import { useRoomRTCStore } from "../../model/store/store/RoomRTCStore"
+import { Message, User } from "../../model/store/types/RoomRTCSchema"
 import { Answer, ClientId, Ice, Offer, RTCClient } from "../RTCClient/RTCClient"
 
 export const useWebRTCRoom = () => {
   const [messages, setMessages] = useState<Message[]>([])
-  const [users, setUsers] = useState<RTCClient[]>([])
-  const [localStream, setLocalStream] = useState<MediaStream | null>(null)
+  const users = useRoomRTCStore(getRoomUsers)
+  const deleteUser = useRoomRTCStore(getActionDeleteConnectedUsers)
 
   const usersRef = useRef(users)
-  const localStreamRef = useRef(localStream)
   usersRef.current = users
-  localStreamRef.current = localStream
+  const deleteRef = useRef(deleteUser)
+  deleteRef.current = deleteUser
 
   const createNewUser = (user: User, createOffer?: boolean) => {
     const newUser = new RTCClient(user, createOffer)
@@ -19,38 +24,29 @@ export const useWebRTCRoom = () => {
       setMessages((prev) => [...prev, { user: user, data: msg }])
     })
 
-    if (localStreamRef.current) newUser.sendStream(localStreamRef.current)
     return newUser
   }
 
   const getUserById = (id: string) => {
-    const user = usersRef.current.find((usr) => usr.id === id)
+    const user = usersRef.current[id]
     return user
   }
 
   useEffect(() => {
     const initClients = (users: User[]) => {
-      setUsers(users.map((user) => createNewUser(user, true)))
+      users.map((user) => createNewUser(user, true))
     }
 
     const addUser = (user: ClientId) => {
-      setUsers((prev) => {
-        const alreadyInList = prev.find((usr) => usr.id === user.id)
-        if (alreadyInList) {
-          console.warn(`User ${alreadyInList} is already in list`)
-          return prev
-        }
-        const newUser = createNewUser(user.id)
-        return [...prev, newUser]
-      })
+      const alreadyInList = getUserById(user.id)
+      if (alreadyInList) {
+        console.warn(`User ${alreadyInList} is already in list`)
+      }
+      createNewUser(user.id)
     }
 
-    const deleteUser = (user: ClientId) => {
-      setUsers((prev) => {
-        const leaveUser = prev.find((usr) => usr.id === user.id)
-        leaveUser?.close()
-        return prev.filter((usr) => usr.id !== user.id)
-      })
+    const userDisconnect = (user: ClientId) => {
+      deleteRef.current(user.id)
     }
 
     const saveAnswer = (data: Answer & ClientId) => {
@@ -71,21 +67,16 @@ export const useWebRTCRoom = () => {
 
     socketClient.on("users_in_room", initClients)
     socketClient.on("user_join", addUser)
-    socketClient.on("user_leave", deleteUser)
+    socketClient.on("user_leave", userDisconnect)
 
     socketClient.on("new_answer", saveAnswer)
     socketClient.on("new_offer", createAnswer)
     socketClient.on("new_ice", saveIce)
 
     return () => {
-      setUsers((prev) => {
-        prev.forEach((client) => client.close())
-        usersRef.current = []
-        return []
-      })
       socketClient.off("users_in_room", initClients)
       socketClient.off("user_join", addUser)
-      socketClient.off("user_leave", deleteUser)
+      socketClient.off("user_leave", userDisconnect)
       socketClient.off("new_answer", saveAnswer)
       socketClient.off("new_offer", createAnswer)
       socketClient.off("new_ice", saveIce)
@@ -94,34 +85,13 @@ export const useWebRTCRoom = () => {
 
   const hundleSendMessage = (msg: string) => {
     setMessages((prev) => [...prev, { user: "me", data: msg }])
-    users.forEach((user) => {
+    Object.values(users).forEach((user) => {
       user.sendMessage(msg)
     })
   }
 
-  const hundleStartLocalStream = (stream: MediaStream) => {
-    setLocalStream(stream)
-    users.forEach((user) => {
-      user.sendStream(stream)
-    })
-  }
-
-  const hundleStopLocalStream = () => {
-    localStream?.getTracks().forEach((track) => {
-      track.stop()
-    })
-    setLocalStream(null)
-    users.forEach((user) => {
-      user.stopStream()
-    })
-  }
-
   return {
-    users,
     messages,
-    localStream,
-    hundleStopLocalStream,
-    hundleStartLocalStream,
     hundleSendMessage,
   }
 }

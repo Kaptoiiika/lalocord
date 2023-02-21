@@ -7,16 +7,16 @@ import {
 } from "@reduxjs/toolkit"
 import { AxiosInstance } from "axios"
 import { rtkApi } from "@/shared/api/RtkApi"
-import { RoomSchema } from "@/pages/RoomPage/model/types/RoomSchema"
 import { UserSchema } from "@/entities/User"
 import { AuthByUsernameSchema } from "@/features/AuthByUsername"
+import { RoomRTCSchema } from "@/pages/RoomPage/model/store/types/RoomRTCSchema"
 
 export interface StateSchema {
   user: UserSchema
   [rtkApi.reducerPath]: ReturnType<typeof rtkApi.reducer>
 
   authByUsername?: AuthByUsernameSchema
-  rooms?: RoomSchema
+  rtcRoom?: RoomRTCSchema
 }
 
 export type StateSchemaKey = keyof StateSchema

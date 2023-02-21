@@ -1,91 +1,67 @@
 import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
-import { Typography } from "@mui/material"
 import { memo, useEffect, useState } from "react"
 import { RTCClient } from "../../lib/RTCClient/RTCClient"
+import {
+  getDisplayMediaStream,
+  getRoomUsers,
+  getWebCamStream,
+} from "../../model/store/selectors/RoomRTCSelectors"
+import { useRoomRTCStore } from "../../model/store/store/RoomRTCStore"
 import styles from "./RoomStreams.module.scss"
+import { RoomUserStream } from "./RoomUserStream/RoomUserStream"
 
-type RoomStreamsProps = {
-  users: RTCClient[]
-  localStream: MediaStream | null
-}
+type RoomStreamsProps = {}
 
 export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
-  const { users, localStream } = props
+  const users = useRoomRTCStore(getRoomUsers)
+  const mediaStream = useRoomRTCStore(getDisplayMediaStream)
+  const webCamStream = useRoomRTCStore(getWebCamStream)
   const [userStreams, setUserStreams] = useState<RTCClient[]>([])
 
   useEffect(() => {
-    setUserStreams(users.filter((usr) => !!usr.video))
-
-    const listeners = users.map((user) => {
-      const fn = (stream: MediaStream | null) => {
-        if (stream) setUserStreams((prev) => [...prev, user])
-        else setUserStreams((prev) => prev.filter((usr) => user.id !== usr.id))
+    const userList = Object.values(users)
+    setUserStreams(
+      userList.filter((usr) => !!usr.video.media || !!usr.video.webCam)
+    )
+    
+    const listeners = userList.map((user) => {
+      const fn = () => {
+        const haveAnyStream = !!user.video.media || !!user.video.webCam
+        if (haveAnyStream)
+          setUserStreams((prev) => {
+            const includeInList = prev.find(
+              (prevUser) => prevUser.id === user.id
+            )
+            return includeInList ? [...prev] : [...prev, user]
+          })
+        else {
+          setUserStreams((prev) =>
+            prev.filter((prevUser) => prevUser.id !== user.id)
+          )
+        }
       }
-      user.on("streamVideo", fn)
+      user.on("updateStreams", fn)
       return { user, fn }
     })
 
     return () => {
       listeners.forEach(({ user, fn }) => {
-        user.off("streamVideo", fn)
+        user.off("updateStreams", fn)
       })
     }
   }, [users])
 
+  const streams: Pick<RTCClient, "id" | "video">[] = [...userStreams]
+  if (mediaStream || webCamStream)
+    streams.push({
+      id: "local",
+      video: { media: mediaStream, webCam: webCamStream },
+    })
+
   return (
     <StreamViewer className={styles.RoomStreams}>
-      {!!localStream && (
-        <div
-          className={styles.stream}
-          onDoubleClick={(e) => {
-            e.currentTarget.requestFullscreen().catch((e) => {
-              console.error(e)
-            })
-          }}
-        >
-          <div className={styles.wrapper}>
-            <Typography>{"local"}</Typography>
-          </div>
-          <video
-            style={{ width: "100%", height: "100%" }}
-            ref={(node) => {
-              if (node && node.srcObject !== localStream) {
-                node.srcObject = localStream
-              }
-            }}
-            autoPlay
-            muted
-            controls
-            playsInline
-          />
-        </div>
-      )}
-      {userStreams.map((user) => (
-        <div
-          key={user.id}
-          className={styles.stream}
-          onDoubleClick={(e) => {
-            e.currentTarget.requestFullscreen().catch((e) => {
-              console.error(e)
-            })
-          }}
-        >
-          <div className={styles.wrapper}>
-            <Typography>{user.id}</Typography>
-          </div>
-          <video
-            style={{ width: "100%", height: "100%" }}
-            ref={(node) => {
-              if (node && node.srcObject !== user.video) {
-                node.srcObject = user.video
-              }
-            }}
-            autoPlay
-            controls
-            muted
-            playsInline
-          />
-        </div>
+      {streams.map((user) => (
+        <RoomUserStream key={user.id} user={user} />
       ))}
     </StreamViewer>
   )
