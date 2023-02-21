@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
-import { userActions } from "@/entities/User"
+import { initalAuthData } from "@/entities/User"
 import { FormateError } from "@/shared/api/Errors/FormateError/FormateError"
 import { AuthRespounce } from "@/shared/api/types/AuthRespounce"
 import { ThunkConfig } from "@/shared/config/storeConfig"
@@ -26,16 +26,10 @@ export const loginByUsernameOrEmail = createAsyncThunk<
         "/api/auth/local",
         body
       )
-      const { user, jwt: token } = data
+      const { jwt: token } = data
 
-      thunkAPI.dispatch(
-        userActions.setAuthData({
-          id: user.id,
-          email: user.email,
-          username: user.username,
-        })
-      )
       saveTokenToApi(thunkAPI.extra.api, token)
+      thunkAPI.dispatch(initalAuthData())
 
       return
     } catch (error: any) {

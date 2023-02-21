@@ -23,7 +23,7 @@ export const RoomActions = (props: RoomActionsProps) => {
   const hundleWebCamStream = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: streamSettings,
+        video: streamSettings.video,
       })
       setWebCamStream(stream)
       stream.getVideoTracks().forEach((track) => {

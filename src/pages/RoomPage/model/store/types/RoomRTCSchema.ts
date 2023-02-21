@@ -3,7 +3,7 @@ import { RTCClient } from "../../../lib/RTCClient/RTCClient"
 export interface RoomRTCSchema {
   webCamStream: MediaStream | null
   displayMediaStream: MediaStream | null
-  videoStreamSettings: MediaTrackConstraints
+  streamSettings: MediaStreamConstraints
   encodingSettings: RTCRtpEncodingParameters
   connectedUsers: ConnectedUsers
 

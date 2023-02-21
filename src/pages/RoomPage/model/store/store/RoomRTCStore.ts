@@ -1,11 +1,27 @@
 import { create, StateCreator } from "zustand"
 import { ConnectedUsers, RoomRTCSchema } from "../types/RoomRTCSchema"
-import { getEncodingSettingsFromLocalStorage, saveEncodingSettingsToLocalStorage } from "./RoomRTCLocalStorage"
+import {
+  getEncodingSettingsFromLocalStorage,
+  saveEncodingSettingsToLocalStorage,
+} from "./RoomRTCLocalStorage"
 
 const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   displayMediaStream: null,
   webCamStream: null,
-  videoStreamSettings: { frameRate: 60, width: 1920, height: 1024 },
+  streamSettings: {
+    audio: {
+      noiseSuppression: false,
+      echoCancellation: false,
+      autoGainControl: false,
+      channelCount: 2,
+    },
+    video: {
+      frameRate: 60,
+      width: 1920,
+      height: 1024,
+      displaySurface: "monitor",
+    },
+  },
   encodingSettings: getEncodingSettingsFromLocalStorage(),
   connectedUsers: {},
 

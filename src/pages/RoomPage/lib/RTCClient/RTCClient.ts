@@ -215,7 +215,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   private reciveTrack(event: RTCTrackEvent) {
     const stream = event.streams[0]
     const track = event.track
-    this.log("reciveTrack")
+    this.log("reciveTrack", track)
     if (track.kind === "video") {
       this.unknownVideo = stream
     }

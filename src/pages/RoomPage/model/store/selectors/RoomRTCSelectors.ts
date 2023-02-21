@@ -4,7 +4,7 @@ export const getDisplayMediaStream = (state: RoomRTCSchema) =>
   state.displayMediaStream
 export const getWebCamStream = (state: RoomRTCSchema) => state.webCamStream
 export const getStreamSettings = (state: RoomRTCSchema) =>
-  state.videoStreamSettings
+  state.streamSettings
 export const getRoomUsers = (state: RoomRTCSchema) => state.connectedUsers
 export const getEncodingSettings = (state: RoomRTCSchema) =>
   state.encodingSettings

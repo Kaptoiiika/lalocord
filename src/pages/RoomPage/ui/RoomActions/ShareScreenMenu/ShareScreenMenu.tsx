@@ -85,14 +85,9 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
   const hundleStartDisplayMediaStream = async () => {
     handleClose()
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        audio: {
-          noiseSuppression: false,
-          echoCancellation: false,
-          autoGainControl: false,
-        },
-        video: streamSettings,
-      })
+      const stream = await navigator.mediaDevices.getDisplayMedia(
+        streamSettings
+      )
       setDisplayMediaStream(stream)
       stream.getVideoTracks().forEach((track) => {
         track.onended = () => {
