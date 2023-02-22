@@ -1,3 +1,5 @@
+import { downloadBlob } from "@/shared/lib/utils/downloadBlob/downloadBlob"
+import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
 import { Typography } from "@mui/material"
 import { RTCClient } from "../../../lib/RTCClient/RTCClient"
 import styles from "./RoomUserStream.module.scss"
@@ -9,48 +11,22 @@ type RoomUserStreamProps = {
 export const RoomUserStream = (props: RoomUserStreamProps) => {
   const { user } = props
 
+  const hundleStartRecordStream = (stream: MediaStream) => {
+    const recorder = new MediaRecorder(stream)
+    recorder.ondataavailable = (e) => {
+      downloadBlob(e.data, `${stream.id}`)
+    }
+    recorder.start()
+  }
+
   return (
-    <div
-      key={user.id}
-      className={styles.stream}
-      onDoubleClick={(e) => {
-        e.currentTarget.requestFullscreen().catch((e) => {
-          console.error(e)
-        })
-      }}
-    >
+    <div key={user.id} className={styles.stream}>
       {/* <div className={styles.wrapper}>
         <Typography>{user.id}</Typography>
       </div> */}
 
-      {!!user.video.webCam && (
-        <video
-          className={styles.video}
-          ref={(node) => {
-            if (node && node.srcObject !== user.video.webCam) {
-              node.srcObject = user.video.webCam
-            }
-          }}
-          autoPlay
-          controls
-          muted
-          playsInline
-        />
-      )}
-      {!!user.video.media && (
-        <video
-          className={styles.video}
-          ref={(node) => {
-            if (node && node.srcObject !== user.video.media) {
-              node.srcObject = user.video.media
-            }
-          }}
-          autoPlay
-          controls
-          muted
-          playsInline
-        />
-      )}
+      {!!user.video.webCam && <VideoPlayer stream={user.video.webCam} />}
+      {!!user.video.media && <VideoPlayer stream={user.video.media} />}
     </div>
   )
 }
