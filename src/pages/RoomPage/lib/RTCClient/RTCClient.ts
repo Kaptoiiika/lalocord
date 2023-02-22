@@ -228,7 +228,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   }
 
   private accpetStream() {
-    console.log(this)
     if (!this.unknownVideo) return
     const type = this.unknownVideoType
     switch (type) {

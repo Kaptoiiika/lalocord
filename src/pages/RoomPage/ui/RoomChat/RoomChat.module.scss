@@ -1,23 +1,20 @@
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,600");
-
-.RoomChat {
-  position: relative;
-}
+$chatWidth: var(--chat-width);
+$animationTime: 0.3s;
 
 .sidebar {
+  position: relative;
   display: flex;
   flex-direction: column;
-  flex: 0 0 300px;
+  flex: 0 0 $chatWidth;
   height: 100vh;
-  border-left: var(--box-border);
-  overflow: hidden;
+  transition: flex $animationTime;
   &.collapsed {
-    position: absolute;
-    height: var(--header-height);
-    top: 0;
-    right: 0;
-    flex: 0 0 64px;
-
+    flex: 0 0 0;
+    .header {
+      right: 0;
+      width: 64px;
+    }
     .chat {
       display: none;
     }
@@ -25,22 +22,29 @@
 }
 
 .header {
+  right: 0px;
+  position: absolute;
+  transition: width $animationTime;
+  width: calc($chatWidth - 1px);
+  min-width: 64px;
   height: var(--header-height);
-  flex: 0 0 var(--header-height);
-  border-bottom: var(--box-border);
+  border-left: var(--box-border);
 }
+
 .headerButton {
   height: 100%;
   width: 100%;
   border-radius: 0;
 }
 
-
 .chat {
   height: calc(100vh - var(--header-height));
+  margin-top: var(--header-height);
   flex-direction: column;
   justify-content: flex-end;
   display: flex;
+  border-top: var(--box-border);
+  border-left: var(--box-border);
 }
 
 .chatMessages {

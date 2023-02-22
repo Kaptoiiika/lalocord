@@ -73,11 +73,16 @@ export const RoomChat = (props: RoomChatProps) => {
   }
 
   return (
-    <div
+    <aside
       className={classNames(styles.sidebar, { [styles.collapsed]: collapsed })}
     >
       <header className={styles.header}>
-        <Button className={styles.headerButton} onClick={hundleCollapse}>
+        <Button
+          sx={{ borderRadius: 0 }}
+          className={styles.headerButton}
+          onClick={hundleCollapse}
+          aria-label={collapsed ? "Open chat" : "Hide chat"}
+        >
           <Badge
             color="secondary"
             badgeContent={messages.length - readedMessage}
@@ -106,6 +111,6 @@ export const RoomChat = (props: RoomChatProps) => {
           />
         </form>
       </div>
-    </div>
+    </aside>
   )
 }

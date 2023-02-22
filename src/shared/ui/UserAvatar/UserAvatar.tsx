@@ -12,7 +12,7 @@ export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
   function UserAvatar(props, ref) {
     const { src, avatar, ...other } = props
 
-    const imageSRC = avatar?.formats?.small?.url || avatar?.url || src
+    const imageSRC = avatar?.formats?.thumbnail?.url || avatar?.url || src
 
     return <Avatar ref={ref} src={imageSRC} {...other} />
   }

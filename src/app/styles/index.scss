@@ -2,13 +2,16 @@
 @import "variables/global";
 @import "theme/light";
 
-root {
+:root {
   --app-max-width: 1366px;
 }
 
 .app {
+  scrollbar-width: none;
+
   min-height: 100vh;
   min-width: 100vw;
   max-width: 100vw;
   background: var(--bg-app);
 }
+

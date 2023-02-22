@@ -94,7 +94,9 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
           setDisplayMediaStream(null)
         }
       })
-    } catch (error: any) {}
+    } catch (error: any) {
+      console.log(error)
+    }
   }
 
   const hundlePriotryChange = (
@@ -155,9 +157,11 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
         )}
         <Divider />
         <div className={styles.slider}>
-          <Typography>
-            Bitrate: {bitrateToShortValue(encodingSettings.maxBitrate || 0)}{" "}
-            Mb/s
+          <Typography className={styles.sliderLabel}>
+            Bitrate:{" "}
+            <span>
+              {bitrateToShortValue(encodingSettings.maxBitrate || 0)} Mb/s
+            </span>
           </Typography>
           <Slider
             defaultValue={bitrateToShortValue(encodingSettings.maxBitrate || 0)}
@@ -172,7 +176,9 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
           />
         </div>
         <div className={styles.slider}>
-          <Typography>Priority: {encodingSettings.priority}</Typography>
+          <Typography className={styles.sliderLabel}>
+            Priority: <span>{encodingSettings.priority}</span>
+          </Typography>
           <Slider
             value={PriorityTextToNumber(encodingSettings.priority)}
             onChange={hundlePriotryChange}
