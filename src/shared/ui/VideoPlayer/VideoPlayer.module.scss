@@ -1,4 +1,32 @@
-.video {
+.player {
+  position: relative;
   width: 100%;
   height: 100%;
+}
+
+.video {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.tooltip {
+  z-index: 1;
+  position: absolute;
+  transition: opacity 0.3s;
+  opacity: 1;
+  bottom: 0;
+  width: 100%;
+  background-color: aliceblue;
+}
+.customtooltip {
+  bottom: auto;
+  top: 0;
+}
+.tooltipVolume {
+  min-width: 300px;
+}
+
+.closed {
+  opacity: 0;
 }
