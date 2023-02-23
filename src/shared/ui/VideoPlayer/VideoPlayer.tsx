@@ -1,6 +1,13 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { Button, Slider } from "@mui/material"
-import { memo, useCallback, useRef, useState, VideoHTMLAttributes } from "react"
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  VideoHTMLAttributes,
+} from "react"
 import VolumeDown from "@mui/icons-material/VolumeDown"
 import VolumeUp from "@mui/icons-material/VolumeUp"
 import styles from "./VideoPlayer.module.scss"
@@ -14,9 +21,12 @@ type VideoPlayerProps = {
   initVolume?: number
 } & VideoHTMLAttributes<HTMLVideoElement>
 
+const hasAudioOnStream = (stream: MediaStream) => {
+  return !!stream.getAudioTracks().length
+}
+
 export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const { stream = null, initVolume, className, ...other } = props
-  const [open, setOpen] = useState(false)
   const [played, setPlayed] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [volume, setVolume] = useState(
@@ -25,12 +35,24 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<HTMLDivElement | null>(null)
 
+  //todo: replace to hooks
+  const [open, setOpen] = useState(false)
+  const openRef = useRef<ReturnType<typeof setTimeout>>()
+  useEffect(() => {
+    return () => clearTimeout(openRef.current)
+  }, [])
   const hundleClose = useCallback(() => {
     setOpen(false)
+    clearTimeout(openRef.current)
   }, [])
   const hundleOpen = useCallback(() => {
     setOpen(true)
+    clearTimeout(openRef.current)
+    openRef.current = setTimeout(() => {
+      setOpen(false)
+    }, 3000)
   }, [])
+  //: replace to hooks
 
   const [recorder, setRecorder] = useState<MediaRecorder>()
 
@@ -116,8 +138,9 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       className={styles.player}
       ref={hundleRefPlayer}
       onFocus={hundleOpen}
-      onClick={hundleOpen}
       onMouseEnter={hundleOpen}
+      onMouseMove={hundleOpen}
+      onClick={hundleOpen}
       onBlur={hundleClose}
       onMouseLeave={hundleClose}
     >
@@ -154,6 +177,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
         >
           <VolumeDown />
           <Slider
+            disabled={stream ? !hasAudioOnStream(stream) : true}
             aria-label="Volume"
             value={volume}
             onChange={hundleChangeVolume}
@@ -176,7 +200,9 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       <video
         {...other}
         ref={hundleRefVideo}
-        className={classNames([styles.video, className])}
+        className={classNames([styles.video, className], {
+          [styles.cursorHide]: !open,
+        })}
         autoPlay
         playsInline
       />
