@@ -30,6 +30,10 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     webCam: null,
   }
   messages: string[] = []
+  stream: Record<MediaStreamTypes, MediaStream | null> = {
+    media: null,
+    webCam: null,
+  }
 
   private unknownVideo: MediaStream | null = null
   private unknownVideoType: MediaStreamTypes | null = null
@@ -106,11 +110,15 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     if (webCamStream) this.sendStream(webCamStream, "webCam")
 
     const sub = useRoomRTCStore.subscribe((state) => {
-      if (state.webCamStream) this.sendStream(state.webCamStream, "webCam")
-      else this.stopStream("webCam")
-      if (state.displayMediaStream)
+      if (state.webCamStream === null) this.stopStream("webCam")
+      else if (state.webCamStream !== this.stream.webCam)
+        this.sendStream(state.webCamStream, "webCam")
+      this.stream.webCam = state.webCamStream
+
+      if (state.displayMediaStream === null) this.stopStream("media")
+      else if (state.displayMediaStream !== this.stream.media)
         this.sendStream(state.displayMediaStream, "media")
-      else this.stopStream("media")
+      this.stream.media = state.displayMediaStream
 
       if (state.encodingSettings !== this.encodingSettings) {
         this.encodingSettings = state.encodingSettings
@@ -172,6 +180,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   async sendStream(stream: MediaStream, type: MediaStreamTypes) {
     if (!this.peer) return
+    this.log('send stream')
     const [videoStream] = stream.getVideoTracks()
     const [audioStream] = stream.getAudioTracks()
     const currentSenders = this.senders[type]
@@ -185,12 +194,10 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
     const senders = stream.getTracks().map(async (track) => {
       if (senderVideo && track.kind === "video") {
-        senderVideo.track?.stop()
         await senderVideo.replaceTrack(track)
         return senderVideo
       }
       if (senderAudio && track.kind === "audio") {
-        senderAudio.track?.stop()
         await senderAudio.replaceTrack(track)
         return senderAudio
       }
