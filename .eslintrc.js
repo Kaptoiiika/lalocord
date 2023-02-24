@@ -54,7 +54,7 @@ module.exports = {
     "import/prefer-default-export": "off",
     "@typescript-eslint/no-empty-function": "warn",
     "@typescript-eslint/no-empty-interface": "warn",
-    "@typescript-eslint/ban-types": "warn",
+    "@typescript-eslint/ban-types": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-explicit-any": "off", //['warn', { allowExplicitAny: true }],

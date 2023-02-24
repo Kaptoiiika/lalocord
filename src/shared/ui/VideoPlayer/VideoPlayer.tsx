@@ -1,5 +1,5 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
-import { Button, Slider } from "@mui/material"
+import { Button, IconButton, Slider } from "@mui/material"
 import {
   memo,
   useCallback,
@@ -14,19 +14,23 @@ import styles from "./VideoPlayer.module.scss"
 import { Stack } from "@mui/system"
 import { getNumberBeetwenTwoValues } from "@/shared/lib/utils/Numbers/getNumberBeetwenTwoValues"
 import { downloadBlob } from "@/shared/lib/utils/downloadBlob/downloadBlob"
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import PauseIcon from "@mui/icons-material/Pause"
+import FullscreenIcon from "@mui/icons-material/Fullscreen"
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit"
 
 type VideoPlayerProps = {
   stream: MediaStream | null
-  type?: "stream" | "video"
   initVolume?: number
+  onRecord?: (blobUrl: string) => void
 } & VideoHTMLAttributes<HTMLVideoElement>
 
-const hasAudioOnStream = (stream: MediaStream) => {
-  return !!stream.getAudioTracks().length
+const hasAudioOnStream = (stream: MediaStream | null) => {
+  return !!stream?.getAudioTracks().length
 }
 
 export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
-  const { stream = null, initVolume, className, ...other } = props
+  const { stream = null, initVolume, onRecord, className, ...other } = props
   const [played, setPlayed] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [volume, setVolume] = useState(
@@ -58,14 +62,16 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
 
   const hundleStartRecordStream = useCallback(() => {
     if (!stream) return
-    const recorder = new MediaRecorder(stream)
+    const streamRecorder = new MediaStream(stream.getTracks())
+    const recorder = new MediaRecorder(streamRecorder)
     recorder.ondataavailable = (e) => {
-      downloadBlob(e.data, `${stream.id}`)
-      setRecorder(undefined)
+      const url = downloadBlob(e.data, `${stream.id}`)
+      onRecord?.(url)
+      setRecorder?.(undefined)
     }
     recorder.start()
     setRecorder(recorder)
-  }, [stream])
+  }, [onRecord, stream])
   const hundleStopRecordStream = useCallback(() => {
     recorder?.stop()
     setRecorder(undefined)
@@ -133,6 +139,8 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     videoRef.current.volume = volume
   }
 
+  const toolTipIsClosed = played && !open
+
   return (
     <div
       className={styles.player}
@@ -144,64 +152,78 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       onBlur={hundleClose}
       onMouseLeave={hundleClose}
     >
-      <Stack
-        direction="row"
-        justifyContent="end"
-        className={classNames([styles.tooltip, styles.customtooltip], {
-          [styles.closed]: !open,
+      <div
+        className={classNames("", { [styles.tooltipShadow]: !toolTipIsClosed })}
+      >
+        <div className={styles.tooltipShadowBottom} />
+      </div>
+      <div
+        className={classNames(styles.tooltip, {
+          [styles.closed]: toolTipIsClosed,
         })}
       >
-        {recorder ? (
-          <Button variant="contained" onClick={hundleStopRecordStream}>
-            stop record
-          </Button>
-        ) : (
-          <Button variant="contained" onClick={hundleStartRecordStream}>
-            start record
-          </Button>
-        )}
-      </Stack>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        className={classNames(styles.tooltip, { [styles.closed]: !open })}
-      >
-        <Button variant="contained" onClick={hundlePlayPause}>
-          PlayPause
-        </Button>
+        <Stack direction="row" justifyContent="flex-start">
+          <IconButton
+            aria-label={played ? "pause video" : "play video"}
+            onClick={hundlePlayPause}
+          >
+            {played ? (
+              <PauseIcon color="primary" />
+            ) : (
+              <PlayArrowIcon color="primary" />
+            )}
+          </IconButton>
+        </Stack>
         <Stack
           className={styles.tooltipVolume}
           spacing={2}
           direction="row"
           alignItems="center"
         >
-          <VolumeDown />
+          <VolumeDown color={"primary"} />
           <Slider
-            disabled={stream ? !hasAudioOnStream(stream) : true}
+            disabled={!hasAudioOnStream(stream)}
             aria-label="Volume"
-            value={volume}
+            value={hasAudioOnStream(stream) ? volume : 0}
             onChange={hundleChangeVolume}
             step={0.01}
             min={0}
             max={1}
           />
-          <VolumeUp />
+          <VolumeUp color="primary" />
         </Stack>
-        {fullscreen ? (
-          <Button variant="contained" onClick={hundleExitFullscreen}>
-            ExitFullScreen
-          </Button>
-        ) : (
-          <Button variant="contained" onClick={hundleFullscreen}>
-            FullScreen
-          </Button>
-        )}
-      </Stack>
+        <Stack direction="row" justifyContent="flex-end" gap={2}>
+          {recorder ? (
+            <Button variant="contained" onClick={hundleStopRecordStream}>
+              stop record
+            </Button>
+          ) : (
+            <Button variant="contained" onClick={hundleStartRecordStream}>
+              start record
+            </Button>
+          )}
+          {fullscreen ? (
+            <IconButton
+              aria-label="Exit fullscreen"
+              onClick={hundleExitFullscreen}
+            >
+              <FullscreenExitIcon color="primary" />
+            </IconButton>
+          ) : (
+            <IconButton
+              aria-label="enter video to fullscreen"
+              onClick={hundleFullscreen}
+            >
+              <FullscreenIcon color="primary" />
+            </IconButton>
+          )}
+        </Stack>
+      </div>
       <video
         {...other}
         ref={hundleRefVideo}
         className={classNames([styles.video, className], {
-          [styles.cursorHide]: !open,
+          [styles.cursorHide]: toolTipIsClosed,
         })}
         autoPlay
         playsInline

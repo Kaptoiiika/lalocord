@@ -6,17 +6,16 @@ $animationTime: 0.3s;
   position: relative;
   display: flex;
   flex-direction: column;
-  flex: 0 0 $chatWidth;
+  flex: 0 0 auto;
+  width: 300px;
   height: 100vh;
-  transition: flex $animationTime;
+  transition: width $animationTime;
   &.collapsed {
-    flex: 0 0 0;
+    width: 1px;
+
     .header {
       right: 0;
       width: 64px;
-    }
-    .chat {
-      display: none;
     }
   }
 }
@@ -45,6 +44,7 @@ $animationTime: 0.3s;
   display: flex;
   border-top: var(--box-border);
   border-left: var(--box-border);
+  overflow: hidden;
 }
 
 .chatMessages {

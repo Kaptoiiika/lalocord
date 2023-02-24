@@ -1,3 +1,11 @@
+/**
+ *
+ *
+ * @export
+ * @param {(Blob | MediaSource)} blob
+ * @param {string} [name="file"]
+ * @return {string} BlobURL 
+ */
 export function downloadBlob(blob: Blob | MediaSource, name = "file") {
   // Convert your blob into a Blob URL (a special url that points to an object in the browser's memory)
   const blobUrl = URL.createObjectURL(blob)
@@ -24,4 +32,6 @@ export function downloadBlob(blob: Blob | MediaSource, name = "file") {
 
   // Remove link from body
   document.body.removeChild(link)
+
+  return blobUrl
 }

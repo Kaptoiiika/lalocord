@@ -185,10 +185,12 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
     const senders = stream.getTracks().map(async (track) => {
       if (senderVideo && track.kind === "video") {
+        senderVideo.track?.stop()
         await senderVideo.replaceTrack(track)
         return senderVideo
       }
       if (senderAudio && track.kind === "audio") {
+        senderAudio.track?.stop()
         await senderAudio.replaceTrack(track)
         return senderAudio
       }

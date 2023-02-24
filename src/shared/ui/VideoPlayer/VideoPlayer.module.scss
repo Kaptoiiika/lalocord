@@ -16,15 +16,28 @@
   transition: opacity 0.15s;
   opacity: 1;
   bottom: 0;
-  width: 100%;
-  background-color: aliceblue;
+  padding: 8px;
+  width: calc(100% - 16px);
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 1fr) 1fr;
 }
+
+.tooltipShadow {
+  position: absolute;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  .tooltipShadowBottom {
+    box-shadow: 0 0 8em 2em rgb(0, 0, 0);
+  }
+}
+
 .customtooltip {
   bottom: auto;
   top: 0;
 }
 .tooltipVolume {
-  min-width: 300px;
+  width: 100%;
 }
 
 .closed {

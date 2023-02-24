@@ -18,19 +18,3 @@ button {
 li {
   list-style-type: none;
 }
-
-body {
-  &::-webkit-scrollbar {
-    width: 1em;
-    height: 1em;
-  }
-  &::-webkit-scrollbar-button {
-    background: #ccc;
-  }
-  &::-webkit-scrollbar-track-piece {
-    background: rgb(255, 255, 255);
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #eee;
-  }
-}

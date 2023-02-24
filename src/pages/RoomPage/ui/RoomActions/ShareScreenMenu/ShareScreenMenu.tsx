@@ -78,8 +78,8 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
     handleClose()
     mediaStream?.getTracks().forEach((track) => {
       track.stop()
-      setDisplayMediaStream(null)
     })
+    setDisplayMediaStream(null)
   }
 
   const hundleStartDisplayMediaStream = async () => {
@@ -88,6 +88,10 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
       const stream = await navigator.mediaDevices.getDisplayMedia(
         streamSettings
       )
+      mediaStream?.getTracks().forEach((tracks) => {
+        tracks.onended = null
+        tracks.stop()
+      })
       setDisplayMediaStream(stream)
       stream.getVideoTracks().forEach((track) => {
         track.onended = () => {
