@@ -13,7 +13,7 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       noiseSuppression: false,
       echoCancellation: false,
       // autoGainControl: false,
-      channelCount: { max: 7, ideal: 2 },
+      channelCount: 2,
     },
     video: {
       frameRate: 60,

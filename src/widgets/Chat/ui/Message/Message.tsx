@@ -13,8 +13,21 @@ function checkURLisImageLink(url: string) {
   )
 }
 
+type TypeObject = {
+  price: string
+}
+type ActionType = "rating" | "price" | "energy"
+
 export const Message = (props: MessageProps) => {
   const { message, className } = props
+
+  const fn = (field: ActionType) => {}
+  const myobject: TypeObject = {
+    price: "brat",
+  }
+  Object.entries(myobject).forEach(([key, value] ) => {
+    fn(key as keyof typeof myobject)
+  })
 
   return (
     <Typography component="p" className={className}>
