@@ -52,30 +52,6 @@ $animationTime: 0.3s;
   opacity: 1;
 }
 
-.chatMessages {
-  overflow: auto;
-}
-
 .input {
   width: 100%;
-}
-
-.message {
-  margin-top: 8px;
-
-  &Group {
-    margin-top: 4px;
-  }
-  &User {
-    font-size: 1.25em;
-    font-weight: bold;
-    overflow-wrap: break-word;
-  }
-  &Text {
-    margin-left: 4px;
-    overflow-wrap: break-word;
-  }
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
 }
