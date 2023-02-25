@@ -7,7 +7,7 @@ import styles from "./Navbar.module.scss"
 
 const links = [
   {
-    to: AppRoutes.INDEX,
+    to: AppRoutes.MAIN_PAGE,
     label: "home",
     icon: <HomeIcon />,
   },
@@ -22,24 +22,24 @@ export const Navbar = () => {
         spacing={4}
       >
         <Stack alignItems="center" spacing={1}>
-          <Link className={styles.headerLink} to={AppRoutes.INDEX}>
+          <Link className={styles.headerLink} to={AppRoutes.MAIN_PAGE}>
             <IconButton aria-label="home">
               <HomeIcon />
             </IconButton>
           </Link>
 
-          {links.map((link) => (
+          {/* {links.map((link) => (
             <Link key={link.to} to={link.to}>
               <IconButton aria-label={link.label}>{link.icon}</IconButton>
             </Link>
-          ))}
+          ))} */}
         </Stack>
 
-        <Link className={styles.headerLink} to={AppRoutes.AUTH}>
+        {/* <Link className={styles.headerLink} to={AppRoutes.AUTH}>
           <IconButton aria-label="home">
             <HomeIcon />
           </IconButton>
-        </Link>
+        </Link> */}
       </Stack>
     </nav>
   )

@@ -1,6 +1,6 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { Badge, Button, TextField } from "@mui/material"
-import { useCallback, useEffect, useState } from "react"
+import { ClipboardEvent, useCallback, useEffect, useState } from "react"
 import ChatIcon from "@mui/icons-material/Chat"
 import styles from "./Chat.module.scss"
 import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
@@ -24,10 +24,11 @@ const saveChatCollapsedToLocalStorage = (state: boolean) => {
 
 type ChatProps = {
   onSendMessage?: (msg: string) => void
+  onSendFile?: (blob: Blob) => void
 }
 
 export const Chat = (props: ChatProps) => {
-  const { onSendMessage } = props
+  const { onSendMessage, onSendFile } = props
   const messages = useChatStore(getMessages)
   const addMessage = useChatStore(getActionAddMessage)
   const localUser = useUserStore(getLocalUser)
@@ -42,8 +43,20 @@ export const Chat = (props: ChatProps) => {
     []
   )
 
+  const hundlePasteFile = (e: ClipboardEvent<HTMLDivElement>) => {
+    const clipboardItems = e.clipboardData.items
+    const items = Array.from(clipboardItems)
+    if (items.length === 0) {
+      return
+    }
+    const item = items[0]
+    const blob = item.getAsFile()
+    if (blob) onSendFile?.(blob)
+  }
+
   const hundleSendMessage = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault()
+    if (text === "") return
     addMessage({ data: text, user: localUser })
     onSendMessage?.(text)
     setText("")
@@ -85,6 +98,7 @@ export const Chat = (props: ChatProps) => {
         <MessageList />
         <form onSubmit={hundleSendMessage} className={styles.form}>
           <TextField
+            onPaste={hundlePasteFile}
             fullWidth
             autoComplete="off"
             value={text}

@@ -190,6 +190,10 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.sendData("data", msg)
   }
 
+  sendBlob(blob: Blob) {
+    // this.sendData("data", blob)
+  }
+
   async sendStream(stream: MediaStream, type: MediaStreamTypes) {
     if (!this.peer) return
     this.log("send stream")

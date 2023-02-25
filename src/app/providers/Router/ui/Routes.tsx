@@ -10,6 +10,10 @@ export const RoutesConfig: Record<string, AppRouteProps> = {
     element: <MainPage />,
   },
 
+  [AppRoutes.MAIN_PAGE]: {
+    element: <MainPage />,
+  },
+
   [AppRoutes.ROOM_ID]: {
     element: <RoomPage />,
   },
