@@ -1,7 +1,7 @@
+import { getLocalUser, UserModel, useUserStore } from "@/entities/User"
 import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
 import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
 import { memo, useEffect, useState } from "react"
-import { RTCClient } from "../../lib/RTCClient/RTCClient"
 import {
   getDisplayMediaStream,
   getRoomUsers,
@@ -10,35 +10,19 @@ import {
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import styles from "./RoomStreams.module.scss"
 
-type RoomStreamsProps = {}
+type UserStream = { user: UserModel; stream: MediaStream }
 
-export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
+export const RoomStreams = memo(function RoomStreams() {
   const users = useRoomRTCStore(getRoomUsers)
+  const localUser = useUserStore(getLocalUser)
   const mediaStream = useRoomRTCStore(getDisplayMediaStream)
   const webCamStream = useRoomRTCStore(getWebCamStream)
-  const [userStreams, setUserStreams] = useState<RTCClient[]>([])
+  const [, update] = useState(0)
 
   useEffect(() => {
-    const userList = Object.values(users)
-    setUserStreams(
-      userList.filter((usr) => !!usr.video.media || !!usr.video.webCam)
-    )
-
-    const listeners = userList.map((user) => {
+    const listeners = Object.values(users).map((user) => {
       const fn = () => {
-        const haveAnyStream = !!user.video.media || !!user.video.webCam
-        if (haveAnyStream)
-          setUserStreams((prev) => {
-            const includeInList = prev.find(
-              (prevUser) => prevUser.id === user.id
-            )
-            return includeInList ? [...prev] : [...prev, user]
-          })
-        else {
-          setUserStreams((prev) =>
-            prev.filter((prevUser) => prevUser.id !== user.id)
-          )
-        }
+        update((prev) => prev + 1)
       }
       user.on("updateStreams", fn)
       return { user, fn }
@@ -51,19 +35,23 @@ export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
     }
   }, [users])
 
-  const streams: Pick<RTCClient, "id" | "video">[] = [...userStreams]
-  if (mediaStream || webCamStream)
-    streams.push({
-      id: "local",
-      video: { media: mediaStream, webCam: webCamStream },
-    })
+  const initialStreams: UserStream[] = []
+  if (mediaStream) initialStreams.push({ stream: mediaStream, user: localUser })
+  if (webCamStream)
+    initialStreams.push({ stream: webCamStream, user: localUser })
+  const streams = Object.values(users).reduce((prev, curent) => {
+    if (curent.video.media)
+      prev.push({ user: curent.user, stream: curent.video.media })
+    if (curent.video.webCam)
+      prev.push({ user: curent.user, stream: curent.video.webCam })
+    return prev
+  }, initialStreams)
 
   return (
     <StreamViewer className={styles.RoomStreams}>
-      {streams.map((user) => (
-        <div key={user.id} className={styles.stream}>
-          {!!user.video.webCam && <VideoPlayer stream={user.video.webCam} />}
-          {!!user.video.media && <VideoPlayer stream={user.video.media} />}
+      {streams.map((userStream) => (
+        <div key={userStream.stream.id} className={styles.stream}>
+          <VideoPlayer stream={userStream.stream} />
         </div>
       ))}
     </StreamViewer>

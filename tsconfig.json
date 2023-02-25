@@ -23,6 +23,6 @@
       "module": "CommonJS"
     }
   },
-  "include": ["./config/jest/setupTest.ts", "./src/**/*.tsx", "./src/**/*.ts", "src/index.js"],
+  "include": ["./config/jest/setupTest.ts", "./src/**/*.tsx", "./src/**/*.ts", "src/index.js", "src/pages/MainPage/ui/MainPage.tsx"],
   "exclude": ["./src/**/*.test.*"]
 }

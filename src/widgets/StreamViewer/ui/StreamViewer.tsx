@@ -9,21 +9,22 @@ type StreamViewerProps = {
 
 export const StreamViewer = (props: StreamViewerProps) => {
   const { children, className } = props
-  const childrenArr = Children.toArray(children)
+  // const childrenArr = Children.toArray(children)
 
-  const totalRows = Math.round(Math.sqrt(childrenArr.length))
-  const rows = sliceIntoTotalChunks(childrenArr, totalRows)
+  // const totalRows = Math.round(Math.sqrt(childrenArr.length))
+  // const rows = sliceIntoTotalChunks(childrenArr, totalRows)
 
   return (
     <div className={classNames([styles.StreamViewer, className])}>
-      {rows.map((rowChildren, index) => (
+      {/* {rows.map((rowChildren, index) => (
         <div
           key={`${totalRows}-${index}-${rowChildren.length}`}
           className={styles.row}
         >
           {rowChildren}
         </div>
-      ))}
+      ))} */}
+      {children}
     </div>
   )
 }

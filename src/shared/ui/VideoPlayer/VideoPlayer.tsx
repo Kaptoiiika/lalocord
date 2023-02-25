@@ -1,5 +1,5 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
-import { Button, IconButton, Slider } from "@mui/material"
+import { IconButton, Slider } from "@mui/material"
 import {
   memo,
   useCallback,
@@ -13,7 +13,6 @@ import VolumeUp from "@mui/icons-material/VolumeUp"
 import styles from "./VideoPlayer.module.scss"
 import { Stack } from "@mui/system"
 import { getNumberBeetwenTwoValues } from "@/shared/lib/utils/Numbers/getNumberBeetwenTwoValues"
-import { downloadBlob } from "@/shared/lib/utils/downloadBlob/downloadBlob"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import PauseIcon from "@mui/icons-material/Pause"
 import FullscreenIcon from "@mui/icons-material/Fullscreen"
@@ -22,7 +21,6 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit"
 type VideoPlayerProps = {
   stream: MediaStream | null
   initVolume?: number
-  onRecord?: (blobUrl: string) => void
 } & VideoHTMLAttributes<HTMLVideoElement>
 
 const hasAudioOnStream = (stream: MediaStream | null) => {
@@ -30,7 +28,7 @@ const hasAudioOnStream = (stream: MediaStream | null) => {
 }
 
 export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
-  const { stream = null, initVolume, onRecord, className, ...other } = props
+  const { stream = null, initVolume, className, ...other } = props
   const [played, setPlayed] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [volume, setVolume] = useState(
@@ -57,25 +55,6 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     }, 3000)
   }, [])
   //: replace to hooks
-
-  const [recorder, setRecorder] = useState<MediaRecorder>()
-
-  const hundleStartRecordStream = useCallback(() => {
-    if (!stream) return
-    const streamRecorder = new MediaStream(stream.getTracks())
-    const recorder = new MediaRecorder(streamRecorder)
-    recorder.ondataavailable = (e) => {
-      const url = downloadBlob(e.data, `${stream.id}`)
-      onRecord?.(url)
-      setRecorder?.(undefined)
-    }
-    recorder.start()
-    setRecorder(recorder)
-  }, [onRecord, stream])
-  const hundleStopRecordStream = useCallback(() => {
-    recorder?.stop()
-    setRecorder(undefined)
-  }, [recorder])
 
   const hundlePlayPause = useCallback(() => {
     if (!videoRef.current) return
@@ -193,15 +172,6 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
           <VolumeUp color="primary" />
         </Stack>
         <Stack direction="row" justifyContent="flex-end" gap={2}>
-          {recorder ? (
-            <Button variant="contained" onClick={hundleStopRecordStream}>
-              stop record
-            </Button>
-          ) : (
-            <Button variant="contained" onClick={hundleStartRecordStream}>
-              start record
-            </Button>
-          )}
           {fullscreen ? (
             <IconButton
               aria-label="Exit fullscreen"

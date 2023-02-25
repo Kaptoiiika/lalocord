@@ -7,7 +7,7 @@ type RoterProviderProps = {} & PropsWithChildren
 export const AppRouterProvider  = (props: RoterProviderProps) => {
   const { children } = props
 
-  if (!__IS_DEV__) {
+  if (false) { // __electron__
     return <HashRouter>{children}</HashRouter>
   }
 

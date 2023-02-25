@@ -17,6 +17,7 @@ export const MainPage = () => {
           variant="outlined"
           value={localUser.username}
           label="username"
+          type="text"
           onChange={hundleChangeUserName}
         />
         <RoomList />

@@ -1,10 +1,16 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { Badge, Button, TextField } from "@mui/material"
 import { useCallback, useEffect, useState } from "react"
-import { Message } from "../../model/types/RoomRTCSchema"
-import styles from "./RoomChat.module.scss"
 import ChatIcon from "@mui/icons-material/Chat"
+import styles from "./Chat.module.scss"
 import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { MessageModel } from "../model/types/ChatSchem"
+import { useChatStore } from "../model/store/ChatStore"
+import {
+  getActionAddMessage,
+  getMessages,
+} from "../model/selectors/ChatStoreSelectors"
+import { getLocalUser, useUserStore } from "@/entities/User"
 
 const getChatCollapsedFromLocalStorage = (): boolean => {
   const json = localStorage.getItem(localstorageKeys.CHATCOLLAPSED)
@@ -16,14 +22,16 @@ const saveChatCollapsedToLocalStorage = (state: boolean) => {
   localStorage.setItem(localstorageKeys.CHATCOLLAPSED, JSON.stringify(state))
 }
 
-type RoomChatProps = {
-  messages: Message[]
+type ChatProps = {
   onSendMessage?: (msg: string) => void
 }
 
-export const RoomChat = (props: RoomChatProps) => {
+export const Chat = (props: ChatProps) => {
+  const { onSendMessage } = props
+  const messages = useChatStore(getMessages)
+  const addMessage = useChatStore(getActionAddMessage)
+  const localUser = useUserStore(getLocalUser)
   const [text, setText] = useState("")
-  const { messages, onSendMessage } = props
   const [collapsed, setCollapsed] = useState(getChatCollapsedFromLocalStorage())
   const [readedMessage, setReadedMessage] = useState(0)
 
@@ -36,6 +44,7 @@ export const RoomChat = (props: RoomChatProps) => {
 
   const hundleSendMessage = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault()
+    addMessage({ data: text, user: localUser })
     onSendMessage?.(text)
     setText("")
   }
@@ -53,7 +62,11 @@ export const RoomChat = (props: RoomChatProps) => {
     }
   }, [messages, collapsed])
 
-  const MessageItem = (message: Message, index: number, arr: Message[]) => {
+  const MessageItem = (
+    message: MessageModel,
+    index: number,
+    arr: MessageModel[]
+  ) => {
     if (index && arr[index - 1]?.user === message.user) {
       return (
         <li
@@ -64,10 +77,12 @@ export const RoomChat = (props: RoomChatProps) => {
         </li>
       )
     }
-    
+
     return (
       <li className={styles.message} key={index}>
-        <div className={styles.messageUser}>{message.user.username || message.user.id}</div>
+        <div className={styles.messageUser}>
+          {message.user.username || message.user.id}
+        </div>
         <div className={styles.messageText}>{message.data}</div>
       </li>
     )

@@ -1,17 +1,14 @@
-import { UserModel, useUserStore } from "@/entities/User"
+import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
-import { useState, useRef, useEffect } from "react"
+import { useRef, useEffect } from "react"
 import {
   getActionDeleteConnectedUsers,
   getRoomUsers,
 } from "../../model/selectors/RoomRTCSelectors"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
-import { Message } from "../../model/types/RoomRTCSchema"
 import { Answer, ClientId, Ice, Offer, RTCClient } from "../RTCClient/RTCClient"
 
 export const useWebRTCRoom = () => {
-  const [messages, setMessages] = useState<Message[]>([])
-  const localUser = useUserStore((state) => state.localUser)
   const users = useRoomRTCStore(getRoomUsers)
   const deleteUser = useRoomRTCStore(getActionDeleteConnectedUsers)
 
@@ -22,14 +19,10 @@ export const useWebRTCRoom = () => {
 
   const createNewUser = (user: UserModel, createOffer?: boolean) => {
     const newUser = new RTCClient(user, createOffer)
-    newUser.on("newMessage", (msg: string) => {
-      setMessages((prev) => [...prev, { user: user, data: msg }])
-    })
-
     return newUser
   }
 
-  const getUserById = (id: string) => {
+  const getUserById = (id: string): RTCClient | undefined => {
     const user = usersRef.current[id]
     return user
   }
@@ -48,6 +41,7 @@ export const useWebRTCRoom = () => {
     }
 
     const userDisconnect = (user: ClientId) => {
+      getUserById(user.id)?.close()
       deleteRef.current(user.id)
     }
 
@@ -82,21 +76,17 @@ export const useWebRTCRoom = () => {
       socketClient.off("new_answer", saveAnswer)
       socketClient.off("new_offer", createAnswer)
       socketClient.off("new_ice", saveIce)
+      Object.values(usersRef.current).forEach((users) => users.close())
     }
   }, [])
 
   const hundleSendMessage = (msg: string) => {
-    setMessages((prev) => [
-      ...prev,
-      { user: localUser, data: msg },
-    ])
     Object.values(users).forEach((user) => {
       user.sendMessage(msg)
     })
   }
 
   return {
-    messages,
     hundleSendMessage,
   }
 }

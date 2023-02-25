@@ -1,6 +1,8 @@
 import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
+import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
+import { MessageModel } from "@/widgets/Chat/model/types/ChatSchem"
 //@ts-ignore // no types
 import freeice from "freeice"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
@@ -173,7 +175,14 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     if (!this.peer) return console.warn("Connection already close")
     this.peer.close()
     this.channel.close()
+    this.video.media?.getTracks().forEach((track) => track.stop())
+    this.video.webCam?.getTracks().forEach((track) => track.stop())
+    this.video = {
+      media: null,
+      webCam: null,
+    }
     this.peer = null
+    this.log("peer closed")
     this.emit("close")
   }
 
@@ -272,7 +281,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.channel.send(json)
   }
 
-  updateBitrate() {
+  private updateBitrate() {
     const videoSender = this.peer
       ?.getSenders()
       .filter((sender) => sender.track?.kind === "video")
@@ -289,6 +298,11 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       params.encodings = encoders
       sender.setParameters(params)
     })
+  }
+
+  private onNewMessage(msg: string) {
+    const message: MessageModel = { data: msg, user: this.user }
+    useChatStore.getState().addMessage(message)
   }
 
   private initDataChanel(e: MessageEvent) {
@@ -325,6 +339,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           this.updateBitrate()
           break
         case "data":
+          this.onNewMessage(data)
           this.emit("newMessage", data)
         default:
           this.log(msg)
