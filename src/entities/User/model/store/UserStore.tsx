@@ -1,5 +1,5 @@
 import { create, StateCreator } from "zustand"
-import { UserSchema } from "../typesS/UserSchema"
+import { UserSchema } from "../types/UserSchema"
 import {
   getUserFromLocalStorage,
   saveUserToLocalStorage,
@@ -10,10 +10,12 @@ const initUser = getUserFromLocalStorage()
 const store: StateCreator<UserSchema> = (set, get) => ({
   localUser: initUser,
 
-  setUsername(value) {
-    saveUserToLocalStorage({ username: value, id: "local" })
+  setLocalUsername(value) {
+    const user = get().localUser
+    user.username = value
 
-    set((state) => ({ ...state, username: value }))
+    set((state) => ({ ...state, localUser: { ...user } }))
+    saveUserToLocalStorage(user)
   },
 })
 

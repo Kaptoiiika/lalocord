@@ -5,9 +5,9 @@ import { Stack, TextField } from "@mui/material"
 import styles from "./MainPage.module.scss"
 
 export const MainPage = () => {
-  const { setUsername, localUser } = useUserStore()
+  const { setLocalUsername, localUser } = useUserStore()
   const hundleChangeUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.currentTarget.value)
+    setLocalUsername(e.currentTarget.value)
   }
 
   return (

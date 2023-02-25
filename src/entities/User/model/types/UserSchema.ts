@@ -1,6 +1,6 @@
 export interface UserSchema {
   localUser: UserModel
-  setUsername: (value: string) => void
+  setLocalUsername: (value: string) => void
 }
 
 export interface UserModel {
