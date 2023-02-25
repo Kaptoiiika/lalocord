@@ -1,4 +1,9 @@
 import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { getNumberBeetwenTwoValues } from "@/shared/lib/utils/Numbers/getNumberBeetwenTwoValues"
+import {
+  PriorityNumberToText,
+  PriorityTextToNumber,
+} from "../../utils/FormatePriority"
 
 const defaultEncodingSettings: RTCRtpEncodingParameters = {
   maxBitrate: 1024 * 1024 * 10,
@@ -14,10 +19,12 @@ export const getEncodingSettingsFromLocalStorage =
     const res: RTCRtpEncodingParameters = {
       maxBitrate:
         Number(data?.maxBitrate) || defaultEncodingSettings.maxBitrate,
-      priority: data?.priority || defaultEncodingSettings.priority,
-      scaleResolutionDownBy:
-        data?.scaleResolutionDownBy ||
-        defaultEncodingSettings.scaleResolutionDownBy,
+      priority: data?.priority
+        ? PriorityNumberToText(PriorityTextToNumber(data?.priority))
+        : defaultEncodingSettings.priority,
+      scaleResolutionDownBy: data?.scaleResolutionDownBy
+        ? getNumberBeetwenTwoValues(Number(data?.scaleResolutionDownBy), 1, 10)
+        : defaultEncodingSettings.scaleResolutionDownBy,
     }
     return res
   }

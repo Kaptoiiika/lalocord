@@ -3,7 +3,7 @@ import { RouteProps } from "react-router-dom"
 export const enum AppRoutes {
   NOT_FOUND = "not_found",
 
-  INDEX = "/",
+  INDEX = "*",
   ROOM_ID = "/room/:id",
   AUTH = "auth",
   PROFILE = "/",

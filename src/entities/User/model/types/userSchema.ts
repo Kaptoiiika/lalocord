@@ -1,13 +1,9 @@
-import { FileRespounce } from "@/shared/api/types/FilteTypes"
-
 export interface UserSchema {
-  authData?: UserModel
-  isInited: boolean
+  localUser: UserModel
+  setUsername: (value: string) => void
 }
 
 export interface UserModel {
-  id: number
+  id: string
   username: string
-  email: string
-  avatar?: FileRespounce
 }

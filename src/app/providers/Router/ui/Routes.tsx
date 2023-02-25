@@ -1,4 +1,3 @@
-import { AuthorizationPage } from "@/pages/AuthorizationPage"
 import { MainPage } from "@/pages/MainPage"
 import { RoomPage } from "@/pages/RoomPage"
 import {
@@ -13,9 +12,5 @@ export const RoutesConfig: Record<string, AppRouteProps> = {
 
   [AppRoutes.ROOM_ID]: {
     element: <RoomPage />,
-  },
-
-  [AppRoutes.AUTH]: {
-    element: <AuthorizationPage />,
   },
 }

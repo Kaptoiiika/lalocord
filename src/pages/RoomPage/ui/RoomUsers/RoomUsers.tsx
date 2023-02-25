@@ -1,31 +1,26 @@
-import { getAuthData } from "@/entities/User"
+import { useUserStore } from "@/entities/User"
 import { UserAvatar } from "@/shared/ui/UserAvatar/UserAvatar"
 import { Avatar, Stack, Tooltip } from "@mui/material"
-import { useSelector } from "react-redux"
-import { RTCClient } from "../../lib/RTCClient/RTCClient"
+import { getRoomUsers } from "../../model/selectors/RoomRTCSelectors"
+import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import styles from "./RoomUsers.module.scss"
 
-type RoomUsersProps = {
-  users: RTCClient[]
-}
+export const RoomUsers = () => {
+  const users = useRoomRTCStore(getRoomUsers)
+  const localUsername = useUserStore((state) => state.localUser)
 
-export const RoomUsers = (props: RoomUsersProps) => {
-  const { users } = props
-  const authUser = useSelector(getAuthData)
+  const userList = Object.values(users)
 
   return (
     <div className={styles["RoomUsers"]}>
       <Stack className={styles.users} direction="row" gap={1}>
-        <Tooltip title={authUser?.username ?? "You"}>
-          <UserAvatar
-            avatar={authUser?.avatar}
-            alt={authUser?.username || "You"}
-          />
+        <Tooltip title={localUsername.username || "You"}>
+          <UserAvatar alt={localUsername.username || "You"} />
         </Tooltip>
 
-        {users.map((user) => (
-          <Tooltip key={user.id} title={user.id}>
-            <Avatar src="" alt={user.id} />
+        {userList.map((client) => (
+          <Tooltip key={client.id} title={client.user?.username || client.id}>
+            <Avatar src="" alt={client.id} />
           </Tooltip>
         ))}
       </Stack>

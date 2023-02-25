@@ -17,6 +17,9 @@ $animationTime: 0.3s;
       right: 0;
       width: 64px;
     }
+    .chat {
+      opacity: 0;
+    }
   }
 }
 
@@ -45,6 +48,8 @@ $animationTime: 0.3s;
   border-top: var(--box-border);
   border-left: var(--box-border);
   overflow: hidden;
+  transition: opacity $animationTime;
+  opacity: 1;
 }
 
 .chatMessages {

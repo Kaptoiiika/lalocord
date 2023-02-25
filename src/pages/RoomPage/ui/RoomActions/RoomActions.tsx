@@ -3,12 +3,12 @@ import VideocamIcon from "@mui/icons-material/Videocam"
 import VideocamOffIcon from "@mui/icons-material/VideocamOff"
 import styles from "./RoomActions.module.scss"
 import { useState } from "react"
-import { useRoomRTCStore } from "../../model/store/store/RoomRTCStore"
+import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import {
   getActionSetWebCamStream,
   getStreamSettings,
   getWebCamStream,
-} from "../../model/store/selectors/RoomRTCSelectors"
+} from "../../model/selectors/RoomRTCSelectors"
 import { ShareScreenMenu } from "./ShareScreenMenu/ShareScreenMenu"
 
 type RoomActionsProps = {}

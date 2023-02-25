@@ -1,15 +1,17 @@
+import { UserModel, useUserStore } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
 import { useState, useRef, useEffect } from "react"
 import {
   getActionDeleteConnectedUsers,
   getRoomUsers,
-} from "../../model/store/selectors/RoomRTCSelectors"
-import { useRoomRTCStore } from "../../model/store/store/RoomRTCStore"
-import { Message, User } from "../../model/store/types/RoomRTCSchema"
+} from "../../model/selectors/RoomRTCSelectors"
+import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
+import { Message } from "../../model/types/RoomRTCSchema"
 import { Answer, ClientId, Ice, Offer, RTCClient } from "../RTCClient/RTCClient"
 
 export const useWebRTCRoom = () => {
   const [messages, setMessages] = useState<Message[]>([])
+  const localUser = useUserStore((state) => state.localUser)
   const users = useRoomRTCStore(getRoomUsers)
   const deleteUser = useRoomRTCStore(getActionDeleteConnectedUsers)
 
@@ -18,7 +20,7 @@ export const useWebRTCRoom = () => {
   const deleteRef = useRef(deleteUser)
   deleteRef.current = deleteUser
 
-  const createNewUser = (user: User, createOffer?: boolean) => {
+  const createNewUser = (user: UserModel, createOffer?: boolean) => {
     const newUser = new RTCClient(user, createOffer)
     newUser.on("newMessage", (msg: string) => {
       setMessages((prev) => [...prev, { user: user, data: msg }])
@@ -33,16 +35,16 @@ export const useWebRTCRoom = () => {
   }
 
   useEffect(() => {
-    const initClients = (users: User[]) => {
+    const initClients = (users: UserModel[]) => {
       users.map((user) => createNewUser(user, true))
     }
 
-    const addUser = (user: ClientId) => {
+    const addUser = (user: UserModel) => {
       const alreadyInList = getUserById(user.id)
       if (alreadyInList) {
         console.warn(`User ${alreadyInList} is already in list`)
       }
-      createNewUser(user.id)
+      createNewUser(user)
     }
 
     const userDisconnect = (user: ClientId) => {
@@ -84,7 +86,10 @@ export const useWebRTCRoom = () => {
   }, [])
 
   const hundleSendMessage = (msg: string) => {
-    setMessages((prev) => [...prev, { user: "me", data: msg }])
+    setMessages((prev) => [
+      ...prev,
+      { user: localUser, data: msg },
+    ])
     Object.values(users).forEach((user) => {
       user.sendMessage(msg)
     })

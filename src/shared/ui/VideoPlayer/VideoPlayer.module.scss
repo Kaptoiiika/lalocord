@@ -20,6 +20,7 @@
   width: calc(100% - 16px);
   display: grid;
   grid-template-columns: 1fr minmax(300px, 1fr) 1fr;
+  align-items: center;
 }
 
 .tooltipShadow {

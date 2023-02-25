@@ -1,9 +1,10 @@
+import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 //@ts-ignore // no types
 import freeice from "freeice"
-import { useRoomRTCStore } from "../../model/store/store/RoomRTCStore"
-import { MediaStreamTypes } from "../../model/store/types/RoomRTCSchema"
+import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
+import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
@@ -23,6 +24,7 @@ export type RTCClientEvents = "updateStreams" | "close" | "newMessage"
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
+  user: UserModel
   peer: RTCPeerConnection | null
   channel: RTCDataChannel
   video: Record<MediaStreamTypes, MediaStream | null> = {
@@ -45,15 +47,16 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   }
   private encodingSettings: RTCRtpEncodingParameters = {}
 
-  constructor(id: string, sendOffer?: boolean) {
+  constructor(user: UserModel, sendOffer?: boolean) {
     super()
-    this.id = id
+    this.id = user.id
+    this.user = user
     if (!RTCPeerConnection)
       throw new Error("Your browser does not support WEBRTC")
     this.peer = new RTCPeerConnection({
       iceServers: freeice(),
     })
-    this.log("client:", id, this)
+    this.log("client:", user, this)
 
     this.channel = this.peer.createDataChannel("text")
     this.channel.onopen = () => {
@@ -180,7 +183,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   async sendStream(stream: MediaStream, type: MediaStreamTypes) {
     if (!this.peer) return
-    this.log('send stream')
+    this.log("send stream")
     const [videoStream] = stream.getVideoTracks()
     const [audioStream] = stream.getAudioTracks()
     const currentSenders = this.senders[type]

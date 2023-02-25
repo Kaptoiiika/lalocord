@@ -8,7 +8,6 @@ import { apiClient } from "@/shared/api/apiClient"
 import { rtkApi } from "@/shared/api/RtkApi"
 import { StateSchema, ThunkExtraArg } from "@/shared/config/storeConfig"
 import { createReducerManager } from "./ReducerManager"
-import { userReducer } from "@/entities/User"
 
 export function createReduxStore(
   initialState?: StateSchema,
@@ -16,7 +15,6 @@ export function createReduxStore(
 ) {
   const rootReducers: ReducersMapObject<StateSchema> = {
     ...asyncReducers,
-    user: userReducer,
     [rtkApi.reducerPath]: rtkApi.reducer,
   }
   const reducerManager = createReducerManager(rootReducers)

@@ -4,8 +4,8 @@ import {
   getStreamSettings,
   getEncodingSettings,
   getActionSetEncodingSettings,
-} from "../../../model/store/selectors/RoomRTCSelectors"
-import { useRoomRTCStore } from "../../../model/store/store/RoomRTCStore"
+} from "../../../model/selectors/RoomRTCSelectors"
+import { useRoomRTCStore } from "../../../model/store/RoomRTCStore"
 import {
   IconButton,
   Tooltip,
@@ -21,41 +21,16 @@ import ScreenShareIcon from "@mui/icons-material/ScreenShare"
 import StopScreenShareIcon from "@mui/icons-material/StopScreenShare"
 import styles from "./ShareScreenMenu.module.scss"
 import { MouseEvent, useState } from "react"
+import {
+  PriorityNumberToText,
+  PriorityTextToNumber,
+} from "../../../utils/FormatePriority"
+import {
+  bitrateToShortValue,
+  bitrateValueText,
+} from "../../../utils/FormateBitrate"
 
 type ShareScreenMenuProps = {}
-
-function bitrateValueText(value: number) {
-  return `${value} Mb/s`
-}
-function bitrateToShortValue(value: number): number {
-  return value / 1024 / 1024
-}
-function PriorityValueText(value: number): RTCPriorityType {
-  switch (value) {
-    case 4:
-      return "high"
-    case 3:
-      return "medium"
-    case 2:
-      return "low"
-    case 1:
-      return "very-low"
-  }
-  return "low"
-}
-function PriorityTextToNumber(value?: string): number {
-  switch (value) {
-    case "high":
-      return 4
-    case "medium":
-      return 3
-    case "low":
-      return 2
-    case "very-low":
-      return 1
-  }
-  return 2
-}
 
 export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
   const mediaStream = useRoomRTCStore(getDisplayMediaStream)
@@ -112,7 +87,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
   ) => {
     if (Array.isArray(newValue)) return
     const settings = encodingSettings
-    settings.priority = PriorityValueText(newValue)
+    settings.priority = PriorityNumberToText(newValue)
 
     setEncodingSettings(settings)
   }
@@ -190,7 +165,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
             value={PriorityTextToNumber(encodingSettings.priority)}
             onChange={hundlePriotryChange}
             aria-label="Priority"
-            getAriaValueText={PriorityValueText}
+            getAriaValueText={PriorityNumberToText}
             step={1}
             min={1}
             max={4}

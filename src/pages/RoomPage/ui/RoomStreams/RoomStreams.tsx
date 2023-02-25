@@ -1,3 +1,4 @@
+import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
 import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
 import { memo, useEffect, useState } from "react"
 import { RTCClient } from "../../lib/RTCClient/RTCClient"
@@ -5,10 +6,9 @@ import {
   getDisplayMediaStream,
   getRoomUsers,
   getWebCamStream,
-} from "../../model/store/selectors/RoomRTCSelectors"
-import { useRoomRTCStore } from "../../model/store/store/RoomRTCStore"
+} from "../../model/selectors/RoomRTCSelectors"
+import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import styles from "./RoomStreams.module.scss"
-import { RoomUserStream } from "./RoomUserStream/RoomUserStream"
 
 type RoomStreamsProps = {}
 
@@ -23,7 +23,7 @@ export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
     setUserStreams(
       userList.filter((usr) => !!usr.video.media || !!usr.video.webCam)
     )
-    
+
     const listeners = userList.map((user) => {
       const fn = () => {
         const haveAnyStream = !!user.video.media || !!user.video.webCam
@@ -61,7 +61,10 @@ export const RoomStreams = memo(function RoomStreams(props: RoomStreamsProps) {
   return (
     <StreamViewer className={styles.RoomStreams}>
       {streams.map((user) => (
-        <RoomUserStream key={user.id} user={user} />
+        <div key={user.id} className={styles.stream}>
+          {!!user.video.webCam && <VideoPlayer stream={user.video.webCam} />}
+          {!!user.video.media && <VideoPlayer stream={user.video.media} />}
+        </div>
       ))}
     </StreamViewer>
   )

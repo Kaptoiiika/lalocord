@@ -1,7 +1,7 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { Badge, Button, TextField } from "@mui/material"
 import { useCallback, useEffect, useState } from "react"
-import { Message } from "../../model/store/types/RoomRTCSchema"
+import { Message } from "../../model/types/RoomRTCSchema"
 import styles from "./RoomChat.module.scss"
 import ChatIcon from "@mui/icons-material/Chat"
 import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
@@ -64,9 +64,10 @@ export const RoomChat = (props: RoomChatProps) => {
         </li>
       )
     }
+    
     return (
       <li className={styles.message} key={index}>
-        <div className={styles.messageUser}>{message.user}</div>
+        <div className={styles.messageUser}>{message.user.username || message.user.id}</div>
         <div className={styles.messageText}>{message.data}</div>
       </li>
     )
