@@ -1,5 +1,5 @@
 import { create, StateCreator } from "zustand"
-import { UserSchema } from "../types/UserSchema"
+import { UserSchema } from "../typesS/UserSchema"
 import {
   getUserFromLocalStorage,
   saveUserToLocalStorage,
