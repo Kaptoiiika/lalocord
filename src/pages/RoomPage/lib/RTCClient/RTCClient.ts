@@ -21,7 +21,7 @@ export type MessageType =
   | "stopStream"
   | "data"
 
-export type RTCClientEvents = "updateStreams" | "close" | "newMessage"
+export type RTCClientEvents = "updateStreams"
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
@@ -62,8 +62,8 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.channel = this.peer.createDataChannel("text")
     this.channel.onopen = () => {
       this.channelIsOpen = true
-      this.messages.forEach((json) => {
-        this.channel.send(json)
+      this.messages.forEach((data) => {
+        this.sendMessageToChanel(data)
       })
     }
     this.channel.onclose = () => {
@@ -175,17 +175,16 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   close() {
     if (!this.peer) return console.warn("Connection already close")
-    this.peer.close()
-    this.channel.close()
     this.video.media?.getTracks().forEach((track) => track.stop())
     this.video.webCam?.getTracks().forEach((track) => track.stop())
+    this.channel.close()
+    this.peer.close()
     this.video = {
       media: null,
       webCam: null,
     }
     this.peer = null
     this.log("peer closed")
-    this.emit("close")
   }
 
   sendMessage(msg: string) {
@@ -193,7 +192,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   }
 
   sendBlob(blob: Blob) {
-    // this.sendData("data", blob)
+    this.sendMessageToChanel(blob)
   }
 
   async sendStream(stream: MediaStream, type: MediaStreamTypes) {
@@ -279,11 +278,15 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   private sendData(type: MessageType, msg?: unknown) {
     const json = JSON.stringify({ type: type, data: msg })
     this.log("sendData", { type: type, data: msg })
+    this.sendMessageToChanel(json)
+  }
+
+  private sendMessageToChanel(data: any) {
     if (!this.channelIsOpen) {
-      this.messages.push(json)
+      this.messages.push(data)
       return
     }
-    this.channel.send(json)
+    this.channel.send(data)
   }
 
   private updateBitrate() {
@@ -310,10 +313,14 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   private onNewMessage(msg: string) {
     const message: MessageModel = { data: msg, user: this.user }
-    useChatStore.getState().addMessage(message)
+    useChatStore.getState().addMessage(message, true)
   }
 
   private initDataChanel(e: MessageEvent) {
+    if (e.data instanceof Blob) {
+      console.log("BLob", e)
+      return e.data
+    }
     try {
       const msg: { type: MessageType; data: any } = JSON.parse(e.data)
       this.log("reciveData", msg)
@@ -344,8 +351,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           this.remoteClosedStream(data)
           break
         case "data":
-          this.onNewMessage(data)
-          this.emit("newMessage", data)
+          if (typeof data === "string") this.onNewMessage(data)
         default:
           this.log(msg)
           break

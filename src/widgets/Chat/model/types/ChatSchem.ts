@@ -2,8 +2,9 @@ import { UserModel } from "@/entities/User"
 
 export interface ChatSchema {
   messages: MessageModel[]
+  audio: HTMLAudioElement
 
-  addMessage: (message: MessageModel) => void
+  addMessage: (message: MessageModel, playSound?: boolean) => void
 }
 
 export interface MessageModel {

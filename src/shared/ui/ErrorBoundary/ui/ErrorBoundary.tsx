@@ -1,7 +1,10 @@
-import { Component, PropsWithChildren, Suspense } from "react"
+// eslint-disable-next-line boundaries/element-types
 import { PageError } from "@/widgets/PageError"
+import { Component, PropsWithChildren, Suspense } from "react"
 
-type ErrorBoundaryProps = {} & PropsWithChildren
+type ErrorBoundaryProps = {
+  errorText?: string
+} & PropsWithChildren
 
 type ErrorBoundaryState = { hasError: boolean; error: any }
 
@@ -16,7 +19,7 @@ export class ErrorBoundary extends Component<
 
   static getDerivedStateFromError() {
     // Update state so the next render will show the fallback UI.
-    return { hasError: true,  }
+    return { hasError: true }
   }
 
   componentDidCatch(error: any, errorInfo: any) {
@@ -25,12 +28,12 @@ export class ErrorBoundary extends Component<
   }
 
   render() {
-    const { hasError, error } = this.state
-    const { children } = this.props
+    const { hasError } = this.state
+    const { children, errorText } = this.props
     if (hasError) {
       return (
         <Suspense>
-          <PageError />
+          <PageError title={errorText} />
         </Suspense>
       )
     }

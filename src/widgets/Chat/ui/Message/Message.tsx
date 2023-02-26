@@ -25,7 +25,7 @@ export const Message = (props: MessageProps) => {
   const myobject: TypeObject = {
     price: "brat",
   }
-  Object.entries(myobject).forEach(([key, value] ) => {
+  Object.entries(myobject).forEach(([key, value]) => {
     fn(key as keyof typeof myobject)
   })
 

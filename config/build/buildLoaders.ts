@@ -14,7 +14,7 @@ export function buildLoaders(options: BuildOptions): webpack.RuleSetRule[] {
   }
 
   const fileLoader = {
-    test: /\.(png|jpe?g|gif|webp)$/i,
+    test: /\.(png|jpe?g|gif|webp|mp3)$/i,
     use: [
       {
         loader: "file-loader",
