@@ -19,7 +19,6 @@ export type MessageType =
   | "request_new_offer"
   | "sendNewStream"
   | "stopStream"
-  | "streamAccepted"
   | "data"
 
 export type RTCClientEvents = "updateStreams" | "close" | "newMessage"
@@ -150,6 +149,8 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     const answer = await this.peer.createAnswer()
     await this.peer.setLocalDescription(answer)
     const resp = { id: this.id, answer: answer }
+
+    this.log("createAnswer", answer)
     if (this.channelIsOpen) this.sendData("answer", answer)
     else socketClient.emit("new_answer", resp)
   }
@@ -159,12 +160,14 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     const offer = await this.peer.createOffer()
     await this.peer.setLocalDescription(offer)
     const data = { id: this.id, offer: offer }
+    this.log("createdoffer", offer)
     if (this.channelIsOpen) this.sendData("offer", offer)
     else socketClient.emit("new_offer", data)
   }
 
   async saveAnswer(answer: RTCSessionDescription) {
     await this.peer?.setRemoteDescription(answer)
+    this.updateBitrate()
   }
 
   saveIce(ice: RTCIceCandidateInit) {
@@ -266,7 +269,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
         return
     }
     this.unknownVideo = null
-    this.sendData("streamAccepted")
     this.emit("updateStreams")
   }
 
@@ -286,12 +288,15 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   }
 
   private updateBitrate() {
+    if (!this.peer) return
+
     const videoSender = this.peer
       ?.getSenders()
       .filter((sender) => sender.track?.kind === "video")
     if (!videoSender) return
     videoSender?.map((sender) => {
       const params = sender.getParameters()
+      console.log("video params", params)
       const encoders = params.encodings.map((encod) => {
         return {
           ...encod,
@@ -338,9 +343,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "stopStream":
           this.remoteClosedStream(data)
-          break
-        case "streamAccepted":
-          this.updateBitrate()
           break
         case "data":
           this.onNewMessage(data)

@@ -39,9 +39,6 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
   const setDisplayMediaStream = useRoomRTCStore(getActionSetDisaplyMediaStream)
   const setEncodingSettings = useRoomRTCStore(getActionSetEncodingSettings)
 
-  const [bitrate, setBitrate] = useState(
-    bitrateToShortValue(encodingSettings.maxBitrate || 0)
-  )
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
 
@@ -88,7 +85,6 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
     if (Array.isArray(newValue)) return
     const settings = encodingSettings
     settings.priority = PriorityNumberToText(newValue)
-
     setEncodingSettings(settings)
   }
   const hundleBitrateChange = (
@@ -146,7 +142,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
             </span>
           </Typography>
           <Slider
-            defaultValue={bitrate}
+            defaultValue={bitrateToShortValue(encodingSettings.maxBitrate || 0)}
             onChangeCommitted={hundleBitrateChange}
             aria-label="bitrate"
             valueLabelDisplay="auto"

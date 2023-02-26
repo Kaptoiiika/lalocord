@@ -15,9 +15,7 @@ export const ShareWebCamMenu = () => {
 
   const hundleStartWebCamStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: streamSettings.video,
-      })
+      const stream = await navigator.mediaDevices.getUserMedia(streamSettings)
       webCamStream?.getTracks().forEach((tracks) => {
         tracks.onended = null
         tracks.stop()
@@ -28,7 +26,9 @@ export const ShareWebCamMenu = () => {
           setWebCamStream(null)
         }
       })
-    } catch (error: any) {}
+    } catch (error: any) {
+      console.log(error)
+    }
   }
 
   const hundleStopStream = () => {

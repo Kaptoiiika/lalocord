@@ -17,6 +17,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import PauseIcon from "@mui/icons-material/Pause"
 import FullscreenIcon from "@mui/icons-material/Fullscreen"
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit"
+import { VideoPlayerDebugInfo } from "./VideoPlayerDebugInfo/VideoPlayerDebugInfo"
 
 type VideoPlayerProps = {
   stream: MediaStream | null
@@ -27,6 +28,8 @@ const hasAudioOnStream = (stream: MediaStream | null) => {
   return !!stream?.getAudioTracks().length
 }
 
+let debugValue = !!localStorage.getItem('debug')
+
 export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const { stream = null, initVolume, className, ...other } = props
   const [played, setPlayed] = useState(false)
@@ -36,6 +39,20 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   )
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<HTMLDivElement | null>(null)
+
+  const [debug, setDebug] = useState(debugValue)
+  useEffect(() => {
+    const fn = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === "F2") {
+        setDebug((prev) => !prev)
+        debugValue = !debugValue
+      }
+    }
+    document.addEventListener("keydown", fn)
+    return () => {
+      document.removeEventListener("keydown", fn)
+    }
+  }, [])
 
   //todo: replace to hooks
   const [open, setOpen] = useState(false)
@@ -131,6 +148,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       onBlur={hundleClose}
       onMouseLeave={hundleClose}
     >
+      {debug && <VideoPlayerDebugInfo stream={stream} />}
       <div
         className={classNames("", { [styles.tooltipShadow]: !toolTipIsClosed })}
       >
