@@ -6,8 +6,6 @@ import {
 } from "./RoomRTCLocalStorage"
 
 const store: StateCreator<RoomRTCSchema> = (set, get) => ({
-  displayMediaStream: null,
-  webCamStream: null,
   streamSettings: {
     audio: {
       noiseSuppression: false,
@@ -25,8 +23,31 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
     surfaceSwitching: "include",
   },
   encodingSettings: getEncodingSettingsFromLocalStorage(),
+  displayMediaStream: null,
+  webCamStream: null,
   connectedUsers: {},
 
+  close: () => {
+    const { webCamStream, displayMediaStream, connectedUsers } = get()
+    const tracks = [
+      ...(displayMediaStream?.getTracks() || []),
+      ...(webCamStream?.getTracks() || []),
+    ]
+    tracks.forEach((tracks) => {
+      tracks.onended = null
+      tracks.stop()
+    })
+    Object.values(connectedUsers).forEach((client) => {
+      client.close()
+    })
+
+    set((state) => ({
+      ...state,
+      webCamStream: null,
+      displayMediaStream: null,
+      connectedUsers: {},
+    }))
+  },
   setEncodingSettings: (settings) => {
     saveEncodingSettingsToLocalStorage(settings)
     set((state) => ({ ...state, encodingSettings: { ...settings } }))

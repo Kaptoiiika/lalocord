@@ -2,6 +2,7 @@ import { classNames } from "@/shared/lib/classNames/classNames"
 import { IconButton, Slider } from "@mui/material"
 import {
   memo,
+  MouseEvent,
   useCallback,
   useEffect,
   useRef,
@@ -18,9 +19,12 @@ import PauseIcon from "@mui/icons-material/Pause"
 import FullscreenIcon from "@mui/icons-material/Fullscreen"
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit"
 import { VideoPlayerDebugInfo } from "./VideoPlayerDebugInfo/VideoPlayerDebugInfo"
+import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
 
 type VideoPlayerProps = {
   stream: MediaStream | null
+  onPlay?: () => void
+  onPause?: () => void
   initVolume?: number
 } & VideoHTMLAttributes<HTMLVideoElement>
 
@@ -28,10 +32,17 @@ const hasAudioOnStream = (stream: MediaStream | null) => {
   return !!stream?.getAudioTracks().length
 }
 
-let debugValue = !!localStorage.getItem('debug')
+let debugValue = !!localStorage.getItem("debug")
 
 export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
-  const { stream = null, initVolume, className, ...other } = props
+  const {
+    stream = null,
+    initVolume,
+    className,
+    onPlay,
+    onPause,
+    ...other
+  } = props
   const [played, setPlayed] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [volume, setVolume] = useState(
@@ -39,6 +50,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   )
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<HTMLDivElement | null>(null)
+  const { hundleClose, hundleOpen, open } = useIsOpen(3000)
 
   const [debug, setDebug] = useState(debugValue)
   useEffect(() => {
@@ -54,32 +66,23 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     }
   }, [])
 
-  //todo: replace to hooks
-  const [open, setOpen] = useState(false)
-  const openRef = useRef<ReturnType<typeof setTimeout>>()
-  useEffect(() => {
-    return () => clearTimeout(openRef.current)
-  }, [])
-  const hundleClose = useCallback(() => {
-    setOpen(false)
-    clearTimeout(openRef.current)
-  }, [])
-  const hundleOpen = useCallback(() => {
-    setOpen(true)
-    clearTimeout(openRef.current)
-    openRef.current = setTimeout(() => {
-      setOpen(false)
-    }, 3000)
-  }, [])
-  //: replace to hooks
+  const hundlePause = useCallback(() => {
+    videoRef.current?.pause()
+    onPause?.()
+  }, [onPause])
+  const hundlePlay = useCallback(() => {
+    try {
+      videoRef.current?.play()
+      onPlay?.()
+    } catch (error) {
+      console.error(error)
+    }
+  }, [onPlay])
 
   const hundlePlayPause = useCallback(() => {
-    if (!videoRef.current) return
-    try {
-      if (played) videoRef.current.pause()
-      else videoRef.current.play()
-    } catch (error) {}
-  }, [played])
+    if (played) hundlePause()
+    else hundlePlay()
+  }, [played, hundlePlay, hundlePause])
 
   const hundleChangeVolume = useCallback(
     (event: Event, newValue: number | number[]) => {
@@ -89,17 +92,26 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     []
   )
 
-  const hundleFullscreen = () => {
+  const hundleFullscreen = useCallback(() => {
     try {
       playerRef.current?.requestFullscreen()
-    } catch (error) {}
-  }
-
-  const hundleExitFullscreen = () => {
+    } catch (error) {
+      console.error(error)
+    }
+  }, [])
+  const hundleExitFullscreen = useCallback(() => {
     try {
       document.exitFullscreen()
-    } catch (error) {}
-  }
+    } catch (error) {
+      console.error(error)
+    }
+  }, [])
+  const hundleFullscreenToggle = useCallback((e: MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (document.fullscreenElement) document.exitFullscreen()
+    else playerRef.current?.requestFullscreen()
+  }, [])
 
   const hundleRefVideo = useCallback(
     (node: HTMLVideoElement | null) => {
@@ -135,7 +147,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     videoRef.current.volume = volume
   }
 
-  const toolTipIsClosed = played && !open
+  const toolsIsClosed = played && !open
 
   return (
     <div
@@ -150,13 +162,13 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     >
       {debug && <VideoPlayerDebugInfo stream={stream} />}
       <div
-        className={classNames("", { [styles.tooltipShadow]: !toolTipIsClosed })}
+        className={classNames("", { [styles.tooltipShadow]: !toolsIsClosed })}
       >
         <div className={styles.tooltipShadowBottom} />
       </div>
       <div
         className={classNames(styles.tooltip, {
-          [styles.closed]: toolTipIsClosed,
+          [styles.closed]: toolsIsClosed,
         })}
       >
         <Stack direction="row" justifyContent="flex-start">
@@ -209,9 +221,10 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       </div>
       <video
         {...other}
+        onDoubleClick={hundleFullscreenToggle}
         ref={hundleRefVideo}
         className={classNames([styles.video, className], {
-          [styles.cursorHide]: toolTipIsClosed,
+          [styles.cursorHide]: toolsIsClosed,
         })}
         autoPlay
         playsInline

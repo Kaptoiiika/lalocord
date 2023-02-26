@@ -8,6 +8,7 @@ export interface RoomRTCSchema {
   encodingSettings: RTCRtpEncodingParameters
   connectedUsers: ConnectedUsers
 
+  close: () => void
   setEncodingSettings: (settings: RTCRtpEncodingParameters) => void
   deleteConnectedUser: (id: UserId) => void
   addConnectedUsers: (...users: RTCClient[]) => void
