@@ -149,7 +149,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     const answer = await this.peer.createAnswer()
     await this.peer.setLocalDescription(answer)
     const resp = { id: this.id, answer: answer }
-
     this.log("createAnswer", answer)
     if (this.channelIsOpen) this.sendData("answer", answer)
     else socketClient.emit("new_answer", resp)

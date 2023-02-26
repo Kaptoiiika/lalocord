@@ -16,7 +16,7 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       channelCount: 2,
     },
     video: {
-      frameRate: { ideal: 90 },
+      frameRate: 60,
       width: { ideal: 1924 },
       height: { ideal: 1080 },
       displaySurface: "monitor",
