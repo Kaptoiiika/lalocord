@@ -1,8 +1,10 @@
 import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
+import { convertBlobToBase64 } from "@/shared/lib/utils/Blob/convertBlobToBase64/convertBlobToBase64"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
+import { splitStringToChunks } from "@/shared/lib/utils/String/splitStringToChunks"
 import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
-import { MessageModel } from "@/widgets/Chat/model/types/ChatSchem"
+import { MessageData, MessageModel } from "@/widgets/Chat/model/types/ChatSchem"
 //@ts-ignore // no types
 import freeice from "freeice"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
@@ -19,8 +21,16 @@ export type MessageType =
   | "request_new_offer"
   | "sendNewStream"
   | "stopStream"
-  | "data"
+  | "text"
+  | "file"
 
+export type DataChunk = {
+  id: string
+  data: string
+  type: string
+  size: number
+  current: number
+}
 export type RTCClientEvents = "updateStreams"
 
 export class RTCClient extends Emitter<RTCClientEvents> {
@@ -47,6 +57,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     webCam: null,
   }
   private encodingSettings: RTCRtpEncodingParameters = {}
+  private fileBuffer: Record<string, DataChunk[]> = {}
 
   constructor(user: UserModel, sendOffer?: boolean) {
     super()
@@ -188,11 +199,24 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   }
 
   sendMessage(msg: string) {
-    this.sendData("data", msg)
+    this.sendData("text", msg)
   }
 
-  sendBlob(blob: Blob) {
-    this.sendMessageToChanel(blob)
+  async sendBlob(blob: Blob) {
+    const data = await convertBlobToBase64(blob)
+    const stringChunks = splitStringToChunks(data, 1024 * 32)
+    const id = Math.random().toString(16).slice(2)
+
+    stringChunks?.forEach((chunk, index) => {
+      const dataChunk: DataChunk = {
+        id: id,
+        data: chunk,
+        type: blob.type,
+        size: stringChunks.length,
+        current: index + 1,
+      }
+      this.sendData("file", dataChunk)
+    })
   }
 
   async sendStream(stream: MediaStream, type: MediaStreamTypes) {
@@ -311,16 +335,12 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     })
   }
 
-  private onNewMessage(msg: string) {
+  private onNewMessage(msg: MessageData) {
     const message: MessageModel = { data: msg, user: this.user }
     useChatStore.getState().addMessage(message, true)
   }
 
   private initDataChanel(e: MessageEvent) {
-    if (e.data instanceof Blob) {
-      console.log("BLob", e)
-      return e.data
-    }
     try {
       const msg: { type: MessageType; data: any } = JSON.parse(e.data)
       this.log("reciveData", msg)
@@ -350,7 +370,28 @@ export class RTCClient extends Emitter<RTCClientEvents> {
         case "stopStream":
           this.remoteClosedStream(data)
           break
-        case "data":
+        case "file":
+          const fileChunk: DataChunk = data
+          if (fileChunk.size === 1)
+            return this.onNewMessage({
+              type: fileChunk.type,
+              src: fileChunk.data,
+            })
+
+          if (fileChunk.current >= fileChunk.size) {
+            const data = this.fileBuffer[fileChunk.id]
+              .map((chunk) => chunk.data)
+              .join("")
+            delete this.fileBuffer[fileChunk.id]
+            return this.onNewMessage({ type: fileChunk.type, src: data })
+          }
+
+          if (this.fileBuffer[fileChunk.id])
+            this.fileBuffer[fileChunk.id].push(fileChunk)
+          else this.fileBuffer[fileChunk.id] = [fileChunk]
+
+          break
+        case "text":
           if (typeof data === "string") this.onNewMessage(data)
         default:
           this.log(msg)

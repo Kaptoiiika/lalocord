@@ -6,7 +6,7 @@ import styles from "./MainPage.module.scss"
 
 export const MainPage = () => {
   const { setLocalUsername, localUser } = useUserStore()
-  const hundleChangeUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalUsername(e.currentTarget.value)
   }
 
@@ -18,7 +18,7 @@ export const MainPage = () => {
           value={localUser.username}
           label="username"
           type="text"
-          onChange={hundleChangeUserName}
+          onChange={handleChangeUserName}
         />
         <RoomList />
       </Stack>

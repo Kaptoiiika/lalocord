@@ -2,19 +2,21 @@ import { create, StateCreator } from "zustand"
 import { ChatSchema } from "../types/ChatSchem"
 import notofficationSound from "@/shared/assets/audio/notification.mp3"
 
+const audio = new Audio(notofficationSound)
+audio.currentTime = 0
+audio.volume = 0.3
+
+const playAudio = async () => {
+  try {
+    await audio.play()
+  } catch (error) {}
+}
+
 const store: StateCreator<ChatSchema> = (set, get) => ({
   messages: [],
-  audio: new Audio(notofficationSound),
 
   addMessage(message, playSound) {
-    if (playSound) {
-      const { audio } = get()
-      audio.currentTime = 0
-      try {
-        audio.play()
-      } catch (error) {}
-    }
-
+    if (playSound) playAudio()
     set((state) => ({ ...state, messages: [...state.messages, message] }))
   },
 })

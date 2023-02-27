@@ -12,6 +12,7 @@ import {
 import { getLocalUser, useUserStore } from "@/entities/User"
 import { MessageList } from "../MessageList/MessageList"
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary"
+import { ImagePreview } from "@/features/ImagePreview"
 
 const getChatCollapsedFromLocalStorage = (): boolean => {
   const json = localStorage.getItem(localstorageKeys.CHATCOLLAPSED)
@@ -37,25 +38,39 @@ export const Chat = (props: ChatProps) => {
   const [collapsed, setCollapsed] = useState(getChatCollapsedFromLocalStorage())
   const [readedMessage, setReadedMessage] = useState(0)
 
-  const hundleChangeText = useCallback(
+  const handleChangeText = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setText(e.currentTarget.value)
     },
     []
   )
 
-  const hundlePasteFile = (e: ClipboardEvent<HTMLDivElement>) => {
-    const clipboardItems = e.clipboardData.items
-    const items = Array.from(clipboardItems)
-    if (items.length === 0) {
-      return
-    }
-    const item = items[0]
+  const handleSendFile = async (data: DataTransfer) => {
+    const items = Array.from(data.items)
+
+    const item = items.find((item) => !!item.getAsFile())
+    if (!item) return
+
     const blob = item.getAsFile()
-    if (blob) onSendFile?.(blob)
+    console.log(blob)
+    if (blob) {
+      onSendFile?.(blob)
+      addMessage({
+        data: { type: "image", src: URL.createObjectURL(blob) },
+        user: localUser,
+      })
+    }
   }
 
-  const hundleSendMessage = (e: React.FormEvent | React.MouseEvent) => {
+  const handlePasteFile = async (e: ClipboardEvent) => {
+    handleSendFile(e.clipboardData)
+  }
+  const handleDropFile = async (e: React.DragEvent) => {
+    e.preventDefault()
+    handleSendFile(e.dataTransfer)
+  }
+
+  const handleSendMessage = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault()
     if (text === "") return
     addMessage({ data: text, user: localUser })
@@ -63,7 +78,7 @@ export const Chat = (props: ChatProps) => {
     setText("")
   }
 
-  const hundleCollapse = () => {
+  const handleCollapse = () => {
     setCollapsed((prev) => {
       saveChatCollapsedToLocalStorage(!prev)
       return !prev
@@ -86,7 +101,7 @@ export const Chat = (props: ChatProps) => {
         <Button
           sx={{ borderRadius: 0 }}
           className={styles.headerButton}
-          onClick={hundleCollapse}
+          onClick={handleCollapse}
           aria-label={collapsed ? "Open chat" : "Hide chat"}
         >
           <Badge
@@ -100,18 +115,20 @@ export const Chat = (props: ChatProps) => {
       <div className={styles.chat}>
         <ErrorBoundary errorText="Chat is broken(">
           <MessageList />
-          <form onSubmit={hundleSendMessage} className={styles.form}>
+          <form onSubmit={handleSendMessage} className={styles.form}>
             <TextField
-              onPaste={hundlePasteFile}
+              onPaste={handlePasteFile}
+              onDrop={handleDropFile}
               fullWidth
               autoComplete="off"
               value={text}
-              onChange={hundleChangeText}
+              onChange={handleChangeText}
               className={styles.input}
             />
           </form>
         </ErrorBoundary>
       </div>
+      <ImagePreview />
     </aside>
   )
 }

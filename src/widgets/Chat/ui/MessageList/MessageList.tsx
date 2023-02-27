@@ -23,7 +23,7 @@ export const MessageList = (props: MessageListProps) => {
           className={classNames([styles.message, styles.messageGroup])}
           key={index}
         >
-          <Message message={message.data} className={styles.messageText} />
+          <Message message={message} className={styles.messageText} />
         </li>
       )
     }
@@ -33,7 +33,7 @@ export const MessageList = (props: MessageListProps) => {
         <Typography component="h6" className={styles.messageUser}>
           {message.user.username || message.user.id}
         </Typography>
-        <Message message={message.data} className={styles.messageText} />
+        <Message message={message} className={styles.messageText} />
       </li>
     )
   }

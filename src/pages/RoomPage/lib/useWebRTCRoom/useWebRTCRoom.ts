@@ -80,20 +80,20 @@ export const useWebRTCRoom = () => {
     }
   }, [])
 
-  const hundleSendMessage = (msg: string) => {
+  const handleSendMessage = (msg: string) => {
     Object.values(users).forEach((user) => {
       user.sendMessage(msg)
     })
   }
 
-  const hundleSendBlob = (blob: Blob) => {
+  const handleSendBlob = (blob: Blob) => {
     Object.values(users).forEach((user) => {
       user.sendBlob(blob)
     })
   }
 
   return {
-    hundleSendMessage,
-    hundleSendBlob,
+    handleSendMessage,
+    handleSendBlob,
   }
 }

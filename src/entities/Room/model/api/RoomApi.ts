@@ -18,15 +18,15 @@ const RoomApi = rtkApi.injectEndpoints({
         arg,
         { cacheDataLoaded, cacheEntryRemoved, updateCachedData }
       ) {
-        const hundleUpdateRooms = (rooms: RoomModel[]) =>
+        const handleUpdateRooms = (rooms: RoomModel[]) =>
           updateCachedData(() => rooms)
         try {
           await cacheDataLoaded
-          socketClient.on(SocketActions.SHARE_ROOMS, hundleUpdateRooms)
+          socketClient.on(SocketActions.SHARE_ROOMS, handleUpdateRooms)
         } catch (error) {}
 
         await cacheEntryRemoved
-        socketClient.off(SocketActions.SHARE_ROOMS, hundleUpdateRooms)
+        socketClient.off(SocketActions.SHARE_ROOMS, handleUpdateRooms)
       },
     }),
   }),

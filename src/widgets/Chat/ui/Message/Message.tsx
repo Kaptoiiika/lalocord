@@ -1,9 +1,13 @@
 import { Link, Typography } from "@mui/material"
 import Linkify from "react-linkify"
+import { MessageModel } from "../../model/types/ChatSchem"
+import { MessageFile } from "./MessageFile"
 import styles from "./Message.module.scss"
+import { useImagePreviewStore } from "@/features/ImagePreview/model/store/ImagePreviewStore"
+import { getActionSeletFileToImagePreview } from "@/features/ImagePreview"
 
 type MessageProps = {
-  message: string
+  message: MessageModel
   className?: string
 }
 
@@ -13,38 +17,43 @@ function checkURLisImageLink(url: string) {
   )
 }
 
-type TypeObject = {
-  price: string
-}
-type ActionType = "rating" | "price" | "energy"
-
 export const Message = (props: MessageProps) => {
   const { message, className } = props
+  const selectImage = useImagePreviewStore(getActionSeletFileToImagePreview)
 
-  const fn = (field: ActionType) => {}
-  const myobject: TypeObject = {
-    price: "brat",
+  const handleClick = (e: React.MouseEvent<HTMLImageElement>) => {
+    selectImage(e.currentTarget.src)
   }
-  Object.entries(myobject).forEach(([key, value]) => {
-    fn(key as keyof typeof myobject)
-  })
 
   return (
     <Typography component="p" className={className}>
-      <Linkify
-        componentDecorator={(href, text, key) => {
-          if (checkURLisImageLink(href))
-            return <img alt="" src={href} className={styles.image} />
+      {typeof message.data === "string" && (
+        <Linkify
+          componentDecorator={(href, text, key) => {
+            if (checkURLisImageLink(href))
+              return (
+                <img
+                  onClick={handleClick}
+                  alt=""
+                  src={href}
+                  style={{ width: "100%", objectFit: "contain" }}
+                />
+              )
 
-          return (
-            <Link key={key} href={href} target="_blank" rel="noreferrer">
-              {text}
-            </Link>
-          )
-        }}
-      >
-        {message}
-      </Linkify>
+            return (
+              <Link key={key} href={href} target="_blank" rel="noreferrer">
+                {text}
+              </Link>
+            )
+          }}
+        >
+          {message.data}
+        </Linkify>
+      )}
+
+      {typeof message.data === "object" && (
+        <MessageFile message={message.data} />
+      )}
     </Typography>
   )
 }

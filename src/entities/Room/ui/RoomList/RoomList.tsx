@@ -21,11 +21,11 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
   const navigate = useNavigate()
   const [roomName, setRoomName] = useState("")
 
-  const hundleCreateRoom = () => {
+  const handleCreateRoom = () => {
     navigate(AppRoutes.ROOM_ID.replace(":id", roomName))
   }
 
-  const hundleChangeRoomName = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRoomName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRoomName(e.currentTarget.value)
   }
 
@@ -35,11 +35,11 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
         <TextField
           variant="outlined"
           value={roomName}
-          onChange={hundleChangeRoomName}
+          onChange={handleChangeRoomName}
         />
         <Button
           disabled={!roomName}
-          onClick={hundleCreateRoom}
+          onClick={handleCreateRoom}
           variant="contained"
         >
           CreateRoom

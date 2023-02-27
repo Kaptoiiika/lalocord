@@ -13,7 +13,7 @@ export const ShareWebCamMenu = () => {
   const webCamStream = useRoomRTCStore(getWebCamStream)
   const streamSettings = useRoomRTCStore(getStreamSettings)
 
-  const hundleStartWebCamStream = async () => {
+  const handleStartWebCamStream = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia(streamSettings)
       webCamStream?.getTracks().forEach((tracks) => {
@@ -31,7 +31,7 @@ export const ShareWebCamMenu = () => {
     }
   }
 
-  const hundleStopStream = () => {
+  const handleStopStream = () => {
     webCamStream?.getTracks().forEach((track) => {
       track.stop()
     })
@@ -42,13 +42,13 @@ export const ShareWebCamMenu = () => {
     <>
       {!!webCamStream ? (
         <Tooltip title="Turn on camera" arrow>
-          <IconButton onClick={hundleStopStream}>
+          <IconButton onClick={handleStopStream}>
             <VideocamOffIcon />
           </IconButton>
         </Tooltip>
       ) : (
         <Tooltip title="Turn off camera" arrow>
-          <IconButton onClick={hundleStartWebCamStream}>
+          <IconButton onClick={handleStartWebCamStream}>
             <VideocamIcon />
           </IconButton>
         </Tooltip>

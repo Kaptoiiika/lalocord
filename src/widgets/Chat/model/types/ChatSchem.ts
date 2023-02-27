@@ -2,12 +2,15 @@ import { UserModel } from "@/entities/User"
 
 export interface ChatSchema {
   messages: MessageModel[]
-  audio: HTMLAudioElement
 
   addMessage: (message: MessageModel, playSound?: boolean) => void
 }
 
 export interface MessageModel {
   user: UserModel
-  data: string
+  data: MessageData
 }
+
+export type MessageData = string | FileMessage
+export type FileMessage = { type: FileMessageType; src: string }
+export type FileMessageType = "image" | string

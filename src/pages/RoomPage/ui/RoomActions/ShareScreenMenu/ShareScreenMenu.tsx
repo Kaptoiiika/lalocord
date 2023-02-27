@@ -49,7 +49,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
     setAnchorEl(null)
   }
 
-  const hundleStopDisplayMediaStream = () => {
+  const handleStopDisplayMediaStream = () => {
     handleClose()
     mediaStream?.getTracks().forEach((track) => {
       track.stop()
@@ -57,7 +57,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
     setDisplayMediaStream(null)
   }
 
-  const hundleStartDisplayMediaStream = async () => {
+  const handleStartDisplayMediaStream = async () => {
     handleClose()
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia(
@@ -78,7 +78,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
     }
   }
 
-  const hundlePriotryChange = (
+  const handlePriotryChange = (
     event: React.SyntheticEvent | Event,
     newValue: number | Array<number>
   ) => {
@@ -87,7 +87,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
     settings.priority = PriorityNumberToText(newValue)
     setEncodingSettings(settings)
   }
-  const hundleBitrateChange = (
+  const handleBitrateChange = (
     event: React.SyntheticEvent | Event,
     newValue: number | Array<number>
   ) => {
@@ -117,7 +117,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
           horizontal: "center",
         }}
       >
-        <MenuItem onClick={hundleStartDisplayMediaStream}>
+        <MenuItem onClick={handleStartDisplayMediaStream}>
           <ListItemIcon>
             <ScreenShareIcon fontSize="small" />
           </ListItemIcon>
@@ -126,7 +126,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
           </ListItemText>
         </MenuItem>
         {!!mediaStream && (
-          <MenuItem onClick={hundleStopDisplayMediaStream}>
+          <MenuItem onClick={handleStopDisplayMediaStream}>
             <ListItemIcon>
               <StopScreenShareIcon fontSize="small" />
             </ListItemIcon>
@@ -143,7 +143,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
           </Typography>
           <Slider
             defaultValue={bitrateToShortValue(encodingSettings.maxBitrate || 0)}
-            onChangeCommitted={hundleBitrateChange}
+            onChangeCommitted={handleBitrateChange}
             aria-label="bitrate"
             valueLabelDisplay="auto"
             getAriaValueText={bitrateValueText}
@@ -159,7 +159,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
           </Typography>
           <Slider
             value={PriorityTextToNumber(encodingSettings.priority)}
-            onChange={hundlePriotryChange}
+            onChange={handlePriotryChange}
             aria-label="Priority"
             getAriaValueText={PriorityNumberToText}
             step={1}

@@ -7,7 +7,7 @@ import { RoomUsers } from "../RoomUsers/RoomUsers"
 import styles from "./RoomLobby.module.scss"
 
 export const RoomLobby = () => {
-  const { hundleSendMessage, hundleSendBlob } = useWebRTCRoom()
+  const { handleSendMessage, handleSendBlob } = useWebRTCRoom()
 
   return (
     <Stack justifyContent="space-between" direction="row" height="100%">
@@ -17,7 +17,7 @@ export const RoomLobby = () => {
         <RoomActions />
       </div>
 
-      <Chat onSendMessage={hundleSendMessage} onSendFile={hundleSendBlob} />
+      <Chat onSendMessage={handleSendMessage} onSendFile={handleSendBlob} />
     </Stack>
   )
 }

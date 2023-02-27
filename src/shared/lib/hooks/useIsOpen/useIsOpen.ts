@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 /**
  *
  *
- * @param {number} [time] in ms to execute hundleClose() after hundleOpen()
- * @return open, hundleClose, hundleOpen
+ * @param {number} [time] in ms to execute handleClose() after handleOpen()
+ * @return open, handleClose, handleOpen
  */
 export const useIsOpen = (time?: number) => {
   const [open, setOpen] = useState(false)
@@ -14,12 +14,12 @@ export const useIsOpen = (time?: number) => {
     return () => clearTimeout(openRef.current)
   }, [])
 
-  const hundleClose = useCallback(() => {
+  const handleClose = useCallback(() => {
     setOpen(false)
     clearTimeout(openRef.current)
   }, [])
 
-  const hundleOpen = useCallback(() => {
+  const handleOpen = useCallback(() => {
     setOpen(true)
     clearTimeout(openRef.current)
     if (time) {
@@ -29,5 +29,5 @@ export const useIsOpen = (time?: number) => {
     }
   }, [time])
 
-  return { open, hundleClose, hundleOpen }
+  return { open, handleClose, handleOpen }
 }
