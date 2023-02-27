@@ -52,11 +52,10 @@ export const Chat = (props: ChatProps) => {
     if (!item) return
 
     const blob = item.getAsFile()
-    console.log(blob)
     if (blob) {
       onSendFile?.(blob)
       addMessage({
-        data: { type: "image", src: URL.createObjectURL(blob) },
+        data: { type: blob.type, src: URL.createObjectURL(blob) },
         user: localUser,
       })
     }
@@ -65,6 +64,7 @@ export const Chat = (props: ChatProps) => {
   const handlePasteFile = async (e: ClipboardEvent) => {
     handleSendFile(e.clipboardData)
   }
+  
   const handleDropFile = async (e: React.DragEvent) => {
     e.preventDefault()
     handleSendFile(e.dataTransfer)

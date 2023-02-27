@@ -1,6 +1,7 @@
 import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
 import { convertBlobToBase64 } from "@/shared/lib/utils/Blob/convertBlobToBase64/convertBlobToBase64"
+import { covertBase64ToBlob } from "@/shared/lib/utils/Blob/covertBase64ToBlob/covertBase64ToBlob"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 import { splitStringToChunks } from "@/shared/lib/utils/String/splitStringToChunks"
 import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
@@ -219,6 +220,29 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     })
   }
 
+  private async reciveBlobChunk(fileChunk: DataChunk) {
+    if (fileChunk.size === 1)
+      return this.onNewMessage({
+        type: fileChunk.type,
+        src: fileChunk.data,
+      })
+
+    if (fileChunk.current === fileChunk.size) {
+      this.fileBuffer[fileChunk.id].push(fileChunk)
+      const data = this.fileBuffer[fileChunk.id]
+        .map((chunk) => chunk.data)
+        .join("")
+      delete this.fileBuffer[fileChunk.id]
+      const blob = await covertBase64ToBlob(data)
+      const srcURL = URL.createObjectURL(blob)
+      return this.onNewMessage({ type: fileChunk.type, src: srcURL })
+    }
+
+    if (this.fileBuffer[fileChunk.id])
+      this.fileBuffer[fileChunk.id].push(fileChunk)
+    else this.fileBuffer[fileChunk.id] = [fileChunk]
+  }
+
   async sendStream(stream: MediaStream, type: MediaStreamTypes) {
     if (!this.peer) return
     this.log("send stream")
@@ -372,24 +396,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "file":
           const fileChunk: DataChunk = data
-          if (fileChunk.size === 1)
-            return this.onNewMessage({
-              type: fileChunk.type,
-              src: fileChunk.data,
-            })
-
-          if (fileChunk.current >= fileChunk.size) {
-            const data = this.fileBuffer[fileChunk.id]
-              .map((chunk) => chunk.data)
-              .join("")
-            delete this.fileBuffer[fileChunk.id]
-            return this.onNewMessage({ type: fileChunk.type, src: data })
-          }
-
-          if (this.fileBuffer[fileChunk.id])
-            this.fileBuffer[fileChunk.id].push(fileChunk)
-          else this.fileBuffer[fileChunk.id] = [fileChunk]
-
+          this.reciveBlobChunk(fileChunk)
           break
         case "text":
           if (typeof data === "string") this.onNewMessage(data)
