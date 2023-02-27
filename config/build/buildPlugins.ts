@@ -16,17 +16,17 @@ export function buildPlugins(
     new HTMLWebpackPlugin({
       template: paths.html,
     }),
-    new webpack.ProgressPlugin(),
     new MiniCssExtractPlugin({
       filename: "css/[name].[contenthash:6].css",
       chunkFilename: "css/[name].[contenthash:6].css",
     }),
     buildDefinePlugins(options),
-    new ReactRefreshWebpackPlugin(),
     new CircularDependencyPlugin({
       exclude: /node_modules/,
       failOnError: true,
     }),
+    new webpack.ProgressPlugin(),
+    // new ReactRefreshWebpackPlugin(),
     new ForkTsCheckerWebpackPlugin({
       typescript: {
         diagnosticOptions: {

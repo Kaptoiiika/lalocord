@@ -1,15 +1,10 @@
 import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
-import { convertBlobToBase64 } from "@/shared/lib/utils/Blob/convertBlobToBase64/convertBlobToBase64"
-import { covertBase64ToBlob } from "@/shared/lib/utils/Blob/covertBase64ToBlob/covertBase64ToBlob"
-import Emitter from "@/shared/lib/utils/Emitter/Emitter"
-import { splitStringToChunks } from "@/shared/lib/utils/String/splitStringToChunks"
-import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
-import { MessageData, MessageModel } from "@/widgets/Chat/model/types/ChatSchem"
 //@ts-ignore // no types
 import freeice from "freeice"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
+import { RTCClientDataChanel } from "./RTCClientDataChanel"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
@@ -34,16 +29,14 @@ export type DataChunk = {
 }
 export type RTCClientEvents = "updateStreams"
 
-export class RTCClient extends Emitter<RTCClientEvents> {
+export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
   id: string
   user: UserModel
   peer: RTCPeerConnection | null
-  channel: RTCDataChannel
   video: Record<MediaStreamTypes, MediaStream | null> = {
     media: null,
     webCam: null,
   }
-  messages: string[] = []
   stream: Record<MediaStreamTypes, MediaStream | null> = {
     media: null,
     webCam: null,
@@ -51,36 +44,25 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   private unknownVideo: MediaStream | null = null
   private unknownVideoType: MediaStreamTypes | null = null
-  private channelIsOpen = false
   private offerCreater: boolean
   private senders: Record<MediaStreamTypes, RTCRtpSender[] | null> = {
     media: null,
     webCam: null,
   }
   private encodingSettings: RTCRtpEncodingParameters = {}
-  private fileBuffer: Record<string, DataChunk[]> = {}
 
   constructor(user: UserModel, sendOffer?: boolean) {
-    super()
-    this.id = user.id
-    this.user = user
     if (!RTCPeerConnection)
       throw new Error("Your browser does not support WEBRTC")
-    this.peer = new RTCPeerConnection({
+    const newPeer = new RTCPeerConnection({
       iceServers: freeice(),
     })
-    this.log("client:", user, this)
+    super(newPeer, user)
+    this.peer = newPeer
 
-    this.channel = this.peer.createDataChannel("text")
-    this.channel.onopen = () => {
-      this.channelIsOpen = true
-      this.messages.forEach((data) => {
-        this.sendMessageToChanel(data)
-      })
-    }
-    this.channel.onclose = () => {
-      this.channelIsOpen = false
-    }
+    this.id = user.id
+    this.user = user
+    this.log("client:", user, this)
 
     this.peer.ontrack = this.reciveTrack.bind(this)
 
@@ -94,6 +76,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
         socketClient.emit("new_ice", resp)
       }
     }
+
     this.offerCreater = !!sendOffer
     this.peer.onnegotiationneeded = () => {
       if (!this.offerCreater) this.createOffer()
@@ -191,56 +174,14 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.video.webCam?.getTracks().forEach((track) => track.stop())
     this.channel.close()
     this.peer.close()
+    this.messagesBuffer = []
+    this.fileBuffer = {}
     this.video = {
       media: null,
       webCam: null,
     }
     this.peer = null
     this.log("peer closed")
-  }
-
-  sendMessage(msg: string) {
-    this.sendData("text", msg)
-  }
-
-  async sendBlob(blob: Blob) {
-    const data = await convertBlobToBase64(blob)
-    const stringChunks = splitStringToChunks(data, 1024 * 32)
-    const id = Math.random().toString(16).slice(2)
-
-    stringChunks?.forEach((chunk, index) => {
-      const dataChunk: DataChunk = {
-        id: id,
-        data: chunk,
-        type: blob.type,
-        size: stringChunks.length,
-        current: index + 1,
-      }
-      this.sendData("file", dataChunk)
-    })
-  }
-
-  private async reciveBlobChunk(fileChunk: DataChunk) {
-    if (fileChunk.size === 1)
-      return this.onNewMessage({
-        type: fileChunk.type,
-        src: fileChunk.data,
-      })
-
-    if (fileChunk.current === fileChunk.size) {
-      this.fileBuffer[fileChunk.id].push(fileChunk)
-      const data = this.fileBuffer[fileChunk.id]
-        .map((chunk) => chunk.data)
-        .join("")
-      delete this.fileBuffer[fileChunk.id]
-      const blob = await covertBase64ToBlob(data)
-      const srcURL = URL.createObjectURL(blob)
-      return this.onNewMessage({ type: fileChunk.type, src: srcURL })
-    }
-
-    if (this.fileBuffer[fileChunk.id])
-      this.fileBuffer[fileChunk.id].push(fileChunk)
-    else this.fileBuffer[fileChunk.id] = [fileChunk]
   }
 
   async sendStream(stream: MediaStream, type: MediaStreamTypes) {
@@ -323,20 +264,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.emit("updateStreams")
   }
 
-  private sendData(type: MessageType, msg?: unknown) {
-    const json = JSON.stringify({ type: type, data: msg })
-    this.log("sendData", { type: type, data: msg })
-    this.sendMessageToChanel(json)
-  }
-
-  private sendMessageToChanel(data: any) {
-    if (!this.channelIsOpen) {
-      this.messages.push(data)
-      return
-    }
-    this.channel.send(data)
-  }
-
   private updateBitrate() {
     if (!this.peer) return
 
@@ -357,11 +284,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       params.encodings = encoders
       sender.setParameters(params)
     })
-  }
-
-  private onNewMessage(msg: MessageData) {
-    const message: MessageModel = { data: msg, user: this.user }
-    useChatStore.getState().addMessage(message, true)
   }
 
   private initDataChanel(e: MessageEvent) {
