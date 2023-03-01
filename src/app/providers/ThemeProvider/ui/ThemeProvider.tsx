@@ -1,31 +1,8 @@
-import { PropsWithChildren, useMemo, useState } from "react"
-import {
-  LOCAL_STORAGE_THEME_KEY,
-  Theme,
-  ThemeContext,
-} from "../lib/ThemeContext"
+import { createTheme, ThemeProvider as ThemeProviderMUI } from "@mui/material"
+import { PropsWithChildren } from "react"
 
-const getDefaultTheme = (): Theme => {
-  const defaultTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY)
-  if (Object.values(Theme).includes(defaultTheme as Theme)) {
-    return defaultTheme as Theme
-  }
-  return Theme.DARK
-}
+const Theme = createTheme({})
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-  const [theme, setTheme] = useState<Theme>(getDefaultTheme())
-  const defaultProps = useMemo(
-    () => ({
-      theme: theme,
-      setTheme: setTheme,
-    }),
-    [theme]
-  )
-
-  return (
-    <ThemeContext.Provider value={defaultProps}>
-      {children}
-    </ThemeContext.Provider>
-  )
+  return <ThemeProviderMUI theme={Theme}>{children}</ThemeProviderMUI>
 }

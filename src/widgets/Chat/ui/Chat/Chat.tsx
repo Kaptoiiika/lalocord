@@ -1,18 +1,14 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
-import { Badge, Button, TextField } from "@mui/material"
-import { ClipboardEvent, useCallback, useEffect, useState } from "react"
-import ChatIcon from "@mui/icons-material/Chat"
+import { useCallback, useEffect, useState } from "react"
 import styles from "./Chat.module.scss"
 import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
 import { useChatStore } from "../../model/store/ChatStore"
-import {
-  getActionAddMessage,
-  getMessages,
-} from "../../model/selectors/ChatStoreSelectors"
-import { getLocalUser, useUserStore } from "@/entities/User"
+import { getMessages } from "../../model/selectors/ChatStoreSelectors"
 import { MessageList } from "../MessageList/MessageList"
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary"
 import { ImagePreview } from "@/features/ImagePreview"
+import { ChatInput } from "../ChatInput/ChatInput"
+import { ChatHeader } from "../ChatHeader/ChatHeader"
 
 const getChatCollapsedFromLocalStorage = (): boolean => {
   const json = localStorage.getItem(localstorageKeys.CHATCOLLAPSED)
@@ -32,58 +28,15 @@ type ChatProps = {
 export const Chat = (props: ChatProps) => {
   const { onSendMessage, onSendFile } = props
   const messages = useChatStore(getMessages)
-  const addMessage = useChatStore(getActionAddMessage)
-  const localUser = useUserStore(getLocalUser)
-  const [text, setText] = useState("")
   const [collapsed, setCollapsed] = useState(getChatCollapsedFromLocalStorage())
   const [readedMessage, setReadedMessage] = useState(0)
 
-  const handleChangeText = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setText(e.currentTarget.value)
-    },
-    []
-  )
-
-  const handleSendFile = async (data: DataTransfer) => {
-    const items = Array.from(data.items)
-
-    const item = items.find((item) => !!item.getAsFile())
-    if (!item) return
-
-    const blob = item.getAsFile()
-    if (blob) {
-      onSendFile?.(blob)
-      addMessage({
-        data: { type: blob.type, src: URL.createObjectURL(blob) },
-        user: localUser,
-      })
-    }
-  }
-
-  const handlePasteFile = async (e: ClipboardEvent) => {
-    handleSendFile(e.clipboardData)
-  }
-  
-  const handleDropFile = async (e: React.DragEvent) => {
-    e.preventDefault()
-    handleSendFile(e.dataTransfer)
-  }
-
-  const handleSendMessage = (e: React.FormEvent | React.MouseEvent) => {
-    e.preventDefault()
-    if (text === "") return
-    addMessage({ data: text, user: localUser })
-    onSendMessage?.(text)
-    setText("")
-  }
-
-  const handleCollapse = () => {
+  const handleCollapse = useCallback(() => {
     setCollapsed((prev) => {
       saveChatCollapsedToLocalStorage(!prev)
       return !prev
     })
-  }
+  }, [])
 
   useEffect(() => {
     if (!collapsed) {
@@ -97,35 +50,15 @@ export const Chat = (props: ChatProps) => {
         [styles.collapsed]: collapsed,
       })}
     >
-      <header className={styles.header}>
-        <Button
-          sx={{ borderRadius: 0 }}
-          className={styles.headerButton}
-          onClick={handleCollapse}
-          aria-label={collapsed ? "Open chat" : "Hide chat"}
-        >
-          <Badge
-            color="secondary"
-            badgeContent={messages.length - readedMessage}
-          >
-            <ChatIcon />
-          </Badge>
-        </Button>
-      </header>
+      <ChatHeader
+        collapsed={collapsed}
+        handleCollapse={handleCollapse}
+        unreadedMessage={messages.length - readedMessage}
+      />
       <div className={styles.chat}>
         <ErrorBoundary errorText="Chat is broken(">
           <MessageList />
-          <form onSubmit={handleSendMessage} className={styles.form}>
-            <TextField
-              onPaste={handlePasteFile}
-              onDrop={handleDropFile}
-              fullWidth
-              autoComplete="off"
-              value={text}
-              onChange={handleChangeText}
-              className={styles.input}
-            />
-          </form>
+          <ChatInput onSendMessage={onSendMessage} onSendFile={onSendFile} />
         </ErrorBoundary>
       </div>
       <ImagePreview />

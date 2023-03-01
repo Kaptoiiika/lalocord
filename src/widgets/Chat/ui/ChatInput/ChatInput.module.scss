@@ -1,0 +1,25 @@
+.inputWrapper {
+  position: relative;
+  width: 100%;
+}
+.input {
+  position: absolute;
+  background-color: white;
+  width: 100%;
+  bottom: 0;
+}
+
+.form {
+  position: relative;
+}
+
+.selectInputFile {
+  display: flex;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+.buttons {
+  margin-bottom: 8px;
+}

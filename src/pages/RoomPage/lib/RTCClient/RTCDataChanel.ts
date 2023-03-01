@@ -1,25 +1,10 @@
 import { UserModel } from "@/entities/User"
 import { convertBlobToBase64 } from "@/shared/lib/utils/Blob/convertBlobToBase64/convertBlobToBase64"
 import { covertBase64ToBlob } from "@/shared/lib/utils/Blob/covertBase64ToBlob/covertBase64ToBlob"
-import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 import { splitStringToChunks } from "@/shared/lib/utils/String/splitStringToChunks"
 import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
 import { MessageData, MessageModel } from "@/widgets/Chat/model/types/ChatSchem"
 //@ts-ignore // no types
-
-export type Answer = { answer: RTCSessionDescription }
-export type Offer = { offer: RTCSessionDescription }
-export type Ice = { ice: RTCIceCandidateInit }
-export type ClientId = { id: string }
-export type MessageType =
-  | "offer"
-  | "ice"
-  | "answer"
-  | "request_new_offer"
-  | "sendNewStream"
-  | "stopStream"
-  | "text"
-  | "file"
 
 export type DataChunk = {
   id: string
@@ -29,16 +14,17 @@ export type DataChunk = {
   current: number
 }
 
-export class RTCClientDataChanel<T extends string = string> extends Emitter<T> {
+export type BaseMessageKeys = "file" | "text"
+
+export class RTCDataChanel<MessageKeys extends string = string> {
   peer: RTCPeerConnection | null
   channel: RTCDataChannel
   user: UserModel
   channelIsOpen = false
-  messagesBuffer: string[] = []
-  fileBuffer: Record<string, DataChunk[]> = {}
+  private messagesBuffer: string[] = []
+  private fileBuffer: Record<string, DataChunk[]> = {}
 
   constructor(peer: RTCPeerConnection, user: UserModel) {
-    super()
     this.peer = peer
     this.user = user
 
@@ -52,10 +38,6 @@ export class RTCClientDataChanel<T extends string = string> extends Emitter<T> {
     this.channel.onclose = () => {
       this.channelIsOpen = false
     }
-  }
-
-  sendMessage(msg: string) {
-    this.sendData("text", msg)
   }
 
   async sendBlob(blob: Blob) {
@@ -88,6 +70,10 @@ export class RTCClientDataChanel<T extends string = string> extends Emitter<T> {
     })
   }
 
+  sendMessage(msg: string) {
+    this.sendData("text", msg)
+  }
+
   async reciveBlobChunk(fileChunk: DataChunk) {
     if (fileChunk.size === 1)
       return this.onNewMessage({
@@ -112,7 +98,7 @@ export class RTCClientDataChanel<T extends string = string> extends Emitter<T> {
     }
   }
 
-  sendData(type: MessageType, msg?: unknown) {
+  sendData(type: MessageKeys|BaseMessageKeys, msg?: unknown) {
     const json = JSON.stringify({ type: type, data: msg })
     this.sendMessageToChanel(json)
   }
@@ -129,5 +115,11 @@ export class RTCClientDataChanel<T extends string = string> extends Emitter<T> {
   onNewMessage(msg: MessageData) {
     const message: MessageModel = { data: msg, user: this.user }
     useChatStore.getState().addMessage(message, true)
+  }
+
+  close() {
+    this.channel.close()
+    this.messagesBuffer = []
+    this.fileBuffer = {}
   }
 }

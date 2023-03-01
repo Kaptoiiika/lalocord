@@ -1,16 +1,18 @@
 import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
+import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 //@ts-ignore // no types
 import freeice from "freeice"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
-import { RTCClientDataChanel } from "./RTCClientDataChanel"
+import { RTCDataChanel } from "./RTCDataChanel"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
 export type Ice = { ice: RTCIceCandidateInit }
 export type ClientId = { id: string }
-export type MessageType =
+
+type MessageType =
   | "offer"
   | "ice"
   | "answer"
@@ -20,19 +22,13 @@ export type MessageType =
   | "text"
   | "file"
 
-export type DataChunk = {
-  id: string
-  data: string
-  type: string
-  size: number
-  current: number
-}
 export type RTCClientEvents = "updateStreams"
 
-export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
+export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
   user: UserModel
   peer: RTCPeerConnection | null
+  channel: RTCDataChanel<MessageType>
   video: Record<MediaStreamTypes, MediaStream | null> = {
     media: null,
     webCam: null,
@@ -52,16 +48,16 @@ export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
   private encodingSettings: RTCRtpEncodingParameters = {}
 
   constructor(user: UserModel, sendOffer?: boolean) {
+    super()
     if (!RTCPeerConnection)
       throw new Error("Your browser does not support WEBRTC")
-    const newPeer = new RTCPeerConnection({
+
+    this.peer = new RTCPeerConnection({
       iceServers: freeice(),
     })
-    super(newPeer, user)
-    this.peer = newPeer
-
     this.id = user.id
     this.user = user
+    this.channel = new RTCDataChanel(this.peer, this.user)
     this.log("client:", user, this)
 
     this.peer.ontrack = this.reciveTrack.bind(this)
@@ -129,11 +125,11 @@ export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
   }
 
   private requestNewOffer() {
-    if (!this.channelIsOpen) return
+    if (!this.channel.channelIsOpen) return
     if (this.offerCreater) {
       this.createOffer()
     } else {
-      this.sendData("request_new_offer")
+      this.channel.sendData("request_new_offer")
     }
     this.offerCreater = !this.offerCreater
   }
@@ -145,7 +141,7 @@ export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
     await this.peer.setLocalDescription(answer)
     const resp = { id: this.id, answer: answer }
     this.log("createAnswer", answer)
-    if (this.channelIsOpen) this.sendData("answer", answer)
+    if (this.channel.channelIsOpen) this.channel.sendData("answer", answer)
     else socketClient.emit("new_answer", resp)
   }
 
@@ -155,7 +151,7 @@ export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
     await this.peer.setLocalDescription(offer)
     const data = { id: this.id, offer: offer }
     this.log("createdoffer", offer)
-    if (this.channelIsOpen) this.sendData("offer", offer)
+    if (this.channel.channelIsOpen) this.channel.sendData("offer", offer)
     else socketClient.emit("new_offer", data)
   }
 
@@ -174,8 +170,6 @@ export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
     this.video.webCam?.getTracks().forEach((track) => track.stop())
     this.channel.close()
     this.peer.close()
-    this.messagesBuffer = []
-    this.fileBuffer = {}
     this.video = {
       media: null,
       webCam: null,
@@ -208,7 +202,7 @@ export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
         return senderAudio
       }
 
-      this.sendData("sendNewStream", type)
+      this.channel.sendData("sendNewStream", type)
       return this.peer!.addTrack(track, stream) // this.peer checked from the top
     })
 
@@ -224,7 +218,7 @@ export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
       if (transceiver.currentDirection === "inactive") transceiver.stop()
     })
     this.senders[type] = null
-    this.sendData("stopStream", type)
+    this.channel.sendData("stopStream", type)
   }
 
   private reciveTrack(event: RTCTrackEvent) {
@@ -317,11 +311,11 @@ export class RTCClient extends RTCClientDataChanel<RTCClientEvents> {
           this.remoteClosedStream(data)
           break
         case "file":
-          const fileChunk: DataChunk = data
-          this.reciveBlobChunk(fileChunk)
+          this.channel.reciveBlobChunk(data)
           break
         case "text":
-          if (typeof data === "string") this.onNewMessage(data)
+          this.channel.onNewMessage(data)
+          break
         default:
           this.log(msg)
           break

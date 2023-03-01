@@ -1,4 +1,5 @@
 import { Link, Modal, Paper, Typography } from "@mui/material"
+import { memo } from "react"
 import {
   getActionUselectImagePreview,
   getCurrentImagePreview,
@@ -18,7 +19,9 @@ const style = {
   pb: 3,
 }
 
-export const ImagePreview = (props: ImagePreviewProps) => {
+export const ImagePreview = memo(function ImagePreview(
+  props: ImagePreviewProps
+) {
   const {} = props
   const image = useImagePreviewStore(getCurrentImagePreview)
   const unselectImage = useImagePreviewStore(getActionUselectImagePreview)
@@ -43,4 +46,4 @@ export const ImagePreview = (props: ImagePreviewProps) => {
       </Paper>
     </Modal>
   )
-}
+})

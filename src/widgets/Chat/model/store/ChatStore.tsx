@@ -17,6 +17,8 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
 
   addMessage(message, playSound) {
     if (playSound) playAudio()
+
+
     set((state) => ({ ...state, messages: [...state.messages, message] }))
   },
 })

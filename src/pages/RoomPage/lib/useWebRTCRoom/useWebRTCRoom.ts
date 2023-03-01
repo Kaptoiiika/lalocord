@@ -82,13 +82,13 @@ export const useWebRTCRoom = () => {
 
   const handleSendMessage = (msg: string) => {
     Object.values(users).forEach((user) => {
-      user.sendMessage(msg)
+      user.channel.sendMessage(msg)
     })
   }
 
   const handleSendBlob = (blob: Blob) => {
     Object.values(users).forEach((user) => {
-      user.sendBlob(blob)
+      user.channel.sendBlob(blob)
     })
   }
 

@@ -26,7 +26,7 @@ export const Message = (props: MessageProps) => {
   }
 
   return (
-    <Typography component="p" className={className}>
+    <Typography component="pre" className={className}>
       {typeof message.data === "string" && (
         <Linkify
           componentDecorator={(href, text, key) => {
