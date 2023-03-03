@@ -1,5 +1,5 @@
 import { getLocalUser, UserModel, useUserStore } from "@/entities/User"
-import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
+import { StreamVideoPlayer } from "@/widgets/StreamVideoPlayer"
 import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
 import { memo, useEffect, useState } from "react"
 import {
@@ -51,7 +51,10 @@ export const RoomStreams = memo(function RoomStreams() {
     <StreamViewer className={styles.RoomStreams}>
       {streams.map((userStream) => (
         <div key={userStream.stream.id} className={styles.stream}>
-          <VideoPlayer stream={userStream.stream} />
+          <StreamVideoPlayer
+            stream={userStream.stream}
+            user={userStream.user}
+          />
         </div>
       ))}
     </StreamViewer>

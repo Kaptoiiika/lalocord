@@ -1,0 +1,9 @@
+.actions {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr minmax(300px, 1fr) 1fr;
+}
+
+.volume {
+  width: 100%;
+}

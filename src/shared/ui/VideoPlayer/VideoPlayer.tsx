@@ -1,36 +1,28 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
-import { IconButton, Slider } from "@mui/material"
 import {
   memo,
   MouseEvent,
+  PropsWithChildren,
   useCallback,
   useEffect,
   useRef,
   useState,
   VideoHTMLAttributes,
 } from "react"
-import VolumeDown from "@mui/icons-material/VolumeDown"
-import VolumeUp from "@mui/icons-material/VolumeUp"
 import styles from "./VideoPlayer.module.scss"
-import { Stack } from "@mui/system"
 import { getNumberBeetwenTwoValues } from "@/shared/lib/utils/Numbers/getNumberBeetwenTwoValues"
-import PlayArrowIcon from "@mui/icons-material/PlayArrow"
-import PauseIcon from "@mui/icons-material/Pause"
-import FullscreenIcon from "@mui/icons-material/Fullscreen"
-import FullscreenExitIcon from "@mui/icons-material/FullscreenExit"
 import { VideoPlayerDebugInfo } from "./VideoPlayerDebugInfo/VideoPlayerDebugInfo"
 import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
+import { VideoPlayerActions } from "./VideoPlayerActions/VideoPlayerActions"
+import { VideoPlayerTooltip } from "./VideoPlayerTooltip/VideoPlayerTooltip"
 
 type VideoPlayerProps = {
-  stream: MediaStream | null
+  stream?: MediaStream | null
   onPlay?: () => void
   onPause?: () => void
   initVolume?: number
-} & VideoHTMLAttributes<HTMLVideoElement>
-
-const hasAudioOnStream = (stream: MediaStream | null) => {
-  return !!stream?.getAudioTracks().length
-}
+} & VideoHTMLAttributes<HTMLVideoElement> &
+  PropsWithChildren
 
 let debugValue = !!localStorage.getItem("debug")
 
@@ -41,6 +33,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     className,
     onPlay,
     onPause,
+    children,
     ...other
   } = props
   const [played, setPlayed] = useState(false)
@@ -70,6 +63,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     videoRef.current?.pause()
     onPause?.()
   }, [onPause])
+  
   const handlePlay = useCallback(() => {
     try {
       videoRef.current?.play()
@@ -161,64 +155,20 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       onMouseLeave={handleClose}
     >
       {debug && <VideoPlayerDebugInfo stream={stream} />}
-      <div
-        className={classNames("", { [styles.tooltipShadow]: !toolsIsClosed })}
-      >
-        <div className={styles.tooltipShadowBottom} />
-      </div>
-      <div
-        className={classNames(styles.tooltip, {
-          [styles.closed]: toolsIsClosed,
-        })}
-      >
-        <Stack direction="row" justifyContent="flex-start">
-          <IconButton
-            aria-label={played ? "pause video" : "play video"}
-            onClick={handlePlayPause}
-          >
-            {played ? (
-              <PauseIcon color="primary" />
-            ) : (
-              <PlayArrowIcon color="primary" />
-            )}
-          </IconButton>
-        </Stack>
-        <Stack
-          className={styles.tooltipVolume}
-          spacing={2}
-          direction="row"
-          alignItems="center"
-        >
-          <VolumeDown color={"primary"} />
-          <Slider
-            disabled={!hasAudioOnStream(stream)}
-            aria-label="Volume"
-            value={hasAudioOnStream(stream) ? volume : 0}
-            onChange={handleChangeVolume}
-            step={0.01}
-            min={0}
-            max={1}
-          />
-          <VolumeUp color="primary" />
-        </Stack>
-        <Stack direction="row" justifyContent="flex-end" gap={2}>
-          {fullscreen ? (
-            <IconButton
-              aria-label="Exit fullscreen"
-              onClick={handleExitFullscreen}
-            >
-              <FullscreenExitIcon color="primary" />
-            </IconButton>
-          ) : (
-            <IconButton
-              aria-label="enter video to fullscreen"
-              onClick={handleFullscreen}
-            >
-              <FullscreenIcon color="primary" />
-            </IconButton>
-          )}
-        </Stack>
-      </div>
+      <VideoPlayerTooltip open={!toolsIsClosed} top>
+        {children}
+      </VideoPlayerTooltip>
+      <VideoPlayerActions
+        fullscreen={fullscreen}
+        played={played}
+        stream={stream}
+        volume={volume}
+        open={!toolsIsClosed}
+        handleChangeVolume={handleChangeVolume}
+        handleExitFullscreen={handleExitFullscreen}
+        handleFullscreen={handleFullscreen}
+        handlePlayPause={handlePlayPause}
+      />
       <video
         {...other}
         onDoubleClick={handleFullscreenToggle}

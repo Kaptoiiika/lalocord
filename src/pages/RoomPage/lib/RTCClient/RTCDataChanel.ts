@@ -98,7 +98,7 @@ export class RTCDataChanel<MessageKeys extends string = string> {
     }
   }
 
-  sendData(type: MessageKeys|BaseMessageKeys, msg?: unknown) {
+  sendData(type: MessageKeys | BaseMessageKeys, msg?: unknown) {
     const json = JSON.stringify({ type: type, data: msg })
     this.sendMessageToChanel(json)
   }
@@ -109,7 +109,12 @@ export class RTCDataChanel<MessageKeys extends string = string> {
       return
     }
 
-    this.channel.send(data)
+    try {
+      this.channel.send(data)
+    } catch (error) {
+      console.warn(error)
+      this.messagesBuffer.push(data)
+    }
   }
 
   onNewMessage(msg: MessageData) {
@@ -118,8 +123,8 @@ export class RTCDataChanel<MessageKeys extends string = string> {
   }
 
   close() {
-    this.channel.close()
     this.messagesBuffer = []
     this.fileBuffer = {}
+    this.channel.close()
   }
 }

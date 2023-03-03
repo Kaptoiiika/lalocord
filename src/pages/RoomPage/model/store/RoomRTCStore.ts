@@ -18,7 +18,7 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       width: { ideal: 1924 },
       // height: { ideal: 1080 }, 
       displaySurface: "monitor",
-      cursor: "off",
+      // cursor: "never",
     },
     surfaceSwitching: "include",
   },

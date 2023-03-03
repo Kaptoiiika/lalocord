@@ -76,7 +76,6 @@ export const useWebRTCRoom = () => {
       socketClient.off("new_answer", saveAnswer)
       socketClient.off("new_offer", createAnswer)
       socketClient.off("new_ice", saveIce)
-      Object.values(usersRef.current).forEach((users) => users.close())
     }
   }, [])
 

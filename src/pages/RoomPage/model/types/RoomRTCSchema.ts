@@ -1,4 +1,3 @@
-import { UserModel } from "@/entities/User"
 import { RTCClient } from "../../lib/RTCClient/RTCClient"
 
 export interface RoomRTCSchema {
@@ -17,7 +16,5 @@ export interface RoomRTCSchema {
 }
 
 export type ConnectedUsers = Record<UserId, RTCClient>
-
 export type UserId = string
-export type Message = { user: UserModel; data: string }
 export type MediaStreamTypes = "webCam" | "media"

@@ -1,0 +1,36 @@
+.tooltip {
+  z-index: 1;
+  position: absolute;
+  transition: opacity 0.15s;
+  opacity: 1;
+  padding: 8px;
+  width: calc(100% - 16px);
+
+  &.tooltipTop {
+    top: 0;
+    .shadowTooltip {
+      top: 0;
+    }
+  }
+
+  &.tooltipBottom {
+    bottom: 0;
+    .shadowTooltip {
+      bottom: 0;
+    }
+  }
+}
+
+.shadowTooltip {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: -1;
+  .shadow {
+    box-shadow: 0em 0em 4em 4em rgba(0, 0, 0, 0.5);
+  }
+}
+
+.closed {
+  opacity: 0;
+}

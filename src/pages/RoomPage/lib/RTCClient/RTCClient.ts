@@ -22,7 +22,7 @@ type MessageType =
   | "text"
   | "file"
 
-export type RTCClientEvents = "updateStreams"
+type RTCClientEvents = "updateStreams"
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
@@ -166,10 +166,16 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   close() {
     if (!this.peer) return console.warn("Connection already close")
-    this.video.media?.getTracks().forEach((track) => track.stop())
-    this.video.webCam?.getTracks().forEach((track) => track.stop())
     this.channel.close()
+    const tracks = [
+      ...(this.video.media?.getTracks() || []),
+      ...(this.video.webCam?.getTracks() || []),
+    ]
+    tracks.forEach((track) => {
+      track.stop()
+    })
     this.peer.close()
+    this.senders = { media: null, webCam: null }
     this.video = {
       media: null,
       webCam: null,

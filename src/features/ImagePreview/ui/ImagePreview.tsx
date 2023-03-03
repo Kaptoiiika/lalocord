@@ -14,9 +14,8 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  pt: 2,
-  px: 4,
-  pb: 3,
+  p: 2,
+  pt: 1,
 }
 
 export const ImagePreview = memo(function ImagePreview(
@@ -42,7 +41,7 @@ export const ImagePreview = memo(function ImagePreview(
             </Link>
           )}
         </Typography>
-        {image && <img src={image} />}
+        {image && <img className={styles.image} src={image} />}
       </Paper>
     </Modal>
   )
