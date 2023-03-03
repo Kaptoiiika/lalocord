@@ -22,7 +22,7 @@ type MessageType =
   | "text"
   | "file"
 
-type RTCClientEvents = "updateStreams"
+type RTCClientEvents = "updateStreams" | "iceconnectionStatusChange"
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
@@ -77,6 +77,10 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.peer.onnegotiationneeded = () => {
       if (!this.offerCreater) this.createOffer()
       else this.requestNewOffer()
+    }
+
+    this.peer.oniceconnectionstatechange = (e) => {
+      this.emit("iceconnectionStatusChange")
     }
 
     useRoomRTCStore.getState().addConnectedUsers(this)

@@ -1,0 +1,35 @@
+.badgeStatus {
+  &::after {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    content: "";
+  }
+}
+
+.red {
+  &::after {
+    border: 2px white solid;
+    background-color: #f44336;
+    color: #f44336;
+  }
+}
+
+.yellow {
+  &::after {
+    border: 2px white solid;
+    background-color: #ffef62;
+    color: #ffef62;
+  }
+}
+
+.green {
+  &::after {
+    border: 2px white solid;
+    background-color: #44b700;
+    color: #44b700;
+  }
+}

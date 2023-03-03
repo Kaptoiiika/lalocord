@@ -1,19 +1,36 @@
 import { FileRespounce } from "@/shared/api/types/FilteTypes"
-import { Avatar, AvatarProps } from "@mui/material"
+import { Avatar, AvatarProps, Badge, Tooltip } from "@mui/material"
 import { forwardRef } from "react"
+import styles from "./UserAvatar.module.scss"
+import { classNames } from "@/shared/lib/classNames/classNames"
 
+export type UserAvatarStatus = "online" | "offline" | "idle"
 type UserAvatarProps = {
   src?: string
   avatar?: FileRespounce
+  status?: UserAvatarStatus
   alt: string
 } & AvatarProps
 
 export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
   function UserAvatar(props, ref) {
-    const { src, avatar, ...other } = props
+    const { src, avatar, status, alt, ...other } = props
 
     const imageSRC = avatar?.formats?.thumbnail?.url || avatar?.url || src
 
-    return <Avatar ref={ref} src={imageSRC} {...other} />
+    return (
+      <Tooltip title={alt}>
+        <Badge
+          className={classNames(styles.badgeStatus, {
+            [styles.red]: status === "offline",
+            [styles.yellow]: status === "idle",
+            [styles.green]: status === "online",
+          })}
+          overlap="circular"
+        >
+          <Avatar ref={ref} src={imageSRC} alt={alt} {...other} />
+        </Badge>
+      </Tooltip>
+    )
   }
 )
