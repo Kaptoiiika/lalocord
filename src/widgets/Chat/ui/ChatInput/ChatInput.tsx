@@ -54,8 +54,9 @@ export const ChatInput = (props: ChatInputProps) => {
 
   const handleSendMessage = () => {
     if (text === "") return
-    addMessage({ data: text, user: localUser })
-    onSendMessage?.(text)
+    const message = text.trim()
+    addMessage({ data: message, user: localUser })
+    onSendMessage?.(message)
     setText("")
   }
 
