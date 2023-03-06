@@ -24,7 +24,7 @@ export function buildBabelLoaders({ isDev }: BuildOptions) {
               props: ["data-testid"],
             },
           ],
-          // isDev && "react-refresh/babel",
+          isDev && "react-refresh/babel",
         ].filter(Boolean),
       },
     },

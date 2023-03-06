@@ -16,4 +16,7 @@
   max-width: 100%;
   max-height: 100%;
   gap: inherit;
+  > * {
+    width: 100%;
+  }
 }

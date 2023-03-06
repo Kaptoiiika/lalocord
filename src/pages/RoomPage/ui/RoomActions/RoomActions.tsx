@@ -9,21 +9,6 @@ export const RoomActions = (props: RoomActionsProps) => {
     <Stack direction="row" alignItems="center">
       <ShareWebCamMenu />
       <ShareScreenMenu />
-      <KNOPKA />
     </Stack>
-  )
-}
-
-const KNOPKA = (props: RoomActionsProps) => {
-  const {} = props
-  return (
-    <button
-      onClick={() => {
-        const elem = document.querySelector("body")
-        if (elem) elem.style.background = "#f00"
-      }}
-    >
-      PIZDA👁
-    </button>
   )
 }

@@ -1,13 +1,12 @@
-import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin"
 import CircularDependencyPlugin from "circular-dependency-plugin"
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin"
 import HTMLWebpackPlugin from "html-webpack-plugin"
 import MiniCssExtractPlugin from "mini-css-extract-plugin"
 import webpack from "webpack"
-import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer"
 import { buildDefinePlugins } from "./plugins/buildDefinePlugins"
 import { BuildOptions } from "./types/config"
 import { buildCopyPlugin } from "./plugins/buildCopyPlugin"
+import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin"
 
 export function buildPlugins(
   options: BuildOptions
@@ -22,7 +21,6 @@ export function buildPlugins(
       chunkFilename: "css/[name].[contenthash:6].css",
     }),
     buildDefinePlugins(options),
-    buildCopyPlugin(options.paths),
     new CircularDependencyPlugin({
       exclude: /node_modules/,
       failOnError: true,
@@ -39,12 +37,11 @@ export function buildPlugins(
     }),
   ]
 
-  // if (isDev) {
-  //   plugins.push(new BundleAnalyzerPlugin())
-  // }
-  // if (true) {
-  //   plugins.push(new BundleAnalyzerPlugin({}))
-  // }
+  if (isDev) {
+    plugins.push(new ReactRefreshPlugin())
+  } else {
+    plugins.push(buildCopyPlugin(options.paths))
+  }
 
   return plugins
 }

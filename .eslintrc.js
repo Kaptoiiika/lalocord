@@ -60,6 +60,7 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": "off", //['warn', { allowExplicitAny: true }],
     "react/display-name": "warn",
     "react/jsx-no-leaked-render": "off", //["warn", { validStrategies: ["coerce"] }], //work bad
+    "@typescript-eslint/no-empty-function": "off",
   },
   globals: {
     __IS_DEV__: true,

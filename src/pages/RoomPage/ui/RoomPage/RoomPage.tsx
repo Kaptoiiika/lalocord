@@ -6,7 +6,7 @@ import { RoomLobby } from "../RoomLobby/RoomLobby"
 import { useUserStore } from "@/entities/User"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 
-const joinToRoom = (id: string) => {
+const emitToJoinRoom = (id: string) => {
   const username = useUserStore.getState().localUser.username
   socketClient.emit("join", {
     name: id,
@@ -14,15 +14,25 @@ const joinToRoom = (id: string) => {
   })
 
   return () => {
-    useRoomRTCStore.getState().close()
+    useRoomRTCStore.getState().leaveRoom()
     socketClient.emit("leave", { name: id })
   }
 }
 
 export const RoomPage = () => {
   const { id = "" } = useParams()
+  const joinToRoom = useRoomRTCStore((state) => state.joinRoom)
+  const leaveRoom = useRoomRTCStore((state) => state.leaveRoom)
 
-  useEffect(() => joinToRoom(id), [id])
+  useEffect(() => {
+    joinToRoom(id)
+    const fn = emitToJoinRoom(id)
+
+    return () => {
+      leaveRoom()
+      fn()
+    }
+  }, [id, joinToRoom, leaveRoom])
 
   return (
     <PageWrapper>

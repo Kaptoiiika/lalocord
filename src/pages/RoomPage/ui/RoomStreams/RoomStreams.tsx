@@ -1,16 +1,17 @@
-import { getLocalUser, UserModel, useUserStore } from "@/entities/User"
-import { StreamVideoPlayer } from "@/widgets/StreamVideoPlayer"
+import { getLocalUser, useUserStore } from "@/entities/User"
 import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
-import { memo, useEffect, useState } from "react"
+import React, { memo, useEffect, useState } from "react"
+import { RTCClient } from "../../lib/RTCClient/RTCClient"
+import { RTCClientMediaStream } from "../../lib/RTCClient/RTCClientMediaStream"
 import {
   getDisplayMediaStream,
   getRoomUsers,
   getWebCamStream,
 } from "../../model/selectors/RoomRTCSelectors"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
+import { ClientStream } from "./ClientStream/ClientStream"
+import { LocalClientStream } from "./ClientStream/LocalClientStream"
 import styles from "./RoomStreams.module.scss"
-
-type UserStream = { user: UserModel; stream: MediaStream }
 
 export const RoomStreams = memo(function RoomStreams() {
   const users = useRoomRTCStore(getRoomUsers)
@@ -24,37 +25,46 @@ export const RoomStreams = memo(function RoomStreams() {
       const fn = () => {
         update((prev) => prev + 1)
       }
-      user.on("updateStreams", fn)
+      user.media.on("newstream", fn)
       return { user, fn }
     })
 
     return () => {
       listeners.forEach(({ user, fn }) => {
-        user.off("updateStreams", fn)
+        user.media.off("newstream", fn)
       })
     }
   }, [users])
 
-  const initialStreams: UserStream[] = []
-  if (mediaStream) initialStreams.push({ stream: mediaStream, user: localUser })
-  if (webCamStream)
-    initialStreams.push({ stream: webCamStream, user: localUser })
+  //🤡
+  const initialStreams: {
+    client: RTCClient
+    clientStream: RTCClientMediaStream
+  }[] = []
   const streams = Object.values(users).reduce((prev, curent) => {
-    if (curent.video.media)
-      prev.push({ user: curent.user, stream: curent.video.media })
-    if (curent.video.webCam)
-      prev.push({ user: curent.user, stream: curent.video.webCam })
+    curent.media.remoteStreams.forEach((stream) => {
+      prev.push({ client: curent, clientStream: stream })
+    })
     return prev
   }, initialStreams)
 
+  const localStreams = []
+  if (mediaStream)
+    localStreams.push({ stream: mediaStream, name: localUser.username })
+  if (webCamStream)
+    localStreams.push({ stream: webCamStream, name: localUser.username })
+
   return (
     <StreamViewer className={styles.RoomStreams}>
-      {streams.map((userStream) => (
-        <div key={userStream.stream.id} className={styles.stream}>
-          <StreamVideoPlayer
-            stream={userStream.stream}
-            user={userStream.user}
-          />
+      {localStreams.map((local) => (
+        <div key={local.stream.id} className={styles.stream}>
+          <LocalClientStream stream={local.stream} name={local.name} />
+        </div>
+      ))}
+
+      {streams.map((user) => (
+        <div key={user.clientStream.stream.id} className={styles.stream}>
+          <ClientStream client={user.client} clientStream={user.clientStream} />
         </div>
       ))}
     </StreamViewer>

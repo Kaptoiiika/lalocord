@@ -7,7 +7,6 @@ import {
   useEffect,
   useRef,
   useState,
-  VideoHTMLAttributes,
 } from "react"
 import styles from "./VideoPlayer.module.scss"
 import { getNumberBeetwenTwoValues } from "@/shared/lib/utils/Numbers/getNumberBeetwenTwoValues"
@@ -20,9 +19,11 @@ type VideoPlayerProps = {
   stream?: MediaStream | null
   onPlay?: () => void
   onPause?: () => void
+  onVolumeChange?: (value: number) => void
   initVolume?: number
-} & VideoHTMLAttributes<HTMLVideoElement> &
-  PropsWithChildren
+  className?: string
+  mute?: boolean
+} & PropsWithChildren
 
 let debugValue = !!localStorage.getItem("debug")
 
@@ -31,8 +32,10 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     stream = null,
     initVolume,
     className,
+    mute,
     onPlay,
     onPause,
+    onVolumeChange,
     children,
     ...other
   } = props
@@ -63,7 +66,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     videoRef.current?.pause()
     onPause?.()
   }, [onPause])
-  
+
   const handlePlay = useCallback(() => {
     try {
       videoRef.current?.play()
@@ -80,10 +83,12 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
 
   const handleChangeVolume = useCallback(
     (event: Event, newValue: number | number[]) => {
-      if (videoRef.current && !Array.isArray(newValue))
-        videoRef.current.volume = newValue
+      if (videoRef.current && !Array.isArray(newValue)) {
+        setVolume(newValue)
+        onVolumeChange?.(newValue)
+      }
     },
-    []
+    [onVolumeChange]
   )
 
   const handleFullscreen = useCallback(() => {
@@ -119,9 +124,6 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       }
       node.onpause = () => {
         setPlayed(false)
-      }
-      node.onvolumechange = (e) => {
-        setVolume(node.volume)
       }
     },
     [stream]
@@ -159,11 +161,12 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
         {children}
       </VideoPlayerTooltip>
       <VideoPlayerActions
+        stream={stream}
+        open={!toolsIsClosed}
         fullscreen={fullscreen}
         played={played}
-        stream={stream}
         volume={volume}
-        open={!toolsIsClosed}
+        mute={mute}
         handleChangeVolume={handleChangeVolume}
         handleExitFullscreen={handleExitFullscreen}
         handleFullscreen={handleFullscreen}

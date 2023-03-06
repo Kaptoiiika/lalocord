@@ -6,3 +6,10 @@
 .users {
   margin: 0 8px;
 }
+
+.roomName {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  border-left: var(--box-border);
+}

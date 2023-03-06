@@ -1,13 +1,15 @@
 import { RTCClient } from "../../lib/RTCClient/RTCClient"
 
 export interface RoomRTCSchema {
+  roomName: string | null
+  connectedUsers: ConnectedUsers
   webCamStream: MediaStream | null
   displayMediaStream: MediaStream | null
   streamSettings: MediaStreamConstraints
   encodingSettings: RTCRtpEncodingParameters
-  connectedUsers: ConnectedUsers
 
-  close: () => void
+  joinRoom: (room: string) => void
+  leaveRoom: () => void
   setEncodingSettings: (settings: RTCRtpEncodingParameters) => void
   deleteConnectedUser: (id: UserId) => void
   addConnectedUsers: (...users: RTCClient[]) => void

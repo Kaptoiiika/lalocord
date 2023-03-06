@@ -6,6 +6,7 @@ import {
 } from "./RoomRTCLocalStorage"
 
 const store: StateCreator<RoomRTCSchema> = (set, get) => ({
+  roomName: null,
   streamSettings: {
     audio: {
       noiseSuppression: false,
@@ -16,7 +17,7 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
     video: {
       frameRate: 60,
       width: { ideal: 1924 },
-      // height: { ideal: 1080 }, 
+      // height: { ideal: 1080 },
       displaySurface: "monitor",
       // cursor: "never",
     },
@@ -27,7 +28,11 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   webCamStream: null,
   connectedUsers: {},
 
-  close: () => {
+  joinRoom: (roomName) => {
+    
+    set((state) => ({ ...state, roomName: roomName }))
+  },
+  leaveRoom: () => {
     const { webCamStream, displayMediaStream, connectedUsers } = get()
     const tracks = [
       ...(displayMediaStream?.getTracks() || []),

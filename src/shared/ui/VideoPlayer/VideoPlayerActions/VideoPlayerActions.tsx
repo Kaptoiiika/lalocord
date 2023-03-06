@@ -9,15 +9,16 @@ import styles from "./VideoPlayerActions.module.scss"
 import { VideoPlayerTooltip } from "../VideoPlayerTooltip/VideoPlayerTooltip"
 
 type VideoPlayerActionsProps = {
-  played: boolean
-  fullscreen: boolean
   stream: MediaStream | null
-  volume: number
   open: boolean
-  handlePlayPause: () => void
-  handleExitFullscreen: () => void
-  handleFullscreen: () => void
-  handleChangeVolume: (event: Event, newValue: number | number[]) => void
+  volume?: number
+  fullscreen?: boolean
+  played?: boolean
+  mute?: boolean
+  handlePlayPause?: () => void
+  handleExitFullscreen?: () => void
+  handleFullscreen?: () => void
+  handleChangeVolume?: (event: Event, newValue: number | number[]) => void
 }
 
 const hasAudioOnStream = (stream: MediaStream | null) => {
@@ -33,6 +34,7 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
     volume,
     played,
     open,
+    mute,
     fullscreen,
     stream,
   } = props
@@ -58,7 +60,7 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
       >
         <VolumeDown color={"primary"} />
         <Slider
-          disabled={!hasAudioOnStream(stream)}
+          disabled={mute || !hasAudioOnStream(stream)}
           aria-label="Volume"
           value={hasAudioOnStream(stream) ? volume : 0}
           onChange={handleChangeVolume}

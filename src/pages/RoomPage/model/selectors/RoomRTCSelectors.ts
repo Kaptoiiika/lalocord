@@ -3,11 +3,11 @@ import { RoomRTCSchema } from "../types/RoomRTCSchema"
 export const getDisplayMediaStream = (state: RoomRTCSchema) =>
   state.displayMediaStream
 export const getWebCamStream = (state: RoomRTCSchema) => state.webCamStream
-export const getStreamSettings = (state: RoomRTCSchema) =>
-  state.streamSettings
+export const getStreamSettings = (state: RoomRTCSchema) => state.streamSettings
 export const getRoomUsers = (state: RoomRTCSchema) => state.connectedUsers
 export const getEncodingSettings = (state: RoomRTCSchema) =>
   state.encodingSettings
+export const getRoomName = (state: RoomRTCSchema) => state.roomName
 
 //actions
 export const getActionDeleteConnectedUsers = (state: RoomRTCSchema) =>
