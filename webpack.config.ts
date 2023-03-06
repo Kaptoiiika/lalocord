@@ -13,9 +13,10 @@ export default (env: BuildEnv) => {
     : dotenv.config({ path: "./.env" }).parsed
 
   const paths: BuildPaths = {
-    entry: path.resolve(__dirname, "src", "index.tsx"),
     build: path.resolve(fileEnv?.buildPath || __dirname, "dist"),
     html: path.resolve(__dirname, "public", "index.html"),
+    public: path.resolve(__dirname, "public"),
+    entry: path.resolve(__dirname, "src", "index.tsx"),
     src: path.resolve(__dirname, "src"),
   }
 

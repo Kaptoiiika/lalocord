@@ -7,6 +7,7 @@ import webpack from "webpack"
 import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer"
 import { buildDefinePlugins } from "./plugins/buildDefinePlugins"
 import { BuildOptions } from "./types/config"
+import { buildCopyPlugin } from "./plugins/buildCopyPlugin"
 
 export function buildPlugins(
   options: BuildOptions
@@ -21,12 +22,12 @@ export function buildPlugins(
       chunkFilename: "css/[name].[contenthash:6].css",
     }),
     buildDefinePlugins(options),
+    buildCopyPlugin(options.paths),
     new CircularDependencyPlugin({
       exclude: /node_modules/,
       failOnError: true,
     }),
     new webpack.ProgressPlugin(),
-    // new ReactRefreshWebpackPlugin(),
     new ForkTsCheckerWebpackPlugin({
       typescript: {
         diagnosticOptions: {
