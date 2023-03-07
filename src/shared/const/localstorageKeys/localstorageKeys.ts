@@ -3,4 +3,5 @@ export enum localstorageKeys {
   "ENCODINGSETTINGS" = "encoding",
   "CHATCOLLAPSED" = "chatcollapsed",
   "USERINFO" = "userinfo",
+  "THEME" = "theme",
 }

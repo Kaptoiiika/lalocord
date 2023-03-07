@@ -4,6 +4,7 @@ import { Stack } from "@mui/material"
 import { Link } from "react-router-dom"
 import HomeIcon from "@mui/icons-material/Home"
 import styles from "./Navbar.module.scss"
+import { ThemeSwitcher } from "@/features/ThemeSwitcher"
 
 const links = [
   {
@@ -19,6 +20,7 @@ export const Navbar = () => {
       <Stack
         className={styles.stack}
         justifyContent="space-between"
+        alignItems="center"
         spacing={4}
       >
         <Stack alignItems="center" spacing={1}>
@@ -27,19 +29,9 @@ export const Navbar = () => {
               <HomeIcon />
             </IconButton>
           </Link>
-
-          {/* {links.map((link) => (
-            <Link key={link.to} to={link.to}>
-              <IconButton aria-label={link.label}>{link.icon}</IconButton>
-            </Link>
-          ))} */}
         </Stack>
 
-        {/* <Link className={styles.headerLink} to={AppRoutes.AUTH}>
-          <IconButton aria-label="home">
-            <HomeIcon />
-          </IconButton>
-        </Link> */}
+        <ThemeSwitcher />
       </Stack>
     </nav>
   )

@@ -54,9 +54,9 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
       </Stack>
       <Stack
         className={styles.volume}
-        spacing={2}
         direction="row"
         alignItems="center"
+        gap={2}
       >
         <VolumeDown color={"primary"} />
         <Slider

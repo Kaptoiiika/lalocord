@@ -1,4 +1,5 @@
 .StreamViewer {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -11,7 +12,6 @@
   display: flex;
   justify-content: center;
   overflow: hidden;
-  height: 100%;
   width: 100%;
   max-width: 100%;
   max-height: 100%;
