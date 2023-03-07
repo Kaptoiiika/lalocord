@@ -3,8 +3,8 @@
     position: absolute;
     width: 8px;
     height: 8px;
-    right: 0;
-    bottom: 0;
+    right: 1px;
+    bottom: 1px;
     border-radius: 50%;
     content: "";
   }
@@ -12,7 +12,7 @@
 
 .red {
   &::after {
-    border: 2px white solid;
+    border: var(--box-border);
     background-color: #f44336;
     color: #f44336;
   }
@@ -20,7 +20,7 @@
 
 .yellow {
   &::after {
-    border: 2px white solid;
+    border: var(--box-border);
     background-color: #ffef62;
     color: #ffef62;
   }
@@ -28,7 +28,7 @@
 
 .green {
   &::after {
-    border: 2px white solid;
+    border: var(--box-border);
     background-color: #44b700;
     color: #44b700;
   }

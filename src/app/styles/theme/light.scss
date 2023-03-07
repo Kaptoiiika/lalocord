@@ -1,5 +1,6 @@
 .light {
-  --box-border: 1px solid rgba(0, 0, 0, 0.12);
+  --box-border-color: rgba(0, 0, 0, 0.12);
+  --box-border: 1px solid var(--box-border-color);
 
   --bg-app: #ffffff;
   --bg-navbar: 182, 182, 182;
