@@ -39,23 +39,6 @@ export const ShareWebCamMenu = () => {
     setWebCamStream(null)
   }, [setWebCamStream, webCamStream])
 
-  useCallback(() => {
-    const fn = (event: KeyboardEvent) => {
-      if (
-        event.key === "F3" &&
-        event.altKey &&
-        event.shiftKey &&
-        event.ctrlKey
-      ) {
-        handleStopStream()
-      }
-    }
-    document.addEventListener("keydown", fn)
-    return () => {
-      document.removeEventListener("keydown", fn)
-    }
-  }, [handleStopStream])
-
   return (
     <>
       {!!webCamStream ? (
