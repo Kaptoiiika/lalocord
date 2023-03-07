@@ -7,6 +7,7 @@ import { useRoomRTCStore } from "../../../model/store/RoomRTCStore"
 import { IconButton, Tooltip } from "@mui/material"
 import VideocamIcon from "@mui/icons-material/Videocam"
 import VideocamOffIcon from "@mui/icons-material/VideocamOff"
+import { useCallback } from "react"
 
 export const ShareWebCamMenu = () => {
   const setWebCamStream = useRoomRTCStore(getActionSetWebCamStream)
@@ -31,12 +32,29 @@ export const ShareWebCamMenu = () => {
     }
   }
 
-  const handleStopStream = () => {
+  const handleStopStream = useCallback(() => {
     webCamStream?.getTracks().forEach((track) => {
       track.stop()
     })
     setWebCamStream(null)
-  }
+  }, [setWebCamStream, webCamStream])
+
+  useCallback(() => {
+    const fn = (event: KeyboardEvent) => {
+      if (
+        event.key === "F3" &&
+        event.altKey &&
+        event.shiftKey &&
+        event.ctrlKey
+      ) {
+        handleStopStream
+      }
+    }
+    document.addEventListener("keydown", fn)
+    return () => {
+      document.removeEventListener("keydown", fn)
+    }
+  }, [handleStopStream])
 
   return (
     <>
