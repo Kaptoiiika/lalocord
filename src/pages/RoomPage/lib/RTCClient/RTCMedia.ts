@@ -88,14 +88,19 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       const clientStream = new RTCClientMediaStream(stream)
 
       clientStream.stream.getVideoTracks().forEach((track) => {
+        let timer: ReturnType<typeof setTimeout> | undefined
         track.onmute = () => {
-          this.remoteStreams = this.remoteStreams.filter(
-            (clientStream) => clientStream !== clientStream
-          )
-          this.emit("newstream")
+          if (timer) clearTimeout(timer)
+          timer = setTimeout(() => {
+            this.remoteStreams = this.remoteStreams.filter(
+              (clientStream) => clientStream !== clientStream
+            )
+            this.emit("newstream")
+          }, 5000)
         }
         track.onunmute = () => {
           if (!this.remoteStreams.includes(clientStream)) {
+            if (timer) clearTimeout(timer)
             this.remoteStreams.push(clientStream)
             this.emit("newstream", clientStream)
           }

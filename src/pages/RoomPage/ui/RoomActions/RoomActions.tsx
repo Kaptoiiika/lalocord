@@ -35,7 +35,7 @@ export const RoomActions = (props: RoomActionsProps) => {
   }, [])
 
   return (
-    <Stack direction="row" alignItems="center">
+    <Stack direction="row" alignItems="end">
       <ShareWebCamMenu />
       <ShareScreenMenu />
     </Stack>

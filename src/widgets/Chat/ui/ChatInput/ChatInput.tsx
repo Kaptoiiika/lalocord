@@ -1,5 +1,5 @@
 import { useUserStore, getLocalUser } from "@/entities/User"
-import { IconButton, Stack, TextField, Tooltip } from "@mui/material"
+import { FilledInput, IconButton, Stack, Tooltip } from "@mui/material"
 import { useState, useCallback } from "react"
 import { getActionAddMessage } from "../../model/selectors/ChatStoreSelectors"
 import { useChatStore } from "../../model/store/ChatStore"
@@ -60,7 +60,7 @@ export const ChatInput = (props: ChatInputProps) => {
     setText("")
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.shiftKey || e.altKey || e.ctrlKey) return
 
     if (e.key === "Enter") {
@@ -71,19 +71,27 @@ export const ChatInput = (props: ChatInputProps) => {
 
   return (
     <div className={styles.form}>
-      <Stack direction="row" alignItems="end">
-        <div className={styles.inputWrapper}>
-          <TextField
-            onPaste={handlePasteFile}
-            onDrop={handleDropFile}
-            onChange={handleChangeText}
-            onKeyDown={handleKeyDown}
-            autoComplete="off"
-            value={text}
-            multiline
-            className={styles.input}
-          />
-        </div>
+      <div className={styles.inputWrapper}>
+        <FilledInput
+          sx={{
+            p: 1,
+            pr: 6,
+            borderRadius: 0,
+            lineHeight: 1.5,
+          }}
+          onPaste={handlePasteFile}
+          onDrop={handleDropFile}
+          onChange={handleChangeText}
+          onKeyDown={handleKeyDown}
+          autoComplete="off"
+          value={text}
+          multiline
+          maxRows={3}
+          className={styles.input}
+          type="text"
+        />
+      </div>
+      <Stack direction="row" alignItems="end" justifyContent="end">
         <Stack
           className={styles.buttons}
           direction="column"
@@ -98,7 +106,7 @@ export const ChatInput = (props: ChatInputProps) => {
                 <input
                   onChange={handleSelectFile}
                   hidden
-                  type={"file"}
+                  type="file"
                   accept="image/*"
                 />
               </label>

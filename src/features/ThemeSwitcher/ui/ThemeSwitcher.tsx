@@ -8,7 +8,7 @@ export const ThemeSwitcher = memo(function ThemeSwitcher() {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <IconButton onClick={toggleTheme}>
+    <IconButton onClick={toggleTheme} aria-label="change theme">
       {theme === "dark" ? <DarkModeIcon /> : <LightModeIcon />}
     </IconButton>
   )

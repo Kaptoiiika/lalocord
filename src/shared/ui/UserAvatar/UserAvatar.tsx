@@ -19,7 +19,7 @@ export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
     const imageSRC = avatar?.formats?.thumbnail?.url || avatar?.url || src
 
     return (
-      <Tooltip title={alt}>
+      <Tooltip title={alt} describeChild>
         <Badge
           className={classNames(styles.badgeStatus, {
             [styles.red]: status === "offline",
