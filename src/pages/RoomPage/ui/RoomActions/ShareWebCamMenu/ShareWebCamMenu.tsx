@@ -47,7 +47,7 @@ export const ShareWebCamMenu = () => {
         event.shiftKey &&
         event.ctrlKey
       ) {
-        handleStopStream
+        handleStopStream()
       }
     }
     document.addEventListener("keydown", fn)
