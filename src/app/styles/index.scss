@@ -12,6 +12,8 @@
 
   min-height: 100vh;
   min-width: 100vw;
-  background: var(--bg-app);
   color: rgb(var(--primary-color));
+}
+body {
+  background: var(--bg-app);
 }
