@@ -5,14 +5,15 @@ import { Link } from "react-router-dom"
 import HomeIcon from "@mui/icons-material/Home"
 import styles from "./Navbar.module.scss"
 import { ThemeSwitcher } from "@/features/ThemeSwitcher"
+import { UserSettingsModal } from "@/entities/UserSettings"
 
-const links = [
-  {
-    to: AppRoutes.MAIN_PAGE,
-    label: "home",
-    icon: <HomeIcon />,
-  },
-]
+// const links = [
+//   {
+//     to: AppRoutes.MAIN_PAGE,
+//     label: "home",
+//     icon: <HomeIcon />,
+//   },
+// ]
 
 export const Navbar = () => {
   return (
@@ -21,17 +22,20 @@ export const Navbar = () => {
         className={styles.stack}
         justifyContent="space-between"
         alignItems="center"
-        spacing={4}
+        gap={4}
       >
-        <Stack alignItems="center" spacing={1}>
+        <Stack alignItems="center" gap={1}>
           <Link className={styles.headerLink} to={AppRoutes.MAIN_PAGE}>
-            <IconButton aria-label="home">
+            <IconButton aria-label="home page">
               <HomeIcon />
             </IconButton>
           </Link>
         </Stack>
 
-        <ThemeSwitcher />
+        <Stack>
+          <ThemeSwitcher />
+          <UserSettingsModal />
+        </Stack>
       </Stack>
     </nav>
   )
