@@ -12,13 +12,13 @@ export function buildWebpackConfig(
 
   const isDevOptions = isDev
     ? {
-        devtool: "inline-source-map",
         devServer: buildDevServer(options),
       }
     : {}
 
   const webPackConfig: webpack.Configuration = {
     target: isDev ? "web" : "browserslist",
+    devtool: "inline-source-map",
     mode: mode,
     entry: paths.entry,
     output: {
@@ -26,7 +26,7 @@ export function buildWebpackConfig(
       path: paths.build,
       clean: true,
       publicPath: "/",
-    }, 
+    },
     plugins: buildPlugins(options),
     module: {
       rules: buildLoaders(options),

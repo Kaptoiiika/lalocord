@@ -31,4 +31,5 @@ root.render(
   // </React.StrictMode>
 )
 
+__webpack_nonce__ = "<%=nonce%>"
 navigator.serviceWorker?.register("/service-worker.js")

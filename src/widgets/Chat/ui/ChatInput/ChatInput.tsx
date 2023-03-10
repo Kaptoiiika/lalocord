@@ -89,6 +89,7 @@ export const ChatInput = (props: ChatInputProps) => {
           maxRows={3}
           className={styles.input}
           type="text"
+          inputProps={{ "aria-label": "message from chat" }}
         />
       </div>
       <Stack direction="row" alignItems="end" justifyContent="end">

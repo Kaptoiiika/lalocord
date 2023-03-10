@@ -27,8 +27,11 @@ export const RoomPage = () => {
   useEffect(() => {
     joinToRoom(id)
     const fn = emitToJoinRoom(id)
+    const prevName = document.title
+    document.title = `${document.title} - ${id}`
 
     return () => {
+      document.title = prevName
       leaveRoom()
       fn()
     }
