@@ -36,12 +36,21 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
   )
 
   useMountedEffect(() => {
-    const container = document.querySelector("body")
-    const metaTheme = document.querySelector("meta[name='theme-color']")
-
+    const container = document.body
     if (container) {
       container.className = theme
-      
+    }
+
+    const currentColorModeisDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches
+    const metaTheme: HTMLMetaElement | null = currentColorModeisDark
+      ? document.querySelector("meta[media='(prefers-color-scheme: dark)']")
+      : document.querySelector("meta[media='(prefers-color-scheme: light)']")
+    const color = getComputedStyle(container).getPropertyValue("--bg-app")
+
+    if (metaTheme && color) {
+      metaTheme.content = color
     }
   })
 
