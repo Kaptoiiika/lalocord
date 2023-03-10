@@ -1,30 +1,18 @@
 import {
+  Button,
   CircularProgress,
   Dialog,
   Grow,
   IconButton,
+  Stack,
   Tooltip,
 } from "@mui/material"
-import { forwardRef, Suspense } from "react"
+import { Suspense } from "react"
 import { UserSettingsLazy } from "../UserSettings/UserSettings.lazy"
 import SettingsIcon from "@mui/icons-material/Settings"
 import { useSearchParams } from "react-router-dom"
-import { TransitionProps } from "@mui/material/transitions"
 
 type UserSettingsmodalProps = {}
-
-const Transition = forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>
-  },
-  ref: React.Ref<unknown>
-) {
-  return (
-    <Grow style={{ transformOrigin: "0 0" }} ref={ref} {...props}>
-      {props.children}
-    </Grow>
-  )
-})
 
 const settingkey = "setting"
 export const UserSettingsModal = (props: UserSettingsmodalProps) => {
@@ -59,13 +47,21 @@ export const UserSettingsModal = (props: UserSettingsmodalProps) => {
       <Dialog
         fullScreen
         open={open}
-        TransitionComponent={Transition}
+        TransitionComponent={Grow}
+        TransitionProps={{ style: { transformOrigin: "0 0" } }}
         onClose={handleCloseSettings}
         PaperProps={{
           style: { background: "var(--bg-app)" },
         }}
       >
-        <Suspense fallback={<CircularProgress />}>
+        <Suspense
+          fallback={
+            <Stack alignItems="center" justifyContent="center">
+              <Button onClick={handleCloseSettings}>Close</Button>
+              <CircularProgress />
+            </Stack>
+          }
+        >
           <UserSettingsLazy onClose={handleCloseSettings} />
         </Suspense>
       </Dialog>

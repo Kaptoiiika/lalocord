@@ -30,3 +30,5 @@ root.render(
   </ErrorBoundary>
   // </React.StrictMode>
 )
+
+navigator.serviceWorker?.register("/service-worker.js")

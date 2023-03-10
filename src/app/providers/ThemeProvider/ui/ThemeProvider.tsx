@@ -37,8 +37,11 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
 
   useMountedEffect(() => {
     const container = document.querySelector("body")
+    const metaTheme = document.querySelector("meta[name='theme-color']")
+
     if (container) {
       container.className = theme
+      
     }
   })
 

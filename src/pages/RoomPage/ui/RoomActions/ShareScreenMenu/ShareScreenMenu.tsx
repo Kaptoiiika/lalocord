@@ -22,10 +22,6 @@ import StopScreenShareIcon from "@mui/icons-material/StopScreenShare"
 import styles from "./ShareScreenMenu.module.scss"
 import { MouseEvent, useState } from "react"
 import {
-  PriorityNumberToText,
-  PriorityTextToNumber,
-} from "../../../utils/FormatePriority"
-import {
   bitrateToShortValue,
   bitrateValueText,
 } from "../../../utils/FormateBitrate"
@@ -78,15 +74,6 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
     }
   }
 
-  const handlePriotryChange = (
-    event: React.SyntheticEvent | Event,
-    newValue: number | Array<number>
-  ) => {
-    if (Array.isArray(newValue)) return
-    const settings = encodingSettings
-    settings.priority = PriorityNumberToText(newValue)
-    setEncodingSettings(settings)
-  }
   const handleBitrateChange = (
     event: React.SyntheticEvent | Event,
     newValue: number | Array<number>
@@ -151,20 +138,6 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
             step={0.1}
             min={0.1}
             max={50}
-          />
-        </div>
-        <div className={styles.slider}>
-          <Typography className={styles.sliderLabel}>
-            Priority: <span>{encodingSettings.priority}</span>
-          </Typography>
-          <Slider
-            value={PriorityTextToNumber(encodingSettings.priority)}
-            onChange={handlePriotryChange}
-            aria-label="Priority"
-            getAriaValueText={PriorityNumberToText}
-            step={1}
-            min={1}
-            max={4}
           />
         </div>
       </Menu>
