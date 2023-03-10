@@ -33,6 +33,7 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
     <Stack gap={1}>
       <Stack direction="row" gap={1}>
         <TextField
+          label={"Room name"}
           variant="outlined"
           value={roomName}
           onChange={handleChangeRoomName}

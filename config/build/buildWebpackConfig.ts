@@ -18,7 +18,7 @@ export function buildWebpackConfig(
 
   const webPackConfig: webpack.Configuration = {
     target: isDev ? "web" : "browserslist",
-    devtool: "inline-source-map",
+    devtool: "source-map",
     mode: mode,
     entry: paths.entry,
     output: {
