@@ -1,6 +1,6 @@
 import { useUserStore, getLocalUser } from "@/entities/User"
 import { FilledInput, IconButton, Stack, Tooltip } from "@mui/material"
-import { useState, useCallback } from "react"
+import { useState, useCallback, memo } from "react"
 import { getActionAddMessage } from "../../model/selectors/ChatStoreSelectors"
 import { useChatStore } from "../../model/store/ChatStore"
 import styles from "./ChatInput.module.scss"
@@ -12,7 +12,7 @@ type ChatInputProps = {
   onSendFile?: (blob: Blob) => void
 }
 
-export const ChatInput = (props: ChatInputProps) => {
+export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   const { onSendMessage, onSendFile } = props
   const addMessage = useChatStore(getActionAddMessage)
   const localUser = useUserStore(getLocalUser)
@@ -92,32 +92,30 @@ export const ChatInput = (props: ChatInputProps) => {
           inputProps={{ "aria-label": "message from chat" }}
         />
       </div>
-      <Stack direction="row" alignItems="end" justifyContent="end">
-        <Stack
-          className={styles.buttons}
-          direction="column"
-          alignItems="center"
-          justifyContent="end"
-          gap={1}
-        >
-          <Tooltip title={"send file"} placement="top">
-            <IconButton>
-              <label className={styles.selectInputFile}>
-                <InsertDriveFileIcon />
-                <input
-                  onChange={handleSelectFile}
-                  hidden
-                  type="file"
-                  accept="image/*"
-                />
-              </label>
-            </IconButton>
-          </Tooltip>
-          <IconButton onClick={handleSendMessage} aria-label="send button">
-            <SendIcon />
+      <Stack
+        className={styles.buttons}
+        direction="column-reverse"
+        alignItems="end"
+        justifyContent="end"
+        gap={1}
+      >
+        <IconButton onClick={handleSendMessage} aria-label="send button">
+          <SendIcon />
+        </IconButton>
+        <Tooltip title={"send file"} placement="top">
+          <IconButton>
+            <label className={styles.selectInputFile}>
+              <InsertDriveFileIcon />
+              <input
+                onChange={handleSelectFile}
+                hidden
+                type="file"
+                accept="image/*"
+              />
+            </label>
           </IconButton>
-        </Stack>
+        </Tooltip>
       </Stack>
     </div>
   )
-}
+})

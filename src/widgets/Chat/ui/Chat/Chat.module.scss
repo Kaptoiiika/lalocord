@@ -13,8 +13,10 @@ $animationTime: 0.3s;
     width: 1px;
 
     .chat {
+      visibility: hidden;
       opacity: 0;
       border-width: 0;
+      pointer-events: none;
     }
   }
 }

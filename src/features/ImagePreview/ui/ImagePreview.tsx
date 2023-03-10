@@ -32,7 +32,7 @@ export const ImagePreview = memo(function ImagePreview(
   }
 
   return (
-    <Modal open={open} onClose={handleClose} keepMounted disablePortal>
+    <Modal open={open} onClose={handleClose}>
       <Paper sx={style} className={styles.box}>
         <Typography variant="h6" component="h2">
           {image && (
