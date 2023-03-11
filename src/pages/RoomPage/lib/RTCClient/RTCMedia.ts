@@ -8,7 +8,7 @@ export type Offer = { offer: RTCSessionDescription }
 export type Ice = { ice: RTCIceCandidateInit }
 export type ClientId = { id: string }
 
-export type RTCMediaStreamEvents = "newstream"
+export type RTCMediaStreamEvents = "newstream" | "stopStream"
 
 export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
   peer: RTCPeerConnection | null
@@ -88,25 +88,26 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       const clientStream = new RTCClientMediaStream(stream)
 
       clientStream.stream.getVideoTracks().forEach((track) => {
-        let timer: ReturnType<typeof setTimeout> | undefined
-        track.onmute = () => {
-          if (timer) clearTimeout(timer)
-          timer = setTimeout(() => {
-            this.remoteStreams = this.remoteStreams.filter(
-              (clientStream) => clientStream !== clientStream
-            )
-            this.emit("newstream")
-          }, 5000)
-        }
         track.onunmute = () => {
           if (!this.remoteStreams.includes(clientStream)) {
-            if (timer) clearTimeout(timer)
             this.remoteStreams.push(clientStream)
             this.emit("newstream", clientStream)
           }
         }
       })
     }
+  }
+
+  stopStream(type: MediaStreamTypes) {
+    const senders = this.senders[type]
+    if (!senders || senders.length === 0) return
+
+    const transceivers = this.peer?.getTransceivers()
+    transceivers?.forEach((transceiver) => {
+      if (transceiver.currentDirection === "inactive") transceiver.stop()
+    })
+    this.senders[type] = null
+    this.emit("stopStream", type)
   }
 
   updateBitrate() {
