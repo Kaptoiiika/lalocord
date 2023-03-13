@@ -83,21 +83,44 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
     this.peer.oniceconnectionstatechange = (e) => {
       this.emit("iceconnectionStatusChange")
+      switch (this.peer?.iceConnectionState) {
+        case "completed":
+        case "connected":
+          break
+        case "checking":
+        case "new":
+          break
+        case "disconnected":
+        case "failed":
+          this.reconnect()
+          break
+        case "closed":
+        default:
+          break
+      }
     }
 
     this.peer.onconnectionstatechange = (e) => {
       switch (this.peer?.connectionState) {
-        case "disconnected":
         case "closed":
           this.close()
+          break
+        case "disconnected":
+        case "failed":
+          break
         case "new":
         case "connected":
-        case "failed":
         default:
           break
       }
     }
     this.log("New RTCClient", this)
+  }
+
+  reconnect() {
+    setTimeout(() => {
+      this.peer?.restartIce()
+    }, 2000)
   }
 
   private requestNewOffer() {

@@ -34,7 +34,7 @@ export const Navbar = () => {
 
         <Stack>
           <ThemeSwitcher />
-          <UserSettingsModal />
+          {/* <UserSettingsModal /> */}
         </Stack>
       </Stack>
     </nav>
