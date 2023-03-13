@@ -23,11 +23,9 @@ export type RemoteTracksTypes = {
 
 export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
   peer: RTCPeerConnection | null
-  remoteStreamList: RTCClientMediaStream[] = []
   availableStreamList: RTCClientMediaStream[] = []
   remoteStream: Record<string, RTCClientMediaStream> = {}
-
-  tracks: Record<string, MediaStreamTrack> = {}
+  remoteTrack: Record<string, MediaStreamTrack> = {}
 
   stream: Record<MediaStreamTypes, MediaStream | null> = {
     media: null,
@@ -140,18 +138,11 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
   }
 
   reciveTrack(event: RTCTrackEvent) {
-    const stream = event.streams[0]
     const track = event.track
-    this.tracks[track.id] = track
-    const currentInList = this.remoteStreamList.find(
-      (remoteStream) => remoteStream.stream === stream
-    )
-    if (!currentInList) {
-      this.emit("needUpdateStreamType")
-      this.log("reciveVideoTrack", track)
-    } else {
-      this.log("reciveAudioTrack", track)
-    }
+    this.remoteTrack[track.id] = track
+
+    this.emit("needUpdateStreamType")
+    this.log("reciveTrack", track)
   }
 
   updateStreamType(tracksType: RemoteTracksTypes[]) {
@@ -162,7 +153,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       )
       if (!currentTrans) return
       const currentStream = this.remoteStream[trackType.type]
-      const currentTrack = this.tracks[trackType.trackId]
+      const currentTrack = this.remoteTrack[trackType.trackId]
 
       if (currentStream) {
         if (currentTrack) currentStream.addTrack(currentTrack)
@@ -171,8 +162,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       }
 
       const mediaStream = new MediaStream()
-      if (this.tracks[trackType.trackId])
-        mediaStream.addTrack(this.tracks[trackType.trackId])
+      if (currentTrack) mediaStream.addTrack(currentTrack)
       const clientStream = new RTCClientMediaStream(mediaStream)
 
       this.remoteStream[trackType.type] = clientStream
