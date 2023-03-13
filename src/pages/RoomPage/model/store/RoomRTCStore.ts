@@ -26,10 +26,10 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   encodingSettings: getEncodingSettingsFromLocalStorage(),
   displayMediaStream: null,
   webCamStream: null,
+  microphoneStream: null,
   connectedUsers: {},
 
   joinRoom: (roomName) => {
-    
     set((state) => ({ ...state, roomName: roomName }))
   },
   leaveRoom: () => {

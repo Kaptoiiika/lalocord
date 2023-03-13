@@ -7,11 +7,17 @@ export class RTCClientMediaStream extends Emitter<events> {
   volume = 0
   closed: boolean
 
+  hasvideo: boolean
+  hasaudio: boolean
+
   constructor(mediastream: MediaStream) {
     super()
     this.stream = mediastream
+
+    this.hasvideo = !!this.stream.getVideoTracks().length
+    this.hasaudio = !!this.stream.getAudioTracks().length
+
     this.closed = false
-    this.open()
   }
 
   close() {
@@ -22,5 +28,11 @@ export class RTCClientMediaStream extends Emitter<events> {
   open() {
     this.closed = false
     this.emit("open")
+  }
+
+  addTrack(track: MediaStreamTrack) {
+    if (track.kind === "audio") this.hasaudio = true
+    else if (track.kind === "video") this.hasvideo = true
+    this.stream.addTrack(track)
   }
 }

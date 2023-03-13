@@ -5,6 +5,7 @@ export interface RoomRTCSchema {
   connectedUsers: ConnectedUsers
   webCamStream: MediaStream | null
   displayMediaStream: MediaStream | null
+  microphoneStream: MediaStream | null
   streamSettings: MediaStreamConstraints
   encodingSettings: RTCRtpEncodingParameters
 
@@ -19,4 +20,4 @@ export interface RoomRTCSchema {
 
 export type ConnectedUsers = Record<UserId, RTCClient>
 export type UserId = string
-export type MediaStreamTypes = "webCam" | "media"
+export type MediaStreamTypes = "webCam" | "media" | "microphone"

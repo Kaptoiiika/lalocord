@@ -14,10 +14,11 @@ export type RTCMediaStreamEvents =
   | "sendStream"
   | "needUpdateStreamType"
 
-export type RemoteStreamTypes = {
-  type: string
+export type RemoteTracksTypes = {
+  type: MediaStreamTypes
   kind: string
   mid: string | null
+  trackId: string
 }
 
 export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
@@ -26,13 +27,17 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
   availableStreamList: RTCClientMediaStream[] = []
   remoteStream: Record<string, RTCClientMediaStream> = {}
 
+  tracks: Record<string, MediaStreamTrack> = {}
+
   stream: Record<MediaStreamTypes, MediaStream | null> = {
     media: null,
     webCam: null,
+    microphone: null,
   }
   senders: Record<MediaStreamTypes, RTCRtpSender[] | null> = {
     media: null,
     webCam: null,
+    microphone: null,
   }
   encodingSettings: RTCRtpEncodingParameters = {}
 
@@ -47,7 +52,12 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
   initStoreSubscribe() {
     const sub = useRoomRTCStore.subscribe((state) => {
-      const { webCamStream, displayMediaStream, encodingSettings } = state
+      const {
+        webCamStream,
+        displayMediaStream,
+        microphoneStream,
+        encodingSettings,
+      } = state
       if (webCamStream !== this.stream.webCam && webCamStream)
         this.sendStream(webCamStream, "webCam")
       else if (webCamStream !== this.stream.webCam) {
@@ -61,6 +71,13 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
         this.stopStream("media")
       }
       this.stream.media = displayMediaStream
+
+      if (microphoneStream !== this.stream.media && microphoneStream)
+        this.sendStream(microphoneStream, "microphone")
+      else if (microphoneStream !== this.stream.microphone) {
+        this.stopStream("microphone")
+      }
+      this.stream.microphone = microphoneStream
 
       if (encodingSettings !== this.encodingSettings) {
         this.encodingSettings = encodingSettings
@@ -100,43 +117,65 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     this.emit("sendStream")
   }
 
-  getStreamType(): RemoteStreamTypes[] {
-    const media = this.stream.media
-    const webCam = this.stream.webCam
+  getStreamType(): RemoteTracksTypes[] {
     const allTrans = this.peer?.getTransceivers()
+    const availableStream: RemoteTracksTypes[] = []
 
-    const mediaTypes =
-      media?.getTracks().map((track) => {
+    Object.entries(this.stream).forEach(([key, value]) => {
+      value?.getTracks().forEach((track) => {
         const transceiver = allTrans?.find(
           (trans) => trans.sender.track === track
         )
-        return {
-          type: "media",
-          kind: track.kind,
-          mid: transceiver?.mid || null,
-        }
-      }) || []
-    const webCamTypes =
-      webCam?.getTracks().map((track) => {
-        const transceiver = allTrans?.find(
-          (trans) => trans.sender.track === track
-        )
-        return {
-          type: "webCam",
-          kind: track.kind,
-          mid: transceiver?.mid || null,
-        }
-      }) || []
 
-    return [...mediaTypes, ...webCamTypes]
+        availableStream.push({
+          type: key as MediaStreamTypes,
+          kind: track.kind,
+          mid: transceiver?.mid || null,
+          trackId: track.id,
+        })
+      })
+    })
+
+    return availableStream
   }
 
   reciveTrack(event: RTCTrackEvent) {
     const stream = event.streams[0]
     const track = event.track
-    if (track.kind === "video") {
-      const clientStream = new RTCClientMediaStream(stream)
-      this.remoteStreamList.push(clientStream)
+    this.tracks[track.id] = track
+    const currentInList = this.remoteStreamList.find(
+      (remoteStream) => remoteStream.stream === stream
+    )
+    if (!currentInList) {
+      this.emit("needUpdateStreamType")
+      this.log("reciveVideoTrack", track)
+    } else {
+      this.log("reciveAudioTrack", track)
+    }
+  }
+
+  updateStreamType(tracksType: RemoteTracksTypes[]) {
+    const transceivers = this.peer?.getTransceivers()
+    tracksType.forEach((trackType) => {
+      const currentTrans = transceivers?.find(
+        (trans) => trans.mid === trackType.mid
+      )
+      if (!currentTrans) return
+      const currentStream = this.remoteStream[trackType.type]
+      const currentTrack = this.tracks[trackType.trackId]
+
+      if (currentStream) {
+        if (currentTrack) currentStream.addTrack(currentTrack)
+        currentStream.open()
+        return
+      }
+
+      const mediaStream = new MediaStream()
+      if (this.tracks[trackType.trackId])
+        mediaStream.addTrack(this.tracks[trackType.trackId])
+      const clientStream = new RTCClientMediaStream(mediaStream)
+
+      this.remoteStream[trackType.type] = clientStream
       clientStream.on("open", () => {
         if (!this.availableStreamList.includes(clientStream)) {
           this.availableStreamList.push(clientStream)
@@ -149,30 +188,9 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
         )
         this.emit("newstream")
       })
-      this.emit("needUpdateStreamType")
-      this.log("reciveVideoTrack", track)
-    } else {
-      this.log("reciveAudioTrack", track)
-    }
-  }
-
-  updateStreamType(streamTypes: RemoteStreamTypes[]) {
-    const transceivers = this.peer?.getTransceivers()
-    streamTypes.forEach((stream) => {
-      const currentTrans = transceivers?.find(
-        (trans) => trans.mid === stream.mid
-      )
-      if (!currentTrans) return
-
-      this.remoteStreamList.map((remoteStream) => {
-        const tracks = remoteStream.stream.getTracks()
-        if (tracks.includes(currentTrans.receiver.track)) {
-          this.remoteStream[stream.type] = remoteStream
-          remoteStream.open()
-        }
-      })
+      clientStream.open()
+      this.emit("newstream")
     })
-    this.emit("newstream")
   }
 
   stopStream(type: MediaStreamTypes) {
