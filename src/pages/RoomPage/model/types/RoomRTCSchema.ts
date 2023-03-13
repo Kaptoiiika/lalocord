@@ -16,6 +16,7 @@ export interface RoomRTCSchema {
   addConnectedUsers: (...users: RTCClient[]) => void
   setWebCamStream: (stream: MediaStream | null) => void
   setdisplayMediaStream: (stream: MediaStream | null) => void
+  setMicrophoneStream: (stream: MediaStream | null) => void
 }
 
 export type ConnectedUsers = Record<UserId, RTCClient>

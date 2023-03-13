@@ -24,7 +24,7 @@ export type RemoteTracksTypes = {
 export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
   peer: RTCPeerConnection | null
   availableStreamList: RTCClientMediaStream[] = []
-  remoteStream: Record<string, RTCClientMediaStream> = {}
+  remoteStream: Record<string, RTCClientMediaStream | undefined> = {}
   remoteTrack: Record<string, MediaStreamTrack> = {}
 
   stream: Record<MediaStreamTypes, MediaStream | null> = {
@@ -167,10 +167,13 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
       this.remoteStream[trackType.type] = clientStream
       clientStream.on("open", () => {
-        if (!this.availableStreamList.includes(clientStream)) {
+        if (
+          !this.availableStreamList.includes(clientStream) &&
+          clientStream.hasvideo
+        ) {
           this.availableStreamList.push(clientStream)
-          this.emit("newstream", clientStream)
         }
+        this.emit("newstream", clientStream)
       })
       clientStream.on("close", () => {
         this.availableStreamList = this.availableStreamList.filter(

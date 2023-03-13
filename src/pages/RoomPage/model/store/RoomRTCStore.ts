@@ -81,6 +81,9 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   setdisplayMediaStream(stream) {
     set((state) => ({ ...state, displayMediaStream: stream }))
   },
+  setMicrophoneStream(stream) {
+    set((state) => ({ ...state, microphoneStream: stream }))
+  },
 })
 
 export const useRoomRTCStore = create(store)

@@ -5,7 +5,7 @@ type events = "close" | "open"
 export class RTCClientMediaStream extends Emitter<events> {
   stream: MediaStream
   volume = 0
-  closed: boolean
+  isOpen: boolean
 
   hasvideo: boolean
   hasaudio: boolean
@@ -17,16 +17,16 @@ export class RTCClientMediaStream extends Emitter<events> {
     this.hasvideo = !!this.stream.getVideoTracks().length
     this.hasaudio = !!this.stream.getAudioTracks().length
 
-    this.closed = false
+    this.isOpen = true
   }
 
   close() {
-    this.closed = true
+    this.isOpen = false
     this.emit("close")
   }
 
   open() {
-    this.closed = false
+    this.isOpen = true
     this.emit("open")
   }
 

@@ -10,11 +10,12 @@ type UserAvatarProps = {
   avatar?: FileRespounce
   status?: UserAvatarStatus
   alt: string
+  className?: string
 } & AvatarProps
 
 export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
   function UserAvatar(props, ref) {
-    const { src, avatar, status, alt, ...other } = props
+    const { src, avatar, status, alt, className, ...other } = props
 
     const imageSRC = avatar?.formats?.thumbnail?.url || avatar?.url || src
 
@@ -28,7 +29,13 @@ export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
           })}
           overlap="circular"
         >
-          <Avatar ref={ref} src={imageSRC} alt={alt} {...other} />
+          <Avatar
+            className={className}
+            ref={ref}
+            src={imageSRC}
+            alt={alt}
+            {...other}
+          />
         </Badge>
       </Tooltip>
     )

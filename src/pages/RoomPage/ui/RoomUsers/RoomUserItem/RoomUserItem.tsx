@@ -1,6 +1,9 @@
 import { RTCClient } from "@/pages/RoomPage/lib/RTCClient/RTCClient"
+import { classNames } from "@/shared/lib/classNames/classNames"
 import { UserAvatar, UserAvatarStatus } from "@/shared/ui/UserAvatar/UserAvatar"
-import { useEffect, useState } from "react"
+import { Menu } from "@mui/material"
+import { useEffect, useRef, useState } from "react"
+import styles from "./RoomUserItem.module.scss"
 
 type RoomUserItemProps = {
   client: RTCClient
@@ -29,6 +32,17 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   const [status, setStatus] = useState(
     getUserStatusOnConnectionState(client.peer?.iceConnectionState)
   )
+  const [, update] = useState(0)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
 
   useEffect(() => {
     const fn = () => {
@@ -40,11 +54,43 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
     }
   }, [client])
 
+  useEffect(() => {
+    const fn = () => {
+      update((prev) => prev + 1)
+    }
+    client.media.on("newstream", fn)
+    return () => {
+      client.media.off("newstream", fn)
+    }
+  }, [client])
+
+  const microphoneStream = client.media.remoteStream.microphone
+  if (microphoneStream && audioRef.current) {
+    audioRef.current.srcObject = microphoneStream.stream
+    audioRef.current.play()
+  }
+
   return (
-    <UserAvatar
-      key={client.id}
-      alt={client.user?.username || client.id}
-      status={status}
-    />
+    <>
+      <UserAvatar
+        className={classNames("", {
+          [styles.micOnline]: !!microphoneStream?.isOpen,
+        })}
+        key={client.id}
+        alt={client.user?.username || client.id}
+        status={status}
+        onClick={handleClick}
+      />
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        keepMounted
+        disablePortal
+      >
+        Volume:
+        <audio ref={audioRef} controls />
+      </Menu>
+    </>
   )
 }
