@@ -16,7 +16,10 @@ export const ShareWebCamMenu = () => {
 
   const handleStartWebCamStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia(streamSettings)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: streamSettings.video,
+        audio: false,
+      })
       webCamStream?.getTracks().forEach((tracks) => {
         tracks.onended = null
         tracks.stop()

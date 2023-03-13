@@ -39,6 +39,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
   const open = Boolean(anchorEl)
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
     setAnchorEl(event.currentTarget)
   }
   const handleClose = () => {
@@ -86,11 +87,27 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
 
   return (
     <>
-      <Tooltip title="Share your screen" arrow>
-        <IconButton aria-label={"Share your screen"} onClick={handleClick}>
-          <ScreenShareIcon />
-        </IconButton>
-      </Tooltip>
+      {!mediaStream ? (
+        <Tooltip title="Share your screen" arrow>
+          <IconButton
+            aria-label={"Share your screen"}
+            onClick={handleClick}
+            onContextMenu={handleClick}
+          >
+            <ScreenShareIcon />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip title="Stop share" arrow>
+          <IconButton
+            aria-label={"Stop share"}
+            onClick={handleStopDisplayMediaStream}
+            onContextMenu={handleClick}
+          >
+            <StopScreenShareIcon />
+          </IconButton>
+        </Tooltip>
+      )}
       <Menu
         anchorEl={anchorEl}
         open={open}

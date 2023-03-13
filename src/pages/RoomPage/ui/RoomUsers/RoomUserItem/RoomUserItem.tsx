@@ -1,7 +1,7 @@
 import { RTCClient } from "@/pages/RoomPage/lib/RTCClient/RTCClient"
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { UserAvatar, UserAvatarStatus } from "@/shared/ui/UserAvatar/UserAvatar"
-import { Menu } from "@mui/material"
+import { IconButton, Menu, Tooltip } from "@mui/material"
 import { useEffect, useRef, useState } from "react"
 import styles from "./RoomUserItem.module.scss"
 
@@ -37,7 +37,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   const open = Boolean(anchorEl)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
   }
   const handleClose = () => {
@@ -65,6 +65,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   }, [client])
 
   const microphoneStream = client.media.remoteStream.microphone
+  const username = client.user?.username || client.id
   if (microphoneStream && audioRef.current) {
     audioRef.current.srcObject = microphoneStream.stream
     audioRef.current.play()
@@ -72,15 +73,18 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
 
   return (
     <>
-      <UserAvatar
-        className={classNames("", {
-          [styles.micOnline]: !!microphoneStream?.isOpen,
-        })}
-        key={client.id}
-        alt={client.user?.username || client.id}
-        status={status}
-        onClick={handleClick}
-      />
+      <Tooltip title={username} describeChild>
+        <IconButton sx={{ p: 0 }} onClick={handleClick} aria-label={username}>
+          <UserAvatar
+            className={classNames("", {
+              [styles.micOnline]: !!microphoneStream?.isOpen,
+            })}
+            key={client.id}
+            alt={username}
+            status={status}
+          />
+        </IconButton>
+      </Tooltip>
       <Menu
         anchorEl={anchorEl}
         open={open}
