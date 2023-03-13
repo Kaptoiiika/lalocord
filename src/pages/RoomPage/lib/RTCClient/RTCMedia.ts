@@ -8,15 +8,27 @@ export type Offer = { offer: RTCSessionDescription }
 export type Ice = { ice: RTCIceCandidateInit }
 export type ClientId = { id: string }
 
-export type RTCMediaStreamEvents = "newstream" | "stopStream"
+export type RTCMediaStreamEvents =
+  | "newstream"
+  | "stopStream"
+  | "sendStream"
+  | "needUpdateStreamType"
+
+export type RemoteStreamTypes = {
+  type: string
+  kind: string
+  mid: string | null
+}
 
 export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
   peer: RTCPeerConnection | null
-  remoteStreams: RTCClientMediaStream[] = []
+  remoteStreamList: RTCClientMediaStream[] = []
+  availableStreamList: RTCClientMediaStream[] = []
+  remoteStream: Record<string, RTCClientMediaStream> = {}
 
   stream: Record<MediaStreamTypes, MediaStream | null> = {
-    media: new MediaStream(),
-    webCam: new MediaStream(),
+    media: null,
+    webCam: null,
   }
   senders: Record<MediaStreamTypes, RTCRtpSender[] | null> = {
     media: null,
@@ -38,10 +50,16 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       const { webCamStream, displayMediaStream, encodingSettings } = state
       if (webCamStream !== this.stream.webCam && webCamStream)
         this.sendStream(webCamStream, "webCam")
+      else if (webCamStream !== this.stream.webCam) {
+        this.stopStream("webCam")
+      }
       this.stream.webCam = webCamStream
 
       if (displayMediaStream !== this.stream.media && displayMediaStream)
         this.sendStream(displayMediaStream, "media")
+      else if (displayMediaStream !== this.stream.media) {
+        this.stopStream("media")
+      }
       this.stream.media = displayMediaStream
 
       if (encodingSettings !== this.encodingSettings) {
@@ -79,6 +97,38 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     })
 
     this.senders[type] = await Promise.all(senders)
+    this.emit("sendStream")
+  }
+
+  getStreamType(): RemoteStreamTypes[] {
+    const media = this.stream.media
+    const webCam = this.stream.webCam
+    const allTrans = this.peer?.getTransceivers()
+
+    const mediaTypes =
+      media?.getTracks().map((track) => {
+        const transceiver = allTrans?.find(
+          (trans) => trans.sender.track === track
+        )
+        return {
+          type: "media",
+          kind: track.kind,
+          mid: transceiver?.mid || null,
+        }
+      }) || []
+    const webCamTypes =
+      webCam?.getTracks().map((track) => {
+        const transceiver = allTrans?.find(
+          (trans) => trans.sender.track === track
+        )
+        return {
+          type: "webCam",
+          kind: track.kind,
+          mid: transceiver?.mid || null,
+        }
+      }) || []
+
+    return [...mediaTypes, ...webCamTypes]
   }
 
   reciveTrack(event: RTCTrackEvent) {
@@ -86,28 +136,52 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     const track = event.track
     if (track.kind === "video") {
       const clientStream = new RTCClientMediaStream(stream)
-
-      clientStream.stream.getVideoTracks().forEach((track) => {
-        track.onunmute = () => {
-          if (!this.remoteStreams.includes(clientStream)) {
-            this.remoteStreams.push(clientStream)
-            this.emit("newstream", clientStream)
-          }
+      this.remoteStreamList.push(clientStream)
+      clientStream.on("open", () => {
+        if (!this.availableStreamList.includes(clientStream)) {
+          this.availableStreamList.push(clientStream)
+          this.emit("newstream", clientStream)
         }
       })
+      clientStream.on("close", () => {
+        this.availableStreamList = this.availableStreamList.filter(
+          (cur) => cur !== clientStream
+        )
+        this.emit("newstream")
+      })
+      this.emit("needUpdateStreamType")
+      this.log("reciveVideoTrack", track)
+    } else {
+      this.log("reciveAudioTrack", track)
     }
   }
 
-  stopStream(type: MediaStreamTypes) {
-    const senders = this.senders[type]
-    if (!senders || senders.length === 0) return
-
+  updateStreamType(streamTypes: RemoteStreamTypes[]) {
     const transceivers = this.peer?.getTransceivers()
-    transceivers?.forEach((transceiver) => {
-      if (transceiver.currentDirection === "inactive") transceiver.stop()
+    streamTypes.forEach((stream) => {
+      const currentTrans = transceivers?.find(
+        (trans) => trans.mid === stream.mid
+      )
+      if (!currentTrans) return
+
+      this.remoteStreamList.map((remoteStream) => {
+        const tracks = remoteStream.stream.getTracks()
+        if (tracks.includes(currentTrans.receiver.track)) {
+          this.remoteStream[stream.type] = remoteStream
+          remoteStream.open()
+        }
+      })
     })
-    this.senders[type] = null
+    this.emit("newstream")
+  }
+
+  stopStream(type: MediaStreamTypes) {
+    this.stream[type] = null
     this.emit("stopStream", type)
+  }
+
+  remoteClosedStream(type: MediaStreamTypes) {
+    this.remoteStream[type]?.close()
   }
 
   updateBitrate() {
@@ -140,5 +214,9 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     senders.forEach((sender) => {
       sender.replaceTrack(null)
     })
+  }
+
+  private log(...message: any) {
+    if (__IS_DEV__) console.log(...message)
   }
 }

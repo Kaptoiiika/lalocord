@@ -1,8 +1,6 @@
 import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
-//@ts-ignore // no types
-import freeice from "freeice"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { RTCDataChanel } from "./RTCDataChanel"
 import { RTCMedia } from "./RTCMedia"
@@ -17,6 +15,9 @@ type MessageType =
   | "ice"
   | "answer"
   | "request_new_offer"
+  | "requset_stream_type"
+  | "receive_stream_type"
+  | "stopStream"
   | "text"
   | "file"
 
@@ -37,12 +38,30 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       throw new Error("Your browser does not support WEBRTC")
 
     this.peer = new RTCPeerConnection({
-      iceServers: freeice(),
+      iceServers: [
+        { urls: "stun:kapitoxa.gay:5349" },
+        { urls: "stun:kapitoxa.gay:3478" },
+        {
+          urls: ["turn:kapitoxa.gay:5349", "turn:kapitoxa.gay:3478"],
+          username: "guest",
+          credential: "somepassword",
+        },
+      ],
     })
     this.id = user.id
     this.user = user
     this.channel = new RTCDataChanel(this.peer, this.user)
     this.media = new RTCMedia(this.peer)
+    this.media.on("needUpdateStreamType", () => {
+      this.channel.sendData("requset_stream_type")
+    })
+    this.media.on("stopStream", (type: string) => {
+      this.channel.sendData("stopStream", type)
+    })
+    this.media.on("sendStream", () => {
+      const streamtype = this.media.getStreamType()
+      this.channel.sendData("receive_stream_type", streamtype)
+    })
     useRoomRTCStore.getState().addConnectedUsers(this)
 
     this.peer.ondatachannel = (event) => {
@@ -151,6 +170,16 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "ice":
           this.saveIce(data)
+          break
+        case "requset_stream_type":
+          const streamtype = this.media.getStreamType()
+          this.channel.sendData("receive_stream_type", streamtype)
+          break
+        case "receive_stream_type":
+          this.media.updateStreamType(data)
+          break
+        case "stopStream":
+          this.media.remoteClosedStream(data)
           break
         case "file":
           this.channel.reciveBlobChunk(data)

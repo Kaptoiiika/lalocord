@@ -42,7 +42,7 @@ export const RoomStreams = memo(function RoomStreams() {
     clientStream: RTCClientMediaStream
   }[] = []
   const streams = Object.values(users).reduce((prev, curent) => {
-    curent.media.remoteStreams.forEach((stream) => {
+    curent.media.availableStreamList.forEach((stream) => {
       prev.push({ client: curent, clientStream: stream })
     })
     return prev

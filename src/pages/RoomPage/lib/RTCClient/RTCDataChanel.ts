@@ -4,7 +4,6 @@ import { covertBase64ToBlob } from "@/shared/lib/utils/Blob/covertBase64ToBlob/c
 import { splitStringToChunks } from "@/shared/lib/utils/String/splitStringToChunks"
 import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
 import { MessageData, MessageModel } from "@/widgets/Chat/model/types/ChatSchem"
-//@ts-ignore // no types
 
 export type DataChunk = {
   id: string
