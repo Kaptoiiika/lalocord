@@ -29,6 +29,8 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
     setRoomName(e.currentTarget.value)
   }
 
+  const roomListIsEmpty = data?.length === 0 && !isLoading
+
   return (
     <Stack gap={1}>
       <Stack direction="row" gap={1}>
@@ -59,7 +61,7 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
             <Divider />
           </Link>
         ))}
-        {data?.length === 0 && !isLoading && <Typography>nothing💤</Typography>}
+        {roomListIsEmpty && <Typography>nothing💤</Typography>}
         {isLoading && (
           <>
             <Skeleton className={styles.roomlink} animation="wave" />

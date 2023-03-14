@@ -91,7 +91,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
         <Tooltip title="Share your screen" arrow>
           <IconButton
             aria-label={"Share your screen"}
-            onClick={handleClick}
+            onClick={handleStartDisplayMediaStream}
             onContextMenu={handleClick}
           >
             <ScreenShareIcon />
