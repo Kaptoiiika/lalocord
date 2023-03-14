@@ -41,6 +41,7 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   }
 
   const handleDropFile = (e: React.DragEvent) => {
+    e.preventDefault()
     const items = Array.from(e.dataTransfer.items)
     const item = items.find((item) => !!item.getAsFile())
     const blob = item?.getAsFile()

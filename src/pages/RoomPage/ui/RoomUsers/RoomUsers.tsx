@@ -8,6 +8,7 @@ import {
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { RoomUserItem } from "./RoomUserItem/RoomUserItem"
 import styles from "./RoomUsers.module.scss"
+import { Tooltip } from "@mui/material"
 
 export const RoomUsers = () => {
   const users = useRoomRTCStore(getRoomUsers)
@@ -19,7 +20,9 @@ export const RoomUsers = () => {
   return (
     <div className={styles["RoomUsers"]}>
       <Stack className={styles.users} direction="row" gap={1}>
-        <UserAvatar alt={localUsername.username || "You"} />
+        <Tooltip title={localUsername.username || "You"} describeChild>
+          <UserAvatar alt={localUsername.username || "You"} />
+        </Tooltip>
 
         {userList.map((client) => (
           <RoomUserItem key={client.id} client={client} />
