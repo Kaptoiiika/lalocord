@@ -1,6 +1,5 @@
 import React from "react"
 import { createRoot } from "react-dom/client"
-import { StoreProvider } from "@/app/providers/StoreProvider"
 import { ThemeProvider } from "@/app/providers/ThemeProvider"
 import { AppRouterProvider } from "@/app/providers/Router"
 import "@/app/styles/index.scss"
@@ -20,13 +19,11 @@ const root = createRoot(container)
 root.render(
   // <React.StrictMode>
   <ErrorBoundary>
-    <StoreProvider>
-      <AppRouterProvider>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
-      </AppRouterProvider>
-    </StoreProvider>
+    <AppRouterProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </AppRouterProvider>
   </ErrorBoundary>
   // </React.StrictMode>
 )
