@@ -6,4 +6,5 @@ export const socketClient = io(url.origin, {
   path: url.pathname === "/" ? "" : url.pathname + "/socket.io",
   reconnectionDelayMax: 10000,
   autoConnect: true,
+  transports: ["websocket"],
 })
