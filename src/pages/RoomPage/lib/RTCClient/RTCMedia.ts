@@ -18,7 +18,6 @@ export type RemoteTracksTypes = {
   type: MediaStreamTypes
   kind: string
   mid: string | null
-  trackId: string
 }
 
 export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
@@ -129,7 +128,6 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
           type: key as MediaStreamTypes,
           kind: track.kind,
           mid: transceiver?.mid || null,
-          trackId: track.id,
         })
       })
     })
@@ -153,7 +151,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       )
       if (!currentTrans) return
       const currentStream = this.remoteStream[trackType.type]
-      const currentTrack = this.remoteTrack[trackType.trackId]
+      const currentTrack = currentTrans.receiver.track
 
       if (currentStream) {
         if (currentTrack) currentStream.addTrack(currentTrack)

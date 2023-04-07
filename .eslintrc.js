@@ -45,7 +45,6 @@ module.exports = {
     "import/extensions": "off",
     "import/no-extraneous-dependencies": "off",
     "no-underscore-dangle": "off",
-    "react/display-name": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     "import/no-internal-modules": "off",

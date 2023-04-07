@@ -2,9 +2,9 @@ import React, { memo, useState } from "react"
 import {
   Button,
   Divider,
+  OutlinedInput,
   Skeleton,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material"
 import { Link, useNavigate } from "react-router-dom"
@@ -51,9 +51,8 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
   return (
     <Stack gap={1}>
       <Stack direction="row" gap={1}>
-        <TextField
+        <OutlinedInput
           label="Room name"
-          variant="outlined"
           value={roomName}
           onChange={handleChangeRoomName}
         />
