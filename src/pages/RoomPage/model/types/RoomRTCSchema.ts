@@ -8,6 +8,7 @@ export interface RoomRTCSchema {
   microphoneStream: MediaStream | null
   streamSettings: MediaStreamConstraints
   encodingSettings: RTCRtpEncodingParameters
+  autoplay: boolean
 
   joinRoom: (room: string) => void
   leaveRoom: () => void
@@ -17,6 +18,7 @@ export interface RoomRTCSchema {
   setWebCamStream: (stream: MediaStream | null) => void
   setdisplayMediaStream: (stream: MediaStream | null) => void
   setMicrophoneStream: (stream: MediaStream | null) => void
+  changeAutoplay: (condition: boolean) => void
 }
 
 export type ConnectedUsers = Record<UserId, RTCClient>

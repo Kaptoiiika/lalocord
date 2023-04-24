@@ -15,11 +15,13 @@ type MessageType =
   | "ice"
   | "answer"
   | "request_new_offer"
+  | "text"
+  | "file"
   | "requset_stream_type"
   | "receive_stream_type"
   | "stopStream"
-  | "text"
-  | "file"
+  | "resumeStream"
+  | "pauseStream"
 
 type RTCClientEvents = "iceconnectionStatusChange"
 
@@ -196,6 +198,12 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "receive_stream_type":
           this.media.updateStreamType(data)
+          break
+        case "resumeStream":
+          this.media.reqestResumeStream(data)
+          break
+        case "pauseStream":
+          this.media.reqestPauseStream(data)
           break
         case "stopStream":
           this.media.remoteClosedStream(data)

@@ -1,7 +1,9 @@
 import { create, StateCreator } from "zustand"
 import { ConnectedUsers, RoomRTCSchema } from "../types/RoomRTCSchema"
 import {
+  getAutoPlayfromLocalStorage,
   getEncodingSettingsFromLocalStorage,
+  saveAutoPlaytoLocalStorage,
   saveEncodingSettingsToLocalStorage,
 } from "./RoomRTCLocalStorage"
 
@@ -27,6 +29,7 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   displayMediaStream: null,
   webCamStream: null,
   microphoneStream: null,
+  autoplay: getAutoPlayfromLocalStorage(),
   connectedUsers: {},
 
   joinRoom: (roomName) => {
@@ -83,6 +86,10 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   },
   setMicrophoneStream(stream) {
     set((state) => ({ ...state, microphoneStream: stream }))
+  },
+  changeAutoplay(condition) {
+    saveAutoPlaytoLocalStorage(condition)
+    set((state) => ({ ...state, autoplay: condition }))
   },
 })
 

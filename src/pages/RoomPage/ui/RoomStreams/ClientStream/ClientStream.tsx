@@ -12,15 +12,24 @@ type ClientStreamProps = {
 export const ClientStream = (props: ClientStreamProps) => {
   const { client, clientStream } = props
 
-  const hundleChangeVolume = (value: number) => {
+  const handleChangeVolume = (value: number) => {
     clientStream.volume = value
+  }
+
+  const handlePause = () => {
+    client.channel.sendData("pauseStream", clientStream.type)
+  }
+  const handlePlay = () => {
+    client.channel.sendData("resumeStream", clientStream.type)
   }
 
   return (
     <VideoPlayer
       stream={clientStream.stream}
       initVolume={clientStream.volume}
-      onVolumeChange={hundleChangeVolume}
+      onVolumeChange={handleChangeVolume}
+      onPause={handlePause}
+      onPlay={handlePlay}
     >
       <Stack className={styles.streamTooltip}>
         <Typography>{client.user?.username || client.user?.id}</Typography>
