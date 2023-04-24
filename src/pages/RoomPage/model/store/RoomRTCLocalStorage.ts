@@ -43,11 +43,49 @@ export const getAutoPlayfromLocalStorage = (): boolean => {
 
   return !!autoplay
 }
-export const saveAutoPlaytoLocalStorage = (
-  condition: boolean
+export const saveAutoPlaytoLocalStorage = (condition: boolean) => {
+  localStorage.setItem(localstorageKeys.AUTOPLAY, JSON.stringify(condition))
+}
+
+const defaultStreamSettings = {
+  audio: {
+    noiseSuppression: false,
+    echoCancellation: false,
+    autoGainControl: false,
+    channelCount: 2,
+  },
+  video: {
+    frameRate: 60,
+    // width: { ideal: 1924 },
+    height: 1080,
+    displaySurface: "monitor",
+  },
+  surfaceSwitching: "include",
+}
+export const getStreamSettingsfromLocalStorage = (): MediaStreamConstraints => {
+  const json = localStorage.getItem(localstorageKeys.STREAMSETTINGS)
+  if (!json) return defaultStreamSettings
+  const data = JSON.parse(json)
+
+  const settings: MediaStreamConstraints = {
+    audio: defaultStreamSettings.audio,
+    video: {
+      frameRate:
+        Number(data?.video?.frameRate) || defaultStreamSettings.video.frameRate,
+      height: {
+        ideal:
+          Number(data?.video?.height) || defaultStreamSettings.video.height,
+      },
+    },
+  }
+
+  return settings
+}
+export const saveStreamSettingstoLocalStorage = (
+  streamSettings: MediaStreamConstraints
 ) => {
   localStorage.setItem(
-    localstorageKeys.AUTOPLAY,
-    JSON.stringify(condition)
+    localstorageKeys.STREAMSETTINGS,
+    JSON.stringify(streamSettings)
   )
 }

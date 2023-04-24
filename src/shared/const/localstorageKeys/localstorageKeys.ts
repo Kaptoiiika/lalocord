@@ -5,4 +5,5 @@ export enum localstorageKeys {
   "USERINFO" = "userinfo",
   "THEME" = "theme",
   "AUTOPLAY" = "autoplay",
+  "STREAMSETTINGS" = "StreamSettings",
 }

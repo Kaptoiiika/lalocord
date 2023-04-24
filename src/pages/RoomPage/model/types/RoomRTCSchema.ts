@@ -19,6 +19,7 @@ export interface RoomRTCSchema {
   setdisplayMediaStream: (stream: MediaStream | null) => void
   setMicrophoneStream: (stream: MediaStream | null) => void
   changeAutoplay: (condition: boolean) => void
+  setStreamSettings: (streamSettings: MediaStreamConstraints) => void
 }
 
 export type ConnectedUsers = Record<UserId, RTCClient>

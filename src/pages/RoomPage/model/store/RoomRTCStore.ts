@@ -3,35 +3,26 @@ import { ConnectedUsers, RoomRTCSchema } from "../types/RoomRTCSchema"
 import {
   getAutoPlayfromLocalStorage,
   getEncodingSettingsFromLocalStorage,
+  getStreamSettingsfromLocalStorage,
   saveAutoPlaytoLocalStorage,
   saveEncodingSettingsToLocalStorage,
+  saveStreamSettingstoLocalStorage,
 } from "./RoomRTCLocalStorage"
 
 const store: StateCreator<RoomRTCSchema> = (set, get) => ({
-  roomName: null,
-  streamSettings: {
-    audio: {
-      noiseSuppression: false,
-      echoCancellation: false,
-      autoGainControl: false,
-      channelCount: 2,
-    },
-    video: {
-      frameRate: 60,
-      width: { ideal: 1924 },
-      // height: { ideal: 1080 },
-      displaySurface: "monitor",
-      // cursor: "never",
-    },
-    surfaceSwitching: "include",
-  },
+  streamSettings: getStreamSettingsfromLocalStorage(),
   encodingSettings: getEncodingSettingsFromLocalStorage(),
+  autoplay: getAutoPlayfromLocalStorage(),
+  roomName: null,
+  connectedUsers: {},
   displayMediaStream: null,
   webCamStream: null,
   microphoneStream: null,
-  autoplay: getAutoPlayfromLocalStorage(),
-  connectedUsers: {},
 
+  setStreamSettings(streamSettings) {
+    saveStreamSettingstoLocalStorage(streamSettings)
+    set((state) => ({ ...state, streamSettings: streamSettings }))
+  },
   joinRoom: (roomName) => {
     set((state) => ({ ...state, roomName: roomName }))
   },

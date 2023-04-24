@@ -10,34 +10,26 @@ import {
 import { Link, useNavigate } from "react-router-dom"
 import { AppRoutes } from "@/shared/config/routeConfig/routeConfig"
 import styles from "./RoomList.module.scss"
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { apiClient } from "@/shared/api/apiClient"
 import { RoomModel } from "../../model/types/RoomSchema"
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt"
+import useSWR from "swr"
+import { apiClient } from "@/shared/api/apiClient"
+import TextField from "@mui/material/TextField"
 
 type RoomListProps = {
   className?: string
 }
+const fetcher = async (url: string) => {
+  const res = await apiClient(url)
+  return res.data
+}
 
 export const RoomList = memo(function RoomList(props: RoomListProps) {
   const navigate = useNavigate()
-  const [roomName, setRoomName] = useState("")
-  const [isLoading, setIsloading] = useState(true)
-  const [roomList, setRoomList] = useState<RoomModel[] | undefined>()
-
-  useMountedEffect(() => {
-    apiClient
-      .get("/room")
-      .then((res) => {
-        const rooms: RoomModel[] = res.data
-        setRoomList(rooms)
-        setIsloading(false)
-      })
-      .catch(() => {
-        setRoomList([])
-        setIsloading(false)
-      })
+  const { data: roomList, isLoading } = useSWR<RoomModel[]>("/room", fetcher, {
+    refreshInterval: 5000,
   })
+  const [roomName, setRoomName] = useState("")
 
   const handleCreateRoom = () => {
     navigate(AppRoutes.ROOM_ID.replace(":id", roomName))
@@ -52,7 +44,7 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
   return (
     <Stack gap={1}>
       <Stack direction="row" gap={1}>
-        <OutlinedInput
+        <TextField
           label="Room name"
           value={roomName}
           onChange={handleChangeRoomName}
@@ -74,11 +66,11 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
             to={AppRoutes.ROOM_ID.replace(":id", room.name)}
             key={room.id}
           >
-            <Stack direction="row" justifyContent="space-between">
+            <Stack direction="row" justifyContent="space-between" padding={1}>
               <Typography className={styles.roomlinkName}>
                 {room.name}
               </Typography>
-              <Stack direction="row" alignItems="center">
+              <Stack direction="row" alignItems="center" gap={1}>
                 <Typography>{room.userList?.length}</Typography>
                 <PeopleAltIcon />
               </Stack>

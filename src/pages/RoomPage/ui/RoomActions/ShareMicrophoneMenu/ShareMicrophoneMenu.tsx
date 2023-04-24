@@ -46,15 +46,15 @@ export const ShareMicrophoneMenu = () => {
   return (
     <>
       {!!microphoneStream ? (
-        <Tooltip title="Turn off microphone" arrow>
+        <Tooltip title="Turn on microphone" arrow>
           <IconButton onClick={handleStopStream}>
-            <MicOffIcon />
+            <MicIcon color="success"/>
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Turn on microphone" arrow>
+        <Tooltip title="Turn off microphone" arrow>
           <IconButton onClick={handleStartWebCamStream}>
-            <MicIcon />
+            <MicOffIcon />
           </IconButton>
         </Tooltip>
       )}

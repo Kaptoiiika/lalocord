@@ -87,11 +87,11 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
     currentSenders?.forEach((sender) => {
       if (sender.track?.kind === "video" && videoTrack) {
+        sender.replaceTrack(videoTrack)
         videoTrack.stop()
-        return sender.replaceTrack(videoTrack)
       } else if (sender.track?.kind === "audio" && audioTrack) {
+        sender.replaceTrack(audioTrack)
         audioTrack.stop()
-        return sender.replaceTrack(audioTrack)
       }
     })
     // this.updateBitrate(100000)
@@ -125,7 +125,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     const senderAudio = currentSenders?.find(
       (s) => s.track?.kind === audioStream?.kind
     )
-    videoStream.contentHint = "motion"
+    if (videoStream) videoStream.contentHint = "motion"
 
     const senders = stream.getTracks().map(async (track) => {
       if (senderVideo && track.kind === "video") {
