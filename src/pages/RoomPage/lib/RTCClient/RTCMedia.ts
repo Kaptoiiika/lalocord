@@ -125,7 +125,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     const senderAudio = currentSenders?.find(
       (s) => s.track?.kind === audioStream?.kind
     )
-    if (videoStream) videoStream.contentHint = "motion"
+    // if (videoStream) videoStream.contentHint = "motion"
 
     const senders = stream.getTracks().map(async (track) => {
       if (senderVideo && track.kind === "video") {
