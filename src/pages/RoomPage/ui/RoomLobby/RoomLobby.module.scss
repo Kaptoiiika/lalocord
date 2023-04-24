@@ -5,7 +5,7 @@ $HeaderHeight: var(--header-height);
   position: relative;
   width: 100%;
   grid-template-rows:
-    $HeaderHeight calc(100vh - $HeaderHeight - $HeaderHeight)
+    $HeaderHeight calc(100% - $HeaderHeight - $HeaderHeight)
     $HeaderHeight;
-  height: 100vh;
+  height: 100%;
 }

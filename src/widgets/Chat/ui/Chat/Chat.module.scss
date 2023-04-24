@@ -7,7 +7,7 @@ $animationTime: 0.3s;
   flex-direction: column;
   flex: 0 0 auto;
   width: $chatWidth;
-  height: 100vh;
+  height: 100%;
   transition: width $animationTime;
   &.collapsed {
     width: 1px;

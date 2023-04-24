@@ -12,7 +12,8 @@ import { AppRoutes } from "@/shared/config/routeConfig/routeConfig"
 import styles from "./RoomList.module.scss"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
 import { apiClient } from "@/shared/api/apiClient"
-import { FormateAtributedRoom } from "../../model/service/formateRoom"
+import { RoomModel } from "../../model/types/RoomSchema"
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt"
 
 type RoomListProps = {
   className?: string
@@ -22,13 +23,13 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
   const navigate = useNavigate()
   const [roomName, setRoomName] = useState("")
   const [isLoading, setIsloading] = useState(true)
-  const [roomList, setRoomList] = useState<any[] | undefined>()
+  const [roomList, setRoomList] = useState<RoomModel[] | undefined>()
 
   useMountedEffect(() => {
     apiClient
-      .get("/api/rooms")
+      .get("/room")
       .then((res) => {
-        const rooms = res.data?.data.map(FormateAtributedRoom)
+        const rooms: RoomModel[] = res.data
         setRoomList(rooms)
         setIsloading(false)
       })
@@ -73,7 +74,15 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
             to={AppRoutes.ROOM_ID.replace(":id", room.name)}
             key={room.id}
           >
-            {room.name}
+            <Stack direction="row" justifyContent="space-between">
+              <Typography className={styles.roomlinkName}>
+                {room.name}
+              </Typography>
+              <Stack direction="row" alignItems="center">
+                <Typography>{room.userList?.length}</Typography>
+                <PeopleAltIcon />
+              </Stack>
+            </Stack>
             <Divider />
           </Link>
         ))}

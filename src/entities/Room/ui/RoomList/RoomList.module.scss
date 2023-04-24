@@ -1,10 +1,12 @@
 .roomlink {
   width: 300px;
-  text-align: center;
-  padding: 8px 0;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  .roomlinkName {
+    text-align: center;
+    padding: 8px 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
   }
