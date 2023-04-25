@@ -1,4 +1,5 @@
 import { create, StateCreator } from "zustand"
+import { ConvertUserSettingsToMediaSettings } from "../../utils/ConvertUserSettingsToMediaSettings"
 import { ConnectedUsers, RoomRTCSchema } from "../types/RoomRTCSchema"
 import {
   getAutoPlayfromLocalStorage,
@@ -10,7 +11,10 @@ import {
 } from "./RoomRTCLocalStorage"
 
 const store: StateCreator<RoomRTCSchema> = (set, get) => ({
-  streamSettings: getStreamSettingsfromLocalStorage(),
+  streamSettings: ConvertUserSettingsToMediaSettings(
+    getStreamSettingsfromLocalStorage()
+  ),
+  userStreamSettings: getStreamSettingsfromLocalStorage(),
   encodingSettings: getEncodingSettingsFromLocalStorage(),
   autoplay: getAutoPlayfromLocalStorage(),
   roomName: null,
@@ -21,7 +25,11 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
 
   setStreamSettings(streamSettings) {
     saveStreamSettingstoLocalStorage(streamSettings)
-    set((state) => ({ ...state, streamSettings: streamSettings }))
+    set((state) => ({
+      ...state,
+      userStreamSettings: streamSettings,
+      streamSettings: ConvertUserSettingsToMediaSettings(streamSettings),
+    }))
   },
   joinRoom: (roomName) => {
     set((state) => ({ ...state, roomName: roomName }))

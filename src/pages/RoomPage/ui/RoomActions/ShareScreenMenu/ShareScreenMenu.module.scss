@@ -1,8 +1,11 @@
 .slider {
-  padding: 0 32px;
+  padding: 0 16px;
 }
 .sliderLabel {
   display: flex;
   justify-content: space-between;
+  width: 100%;
+}
+.selector {
   width: 100%;
 }

@@ -4,6 +4,7 @@ import {
   PriorityNumberToText,
   PriorityTextToNumber,
 } from "../../utils/FormatePriority"
+import { UserStreamSettings } from "../types/RoomRTCSchema"
 
 const defaultEncodingSettings: RTCRtpEncodingParameters = {
   maxBitrate: 1024 * 1024 * 10,
@@ -62,27 +63,26 @@ const defaultStreamSettings = {
   },
   surfaceSwitching: "include",
 }
-export const getStreamSettingsfromLocalStorage = (): MediaStreamConstraints => {
+
+export const getStreamSettingsfromLocalStorage = (): UserStreamSettings => {
   const json = localStorage.getItem(localstorageKeys.STREAMSETTINGS)
   if (!json) return defaultStreamSettings
   const data = JSON.parse(json)
 
-  const settings: MediaStreamConstraints = {
+  const settings: UserStreamSettings = {
     audio: defaultStreamSettings.audio,
     video: {
       frameRate:
         Number(data?.video?.frameRate) || defaultStreamSettings.video.frameRate,
-      height: {
-        ideal:
-          Number(data?.video?.height) || defaultStreamSettings.video.height,
-      },
+      height: Number(data?.video?.height) || defaultStreamSettings.video.height,
+      hint: data?.video?.hint || "default",
     },
   }
 
   return settings
 }
 export const saveStreamSettingstoLocalStorage = (
-  streamSettings: MediaStreamConstraints
+  streamSettings: UserStreamSettings
 ) => {
   localStorage.setItem(
     localstorageKeys.STREAMSETTINGS,

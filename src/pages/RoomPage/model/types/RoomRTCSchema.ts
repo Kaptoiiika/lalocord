@@ -7,6 +7,7 @@ export interface RoomRTCSchema {
   displayMediaStream: MediaStream | null
   microphoneStream: MediaStream | null
   streamSettings: MediaStreamConstraints
+  userStreamSettings: UserStreamSettings
   encodingSettings: RTCRtpEncodingParameters
   autoplay: boolean
 
@@ -19,9 +20,18 @@ export interface RoomRTCSchema {
   setdisplayMediaStream: (stream: MediaStream | null) => void
   setMicrophoneStream: (stream: MediaStream | null) => void
   changeAutoplay: (condition: boolean) => void
-  setStreamSettings: (streamSettings: MediaStreamConstraints) => void
+  setStreamSettings: (streamSettings: UserStreamSettings) => void
 }
 
 export type ConnectedUsers = Record<UserId, RTCClient>
 export type UserId = string
 export type MediaStreamTypes = "webCam" | "media" | "microphone"
+export type VideoStreamSettingsHint = "detail" | "motion" | "default"
+export type UserStreamSettings = {
+  video: {
+    frameRate: number
+    height: number
+    hint?: VideoStreamSettingsHint
+  }
+  audio: any
+}

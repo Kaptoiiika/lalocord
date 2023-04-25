@@ -1,6 +1,9 @@
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
-import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
+import {
+  MediaStreamTypes,
+  UserStreamSettings,
+} from "../../model/types/RoomRTCSchema"
 import { RTCClientMediaStream } from "./RTCClientMediaStream"
 
 export type RTCMediaStreamEvents =
@@ -32,6 +35,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     microphone: null,
   }
   encodingSettings: RTCRtpEncodingParameters = {}
+  userStreamSettings: Partial<UserStreamSettings> = {}
 
   private unsubfn
 
@@ -49,6 +53,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
         displayMediaStream,
         microphoneStream,
         encodingSettings,
+        userStreamSettings,
       } = state
       if (webCamStream !== this.stream.webCam && webCamStream)
         this.sendStream(webCamStream, "webCam")
@@ -75,42 +80,47 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
         this.encodingSettings = encodingSettings
         this.updateBitrate()
       }
+
+      if (userStreamSettings !== this.userStreamSettings) {
+        this.userStreamSettings = userStreamSettings
+        this.updateStreamSettings()
+      }
     })
     return sub
   }
 
   reqestPauseStream(type: MediaStreamTypes) {
-    const currentSenders = this.senders[type]
-    const currentStream = this.stream[type]?.clone()
-    const videoTrack = currentStream?.getVideoTracks()?.[0] ?? null
-    const audioTrack = currentStream?.getAudioTracks()?.[0] ?? null
+    // const currentSenders = this.senders[type]
+    // const currentStream = this.stream[type]?.clone()
+    // const videoTrack = currentStream?.getVideoTracks()?.[0] ?? null
+    // const audioTrack = currentStream?.getAudioTracks()?.[0] ?? null
 
-    currentSenders?.forEach((sender) => {
-      if (sender.track?.kind === "video" && videoTrack) {
-        sender.replaceTrack(videoTrack)
-        videoTrack.stop()
-      } else if (sender.track?.kind === "audio" && audioTrack) {
-        sender.replaceTrack(audioTrack)
-        audioTrack.stop()
-      }
-    })
-    // this.updateBitrate(100000)
+    // currentSenders?.forEach((sender) => {
+    //   if (sender.track?.kind === "video" && videoTrack) {
+    //     sender.replaceTrack(videoTrack)
+    //     videoTrack.stop()
+    //   } else if (sender.track?.kind === "audio" && audioTrack) {
+    //     sender.replaceTrack(audioTrack)
+    //     audioTrack.stop()
+    //   }
+    // })
+    this.updateBitrate(100000)
   }
 
   reqestResumeStream(type: MediaStreamTypes) {
-    const currentSenders = this.senders[type]
-    const currentStream = this.stream[type]
-    const videoTrack = currentStream?.getVideoTracks()?.[0] ?? null
-    const audioTrack = currentStream?.getAudioTracks()?.[0] ?? null
+    // const currentSenders = this.senders[type]
+    // const currentStream = this.stream[type]
+    // const videoTrack = currentStream?.getVideoTracks()?.[0] ?? null
+    // const audioTrack = currentStream?.getAudioTracks()?.[0] ?? null
 
-    currentSenders?.forEach((sender) => {
-      if (sender.track?.kind === "video" && videoTrack) {
-        return sender.replaceTrack(videoTrack)
-      } else if (sender.track?.kind === "audio" && audioTrack) {
-        return sender.replaceTrack(audioTrack)
-      }
-    })
-    // this.updateBitrate()
+    // currentSenders?.forEach((sender) => {
+    //   if (sender.track?.kind === "video" && videoTrack) {
+    //     return sender.replaceTrack(videoTrack)
+    //   } else if (sender.track?.kind === "audio" && audioTrack) {
+    //     return sender.replaceTrack(audioTrack)
+    //   }
+    // })
+    this.updateBitrate()
   }
 
   async sendStream(stream: MediaStream, type: MediaStreamTypes) {
@@ -125,7 +135,6 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     const senderAudio = currentSenders?.find(
       (s) => s.track?.kind === audioStream?.kind
     )
-    // if (videoStream) videoStream.contentHint = "motion"
 
     const senders = stream.getTracks().map(async (track) => {
       if (senderVideo && track.kind === "video") {
@@ -171,6 +180,19 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
     this.emit("needUpdateStreamType")
     this.log("reciveTrack", track)
+  }
+
+  updateStreamSettings() {
+    const videoSender = this.peer?.getSenders()
+
+    videoSender?.forEach((sender) => {
+      if (sender.track?.kind !== "video") return
+      sender.track.contentHint = this.userStreamSettings.video?.hint || ""
+      sender.track.applyConstraints({
+        frameRate: this.userStreamSettings.video?.frameRate,
+        height: this.userStreamSettings.video?.height,
+      })
+    })
   }
 
   updateStreamType(tracksType: RemoteTracksTypes[]) {
@@ -223,9 +245,8 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     this.remoteStream[type]?.close()
   }
 
-  updateBitrate() {
+  updateBitrate(bitrate?: number) {
     if (!this.peer) return
-    console.log("bitrateChange")
 
     const videoSender = this.peer
       ?.getSenders()
@@ -234,6 +255,15 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     videoSender?.map((sender) => {
       const params = sender.getParameters()
       const encoders = params.encodings.map((encod) => {
+        if (bitrate) {
+          return {
+            ...encod,
+            ...this.encodingSettings,
+            maxBitrate: bitrate,
+            networkPriority: this.encodingSettings.priority,
+          }
+        }
+
         return {
           ...encod,
           ...this.encodingSettings,
