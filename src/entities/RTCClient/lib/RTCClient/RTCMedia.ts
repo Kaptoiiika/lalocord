@@ -144,6 +144,17 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
     this.senders[type] = await Promise.all(senders)
     this.emit("sendStream")
+    const tcvr = this.peer.getTransceivers()
+    const codecs = RTCRtpReceiver.getCapabilities("video")?.codecs
+    if (codecs) {
+      const h264 = codecs?.filter((codecs) => {
+        return codecs.mimeType === "video/H264"
+      })
+      console.log("selected", h264)
+      tcvr.forEach((tcv) => {
+        tcv.setCodecPreferences?.(h264)
+      })
+    }
   }
 
   getStreamType(): RemoteTracksTypes[] {
