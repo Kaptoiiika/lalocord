@@ -1,9 +1,6 @@
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
-import {
-  MediaStreamTypes,
-  UserStreamSettings,
-} from "../../model/types/RoomRTCSchema"
+import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
 import { RTCClientMediaStream } from "./RTCClientMediaStream"
 
 export type RTCMediaStreamEvents =

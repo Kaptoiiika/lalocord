@@ -47,13 +47,13 @@ export const ShareWebCamMenu = () => {
       {!!webCamStream ? (
         <Tooltip title="Turn on camera" arrow>
           <IconButton onClick={handleStopStream}>
-            <VideocamOffIcon />
+            <VideocamIcon color="success" />
           </IconButton>
         </Tooltip>
       ) : (
         <Tooltip title="Turn off camera" arrow>
           <IconButton onClick={handleStartWebCamStream}>
-            <VideocamIcon />
+            <VideocamOffIcon />
           </IconButton>
         </Tooltip>
       )}
