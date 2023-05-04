@@ -146,6 +146,17 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   async createOffer() {
     if (!this.peer) return
+    const tcvr = this.peer.getTransceivers()
+    const codecs = RTCRtpReceiver.getCapabilities("video")?.codecs
+    if (codecs) {
+      const h264 = codecs?.filter((codecs) => {
+        return codecs.mimeType === "video/H264"
+      })
+      console.log("selected", tcvr, h264)
+      tcvr.forEach((tcv) => {
+        if (tcv.sender.track?.kind === "video") tcv.setCodecPreferences?.(h264)
+      })
+    }
     const offer = await this.peer.createOffer()
     await this.peer.setLocalDescription(offer)
     const data = { id: this.id, offer: offer }
