@@ -70,17 +70,22 @@ export const getStreamSettingsfromLocalStorage = (): UserStreamSettings => {
   const data = JSON.parse(json)
 
   const settings: UserStreamSettings = {
-    audio: defaultStreamSettings.audio,
+    audio: {
+      ...defaultStreamSettings.audio,
+      deviceId: data?.audio?.deviceId || undefined,
+    },
     video: {
       frameRate:
         Number(data?.video?.frameRate) || defaultStreamSettings.video.frameRate,
       height: Number(data?.video?.height) || defaultStreamSettings.video.height,
       hint: data?.video?.hint || "default",
+      deviceId: data?.video?.deviceId || undefined,
     },
   }
 
   return settings
 }
+
 export const saveStreamSettingstoLocalStorage = (
   streamSettings: UserStreamSettings
 ) => {

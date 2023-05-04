@@ -1,6 +1,9 @@
 import { create, StateCreator } from "zustand"
 import { ConvertUserSettingsToMediaSettings } from "../../utils/ConvertUserSettingsToMediaSettings"
-import { ConnectedUsers, RoomRTCSchema } from "../../../../entities/RTCClient/model/types/RoomRTCSchema"
+import {
+  ConnectedUsers,
+  RoomRTCSchema,
+} from "../../../../entities/RTCClient/model/types/RoomRTCSchema"
 import {
   getAutoPlayfromLocalStorage,
   getEncodingSettingsFromLocalStorage,
@@ -25,7 +28,12 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
 
   setStreamSettings(streamSettings) {
     saveStreamSettingstoLocalStorage(streamSettings)
-    const { displayMediaStream, webCamStream, userStreamSettings } = get()
+    const {
+      displayMediaStream,
+      webCamStream,
+      microphoneStream,
+      userStreamSettings,
+    } = get()
     const streamWithVideo = [displayMediaStream, webCamStream]
     streamWithVideo.map((stream) => {
       const videoTrack = stream?.getVideoTracks()
@@ -36,7 +44,12 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
         })
       )
     })
-
+    webCamStream?.getVideoTracks().forEach((track) => {
+      track.applyConstraints({ deviceId: streamSettings.video.deviceId })
+    })
+    microphoneStream?.getAudioTracks().forEach((track) => {
+      track.applyConstraints({ deviceId: streamSettings.audio.deviceId })
+    })
     set((state) => ({
       ...state,
       userStreamSettings: streamSettings,

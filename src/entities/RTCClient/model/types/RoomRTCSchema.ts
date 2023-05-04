@@ -32,6 +32,13 @@ export type UserStreamSettings = {
     frameRate: number
     height: number
     hint?: VideoStreamSettingsHint
+    deviceId?: string
   }
-  audio: any
+  audio: {
+    deviceId?: string
+    noiseSuppression: boolean
+    echoCancellation: boolean
+    autoGainControl: boolean
+    channelCount: number
+  }
 }

@@ -13,8 +13,8 @@ import {
 } from "@mui/material"
 import ScreenShareIcon from "@mui/icons-material/ScreenShare"
 import StopScreenShareIcon from "@mui/icons-material/StopScreenShare"
-import { MouseEvent, useState } from "react"
 import { useRoomRTCStore } from "@/entities/RTCClient"
+import { usePopup } from "@/shared/lib/hooks/usePopup/usePopup"
 
 type ShareScreenMenuProps = {}
 
@@ -22,16 +22,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
   const mediaStream = useRoomRTCStore(getDisplayMediaStream)
   const streamSettings = useRoomRTCStore(getStreamSettings)
   const setDisplayMediaStream = useRoomRTCStore(getActionSetDisaplyMediaStream)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    setAnchorEl(event.currentTarget)
-  }
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
+  const { handleClick, handleClose, anchorEl, open } = usePopup()
 
   const handleStopDisplayMediaStream = () => {
     handleClose()

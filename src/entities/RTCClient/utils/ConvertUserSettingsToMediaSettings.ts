@@ -4,11 +4,12 @@ export const ConvertUserSettingsToMediaSettings = (
   userSettings: UserStreamSettings
 ): MediaStreamConstraints => {
   return {
-    audio: userSettings.audio,
+    audio: { ...userSettings.audio, deviceId: userSettings.audio.deviceId },
     video: {
       frameRate: userSettings.video.frameRate,
       height: { ideal: userSettings.video.height },
-      //@ts-ignore it work 
+      deviceId: userSettings.video.deviceId,
+      //@ts-ignore it work
       displaySurface: "monitor",
     },
     surfaceSwitching: "include",

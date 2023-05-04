@@ -8,12 +8,16 @@ import { useCallback } from "react"
 import MicIcon from "@mui/icons-material/Mic"
 import MicOffIcon from "@mui/icons-material/MicOff"
 import { useRoomRTCStore } from "@/entities/RTCClient"
+import Menu from "@mui/material/Menu"
+import { usePopup } from "@/shared/lib/hooks/usePopup/usePopup"
+import { SelectMicrophone } from "./SelectMicrophone"
 // import styles from "./ShareMicrophoneMenu.module.scss"
 
 export const ShareMicrophoneMenu = () => {
   const setMicrophoneStream = useRoomRTCStore(getActionSetMicrophoneStream)
   const microphoneStream = useRoomRTCStore(getMicrophoneStream)
   const streamSettings = useRoomRTCStore(getStreamSettings)
+  const { handleClick, handleClose, anchorEl, open } = usePopup()
 
   const handleStartWebCamStream = async () => {
     try {
@@ -46,18 +50,36 @@ export const ShareMicrophoneMenu = () => {
   return (
     <>
       {!!microphoneStream ? (
-        <Tooltip title="Turn on microphone" arrow>
-          <IconButton onClick={handleStopStream}>
-            <MicIcon color="success"/>
+        <Tooltip title="Turn off microphone" arrow>
+          <IconButton onClick={handleStopStream} onContextMenu={handleClick}>
+            <MicIcon color="success" />
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Turn off microphone" arrow>
-          <IconButton onClick={handleStartWebCamStream}>
+        <Tooltip title="Turn on microphone" arrow>
+          <IconButton
+            onClick={handleStartWebCamStream}
+            onContextMenu={handleClick}
+          >
             <MicOffIcon />
           </IconButton>
         </Tooltip>
       )}
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+      >
+        <SelectMicrophone />
+      </Menu>
     </>
   )
 }

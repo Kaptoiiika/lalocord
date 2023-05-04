@@ -13,8 +13,6 @@ import {
 import {
   Menu,
   Stack,
-  ButtonGroup,
-  Button,
   Typography,
   Slider,
 } from "@mui/material"
@@ -22,6 +20,7 @@ import IconButton from "@mui/material/IconButton/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 import styles from "./VideoSettingsMenu.module.scss"
 import SettingsIcon from "@mui/icons-material/Settings"
+import { InlineSelect } from "@/shared/ui/InlineSelect/InlineSelect"
 
 type VideoSettingsMenuProps = {}
 
@@ -98,74 +97,24 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
         }}
       >
         <Stack gap={1}>
-          <div className={styles.selector}>
-            <ButtonGroup fullWidth>
-              <Button
-                variant={currentHint === "detail" ? "contained" : undefined}
-                onClick={() => handleChangeHint("detail")}
-              >
-                detail
-              </Button>
-              <Button
-                variant={currentHint === "default" ? "contained" : undefined}
-                onClick={() => handleChangeHint("default")}
-              >
-                default
-              </Button>
-              <Button
-                variant={currentHint === "motion" ? "contained" : undefined}
-                onClick={() => handleChangeHint("motion")}
-              >
-                motion
-              </Button>
-            </ButtonGroup>
-          </div>
-          <div className={styles.selector}>
-            <Typography pl={1}>Frame Rate</Typography>
-            <ButtonGroup fullWidth>
-              <Button
-                variant={currentFrameRate === 5 ? "contained" : undefined}
-                onClick={() => handleChangeFrameRate(5)}
-              >
-                5
-              </Button>
-              <Button
-                variant={currentFrameRate === 30 ? "contained" : undefined}
-                onClick={() => handleChangeFrameRate(30)}
-              >
-                30
-              </Button>
-              <Button
-                variant={currentFrameRate === 60 ? "contained" : undefined}
-                onClick={() => handleChangeFrameRate(60)}
-              >
-                60
-              </Button>
-            </ButtonGroup>
-          </div>
-          <div className={styles.selector}>
-            <Typography pl={1}>Resolution</Typography>
-            <ButtonGroup fullWidth>
-              <Button
-                variant={currentResolution === 144 ? "contained" : undefined}
-                onClick={() => handleChangeResolution(144)}
-              >
-                144p
-              </Button>
-              <Button
-                variant={currentResolution === 720 ? "contained" : undefined}
-                onClick={() => handleChangeResolution(720)}
-              >
-                720p
-              </Button>
-              <Button
-                variant={currentResolution === 1080 ? "contained" : undefined}
-                onClick={() => handleChangeResolution(1080)}
-              >
-                1080p
-              </Button>
-            </ButtonGroup>
-          </div>
+          <InlineSelect
+            title={"Frame Rate"}
+            value={currentHint}
+            list={["detail", "default", "motion"]}
+            onSelect={handleChangeHint}
+          />
+          <InlineSelect
+            title={"Frame Rate"}
+            value={currentFrameRate}
+            list={[5, 30, 60]}
+            onSelect={handleChangeFrameRate}
+          />
+          <InlineSelect
+            title={"Resolution"}
+            value={currentResolution}
+            list={[144, 720, 1080]}
+            onSelect={handleChangeResolution}
+          />
 
           <div className={styles.slider}>
             <Typography className={styles.sliderLabel}>
