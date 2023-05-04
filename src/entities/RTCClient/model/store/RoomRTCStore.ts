@@ -47,10 +47,10 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       )
     })
     //restart stream?
-    if (streamSettings.video.deviceId !== userStreamSettings.video.deviceId) {
+    if (streamSettings.video.deviceId !== userStreamSettings.video.deviceId && webCamStream) {
       startWebCamStream()
     }
-    if (streamSettings.audio.deviceId === userStreamSettings.audio.deviceId) {
+    if (streamSettings.audio.deviceId === userStreamSettings.audio.deviceId && microphoneStream) {
       startMicrophoneStream()
     }
     microphoneStream?.getAudioTracks().forEach((track) => {

@@ -27,7 +27,7 @@ export const SelectMicrophone = (props: SelectMicrophoneProps) => {
       ?.enumerateDevices()
       .then((devices) => {
         const microphones = devices.filter(
-          (device) => device.kind === "audiooutput"
+          (device) => device.kind === "audioinput"
         )
         setmicrophones(microphones)
       })

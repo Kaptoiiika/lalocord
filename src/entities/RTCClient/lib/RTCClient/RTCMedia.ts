@@ -32,6 +32,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     microphone: null,
   }
   encodingSettings: RTCRtpEncodingParameters = {}
+  pause = true
 
   private unsubfn
 
@@ -94,6 +95,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     //     audioTrack.stop()
     //   }
     // })
+    this.pause = true
     this.updateBitrate(100000)
   }
 
@@ -110,6 +112,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     //     return sender.replaceTrack(audioTrack)
     //   }
     // })
+    this.pause = false
     this.updateBitrate()
   }
 
@@ -224,6 +227,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
   updateBitrate(bitrate?: number) {
     if (!this.peer) return
+    if (this.pause) return
 
     const videoSender = this.peer
       ?.getSenders()

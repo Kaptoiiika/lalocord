@@ -25,9 +25,9 @@ export const getActionStopWebCamStream = (state: RoomRTCSchema) =>
 export const getActionSetDisaplyMediaStream = (state: RoomRTCSchema) =>
   state.setdisplayMediaStream
 export const getActionStartMicrophoneStream = (state: RoomRTCSchema) =>
-  state.startWebCamStream
+  state.startMicrophoneStream
 export const getActionStopMicrophoneStream = (state: RoomRTCSchema) =>
-  state.stopWebCamStream
+  state.stopMicrophoneStream
 
 export const getActionSetEncodingSettings = (state: RoomRTCSchema) =>
   state.setEncodingSettings
