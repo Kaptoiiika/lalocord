@@ -5,10 +5,10 @@ import {
   getRoomName,
   getRoomUsers,
 } from "../../model/selectors/RoomRTCSelectors"
-import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { RoomUserItem } from "./RoomUserItem/RoomUserItem"
 import styles from "./RoomUsers.module.scss"
 import { Tooltip } from "@mui/material"
+import { useRoomRTCStore } from "@/entities/RTCClient"
 
 export const RoomUsers = () => {
   const users = useRoomRTCStore(getRoomUsers)

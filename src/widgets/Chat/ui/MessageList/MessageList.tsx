@@ -3,7 +3,7 @@ import { Typography } from "@mui/material"
 import { memo } from "react"
 import { getMessages } from "../../model/selectors/ChatStoreSelectors"
 import { useChatStore } from "../../model/store/ChatStore"
-import { MessageModel } from "../../model/types/ChatSchem"
+import { MessageModel } from "../../model/types/ChatSchema"
 import { Message } from "../Message/Message"
 import styles from "./MessageList.module.scss"
 

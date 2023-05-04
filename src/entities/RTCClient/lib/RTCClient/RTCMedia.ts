@@ -35,7 +35,6 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     microphone: null,
   }
   encodingSettings: RTCRtpEncodingParameters = {}
-  userStreamSettings: Partial<UserStreamSettings> = {}
 
   private unsubfn
 
@@ -53,7 +52,6 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
         displayMediaStream,
         microphoneStream,
         encodingSettings,
-        userStreamSettings,
       } = state
       if (webCamStream !== this.stream.webCam && webCamStream)
         this.sendStream(webCamStream, "webCam")
@@ -79,11 +77,6 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       if (encodingSettings !== this.encodingSettings) {
         this.encodingSettings = encodingSettings
         this.updateBitrate()
-      }
-
-      if (userStreamSettings !== this.userStreamSettings) {
-        this.userStreamSettings = userStreamSettings
-        this.updateStreamSettings()
       }
     })
     return sub
@@ -180,19 +173,6 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
     this.emit("needUpdateStreamType")
     this.log("reciveTrack", track)
-  }
-
-  updateStreamSettings() {
-    const videoSender = this.peer?.getSenders()
-
-    videoSender?.forEach((sender) => {
-      if (sender.track?.kind !== "video") return
-      sender.track.contentHint = this.userStreamSettings.video?.hint || ""
-      sender.track.applyConstraints({
-        frameRate: this.userStreamSettings.video?.frameRate,
-        height: this.userStreamSettings.video?.height,
-      })
-    })
   }
 
   updateStreamType(tracksType: RemoteTracksTypes[]) {

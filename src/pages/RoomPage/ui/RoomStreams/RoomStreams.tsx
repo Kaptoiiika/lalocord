@@ -1,14 +1,14 @@
+import { RTCClientMediaStream } from "@/entities/RTCClient/lib/RTCClient/RTCClientMediaStream"
+import { useRoomRTCStore } from "@/entities/RTCClient/model/store/RoomRTCStore"
 import { getLocalUser, useUserStore } from "@/entities/User"
 import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
 import React, { memo, useEffect, useState } from "react"
-import { RTCClient } from "../../lib/RTCClient/RTCClient"
-import { RTCClientMediaStream } from "../../lib/RTCClient/RTCClientMediaStream"
+import { RTCClient } from "../../../../entities/RTCClient/lib/RTCClient/RTCClient"
 import {
   getDisplayMediaStream,
   getRoomUsers,
   getWebCamStream,
 } from "../../model/selectors/RoomRTCSelectors"
-import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { ClientStream } from "./ClientStream/ClientStream"
 import { LocalClientStream } from "./ClientStream/LocalClientStream"
 import styles from "./RoomStreams.module.scss"

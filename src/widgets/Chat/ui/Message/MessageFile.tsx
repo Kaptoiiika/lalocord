@@ -2,7 +2,7 @@ import { getActionSeletFileToImagePreview } from "@/features/ImagePreview"
 import { useImagePreviewStore } from "@/features/ImagePreview/model/store/ImagePreviewStore"
 import { Link } from "@mui/material"
 import { useState } from "react"
-import { FileMessage } from "../../model/types/ChatSchem"
+import { FileMessage } from "../../model/types/ChatSchema"
 
 type MessageFileProps = {
   message: FileMessage

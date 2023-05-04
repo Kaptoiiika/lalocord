@@ -5,11 +5,19 @@ import {
   getActionDeleteConnectedUsers,
   getRoomUsers,
 } from "../../model/selectors/RoomRTCSelectors"
-import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
-import { Answer, ClientId, Ice, Offer, RTCClient } from "../RTCClient/RTCClient"
+import {
+  Answer,
+  ClientId,
+  Ice,
+  Offer,
+  RTCClient,
+} from "../../../../entities/RTCClient/lib/RTCClient/RTCClient"
+import { useRoomRTCStore } from "@/entities/RTCClient"
+import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
 
 export const useWebRTCRoom = () => {
   const users = useRoomRTCStore(getRoomUsers)
+  const addMessageToChat = useChatStore((store) => store.addMessage)
   const deleteUser = useRoomRTCStore(getActionDeleteConnectedUsers)
 
   const usersRef = useRef(users)
@@ -26,6 +34,18 @@ export const useWebRTCRoom = () => {
     const user = usersRef.current[id]
     return user
   }
+
+  useEffect(() => {
+    Object.values(users).forEach((client) => {
+      client.channel.on("newMessage", addMessageToChat)
+    })
+
+    return () => {
+      Object.values(users).forEach((client) => {
+        client.channel.off("newMessage", addMessageToChat)
+      })
+    }
+  }, [addMessageToChat, users])
 
   useEffect(() => {
     const initClients = (users: UserModel[]) => {

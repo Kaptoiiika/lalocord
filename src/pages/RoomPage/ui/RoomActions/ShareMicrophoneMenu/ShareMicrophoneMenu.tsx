@@ -3,11 +3,11 @@ import {
   getActionSetMicrophoneStream,
   getMicrophoneStream,
 } from "@/pages/RoomPage/model/selectors/RoomRTCSelectors"
-import { useRoomRTCStore } from "@/pages/RoomPage/model/store/RoomRTCStore"
 import { Tooltip, IconButton } from "@mui/material"
 import { useCallback } from "react"
 import MicIcon from "@mui/icons-material/Mic"
 import MicOffIcon from "@mui/icons-material/MicOff"
+import { useRoomRTCStore } from "@/entities/RTCClient"
 // import styles from "./ShareMicrophoneMenu.module.scss"
 
 export const ShareMicrophoneMenu = () => {

@@ -1,9 +1,11 @@
-import { UserModel } from "@/entities/User"
+// eslint-disable-next-line boundaries/element-types
+import type { UserModel } from "@/entities/User"
+import { RTCDataChanel } from "./RTCDataChanel"
 import { socketClient } from "@/shared/api/socket/socket"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
-import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
-import { RTCDataChanel } from "./RTCDataChanel"
+
 import { RTCMedia } from "./RTCMedia"
+import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }

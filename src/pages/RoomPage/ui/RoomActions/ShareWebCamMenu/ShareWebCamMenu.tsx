@@ -3,11 +3,11 @@ import {
   getStreamSettings,
   getWebCamStream,
 } from "../../../model/selectors/RoomRTCSelectors"
-import { useRoomRTCStore } from "../../../model/store/RoomRTCStore"
 import { IconButton, Tooltip } from "@mui/material"
 import VideocamIcon from "@mui/icons-material/Videocam"
 import VideocamOffIcon from "@mui/icons-material/VideocamOff"
 import { useCallback } from "react"
+import { useRoomRTCStore } from "@/entities/RTCClient"
 
 export const ShareWebCamMenu = () => {
   const setWebCamStream = useRoomRTCStore(getActionSetWebCamStream)

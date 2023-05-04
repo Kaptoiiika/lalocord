@@ -4,4 +4,4 @@ export type {
   MessageData,
   FileMessage,
   FileMessageType,
-} from "./model/types/ChatSchem"
+} from "./model/types/ChatSchema"

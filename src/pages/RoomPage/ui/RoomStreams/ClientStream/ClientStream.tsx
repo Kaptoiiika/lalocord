@@ -1,5 +1,5 @@
-import { RTCClient } from "../../../lib/RTCClient/RTCClient"
-import { RTCClientMediaStream } from "../../../lib/RTCClient/RTCClientMediaStream"
+import { RTCClient } from "../../../../../entities/RTCClient/lib/RTCClient/RTCClient"
+import { RTCClientMediaStream } from "../../../../../entities/RTCClient/lib/RTCClient/RTCClientMediaStream"
 import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
 import { Stack, Typography } from "@mui/material"
 import styles from "./ClientStream.module.scss"

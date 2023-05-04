@@ -1,4 +1,4 @@
-import { RTCClient } from "@/pages/RoomPage/lib/RTCClient/RTCClient"
+import { RTCClient } from "@/entities/RTCClient/lib/RTCClient/RTCClient"
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { UserAvatar, UserAvatarStatus } from "@/shared/ui/UserAvatar/UserAvatar"
 import { IconButton, Menu, Tooltip } from "@mui/material"

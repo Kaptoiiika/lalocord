@@ -1,9 +1,14 @@
-import { UserModel } from "@/entities/User"
+// eslint-disable-next-line boundaries/element-types
+import type { UserModel } from "@/entities/User"
 import { convertBlobToBase64 } from "@/shared/lib/utils/Blob/convertBlobToBase64/convertBlobToBase64"
 import { covertBase64ToBlob } from "@/shared/lib/utils/Blob/covertBase64ToBlob/covertBase64ToBlob"
+import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 import { splitStringToChunks } from "@/shared/lib/utils/String/splitStringToChunks"
-import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
-import { MessageData, MessageModel } from "@/widgets/Chat/model/types/ChatSchem"
+// eslint-disable-next-line boundaries/element-types
+import type {
+  MessageData,
+  MessageModel,
+} from "@/widgets/Chat/model/types/ChatSchema"
 
 export type DataChunk = {
   id: string
@@ -15,7 +20,11 @@ export type DataChunk = {
 
 export type BaseMessageKeys = "file" | "text"
 
-export class RTCDataChanel<MessageKeys extends string = string> {
+type RTCDataChanelEvents = "newMessage"
+
+export class RTCDataChanel<
+  MessageKeys extends string = string
+> extends Emitter<RTCDataChanelEvents> {
   peer: RTCPeerConnection | null
   channel: RTCDataChannel
   user: UserModel
@@ -24,6 +33,7 @@ export class RTCDataChanel<MessageKeys extends string = string> {
   private fileBuffer: Record<string, DataChunk[]> = {}
 
   constructor(peer: RTCPeerConnection, user: UserModel) {
+    super()
     this.peer = peer
     this.user = user
 
@@ -118,7 +128,7 @@ export class RTCDataChanel<MessageKeys extends string = string> {
 
   onNewMessage(msg: MessageData) {
     const message: MessageModel = { data: msg, user: this.user }
-    useChatStore.getState().addMessage(message, true)
+    this.emit("newMessage", message)
   }
 
   close() {

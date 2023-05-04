@@ -1,5 +1,5 @@
 import { create, StateCreator } from "zustand"
-import { ChatSchema } from "../types/ChatSchem"
+import { ChatSchema } from "../types/ChatSchema"
 import notofficationSound from "@/shared/assets/audio/notification.mp3"
 
 const audio = new Audio(notofficationSound)
@@ -17,7 +17,6 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
 
   addMessage(message, playSound) {
     if (playSound) playAudio()
-
 
     set((state) => ({ ...state, messages: [...state.messages, message] }))
   },

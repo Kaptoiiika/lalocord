@@ -2,7 +2,6 @@ import { UserModel } from "@/entities/User"
 
 export interface ChatSchema {
   messages: MessageModel[]
-
   addMessage: (message: MessageModel, playSound?: boolean) => void
 }
 

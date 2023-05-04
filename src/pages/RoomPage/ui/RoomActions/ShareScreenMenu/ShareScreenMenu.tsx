@@ -6,7 +6,6 @@ import {
   getActionSetEncodingSettings,
   getStreamSettings,
 } from "../../../model/selectors/RoomRTCSelectors"
-import { useRoomRTCStore } from "../../../model/store/RoomRTCStore"
 import {
   IconButton,
   Tooltip,
@@ -25,11 +24,12 @@ import { MouseEvent, useState } from "react"
 import {
   bitrateToShortValue,
   bitrateValueText,
-} from "../../../utils/FormateBitrate"
+} from "../../../../../entities/RTCClient/utils/FormateBitrate"
 import ButtonGroup from "@mui/material/ButtonGroup"
 import Button from "@mui/material/Button"
 import { Stack } from "@mui/system"
-import { VideoStreamSettingsHint } from "@/pages/RoomPage/model/types/RoomRTCSchema"
+import { VideoStreamSettingsHint } from "@/entities/RTCClient/model/types/RoomRTCSchema"
+import { useRoomRTCStore } from "@/entities/RTCClient"
 
 type ShareScreenMenuProps = {}
 
