@@ -46,31 +46,41 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
         })
       )
     })
-    //restart stream?
-    if (streamSettings.video.deviceId !== userStreamSettings.video.deviceId && webCamStream) {
-      startWebCamStream()
-    }
-    if (streamSettings.audio.deviceId === userStreamSettings.audio.deviceId && microphoneStream) {
-      startMicrophoneStream()
-    }
-    microphoneStream?.getAudioTracks().forEach((track) => {
-      track.applyConstraints({ deviceId: streamSettings.audio.deviceId })
-    })
 
     set((state) => ({
       ...state,
       userStreamSettings: streamSettings,
       streamSettings: ConvertUserSettingsToMediaSettings(streamSettings),
     }))
+
+    //restart stream?
+    if (
+      streamSettings.video.deviceId !== userStreamSettings.video.deviceId &&
+      webCamStream
+    ) {
+      startWebCamStream()
+    }
+    if (
+      streamSettings.audio.deviceId !== userStreamSettings.audio.deviceId &&
+      microphoneStream
+    ) {
+      startMicrophoneStream()
+    }
   },
   joinRoom: (roomName) => {
     set((state) => ({ ...state, roomName: roomName }))
   },
   leaveRoom: () => {
-    const { webCamStream, displayMediaStream, connectedUsers } = get()
+    const {
+      webCamStream,
+      displayMediaStream,
+      microphoneStream,
+      connectedUsers,
+    } = get()
     const tracks = [
       ...(displayMediaStream?.getTracks() || []),
       ...(webCamStream?.getTracks() || []),
+      ...(microphoneStream?.getTracks() || []),
     ]
     tracks.forEach((tracks) => {
       tracks.onended = null
@@ -84,6 +94,7 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       ...state,
       webCamStream: null,
       displayMediaStream: null,
+      microphoneStream: null,
       connectedUsers: {},
     }))
   },
@@ -139,7 +150,6 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   },
   async startMicrophoneStream() {
     const { microphoneStream, streamSettings, stopMicrophoneStream } = get()
-
     const stream = await navigator.mediaDevices.getUserMedia({
       video: false,
       audio: streamSettings.audio,

@@ -10,12 +10,7 @@ import {
   getEncodingSettings,
   getActionSetEncodingSettings,
 } from "@/pages/RoomPage/model/selectors/RoomRTCSelectors"
-import {
-  Menu,
-  Stack,
-  Typography,
-  Slider,
-} from "@mui/material"
+import { Menu, Stack, Typography, Slider } from "@mui/material"
 import IconButton from "@mui/material/IconButton/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 import styles from "./VideoSettingsMenu.module.scss"
@@ -98,7 +93,6 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
       >
         <Stack gap={1}>
           <InlineSelect
-            title={"Frame Rate"}
             value={currentHint}
             list={["detail", "default", "motion"]}
             onSelect={handleChangeHint}

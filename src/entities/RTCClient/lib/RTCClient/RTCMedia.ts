@@ -261,6 +261,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     const senders = [
       ...(this.senders.media || []),
       ...(this.senders.webCam || []),
+      ...(this.senders.microphone || []),
     ]
     senders.forEach((sender) => {
       sender.replaceTrack(null)
