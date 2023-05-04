@@ -1,7 +1,7 @@
 import {
-  getStreamSettings,
-  getActionSetMicrophoneStream,
   getMicrophoneStream,
+  getActionStartMicrophoneStream,
+  getActionStopMicrophoneStream,
 } from "@/pages/RoomPage/model/selectors/RoomRTCSelectors"
 import { Tooltip, IconButton } from "@mui/material"
 import { useCallback } from "react"
@@ -14,38 +14,22 @@ import { SelectMicrophone } from "./SelectMicrophone"
 // import styles from "./ShareMicrophoneMenu.module.scss"
 
 export const ShareMicrophoneMenu = () => {
-  const setMicrophoneStream = useRoomRTCStore(getActionSetMicrophoneStream)
+  const startStream = useRoomRTCStore(getActionStartMicrophoneStream)
+  const stopStream = useRoomRTCStore(getActionStopMicrophoneStream)
   const microphoneStream = useRoomRTCStore(getMicrophoneStream)
-  const streamSettings = useRoomRTCStore(getStreamSettings)
   const { handleClick, handleClose, anchorEl, open } = usePopup()
 
   const handleStartWebCamStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: false,
-        audio: streamSettings.audio,
-      })
-      microphoneStream?.getTracks().forEach((tracks) => {
-        tracks.onended = null
-        tracks.stop()
-      })
-      setMicrophoneStream(stream)
-      stream.getVideoTracks().forEach((track) => {
-        track.onended = () => {
-          setMicrophoneStream(null)
-        }
-      })
+      startStream()
     } catch (error: any) {
       console.log(error)
     }
   }
 
   const handleStopStream = useCallback(() => {
-    microphoneStream?.getTracks().forEach((track) => {
-      track.stop()
-    })
-    setMicrophoneStream(null)
-  }, [microphoneStream, setMicrophoneStream])
+    stopStream()
+  }, [stopStream])
 
   return (
     <>

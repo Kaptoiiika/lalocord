@@ -1,9 +1,9 @@
 import {
-  getActionSetWebCamStream,
-  getStreamSettings,
+  getActionStartWebCamStream,
+  getActionStopWebCamStream,
   getWebCamStream,
 } from "../../../model/selectors/RoomRTCSelectors"
-import { IconButton, Tooltip, Stack } from "@mui/material"
+import { IconButton, Tooltip } from "@mui/material"
 import VideocamIcon from "@mui/icons-material/Videocam"
 import VideocamOffIcon from "@mui/icons-material/VideocamOff"
 import { useCallback } from "react"
@@ -13,38 +13,22 @@ import Menu from "@mui/material/Menu/Menu"
 import { SelectCamera } from "./SelectCamera/SelectCamera"
 
 export const ShareWebCamMenu = () => {
-  const setWebCamStream = useRoomRTCStore(getActionSetWebCamStream)
+  const startStream = useRoomRTCStore(getActionStartWebCamStream)
+  const stopStream = useRoomRTCStore(getActionStopWebCamStream)
   const webCamStream = useRoomRTCStore(getWebCamStream)
-  const streamSettings = useRoomRTCStore(getStreamSettings)
   const { handleClick, handleClose, anchorEl, open } = usePopup()
 
   const handleStartWebCamStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: streamSettings.video,
-        audio: false,
-      })
-      webCamStream?.getTracks().forEach((tracks) => {
-        tracks.onended = null
-        tracks.stop()
-      })
-      setWebCamStream(stream)
-      stream.getVideoTracks().forEach((track) => {
-        track.onended = () => {
-          setWebCamStream(null)
-        }
-      })
+      startStream()
     } catch (error: any) {
       console.log(error)
     }
   }
 
   const handleStopStream = useCallback(() => {
-    webCamStream?.getTracks().forEach((track) => {
-      track.stop()
-    })
-    setWebCamStream(null)
-  }, [setWebCamStream, webCamStream])
+    stopStream()
+  }, [stopStream])
 
   return (
     <>

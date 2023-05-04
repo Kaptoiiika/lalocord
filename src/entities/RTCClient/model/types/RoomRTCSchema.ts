@@ -16,9 +16,11 @@ export interface RoomRTCSchema {
   setEncodingSettings: (settings: RTCRtpEncodingParameters) => void
   deleteConnectedUser: (id: UserId) => void
   addConnectedUsers: (...users: RTCClient[]) => void
-  setWebCamStream: (stream: MediaStream | null) => void
+  startWebCamStream: () => Promise<void>
+  stopWebCamStream: () => void
   setdisplayMediaStream: (stream: MediaStream | null) => void
-  setMicrophoneStream: (stream: MediaStream | null) => void
+  startMicrophoneStream: () => Promise<void>
+  stopMicrophoneStream: () => void
   changeAutoplay: (condition: boolean) => void
   setStreamSettings: (streamSettings: UserStreamSettings) => void
 }

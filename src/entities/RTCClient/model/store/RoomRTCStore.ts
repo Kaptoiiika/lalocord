@@ -33,6 +33,8 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       webCamStream,
       microphoneStream,
       userStreamSettings,
+      startWebCamStream,
+      startMicrophoneStream,
     } = get()
     const streamWithVideo = [displayMediaStream, webCamStream]
     streamWithVideo.map((stream) => {
@@ -44,12 +46,17 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
         })
       )
     })
-    webCamStream?.getVideoTracks().forEach((track) => {
-      track.applyConstraints({ deviceId: streamSettings.video.deviceId })
-    })
+    //restart stream?
+    if (streamSettings.video.deviceId !== userStreamSettings.video.deviceId) {
+      startWebCamStream()
+    }
+    if (streamSettings.audio.deviceId === userStreamSettings.audio.deviceId) {
+      startMicrophoneStream()
+    }
     microphoneStream?.getAudioTracks().forEach((track) => {
       track.applyConstraints({ deviceId: streamSettings.audio.deviceId })
     })
+
     set((state) => ({
       ...state,
       userStreamSettings: streamSettings,
@@ -102,14 +109,59 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       connectedUsers: { ...usrs },
     }))
   },
-  setWebCamStream(stream) {
+  async startWebCamStream() {
+    const { webCamStream, streamSettings, stopWebCamStream } = get()
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: streamSettings.video,
+      audio: false,
+    })
+    webCamStream?.getTracks().forEach((tracks) => {
+      tracks.onended = null
+      tracks.stop()
+    })
+    stream.getVideoTracks().forEach((track) => {
+      track.onended = () => {
+        stopWebCamStream()
+      }
+    })
     set((state) => ({ ...state, webCamStream: stream }))
+  },
+  stopWebCamStream() {
+    const { webCamStream } = get()
+    webCamStream?.getTracks().forEach((tracks) => {
+      tracks.onended = null
+      tracks.stop()
+    })
+    set((state) => ({ ...state, webCamStream: null }))
   },
   setdisplayMediaStream(stream) {
     set((state) => ({ ...state, displayMediaStream: stream }))
   },
-  setMicrophoneStream(stream) {
+  async startMicrophoneStream() {
+    const { microphoneStream, streamSettings, stopMicrophoneStream } = get()
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: false,
+      audio: streamSettings.audio,
+    })
+    microphoneStream?.getTracks().forEach((tracks) => {
+      tracks.onended = null
+      tracks.stop()
+    })
+    stream.getVideoTracks().forEach((track) => {
+      track.onended = () => {
+        stopMicrophoneStream()
+      }
+    })
     set((state) => ({ ...state, microphoneStream: stream }))
+  },
+  stopMicrophoneStream() {
+    const { microphoneStream } = get()
+    microphoneStream?.getTracks().forEach((tracks) => {
+      tracks.onended = null
+      tracks.stop()
+    })
+    set((state) => ({ ...state, microphoneStream: null }))
   },
   changeAutoplay(condition) {
     saveAutoPlaytoLocalStorage(condition)
