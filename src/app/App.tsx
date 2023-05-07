@@ -6,7 +6,7 @@ import { AppRouter } from "./providers/Router/ui/AppRouter"
 
 const App = () => {
   useMountedEffect(() => {
-    console.log("Build v", __BUILD_VERSION__ || "unknown")
+    console.log("Build v", __BUILD_VERSION__ ?? "unknown")
   })
 
   return (

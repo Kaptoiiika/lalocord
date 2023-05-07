@@ -41,8 +41,11 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       const videoTrack = stream?.getVideoTracks()
       videoTrack?.forEach((track) =>
         track.applyConstraints({
-          frameRate: userStreamSettings.video?.frameRate,
-          height: userStreamSettings.video?.height,
+          frameRate:
+            streamSettings.video?.frameRate ||
+            userStreamSettings.video?.frameRate,
+          height:
+            streamSettings.video?.height || userStreamSettings.video?.height,
         })
       )
     })
