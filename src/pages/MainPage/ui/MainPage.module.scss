@@ -1,3 +1,7 @@
 .mainPage {
-  margin: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  overflow: auto;
 }

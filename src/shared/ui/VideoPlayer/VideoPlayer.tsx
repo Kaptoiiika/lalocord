@@ -14,6 +14,7 @@ import { VideoPlayerDebugInfo } from "./VideoPlayerDebugInfo/VideoPlayerDebugInf
 import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
 import { VideoPlayerActions } from "./VideoPlayerActions/VideoPlayerActions"
 import { VideoPlayerTooltip } from "./VideoPlayerTooltip/VideoPlayerTooltip"
+import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
 
 type VideoPlayerProps = {
   stream?: MediaStream | null
@@ -23,6 +24,7 @@ type VideoPlayerProps = {
   initVolume?: number
   className?: string
   mute?: boolean
+  autoplay?: boolean
 } & PropsWithChildren
 
 let debugValue = !!localStorage.getItem("debug")
@@ -33,6 +35,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     initVolume,
     className,
     mute,
+    autoplay,
     onPlay,
     onPause,
     onVolumeChange,
@@ -75,6 +78,12 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       console.error(error)
     }
   }, [onPlay])
+
+  useMountedEffect(() => {
+    if (autoplay) {
+      handlePlay()
+    }
+  })
 
   const handlePlayPause = useCallback(() => {
     if (played) handlePause()
@@ -179,7 +188,6 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
         className={classNames([styles.video, className], {
           [styles.cursorHide]: toolsIsClosed,
         })}
-        autoPlay
         playsInline
       />
     </div>

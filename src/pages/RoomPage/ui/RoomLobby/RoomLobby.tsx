@@ -7,6 +7,7 @@ import { RoomActions } from "../RoomActions/RoomActions"
 import { RoomIsFull } from "../RoomIsFull/RoomIsFull"
 import { RoomStreams } from "../RoomStreams/RoomStreams"
 import { RoomUsers } from "../RoomUsers/RoomUsers"
+import { WaitUserClick } from "../WaitUserClick/WaitUserClick"
 import styles from "./RoomLobby.module.scss"
 
 export const RoomLobby = () => {
@@ -26,15 +27,18 @@ export const RoomLobby = () => {
     return <RoomIsFull />
   }
 
-  return (
-    <Stack justifyContent="space-between" direction="row" height="100%">
-      <div className={styles.mainScreen}>
-        <RoomUsers />
-        <RoomStreams />
-        <RoomActions />
-      </div>
 
-      <Chat onSendMessage={handleSendMessage} onSendFile={handleSendBlob} />
-    </Stack>
+  return (
+    <WaitUserClick>
+      <Stack justifyContent="space-between" direction="row" height="100%">
+        <div className={styles.mainScreen}>
+          <RoomUsers />
+          <RoomStreams />
+          <RoomActions />
+        </div>
+
+        <Chat onSendMessage={handleSendMessage} onSendFile={handleSendBlob} />
+      </Stack>
+    </WaitUserClick>
   )
 }

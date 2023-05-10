@@ -32,7 +32,11 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     microphone: null,
   }
   encodingSettings: RTCRtpEncodingParameters = {}
-  pause = true
+  pause: Record<MediaStreamTypes, boolean> = {
+    media: true,
+    webCam: true,
+    microphone: true,
+  }
 
   private unsubfn
 
@@ -74,46 +78,21 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
       if (encodingSettings !== this.encodingSettings) {
         this.encodingSettings = encodingSettings
-        this.updateBitrate()
+        this.updateBitrate("media")
+        this.updateBitrate("webCam")
       }
     })
     return sub
   }
 
   reqestPauseStream(type: MediaStreamTypes) {
-    // const currentSenders = this.senders[type]
-    // const currentStream = this.stream[type]?.clone()
-    // const videoTrack = currentStream?.getVideoTracks()?.[0] ?? null
-    // const audioTrack = currentStream?.getAudioTracks()?.[0] ?? null
-
-    // currentSenders?.forEach((sender) => {
-    //   if (sender.track?.kind === "video" && videoTrack) {
-    //     sender.replaceTrack(videoTrack)
-    //     videoTrack.stop()
-    //   } else if (sender.track?.kind === "audio" && audioTrack) {
-    //     sender.replaceTrack(audioTrack)
-    //     audioTrack.stop()
-    //   }
-    // })
-    this.pause = true
-    this.updateBitrate(100000)
+    this.pause[type] = true
+    this.updateBitrate(type)
   }
 
   reqestResumeStream(type: MediaStreamTypes) {
-    // const currentSenders = this.senders[type]
-    // const currentStream = this.stream[type]
-    // const videoTrack = currentStream?.getVideoTracks()?.[0] ?? null
-    // const audioTrack = currentStream?.getAudioTracks()?.[0] ?? null
-
-    // currentSenders?.forEach((sender) => {
-    //   if (sender.track?.kind === "video" && videoTrack) {
-    //     return sender.replaceTrack(videoTrack)
-    //   } else if (sender.track?.kind === "audio" && audioTrack) {
-    //     return sender.replaceTrack(audioTrack)
-    //   }
-    // })
-    this.pause = false
-    this.updateBitrate()
+    this.pause[type] = false
+    this.updateBitrate(type)
   }
 
   async sendStream(stream: MediaStream, type: MediaStreamTypes) {
@@ -144,7 +123,6 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
     this.senders[type] = await Promise.all(senders)
     this.emit("sendStream")
-
   }
 
   getStreamType(): RemoteTracksTypes[] {
@@ -226,30 +204,29 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     this.remoteStream[type]?.close()
   }
 
-  updateBitrate(bitrate?: number) {
+  updateBitrate(type: MediaStreamTypes) {
     if (!this.peer) return
-    // if (this.pause) return
 
-    const videoSender = this.peer
-      ?.getSenders()
-      .filter((sender) => sender.track?.kind === "video")
+    const videoSender = this.senders[type]
     if (!videoSender) return
     videoSender?.map((sender) => {
+      if (sender.track?.kind !== "video") {
+        return
+      }
+
       const params = sender.getParameters()
       const encoders = params.encodings.map((encod) => {
-        if (bitrate) {
+        if (this.pause[type]) {
           return {
             ...encod,
             ...this.encodingSettings,
-            maxBitrate: bitrate,
-            networkPriority: this.encodingSettings.priority,
+            maxBitrate: 10000,
           }
         }
 
         return {
           ...encod,
           ...this.encodingSettings,
-          networkPriority: this.encodingSettings.priority,
         }
       })
       params.encodings = encoders

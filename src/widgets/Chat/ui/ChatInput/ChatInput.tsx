@@ -56,7 +56,7 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   const handleSendMessage = () => {
     if (text === "") return
     const message = text.trim()
-    addMessage({ data: message, user: localUser })
+    addMessage({ data: message, user: localUser }, true)
     onSendMessage?.(message)
     setText("")
   }

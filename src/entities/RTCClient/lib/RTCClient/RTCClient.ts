@@ -169,7 +169,8 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   async saveAnswer(answer: RTCSessionDescription) {
     await this.peer?.setRemoteDescription(answer)
-    this.media.updateBitrate()
+    this.media.updateBitrate('media')
+    this.media.updateBitrate('webCam')
   }
 
   saveIce(ice: RTCIceCandidateInit) {

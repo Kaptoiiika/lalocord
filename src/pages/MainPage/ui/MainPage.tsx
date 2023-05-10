@@ -1,5 +1,6 @@
 import { RoomList } from "@/entities/Room"
 import { useUserStore } from "@/entities/User"
+import { AppFooter } from "@/widgets/Footer"
 import { PageWrapper } from "@/widgets/Page"
 import { Stack, TextField } from "@mui/material"
 import styles from "./MainPage.module.scss"
@@ -11,8 +12,14 @@ export const MainPage = () => {
   }
 
   return (
-    <PageWrapper className={styles.mainPage}>
-      <Stack direction="column" gap={1} alignItems="start">
+    <PageWrapper component="div" className={styles.mainPage}>
+      <Stack
+        component="main"
+        direction="column"
+        gap={1}
+        margin={1}
+        alignItems="start"
+      >
         <TextField
           variant="outlined"
           value={localUser.username}
@@ -22,6 +29,8 @@ export const MainPage = () => {
         />
         <RoomList />
       </Stack>
+
+      <AppFooter />
     </PageWrapper>
   )
 }
