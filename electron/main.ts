@@ -6,8 +6,8 @@ const createWindow = () => {
     width: 800,
     height: 600,
   })
-
-  win.loadFile(path.resolve("..", "public", "index.html"))
+  win.setMenu(null)
+  win.loadFile(path.resolve(__dirname, "app", "index.html"))
 }
 
 app.whenReady().then(() => {
@@ -16,7 +16,7 @@ app.whenReady().then(() => {
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
-}) 
+})
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit()
 })

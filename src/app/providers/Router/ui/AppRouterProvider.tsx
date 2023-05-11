@@ -4,10 +4,10 @@ import styles from "./RoterProvider.module.scss"
 
 type RoterProviderProps = {} & PropsWithChildren
 
-export const AppRouterProvider  = (props: RoterProviderProps) => {
+export const AppRouterProvider = (props: RoterProviderProps) => {
   const { children } = props
 
-  if (false) { // __electron__
+  if (__IS_ELECTRON__) {
     return <HashRouter>{children}</HashRouter>
   }
 

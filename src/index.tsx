@@ -28,4 +28,6 @@ root.render(
   // </React.StrictMode>
 )
 
-navigator.serviceWorker?.register("/service-worker.js")
+if (__IS_ELECTRON__ === false) {
+  navigator.serviceWorker?.register("/service-worker.js")
+}
