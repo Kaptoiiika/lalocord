@@ -9,25 +9,42 @@ import webPackConfig from "./webpack.config.electron"
 const webPackConfigList = webPackConfig({})
 const mainConfig = webPackConfigList[0]
 const rendererConfig = webPackConfigList[1]
+const preloadConfig = webPackConfigList[2]
 
 const config: ForgeConfig = {
-  packagerConfig: {},
+  packagerConfig: {
+    icon: "./public/favicon.ico",
+  },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
+    new MakerSquirrel({
+      setupIcon: "./public/favicon.ico",
+    }),
     new MakerZIP({}, ["darwin"]),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    new MakerRpm({
+      options: {
+        icon: "./public/logo512.png",
+      },
+    }),
+    new MakerDeb({
+      options: {
+        icon: "./public/logo512.png",
+      },
+    }),
   ],
   plugins: [
     new WebpackPlugin({
       mainConfig,
+      devContentSecurityPolicy: "*",
       renderer: {
         config: rendererConfig,
         entryPoints: [
           {
+            html: "./public/index.html",
+            js: "./src/index.tsx",
             name: "main_window",
             preload: {
+              config: preloadConfig,
               js: "./electron/preload.ts",
             },
           },

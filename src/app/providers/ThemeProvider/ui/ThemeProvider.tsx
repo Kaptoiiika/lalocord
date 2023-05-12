@@ -16,7 +16,7 @@ const getDefaultTheme = (): Theme => {
   ) {
     return Theme.dark
   }
-  return Theme.light
+  return Theme.dark
 }
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {

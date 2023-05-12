@@ -12,7 +12,6 @@ export function buildWebpackConfig(
 
   const isDevOptions = isDev
     ? {
-        target: isDev ? "web" : "browserslist",
         devServer: buildDevServer(options),
       }
     : {}
