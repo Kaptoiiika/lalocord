@@ -153,10 +153,18 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   },
   async startMicrophoneStream() {
     const { microphoneStream, streamSettings, stopMicrophoneStream } = get()
+    const audioConstraints =
+      typeof streamSettings.audio === "object" ? streamSettings.audio : {}
     const stream = await navigator.mediaDevices.getUserMedia({
       video: false,
-      audio: streamSettings.audio,
+      audio: {
+        ...audioConstraints,
+        autoGainControl: true,
+        noiseSuppression: true,
+        echoCancellation: true,
+      },
     })
+
     microphoneStream?.getTracks().forEach((tracks) => {
       tracks.onended = null
       tracks.stop()
