@@ -220,7 +220,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
           return {
             ...encod,
             ...this.encodingSettings,
-            maxBitrate: 10000,
+            maxBitrate: 100000,
           }
         }
 
