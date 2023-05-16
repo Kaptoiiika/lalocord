@@ -1,3 +1,5 @@
+import { ClientKeyPressEvent, ClientKeys } from "@/shared/types/ClientKeys"
+
 const formatedKeys: Record<ClientKeys, string | null> = {
   ScrollLock: null,
   Pause: null,
@@ -103,8 +105,6 @@ const formatedKeys: Record<ClientKeys, string | null> = {
   Enter: "enter",
   Space: "space",
 }
-
-import { ClientKeyPressEvent, ClientKeys } from "@/shared/types/ClientKeys"
 
 export const KeyHtmltoRobotJs = (keyEvent: ClientKeyPressEvent) => {
   return formatedKeys[keyEvent.key] || null

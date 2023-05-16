@@ -43,6 +43,7 @@ export const ClientStream = (props: ClientStreamProps) => {
       const subDown = (e: KeyboardEvent) => {
         e.preventDefault()
         e.stopPropagation()
+        if (e.repeat) return
         const payload: ClientKeyPressEvent = {
           key: e.key as ClientKeys,
           state: "down",
@@ -52,12 +53,14 @@ export const ClientStream = (props: ClientStreamProps) => {
       const subUp = (e: KeyboardEvent) => {
         e.preventDefault()
         e.stopPropagation()
+        if (e.repeat) return
         const payload: ClientKeyPressEvent = {
           key: e.code as ClientKeys,
           state: "up",
         }
         client.channel.sendData("clientPressKey", payload)
       }
+
       document.addEventListener("keydown", subDown)
       document.addEventListener("keyup", subUp)
       return () => {
