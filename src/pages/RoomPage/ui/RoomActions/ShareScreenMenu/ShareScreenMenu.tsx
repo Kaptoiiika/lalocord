@@ -60,7 +60,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
         client.media.setAllowControl(true)
       }
     )
-    await handleStartDisplayMediaStream()
+    if (!mediaStream) await handleStartDisplayMediaStream()
   }
 
   return (

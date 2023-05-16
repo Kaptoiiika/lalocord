@@ -9,7 +9,6 @@ ipcMain.on(
     e: Electron.IpcMainEvent,
     value: IpcToMainEventMap[IpcChannels.keypress]
   ) => {
-    console.log(value.state)
     const key = KeyHtmltoRobotJs(value)
     if (key) {
       keyToggle(key, value.state)
