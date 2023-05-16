@@ -24,6 +24,15 @@ export const RoomLobby = () => {
     }
   }, [])
 
+  useMountedEffect(() => {
+    const keys = new Set()
+    document.addEventListener("keydown", (e) => {
+      keys.add(e.code)
+      e.preventDefault()
+      e.stopPropagation()
+      console.log(keys)
+    })
+  })
   if (roomisFull) {
     return <RoomIsFull />
   }

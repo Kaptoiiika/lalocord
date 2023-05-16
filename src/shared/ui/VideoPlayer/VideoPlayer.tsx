@@ -109,6 +109,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const handleEnterFullscreen = useCallback(() => {
     try {
       playerRef.current?.requestFullscreen()
+      setFullscreen(true)
       onFullscreenEnter?.()
     } catch (error) {
       console.error(error)
@@ -117,6 +118,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const handleExitFullscreen = useCallback(() => {
     try {
       document.exitFullscreen()
+      setFullscreen(false)
       onFullscreenExit?.()
     } catch (error) {
       console.error(error)

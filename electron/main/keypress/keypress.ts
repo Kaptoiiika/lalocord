@@ -1,6 +1,7 @@
 import { ipcMain } from "electron"
 import { keyToggle } from "robotjs"
 import { IpcChannels, IpcToMainEventMap } from "../types/ipcChannels"
+import { KeyHtmltoRobotJs } from "./KeyHtmltoRobotJs"
 
 ipcMain.on(
   IpcChannels.keypress,
@@ -8,6 +9,7 @@ ipcMain.on(
     e: Electron.IpcMainEvent,
     value: IpcToMainEventMap[IpcChannels.keypress]
   ) => {
-    keyToggle(value.key, value.state)
+    const key = KeyHtmltoRobotJs(value)
+    if (key) keyToggle(key, value.state)
   }
 )

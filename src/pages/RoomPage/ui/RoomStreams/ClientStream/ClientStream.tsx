@@ -53,7 +53,7 @@ export const ClientStream = (props: ClientStreamProps) => {
         e.preventDefault()
         e.stopPropagation()
         const payload: ClientKeyPressEvent = {
-          key: e.key as ClientKeys,
+          key: e.code as ClientKeys,
           state: "up",
         }
         client.channel.sendData("clientPressKey", payload)
