@@ -56,6 +56,7 @@ const formatedKeys: Record<ClientKeys, string | null> = {
   NumpadMultiply: "*",
   NumpadAdd: "+",
   NumpadDivide: "/",
+  NumpadDecimal: ",",
   Numpad0: "numpad_0",
   Numpad1: "numpad_1",
   Numpad2: "numpad_2",
@@ -67,7 +68,7 @@ const formatedKeys: Record<ClientKeys, string | null> = {
   Numpad8: "numpad_8",
   Numpad9: "numpad_9",
   ShiftLeft: "shift",
-  Comma: "command",
+  Comma: ",",
   Period: ".",
   Slash: "/",
   ShiftRight: "right_shift",
@@ -78,7 +79,6 @@ const formatedKeys: Record<ClientKeys, string | null> = {
   ArrowRight: "right",
   ArrowDown: "down",
   ArrowLeft: "left",
-  NumpadDecimal: ",",
   //no formated
   Escape: "escape",
   F1: "f1",
@@ -107,5 +107,5 @@ const formatedKeys: Record<ClientKeys, string | null> = {
 }
 
 export const KeyHtmltoRobotJs = (keyEvent: ClientKeyPressEvent) => {
-  return formatedKeys[keyEvent.key] || null
+  return formatedKeys[keyEvent.code] || null
 }

@@ -12,6 +12,10 @@ ipcMain.on(
     const key = KeyHtmltoRobotJs(value)
     if (key) {
       keyToggle(key, value.state)
+    } else {
+      try {
+        keyToggle(value.key.toLowerCase(), value.state)
+      } catch (error) {}
     }
   }
 )

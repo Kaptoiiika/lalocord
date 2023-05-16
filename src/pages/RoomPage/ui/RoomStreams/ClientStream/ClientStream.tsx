@@ -45,7 +45,8 @@ export const ClientStream = (props: ClientStreamProps) => {
         e.stopPropagation()
         if (e.repeat) return
         const payload: ClientKeyPressEvent = {
-          key: e.code as ClientKeys,
+          key: e.key,
+          code: e.code as ClientKeys,
           state: "down",
         }
         client.channel.sendData("clientPressKey", payload)
@@ -55,7 +56,8 @@ export const ClientStream = (props: ClientStreamProps) => {
         e.stopPropagation()
         if (e.repeat) return
         const payload: ClientKeyPressEvent = {
-          key: e.code as ClientKeys,
+          key: e.key as ClientKeys,
+          code: e.code as ClientKeys,
           state: "up",
         }
         client.channel.sendData("clientPressKey", payload)
