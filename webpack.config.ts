@@ -20,7 +20,7 @@ export default (env: BuildEnv) => {
     src: path.resolve(__dirname, "src"),
   }
 
-  const PORT = env.port || 3000
+  const PORT = env.port || Number(fileEnv?.port) || 3000
   const APIURL = env.apiURL || fileEnv?.apiURL || ""
 
   const config: webpack.Configuration = buildWebpackConfig({

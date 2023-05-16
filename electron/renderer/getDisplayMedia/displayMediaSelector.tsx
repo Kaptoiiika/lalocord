@@ -7,12 +7,20 @@ type SourceType = Awaited<
   ReturnType<typeof window.electron.ipcRenderer.invoke<IpcChannels.getMediaSource>>
 >[0]
 
+const getMediaSource = async ():Promise<SourceType[]>=>{
+  const data = await new Promise<SourceType[]>((res, rej)=>{
+    window.electron.ipcRenderer.once('getMediaSource', (source)=>{
+      res(source)
+    })
+    window.electron.ipcRenderer.sendMessage('getMediaSource', undefined)
+  })
+  
+  return data
+}
+
 export const displayMediaSelector = (): Promise<SourceType | undefined> =>
   new Promise(async (res, rej) => {
-    const sources = await window.electron.ipcRenderer.invoke(
-      IpcChannels.getMediaSource,
-      null
-    )
+    const sources = await getMediaSource()
     const modalContainer = document.createElement("div")
     document.body.appendChild(modalContainer)
     const main = createRoot(modalContainer)

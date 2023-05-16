@@ -120,12 +120,15 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       console.error(error)
     }
   }, [onFullscreenExit])
-  const handleFullscreenToggle = useCallback((e: MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (document.fullscreenElement) document.exitFullscreen()
-    else playerRef.current?.requestFullscreen()
-  }, [])
+  const handleFullscreenToggle = useCallback(
+    (e: MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (document.fullscreenElement) handleExitFullscreen()
+      else handleFullscreen()
+    },
+    [handleExitFullscreen, handleFullscreen]
+  )
 
   const handleRefVideo = useCallback(
     (node: HTMLVideoElement | null) => {

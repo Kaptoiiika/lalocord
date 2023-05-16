@@ -34,7 +34,7 @@ export const ClientStream = (props: ClientStreamProps) => {
     client.channel.sendData("resumeStream", clientStream.type)
   }
   const [takeControll, setTakeControll] = useState(false)
-  
+
   useEffect(() => {
     if (takeControll) {
       const sub = (e: KeyboardEvent) => {
@@ -52,7 +52,6 @@ export const ClientStream = (props: ClientStreamProps) => {
   const handleTakeOffControll = () => {
     setTakeControll(false)
   }
-
   return (
     <VideoPlayer
       stream={clientStream.stream}

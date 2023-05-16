@@ -9,5 +9,6 @@ ipcMain.on(
     value: IpcToMainEventMap[IpcChannels.keypress]
   ) => {
     keyTap(value)
+    console.log('taped')
   }
 )
