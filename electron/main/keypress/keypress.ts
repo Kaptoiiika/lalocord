@@ -13,3 +13,4 @@ ipcMain.on(
     if (key) keyToggle(key, value.state)
   }
 )
+
