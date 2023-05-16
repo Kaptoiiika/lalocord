@@ -27,6 +27,7 @@ type VideoPlayerProps = {
   className?: string
   mute?: boolean
   autoplay?: boolean
+  fullScreen?: boolean
 } & PropsWithChildren
 
 let debugValue = !!localStorage.getItem("debug")
@@ -38,6 +39,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     className,
     mute,
     autoplay,
+    fullScreen: propsFullScreen = false,
     onPlay,
     onPause,
     onVolumeChange,
@@ -47,7 +49,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     ...other
   } = props
   const [played, setPlayed] = useState(false)
-  const [fullscreen, setFullscreen] = useState(false)
+  const [fullscreen, setFullscreen] = useState(propsFullScreen)
   const [volume, setVolume] = useState(
     getNumberBeetwenTwoValues(initVolume, 0, 1)
   )
@@ -104,7 +106,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     [onVolumeChange]
   )
 
-  const handleFullscreen = useCallback(() => {
+  const handleEnterFullscreen = useCallback(() => {
     try {
       playerRef.current?.requestFullscreen()
       onFullscreenEnter?.()
@@ -125,10 +127,19 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       e.preventDefault()
       e.stopPropagation()
       if (document.fullscreenElement) handleExitFullscreen()
-      else handleFullscreen()
+      else handleEnterFullscreen()
     },
-    [handleExitFullscreen, handleFullscreen]
+    [handleExitFullscreen, handleEnterFullscreen]
   )
+  useEffect(() => {
+    if (propsFullScreen === true && fullscreen === false) {
+      handleEnterFullscreen()
+    }
+    if (!playerRef.current) return
+    playerRef.current.onfullscreenchange = () => {
+      if (!document.fullscreenElement) handleExitFullscreen()
+    }
+  }, [propsFullScreen, fullscreen, handleEnterFullscreen, handleExitFullscreen])
 
   const handleRefVideo = useCallback(
     (node: HTMLVideoElement | null) => {
@@ -150,11 +161,6 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const handleRefPlayer = useCallback((node: HTMLDivElement | null) => {
     playerRef.current = node
     if (!node) return
-
-    node.onfullscreenchange = () => {
-      if (document.fullscreenElement === node) setFullscreen(true)
-      else setFullscreen(false)
-    }
   }, [])
 
   if (videoRef.current) {
@@ -187,7 +193,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
         mute={mute}
         handleChangeVolume={handleChangeVolume}
         handleExitFullscreen={handleExitFullscreen}
-        handleFullscreen={handleFullscreen}
+        handleFullscreen={handleEnterFullscreen}
         handlePlayPause={handlePlayPause}
       />
       <video

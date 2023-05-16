@@ -2,7 +2,7 @@ import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKe
 import { UserModel } from "../types/UserSchema"
 
 const defaultUser: UserModel = {
-  id: "local",
+  id: "You",
   username: "",
 }
 

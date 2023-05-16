@@ -13,6 +13,7 @@ export type RemoteTracksTypes = {
   type: MediaStreamTypes
   kind: string
   mid: string | null
+  allowControl?: boolean
 }
 
 export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
@@ -140,11 +141,17 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
           type: key as MediaStreamTypes,
           kind: track.kind,
           mid: transceiver?.mid || null,
+          allowControl: key === "media" ? this.allowControl : undefined,
         })
       })
     })
 
     return availableStream
+  }
+
+  setAllowControl(value: boolean) {
+    this.allowControl = value
+    this.emit("sendStream")
   }
 
   reciveTrack(event: RTCTrackEvent) {
@@ -167,6 +174,8 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
       if (currentStream) {
         if (currentTrack) currentStream.addTrack(currentTrack)
+        if (trackType.allowControl)
+          currentStream.setAllowcontrol(trackType.allowControl)
         currentStream.open()
         return
       }
@@ -174,6 +183,8 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       const mediaStream = new MediaStream()
       if (currentTrack) mediaStream.addTrack(currentTrack)
       const clientStream = new RTCClientMediaStream(mediaStream, trackType.type)
+      if (trackType.allowControl)
+        clientStream.setAllowcontrol(trackType.allowControl)
 
       this.remoteStream[trackType.type] = clientStream
       clientStream.on("open", () => {
@@ -237,8 +248,8 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
   clientPressKey(key: string) {
     if (!__IS_ELECTRON__) return
-    if (this.allowControl) return
-    window.electron.ipcRenderer.sendMessage('keypress', key)
+    if (!this.allowControl) return
+    window.electron.ipcRenderer.sendMessage("keypress", key)
   }
 
   close() {

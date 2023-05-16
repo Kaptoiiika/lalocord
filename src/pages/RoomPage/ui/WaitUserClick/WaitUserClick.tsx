@@ -27,7 +27,7 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
   })
 
   //@ts-ignore not in firefox 
-  if (!navigator.userActivation?.hasBeenActive) {
+  if (navigator.userActivation && !navigator.userActivation?.hasBeenActive) {
     return (
       <div className={styles.WaitUserClick}>
         <Typography variant="h4">Сlick anywhere to continue</Typography>

@@ -1,9 +1,11 @@
 import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
-import { Stack, Typography } from "@mui/material"
+import { Button, Stack, Typography } from "@mui/material"
 import styles from "./ClientStream.module.scss"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
 import { useState, useEffect } from "react"
 import { RTCClient, RTCClientMediaStream } from "@/entities/RTCClient"
+import KeyboardIcon from "@mui/icons-material/Keyboard"
+import Tooltip from "@mui/material/Tooltip"
 
 type ClientStreamProps = {
   client: RTCClient
@@ -38,6 +40,8 @@ export const ClientStream = (props: ClientStreamProps) => {
   useEffect(() => {
     if (takeControll) {
       const sub = (e: KeyboardEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
         client.channel.sendData("clientPressKey", e.key)
       }
       document.addEventListener("keypress", sub)
@@ -52,6 +56,9 @@ export const ClientStream = (props: ClientStreamProps) => {
   const handleTakeOffControll = () => {
     setTakeControll(false)
   }
+
+  const allowControl = clientStream.allowControl
+
   return (
     <VideoPlayer
       stream={clientStream.stream}
@@ -59,12 +66,23 @@ export const ClientStream = (props: ClientStreamProps) => {
       onVolumeChange={handleChangeVolume}
       onPause={handlePause}
       onPlay={handlePlay}
-      onFullscreenEnter={handleTakeControll}
       onFullscreenExit={handleTakeOffControll}
+      fullScreen={takeControll}
       autoplay={autoplay}
     >
-      <Stack className={styles.streamTooltip}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        className={styles.streamTooltip}
+      >
         <Typography>{client.user?.username || client.user?.id}</Typography>
+        {allowControl && (
+          <Tooltip title="Take control">
+            <Button aria-label="Take control" onClick={handleTakeControll}>
+              <KeyboardIcon />
+            </Button>
+          </Tooltip>
+        )}
       </Stack>
     </VideoPlayer>
   )

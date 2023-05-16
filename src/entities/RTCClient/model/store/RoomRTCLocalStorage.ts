@@ -39,15 +39,6 @@ export const saveEncodingSettingsToLocalStorage = (
   )
 }
 
-export const getAutoPlayfromLocalStorage = (): boolean => {
-  const autoplay = localStorage.getItem(localstorageKeys.AUTOPLAY)
-
-  return !!autoplay
-}
-export const saveAutoPlaytoLocalStorage = (condition: boolean) => {
-  localStorage.setItem(localstorageKeys.AUTOPLAY, JSON.stringify(condition))
-}
-
 const defaultStreamSettings = {
   audio: {
     noiseSuppression: false,

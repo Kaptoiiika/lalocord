@@ -9,7 +9,6 @@ export interface RoomRTCSchema {
   streamSettings: MediaStreamConstraints
   userStreamSettings: UserStreamSettings
   encodingSettings: RTCRtpEncodingParameters
-  autoplay: boolean
 
   joinRoom: (room: string) => void
   leaveRoom: () => void
@@ -21,7 +20,6 @@ export interface RoomRTCSchema {
   setdisplayMediaStream: (stream: MediaStream | null) => void
   startMicrophoneStream: () => Promise<void>
   stopMicrophoneStream: () => void
-  changeAutoplay: (condition: boolean) => void
   setStreamSettings: (streamSettings: UserStreamSettings) => void
 }
 

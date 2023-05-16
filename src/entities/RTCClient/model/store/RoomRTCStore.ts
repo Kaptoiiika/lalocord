@@ -5,10 +5,8 @@ import {
   RoomRTCSchema,
 } from "../../../../entities/RTCClient/model/types/RoomRTCSchema"
 import {
-  getAutoPlayfromLocalStorage,
   getEncodingSettingsFromLocalStorage,
   getStreamSettingsfromLocalStorage,
-  saveAutoPlaytoLocalStorage,
   saveEncodingSettingsToLocalStorage,
   saveStreamSettingstoLocalStorage,
 } from "./RoomRTCLocalStorage"
@@ -19,7 +17,6 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   ),
   userStreamSettings: getStreamSettingsfromLocalStorage(),
   encodingSettings: getEncodingSettingsFromLocalStorage(),
-  autoplay: getAutoPlayfromLocalStorage(),
   roomName: null,
   connectedUsers: {},
   displayMediaStream: null,
@@ -183,10 +180,6 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       tracks.stop()
     })
     set((state) => ({ ...state, microphoneStream: null }))
-  },
-  changeAutoplay(condition) {
-    saveAutoPlaytoLocalStorage(condition)
-    set((state) => ({ ...state, autoplay: condition }))
   },
 })
 

@@ -6,13 +6,14 @@ type events = "close" | "open"
 export class RTCClientMediaStream extends Emitter<events> {
   stream: MediaStream
   type: MediaStreamTypes
+  allowControl?: boolean
   volume = 0
   isOpen: boolean
 
   hasvideo: boolean
   hasaudio: boolean
 
-  constructor(mediastream: MediaStream, type:MediaStreamTypes) {
+  constructor(mediastream: MediaStream, type: MediaStreamTypes) {
     super()
     this.stream = mediastream
     this.type = type
@@ -31,6 +32,10 @@ export class RTCClientMediaStream extends Emitter<events> {
   open() {
     this.isOpen = true
     this.emit("open")
+  }
+
+  setAllowcontrol(value: boolean) {
+    this.allowControl = value
   }
 
   addTrack(track: MediaStreamTrack) {

@@ -15,6 +15,7 @@ import ScreenShareIcon from "@mui/icons-material/ScreenShare"
 import StopScreenShareIcon from "@mui/icons-material/StopScreenShare"
 import { useRoomRTCStore } from "@/entities/RTCClient"
 import { usePopup } from "@/shared/lib/hooks/usePopup/usePopup"
+import KeyboardIcon from "@mui/icons-material/Keyboard"
 
 type ShareScreenMenuProps = {}
 
@@ -51,6 +52,15 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
     } catch (error: any) {
       console.log(error)
     }
+  }
+  const handleStartDisplayWithControllMediaStream = async () => {
+    handleClose()
+    Object.values(useRoomRTCStore.getState().connectedUsers).forEach(
+      (client) => {
+        client.media.setAllowControl(true)
+      }
+    )
+    await handleStartDisplayMediaStream()
   }
 
   return (
@@ -97,6 +107,14 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
             {mediaStream ? "Change screen" : "Share your screen"}
           </ListItemText>
         </MenuItem>
+        {__IS_ELECTRON__ && (
+          <MenuItem onClick={handleStartDisplayWithControllMediaStream}>
+            <ListItemIcon>
+              <KeyboardIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{"Share with control"}</ListItemText>
+          </MenuItem>
+        )}
         {!!mediaStream && (
           <MenuItem onClick={handleStopDisplayMediaStream}>
             <ListItemIcon>
