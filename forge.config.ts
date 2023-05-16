@@ -13,9 +13,16 @@ const preloadConfig = webPackConfigList[2]
 
 const config: ForgeConfig = {
   packagerConfig: {
+    asar: true,
+    usageDescription: {
+      Camera: "Needed for video calls",
+      Microphone: "Needed for voice calls",
+    },
     icon: "./public/favicon.ico",
   },
-  rebuildConfig: {},
+  rebuildConfig: {
+    disablePreGypCopy: true,
+  },
   makers: [
     new MakerSquirrel({
       setupIcon: "./public/favicon.ico",

@@ -1,42 +1,46 @@
+import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron"
 import {
-  contextBridge,
-  DesktopCapturerSource,
-  ipcRenderer,
-  IpcRendererEvent,
-} from "electron"
-
-export type Channels = "get_media_source" | "SET_SOURCE" | "ipc-example"
-
-const getSourcesDisplayMedia = async () => {
-  const sources = await new Promise((res, rej) => {
-    electronHandler.ipcRenderer.once("get_media_source", (sources) => {
-      res(sources)
-    })
-    electronHandler.ipcRenderer.sendMessage("get_media_source", [])
-  })
-
-  return sources as DesktopCapturerSource[]
-}
+  IpcToMainEventMap,
+  IpcToRendererEventMap,
+} from "./main/types/ipcChannels"
+import "./preload/index.ts"
 
 const electronHandler = {
   ipcRenderer: {
-    sendMessage(channel: Channels, args: unknown[]) {
+    sendMessage<K extends keyof IpcToMainEventMap>(
+      channel: K,
+      args: IpcToMainEventMap[K]
+    ) {
       ipcRenderer.send(channel, args)
     },
-    on(channel: Channels, func: (...args: unknown[]) => void) {
-      const subscription = (_event: IpcRendererEvent, ...args: unknown[]) =>
-        func(...args)
+    invoke<K extends keyof IpcToMainEventMap>(
+      channel: K,
+      args: IpcToMainEventMap[K]
+    ): Promise<IpcToRendererEventMap[K]> {
+      const data = ipcRenderer.invoke(channel, args)
+      return data
+    },
+    on<K extends keyof IpcToRendererEventMap>(
+      channel: K,
+      func: (args: IpcToRendererEventMap[K]) => void
+    ) {
+      const subscription = (
+        _event: IpcRendererEvent,
+        args: IpcToRendererEventMap[K]
+      ) => func(args)
       ipcRenderer.on(channel, subscription)
 
       return () => {
         ipcRenderer.removeListener(channel, subscription)
       }
     },
-    once(channel: Channels, func: (...args: unknown[]) => void) {
-      ipcRenderer.once(channel, (_event, ...args) => func(...args))
+    once<K extends keyof IpcToRendererEventMap>(
+      channel: K,
+      func: (args: IpcToRendererEventMap[K]) => void
+    ) {
+      ipcRenderer.once(channel, (_event, args) => func(args))
     },
   },
-  getSourcesDisplayMedia,
 }
 
 contextBridge.exposeInMainWorld("electron", electronHandler)

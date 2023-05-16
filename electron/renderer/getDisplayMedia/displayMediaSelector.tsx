@@ -1,26 +1,30 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
+import { Button } from "@mui/material"
+import { IpcChannels } from "../../main/types/ipcChannels"
+import React from "react"
+import { createRoot } from "react-dom/client"
 
 type SourceType = Awaited<
-  ReturnType<typeof window.electron.getSourcesDisplayMedia>
->[0];
+  ReturnType<typeof window.electron.ipcRenderer.invoke<IpcChannels.getMediaSource>>
+>[0]
 
 export const displayMediaSelector = (): Promise<SourceType | undefined> =>
   new Promise(async (res, rej) => {
-    const sources = await window.electron.getSourcesDisplayMedia();
-    const modalContainer = document.createElement("div");
-    document.body.appendChild(modalContainer);
-    const main = createRoot(modalContainer);
+    const sources = await window.electron.ipcRenderer.invoke(
+      IpcChannels.getMediaSource,
+      null
+    )
+    const modalContainer = document.createElement("div")
+    document.body.appendChild(modalContainer)
+    const main = createRoot(modalContainer)
 
     const accept = (node?: SourceType) => {
-      res(node);
-      main.unmount();
-    };
+      res(node)
+      main.unmount()
+    }
     const cancel = () => {
-      rej("Permission denied");
-      main.unmount();
-    };
-
+      rej("Permission denied")
+      main.unmount()
+    }
     const Selector = () => {
       return (
         <div
@@ -36,7 +40,7 @@ export const displayMediaSelector = (): Promise<SourceType | undefined> =>
           <div>
             <button
               onClick={() => {
-                accept();
+                accept()
               }}
             >
               All screen
@@ -48,9 +52,11 @@ export const displayMediaSelector = (): Promise<SourceType | undefined> =>
             ))}
           </div>
 
-          <button onClick={cancel}>cancel</button>
+          <Button variant="contained" onClick={cancel}>
+            cancel
+          </Button>
         </div>
-      );
-    };
-    main.render(<Selector />);
-  });
+      )
+    }
+    main.render(<Selector />)
+  })

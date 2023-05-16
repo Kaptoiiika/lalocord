@@ -43,7 +43,15 @@ export default (env: Partial<BuildEnv>) => {
           test: /\.ts$/,
           use: [{ loader: "ts-loader" }],
         },
+        {
+          test: /\.node$/,
+          loader: "node-loader",
+        },
       ],
+    },
+    resolve: {
+      extensions: [".tsx", ".ts", ".js"],
+      modules: ["./electron", "node_modules"],
     },
   }
 
@@ -63,6 +71,10 @@ export default (env: Partial<BuildEnv>) => {
           use: [{ loader: "ts-loader" }],
         },
       ],
+    },
+    resolve: {
+      extensions: [".tsx", ".ts", ".js"],
+      modules: ["./electron", "node_modules"],
     },
   }
 

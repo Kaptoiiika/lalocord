@@ -24,6 +24,7 @@ type MessageType =
   | "stopStream"
   | "resumeStream"
   | "pauseStream"
+  | "clientPressKey"
 
 type RTCClientEvents = "iceconnectionStatusChange"
 
@@ -169,8 +170,8 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   async saveAnswer(answer: RTCSessionDescription) {
     await this.peer?.setRemoteDescription(answer)
-    this.media.updateBitrate('media')
-    this.media.updateBitrate('webCam')
+    this.media.updateBitrate("media")
+    this.media.updateBitrate("webCam")
   }
 
   saveIce(ice: RTCIceCandidateInit) {
@@ -223,6 +224,9 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "stopStream":
           this.media.remoteClosedStream(data)
+          break
+        case "clientPressKey":
+          this.media.clientPressKey(data)
           break
         case "file":
           this.channel.reciveBlobChunk(data)

@@ -20,6 +20,8 @@ type VideoPlayerProps = {
   stream?: MediaStream | null
   onPlay?: () => void
   onPause?: () => void
+  onFullscreenEnter?: () => void
+  onFullscreenExit?: () => void
   onVolumeChange?: (value: number) => void
   initVolume?: number
   className?: string
@@ -39,6 +41,8 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     onPlay,
     onPause,
     onVolumeChange,
+    onFullscreenEnter,
+    onFullscreenExit,
     children,
     ...other
   } = props
@@ -103,17 +107,19 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const handleFullscreen = useCallback(() => {
     try {
       playerRef.current?.requestFullscreen()
+      onFullscreenEnter?.()
     } catch (error) {
       console.error(error)
     }
-  }, [])
+  }, [onFullscreenEnter])
   const handleExitFullscreen = useCallback(() => {
     try {
       document.exitFullscreen()
+      onFullscreenExit?.()
     } catch (error) {
       console.error(error)
     }
-  }, [])
+  }, [onFullscreenExit])
   const handleFullscreenToggle = useCallback((e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()

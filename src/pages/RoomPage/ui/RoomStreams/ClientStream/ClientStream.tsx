@@ -1,10 +1,9 @@
-import { RTCClient } from "../../../../../entities/RTCClient/lib/RTCClient/RTCClient"
-import { RTCClientMediaStream } from "../../../../../entities/RTCClient/lib/RTCClient/RTCClientMediaStream"
 import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
 import { Stack, Typography } from "@mui/material"
 import styles from "./ClientStream.module.scss"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { RTCClient, RTCClientMediaStream } from "@/entities/RTCClient"
 
 type ClientStreamProps = {
   client: RTCClient
@@ -34,6 +33,25 @@ export const ClientStream = (props: ClientStreamProps) => {
   const handlePlay = () => {
     client.channel.sendData("resumeStream", clientStream.type)
   }
+  const [takeControll, setTakeControll] = useState(false)
+  
+  useEffect(() => {
+    if (takeControll) {
+      const sub = (e: KeyboardEvent) => {
+        client.channel.sendData("clientPressKey", e.key)
+      }
+      document.addEventListener("keypress", sub)
+      return () => {
+        document.removeEventListener("keypress", sub)
+      }
+    }
+  }, [client.channel, takeControll])
+  const handleTakeControll = () => {
+    setTakeControll(true)
+  }
+  const handleTakeOffControll = () => {
+    setTakeControll(false)
+  }
 
   return (
     <VideoPlayer
@@ -42,6 +60,8 @@ export const ClientStream = (props: ClientStreamProps) => {
       onVolumeChange={handleChangeVolume}
       onPause={handlePause}
       onPlay={handlePlay}
+      onFullscreenEnter={handleTakeControll}
+      onFullscreenExit={handleTakeOffControll}
       autoplay={autoplay}
     >
       <Stack className={styles.streamTooltip}>

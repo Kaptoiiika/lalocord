@@ -1,4 +1,5 @@
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
+import { IpcChannels } from "electron/main/types/ipcChannels"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
 import { RTCClientMediaStream } from "./RTCClientMediaStream"
@@ -20,6 +21,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
   availableStreamList: RTCClientMediaStream[] = []
   remoteStream: Record<string, RTCClientMediaStream | undefined> = {}
   remoteTrack: Record<string, MediaStreamTrack> = {}
+  allowControl = false
 
   stream: Record<MediaStreamTypes, MediaStream | null> = {
     media: null,
@@ -232,6 +234,12 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       params.encodings = encoders
       sender.setParameters(params)
     })
+  }
+
+  clientPressKey(key: string) {
+    if (!__IS_ELECTRON__) return
+    if (this.allowControl) return
+    window.electron.ipcRenderer.sendMessage(IpcChannels.keypress, key)
   }
 
   close() {

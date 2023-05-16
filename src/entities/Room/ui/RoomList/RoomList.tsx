@@ -1,12 +1,5 @@
 import React, { memo, useState } from "react"
-import {
-  Button,
-  Divider,
-  OutlinedInput,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material"
+import { Button, Divider, Skeleton, Stack, Typography } from "@mui/material"
 import { Link, useNavigate } from "react-router-dom"
 import { AppRoutes } from "@/shared/config/routeConfig/routeConfig"
 import styles from "./RoomList.module.scss"

@@ -1,14 +1,7 @@
-import { app, BrowserWindow, desktopCapturer, ipcMain } from "electron"
+import { app, BrowserWindow } from "electron"
+import "./main/index.ts"
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string
-
-ipcMain.on("get_media_source", async (event, arg) => {
-  const sources = await desktopCapturer.getSources({
-    types: ["window", "screen", "audio"],
-  })
-
-  event.reply("get_media_source", sources)
-})
 
 const createWindow = () => {
   const win = new BrowserWindow({
