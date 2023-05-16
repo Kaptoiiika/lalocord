@@ -7,12 +7,12 @@ export type IpcEventMap<T = any> = Record<IpcChannels, T>
 
 //main on(key, (value)=>{})
 export interface IpcToMainEventMap {
-  [IpcChannels.getMediaSource]: any 
-  [IpcChannels.keypress]: string
+  getMediaSource: any
+  keypress: string
 }
 
-//renderer invoke(key, (value)=>{})
+//renderer sendMessage(key, (value)=>{})
 export interface IpcToRendererEventMap {
-  [IpcChannels.getMediaSource]: Electron.DesktopCapturerSource[]
-  [IpcChannels.keypress]: any
+  getMediaSource: Electron.DesktopCapturerSource[]
+  keypress: any
 }

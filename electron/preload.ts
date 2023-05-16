@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron"
 import {
+  IpcChannels,
   IpcToMainEventMap,
   IpcToRendererEventMap,
 } from "./main/types/ipcChannels"
@@ -7,20 +8,20 @@ import "./preload/index.ts"
 
 const electronHandler = {
   ipcRenderer: {
-    sendMessage<K extends keyof IpcToMainEventMap>(
+    sendMessage<K extends keyof typeof IpcChannels>(
       channel: K,
       args: IpcToMainEventMap[K]
     ) {
       ipcRenderer.send(channel, args)
     },
-    invoke<K extends keyof IpcToMainEventMap>(
+    invoke<K extends keyof typeof IpcChannels>(
       channel: K,
       args: IpcToMainEventMap[K]
     ): Promise<IpcToRendererEventMap[K]> {
       const data = ipcRenderer.invoke(channel, args)
       return data
     },
-    on<K extends keyof IpcToRendererEventMap>(
+    on<K extends keyof typeof IpcChannels>(
       channel: K,
       func: (args: IpcToRendererEventMap[K]) => void
     ) {
@@ -34,7 +35,7 @@ const electronHandler = {
         ipcRenderer.removeListener(channel, subscription)
       }
     },
-    once<K extends keyof IpcToRendererEventMap>(
+    once<K extends keyof typeof IpcChannels>(
       channel: K,
       func: (args: IpcToRendererEventMap[K]) => void
     ) {
