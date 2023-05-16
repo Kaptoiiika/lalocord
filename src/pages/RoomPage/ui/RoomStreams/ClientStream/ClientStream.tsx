@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 import { RTCClient, RTCClientMediaStream } from "@/entities/RTCClient"
 import KeyboardIcon from "@mui/icons-material/Keyboard"
 import Tooltip from "@mui/material/Tooltip"
+import { ClientKeyPressEvent, ClientKeys } from "@/shared/types/ClientKeys"
 
 type ClientStreamProps = {
   client: RTCClient
@@ -39,14 +40,29 @@ export const ClientStream = (props: ClientStreamProps) => {
 
   useEffect(() => {
     if (takeControll) {
-      const sub = (e: KeyboardEvent) => {
+      const subDown = (e: KeyboardEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        client.channel.sendData("clientPressKey", e.key)
+        const payload: ClientKeyPressEvent = {
+          key: e.key as ClientKeys,
+          state: "down",
+        }
+        client.channel.sendData("clientPressKey", payload)
       }
-      document.addEventListener("keypress", sub)
+      const subUp = (e: KeyboardEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        const payload: ClientKeyPressEvent = {
+          key: e.key as ClientKeys,
+          state: "up",
+        }
+        client.channel.sendData("clientPressKey", payload)
+      }
+      document.addEventListener("keydown", subDown)
+      document.addEventListener("keyup", subUp)
       return () => {
-        document.removeEventListener("keypress", sub)
+        document.removeEventListener("keydown", subDown)
+        document.removeEventListener("keyup", subUp)
       }
     }
   }, [client.channel, takeControll])

@@ -1,5 +1,5 @@
 import { ipcMain } from "electron"
-import { keyTap } from "robotjs"
+import { keyToggle } from "robotjs"
 import { IpcChannels, IpcToMainEventMap } from "../types/ipcChannels"
 
 ipcMain.on(
@@ -8,6 +8,6 @@ ipcMain.on(
     e: Electron.IpcMainEvent,
     value: IpcToMainEventMap[IpcChannels.keypress]
   ) => {
-    keyTap(value)
+    keyToggle(value.key, value.state)
   }
 )

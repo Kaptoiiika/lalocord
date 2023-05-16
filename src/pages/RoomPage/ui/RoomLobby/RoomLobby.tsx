@@ -1,4 +1,5 @@
 import { socketClient } from "@/shared/api/socket/socket"
+import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
 import { Chat } from "@/widgets/Chat"
 import { Stack } from "@mui/material"
 import { useEffect, useState } from "react"
@@ -23,10 +24,18 @@ export const RoomLobby = () => {
     }
   }, [])
 
+  useMountedEffect(() => {
+    const keys = new Set()
+    document.addEventListener("keydown", (e) => {
+      keys.add(e.key)
+      e.preventDefault()
+      e.stopPropagation()
+      console.log(keys)
+    })
+  })
   if (roomisFull) {
     return <RoomIsFull />
   }
-
 
   return (
     <WaitUserClick>

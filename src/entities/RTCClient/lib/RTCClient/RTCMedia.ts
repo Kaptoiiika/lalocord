@@ -1,4 +1,5 @@
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
+import { ClientKeyPressEvent } from "@/shared/types/ClientKeys"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
 import { RTCClientMediaStream } from "./RTCClientMediaStream"
@@ -246,7 +247,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     })
   }
 
-  clientPressKey(key: string) {
+  clientPressKey(key: ClientKeyPressEvent) {
     if (!__IS_ELECTRON__) return
     if (!this.allowControl) return
     window.electron.ipcRenderer.sendMessage("keypress", key)
