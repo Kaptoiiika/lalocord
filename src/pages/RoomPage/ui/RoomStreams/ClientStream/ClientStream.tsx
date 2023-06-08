@@ -6,7 +6,11 @@ import { useState, useEffect } from "react"
 import { RTCClient, RTCClientMediaStream } from "@/entities/RTCClient"
 import KeyboardIcon from "@mui/icons-material/Keyboard"
 import Tooltip from "@mui/material/Tooltip"
-import { ClientKeyPressEvent, ClientKeys } from "@/shared/types/ClientKeys"
+import {
+  ClientKeyPressEvent,
+  ClientKeys,
+  ClientMouseEvent,
+} from "@/shared/types/ClientEvents"
 
 type ClientStreamProps = {
   client: RTCClient
@@ -39,38 +43,61 @@ export const ClientStream = (props: ClientStreamProps) => {
   const [takeControll, setTakeControll] = useState(false)
 
   useEffect(() => {
-    if (takeControll) {
-      const subDown = (e: KeyboardEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        if (e.repeat) return
-        const payload: ClientKeyPressEvent = {
-          key: e.key,
-          code: e.code as ClientKeys,
-          state: "down",
-        }
-        client.channel.sendData("clientPressKey", payload)
+    if (!takeControll) return
+    const subDown = (e: KeyboardEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (e.repeat) return
+      const payload: ClientKeyPressEvent = {
+        key: e.key,
+        code: e.code as ClientKeys,
+        state: "down",
       }
-      const subUp = (e: KeyboardEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        if (e.repeat) return
-        const payload: ClientKeyPressEvent = {
-          key: e.key as ClientKeys,
-          code: e.code as ClientKeys,
-          state: "up",
-        }
-        client.channel.sendData("clientPressKey", payload)
+      client.channel.sendData("clientPressKey", payload)
+    }
+    const subUp = (e: KeyboardEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (e.repeat) return
+      const payload: ClientKeyPressEvent = {
+        key: e.key,
+        code: e.code as ClientKeys,
+        state: "up",
       }
+      client.channel.sendData("clientPressKey", payload)
+    }
 
-      document.addEventListener("keydown", subDown)
-      document.addEventListener("keyup", subUp)
-      return () => {
-        document.removeEventListener("keydown", subDown)
-        document.removeEventListener("keyup", subUp)
-      }
+    document.addEventListener("keydown", subDown)
+    document.addEventListener("keyup", subUp)
+    return () => {
+      document.removeEventListener("keydown", subDown)
+      document.removeEventListener("keyup", subUp)
     }
   }, [client.channel, takeControll])
+  useEffect(() => {
+    if (!takeControll) return
+
+    const fn = (e: MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      const payload: ClientMouseEvent = {
+        clientX: e.clientX,
+        clientY: e.clientY,
+        offsetX: e.offsetX,
+        offsetY: e.offsetY,
+        pageX: e.pageX,
+        pageY: e.pageY,
+        movementX: e.movementX,
+        movementY: e.movementY,
+      }
+      client.channel.sendData("clientMouseChange", payload)
+    }
+    document.addEventListener("mousemove", fn)
+    return () => {
+      document.removeEventListener("mousemove", fn)
+    }
+  }, [client.channel, takeControll])
+
   const handleTakeControll = () => {
     setTakeControll(true)
   }

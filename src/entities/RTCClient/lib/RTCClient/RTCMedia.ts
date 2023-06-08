@@ -1,5 +1,8 @@
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
-import { ClientKeyPressEvent } from "@/shared/types/ClientKeys"
+import {
+  ClientKeyPressEvent,
+  ClientMouseEvent,
+} from "@/shared/types/ClientEvents"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
 import { RTCClientMediaStream } from "./RTCClientMediaStream"
@@ -251,6 +254,12 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     if (!__IS_ELECTRON__) return
     if (!this.allowControl) return
     window.electron.ipcRenderer.sendMessage("keypress", key)
+  }
+
+  clientMouseChange(payload: ClientMouseEvent) {
+    if (!__IS_ELECTRON__) return
+    if (!this.allowControl) return
+    window.electron.ipcRenderer.sendMessage("mousemove", payload)
   }
 
   close() {

@@ -25,6 +25,7 @@ type MessageType =
   | "resumeStream"
   | "pauseStream"
   | "clientPressKey"
+  | "clientMouseChange"
 
 type RTCClientEvents = "iceconnectionStatusChange"
 

@@ -1,6 +1,6 @@
 import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useCallback } from "react"
 import {
   getActionDeleteConnectedUsers,
   getRoomUsers,
@@ -99,17 +99,17 @@ export const useWebRTCRoom = () => {
     }
   }, [])
 
-  const handleSendMessage = (msg: string) => {
-    Object.values(users).forEach((user) => {
+  const handleSendMessage = useCallback((msg: string) => {
+    Object.values(usersRef.current).forEach((user) => {
       user.channel.sendMessage(msg)
     })
-  }
+  }, [])
 
-  const handleSendBlob = (blob: Blob) => {
-    Object.values(users).forEach((user) => {
+  const handleSendBlob = useCallback((blob: Blob) => {
+    Object.values(usersRef.current).forEach((user) => {
       user.channel.sendBlob(blob)
     })
-  }
+  }, [])
 
   return {
     handleSendMessage,

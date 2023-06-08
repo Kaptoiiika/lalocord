@@ -1,4 +1,4 @@
-import { ClientKeyPressEvent, ClientKeys } from "@/shared/types/ClientKeys"
+import { ClientKeyPressEvent, ClientKeys } from "@/shared/types/ClientEvents"
 
 const formatedKeys: Record<ClientKeys, string | null> = {
   ScrollLock: null,

@@ -11,7 +11,9 @@ const createWindow = () => {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   })
-  // win.setMenu(null)
+  if (__IS_DEV__ === false) {
+    win.setMenu(null)
+  }
   win.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
 }
 

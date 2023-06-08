@@ -15,11 +15,12 @@ export const RoomLobby = () => {
   const [roomisFull, setRoomIsfull] = useState(false)
 
   useEffect(() => {
-    socketClient.on("room_is_full", () => {
+    const fn = () => {
       setRoomIsfull(true)
-    })
+    }
+    socketClient.on("room_is_full", fn)
     return () => {
-      socketClient.off("room_is_full", () => {})
+      socketClient.off("room_is_full", fn)
     }
   }, [])
 

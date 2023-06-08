@@ -29,5 +29,13 @@ export const useIsOpen = (time?: number) => {
     }
   }, [time])
 
-  return { open, handleClose, handleOpen }
+  const handleToggle = useCallback(() => {
+    if (open) {
+      handleClose()
+    } else {
+      handleOpen()
+    }
+  }, [handleClose, handleOpen, open])
+
+  return { open, handleToggle, handleClose, handleOpen }
 }

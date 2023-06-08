@@ -18,15 +18,24 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
         document.removeEventListener("click", fn)
       }
     }
+    const fnKey = (e: KeyboardEvent) => {
+      //@ts-ignore not in firefox
+      if (e.isTrusted || navigator.userActivation?.hasBeenActive === true) {
+        update((prev) => prev + 1)
+        document.removeEventListener("keypress", fnKey)
+      }
+    }
 
     document.addEventListener("click", fn)
+    document.addEventListener("keypress", fnKey)
 
     return () => {
       document.removeEventListener("click", fn)
+      document.removeEventListener("keypress", fnKey)
     }
   })
 
-  //@ts-ignore not in firefox 
+  //@ts-ignore not in firefox
   if (navigator.userActivation && !navigator.userActivation?.hasBeenActive) {
     return (
       <div className={styles.WaitUserClick}>

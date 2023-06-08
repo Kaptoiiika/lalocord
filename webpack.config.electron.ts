@@ -37,6 +37,7 @@ export default (env: Partial<BuildEnv>) => {
 
   const main: webpack.Configuration = {
     entry: "./electron/main.ts",
+    plugins: [buildDefinePlugins(options)],
     module: {
       rules: [
         {
