@@ -27,10 +27,13 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
 
   const handleSendFile = async (blob: Blob) => {
     onSendFile?.(blob)
-    addMessage({
-      data: { type: blob.type, src: URL.createObjectURL(blob) },
-      user: localUser,
-    })
+    addMessage(
+      {
+        data: { type: blob.type, src: URL.createObjectURL(blob) },
+        user: localUser,
+      },
+      true
+    )
   }
 
   const handlePasteFile = (e: React.ClipboardEvent) => {

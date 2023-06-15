@@ -22,6 +22,7 @@ export const ImagePreview = memo(function ImagePreview(
   props: ImagePreviewProps
 ) {
   const {} = props
+
   const image = useImagePreviewStore(getCurrentImagePreview)
   const unselectImage = useImagePreviewStore(getActionUselectImagePreview)
 

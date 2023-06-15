@@ -5,6 +5,7 @@ import { AppRouterProvider } from "@/app/providers/Router"
 import "@/app/styles/index.scss"
 import App from "./app/App"
 import { ErrorBoundary } from "./shared/ui/ErrorBoundary"
+import { ContextMenuProvider } from "./app/providers/ContextMenuProvider"
 
 const container = document.getElementById("root")
 
@@ -21,7 +22,9 @@ root.render(
   <ErrorBoundary>
     <AppRouterProvider>
       <ThemeProvider>
-        <App />
+        <ContextMenuProvider>
+          <App />
+        </ContextMenuProvider>
       </ThemeProvider>
     </AppRouterProvider>
   </ErrorBoundary>

@@ -2,7 +2,10 @@ import { UserModel } from "@/entities/User"
 
 export interface ChatSchema {
   messages: MessageModel[]
+  silent: boolean
+
   addMessage: (message: MessageModel, silent?: boolean) => void
+  changeSilentMode: (silent: boolean) => void
 }
 
 export interface MessageModel {

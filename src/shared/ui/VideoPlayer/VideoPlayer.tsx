@@ -55,7 +55,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   )
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<HTMLDivElement | null>(null)
-  const { handleClose, handleOpen, open } = useIsOpen(3000)
+  const { handleClose, handleOpen, open } = useIsOpen({ time: 3000 })
 
   const [debug, setDebug] = useState(debugValue)
   useEffect(() => {
@@ -171,11 +171,15 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
 
   const toolsIsClosed = played && !open
 
+  const handleFocus = useCallback(() => {
+    handleOpen()
+  }, [handleOpen])
+
   return (
     <div
       className={styles.player}
       ref={handleRefPlayer}
-      onFocus={handleOpen}
+      onFocus={handleFocus}
       onMouseEnter={handleOpen}
       onMouseMove={handleOpen}
       onClick={handleOpen}

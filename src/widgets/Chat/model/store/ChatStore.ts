@@ -1,6 +1,10 @@
 import { create, StateCreator } from "zustand"
 import { ChatSchema } from "../types/ChatSchema"
 import notofficationSound from "@/shared/assets/audio/notification.mp3"
+import {
+  getChatAudioFromLocalStorage,
+  saveChatAudioToLocalStorage,
+} from "./ChatStoreLocalStorage"
 
 const audio = new Audio(notofficationSound)
 audio.currentTime = 0
@@ -14,11 +18,19 @@ const playAudio = async () => {
 
 const store: StateCreator<ChatSchema> = (set, get) => ({
   messages: [],
+  silent: getChatAudioFromLocalStorage(),
 
   addMessage(message, silent = false) {
-    if (!silent) playAudio()
+    const storeSilent = get().silent
+    if (!silent && !storeSilent) playAudio()
 
     set((state) => ({ ...state, messages: [...state.messages, message] }))
+  },
+
+  changeSilentMode(silent) {
+    saveChatAudioToLocalStorage({ silent })
+
+    set((state) => ({ ...state, silent: silent }))
   },
 })
 

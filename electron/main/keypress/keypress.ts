@@ -1,8 +1,8 @@
 import { ipcMain } from "electron"
-import { keyToggle } from "robotjs"
 import { IpcChannels, IpcToMainEventMap } from "../types/ipcChannels"
 import { KeyHtmltoRobotJs } from "./KeyHtmltoRobotJs"
 
+// import { keyToggle } from "robotjs"
 ipcMain.on(
   IpcChannels.keypress,
   (
@@ -11,10 +11,10 @@ ipcMain.on(
   ) => {
     const key = KeyHtmltoRobotJs(value)
     if (key) {
-      keyToggle(key, value.state)
+      // keyToggle(key, value.state)
     } else {
       try {
-        keyToggle(value.key.toLowerCase(), value.state)
+        // keyToggle(value.key.toLowerCase(), value.state)
       } catch (error) {}
     }
   }
