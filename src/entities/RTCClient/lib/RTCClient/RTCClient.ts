@@ -135,9 +135,31 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.offerCreater = !this.offerCreater
   }
 
+  preferCodec(codecs: RTCRtpCodecCapability[] = [], mimeType: string) {
+    return codecs.filter((codec) => codec.mimeType === mimeType)
+  }
+
+  changeCodecs() {
+    if (!this.peer) return
+    const transceivers = this.peer.getTransceivers()
+    transceivers.forEach((transceiver) => {
+      const kind = transceiver.sender.track?.kind
+      if (!kind) return
+      const sendCodecs = RTCRtpSender.getCapabilities(kind)?.codecs
+      const recvCodecs = RTCRtpReceiver.getCapabilities(kind)?.codecs
+
+      if (kind === "video") {
+        const newsendCodecs = this.preferCodec(sendCodecs, "video/H264")
+        const newrecvCodecs = this.preferCodec(recvCodecs, "video/H264")
+        transceiver.setCodecPreferences([...newsendCodecs, ...newrecvCodecs])
+        this.log("change codecs to", [...newsendCodecs, ...newrecvCodecs])
+      }
+    })
+  }
   async createAnswer(offer: RTCSessionDescription) {
     if (!this.peer) return
     await this.peer.setRemoteDescription(offer)
+    this.changeCodecs()
     const answer = await this.peer.createAnswer()
     await this.peer.setLocalDescription(answer)
     const resp = { id: this.id, answer: answer }
@@ -161,6 +183,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     //     })
     //   }
     // } catch (error) {}
+    this.changeCodecs()
     const offer = await this.peer.createOffer()
     await this.peer.setLocalDescription(offer)
     const data = { id: this.id, offer: offer }
