@@ -28,6 +28,7 @@ type VideoPlayerProps = {
   mute?: boolean
   autoplay?: boolean
   fullScreen?: boolean
+  controls?: boolean
 } & PropsWithChildren
 
 let debugValue = !!localStorage.getItem("debug")
@@ -46,6 +47,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     onFullscreenEnter,
     onFullscreenExit,
     children,
+    controls = true,
     ...other
   } = props
   const [played, setPlayed] = useState(false)
@@ -187,21 +189,25 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       onMouseLeave={handleClose}
     >
       {debug && <VideoPlayerDebugInfo stream={stream} />}
-      <VideoPlayerTooltip open={!toolsIsClosed} top>
-        {children}
-      </VideoPlayerTooltip>
-      <VideoPlayerActions
-        stream={stream}
-        open={!toolsIsClosed}
-        fullscreen={fullscreen}
-        played={played}
-        volume={volume}
-        mute={mute}
-        handleChangeVolume={handleChangeVolume}
-        handleExitFullscreen={handleExitFullscreen}
-        handleFullscreen={handleEnterFullscreen}
-        handlePlayPause={handlePlayPause}
-      />
+      {controls && (
+        <>
+          <VideoPlayerTooltip open={!toolsIsClosed} top>
+            {children}
+          </VideoPlayerTooltip>
+          <VideoPlayerActions
+            stream={stream}
+            open={!toolsIsClosed}
+            fullscreen={fullscreen}
+            played={played}
+            volume={volume}
+            mute={mute}
+            handleChangeVolume={handleChangeVolume}
+            handleExitFullscreen={handleExitFullscreen}
+            handleFullscreen={handleEnterFullscreen}
+            handlePlayPause={handlePlayPause}
+          />
+        </>
+      )}
       <video
         {...other}
         onDoubleClick={handleFullscreenToggle}

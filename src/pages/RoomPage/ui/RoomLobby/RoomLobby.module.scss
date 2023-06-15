@@ -5,7 +5,18 @@ $HeaderHeight: var(--header-height);
   position: relative;
   width: 100%;
   grid-template-rows:
-    $HeaderHeight calc(100% - $HeaderHeight - $HeaderHeight)
-    $HeaderHeight;
+    $HeaderHeight calc(100% - $HeaderHeight - $HeaderHeight) $HeaderHeight;
   height: 100%;
+
+  &>* {
+    position: relative;
+  }
+
+  &>::after {
+    position: absolute;
+    bottom: 0;
+    content: '';
+    width: 100%;
+    border-bottom: var(--box-border);
+  }
 }

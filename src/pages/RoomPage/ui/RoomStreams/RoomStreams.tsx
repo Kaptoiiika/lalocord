@@ -57,15 +57,19 @@ export const RoomStreams = memo(function RoomStreams() {
   return (
     <StreamViewer className={styles.RoomStreams}>
       {localStreams.map((local) => (
-        <div key={local.stream.id} className={styles.stream}>
-          <LocalClientStream stream={local.stream} name={local.name} />
-        </div>
+        <LocalClientStream
+          key={local.stream.id}
+          stream={local.stream}
+          name={local.name}
+        />
       ))}
 
       {streams.map((user) => (
-        <div key={user.clientStream.stream.id} className={styles.stream}>
-          <ClientStream client={user.client} clientStream={user.clientStream} />
-        </div>
+        <ClientStream
+          key={user.clientStream.stream.id}
+          client={user.client}
+          clientStream={user.clientStream}
+        />
       ))}
     </StreamViewer>
   )

@@ -1,6 +1,6 @@
 .light {
   --box-border-color: rgba(0, 0, 0, 0.12);
-  --box-border: 1px solid var(--box-border-color);
+  --box-border: var(--box-border-width) solid var(--box-border-color);
 
   --bg-app: #ffffff;
   --bg-navbar: 182, 182, 182;

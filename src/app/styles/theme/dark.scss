@@ -1,6 +1,6 @@
 .dark {
   --box-border-color: rgb(68, 76, 86);
-  --box-border: 1px solid var(--box-border-color);
+  --box-border: var(--box-border-width) solid var(--box-border-color);
 
   --bg-app: rgb(28, 33, 40);
   --bg-primary-color: 34, 39, 46;

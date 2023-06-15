@@ -1,16 +1,11 @@
 import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
-import { Button, Stack, Typography } from "@mui/material"
+import { Button, Stack, Tooltip, Typography } from "@mui/material"
 import styles from "./ClientStream.module.scss"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { RTCClient, RTCClientMediaStream } from "@/entities/RTCClient"
-import KeyboardIcon from "@mui/icons-material/Keyboard"
-import Tooltip from "@mui/material/Tooltip"
-import {
-  ClientKeyPressEvent,
-  ClientKeys,
-  ClientMouseEvent,
-} from "@/shared/types/ClientEvents"
+import RemoveIcon from "@mui/icons-material/Remove"
+import { classNames } from "@/shared/lib/classNames/classNames"
 
 type ClientStreamProps = {
   client: RTCClient
@@ -20,6 +15,8 @@ type ClientStreamProps = {
 export const ClientStream = (props: ClientStreamProps) => {
   const { client, clientStream } = props
   const [autoplay, setAutoplay] = useState(!document.hidden)
+  const [hide, setHide] = useState(false)
+
   useMountedEffect(() => {
     const fn = () => {
       if (document.hidden) setAutoplay(false)
@@ -40,98 +37,47 @@ export const ClientStream = (props: ClientStreamProps) => {
   const handlePlay = () => {
     client.channel.sendData("resumeStream", clientStream.type)
   }
-  const [takeControll, setTakeControll] = useState(false)
 
-  useEffect(() => {
-    if (!takeControll) return
-    const subDown = (e: KeyboardEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      if (e.repeat) return
-      const payload: ClientKeyPressEvent = {
-        key: e.key,
-        code: e.code as ClientKeys,
-        state: "down",
-      }
-      client.channel.sendData("clientPressKey", payload)
-    }
-    const subUp = (e: KeyboardEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      if (e.repeat) return
-      const payload: ClientKeyPressEvent = {
-        key: e.key,
-        code: e.code as ClientKeys,
-        state: "up",
-      }
-      client.channel.sendData("clientPressKey", payload)
-    }
-
-    document.addEventListener("keydown", subDown)
-    document.addEventListener("keyup", subUp)
-    return () => {
-      document.removeEventListener("keydown", subDown)
-      document.removeEventListener("keyup", subUp)
-    }
-  }, [client.channel, takeControll])
-  useEffect(() => {
-    if (!takeControll) return
-
-    const fn = (e: MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      const payload: ClientMouseEvent = {
-        clientX: e.clientX,
-        clientY: e.clientY,
-        offsetX: e.offsetX,
-        offsetY: e.offsetY,
-        pageX: e.pageX,
-        pageY: e.pageY,
-        movementX: e.movementX,
-        movementY: e.movementY,
-      }
-      client.channel.sendData("clientMouseChange", payload)
-    }
-    document.addEventListener("mousemove", fn)
-    return () => {
-      document.removeEventListener("mousemove", fn)
-    }
-  }, [client.channel, takeControll])
-
-  const handleTakeControll = () => {
-    setTakeControll(true)
+  const handleHide = () => {
+    handlePause()
+    setHide((prev) => !prev)
   }
-  const handleTakeOffControll = () => {
-    setTakeControll(false)
-  }
-
-  const allowControl = clientStream.allowControl
 
   return (
-    <VideoPlayer
-      stream={clientStream.stream}
-      initVolume={clientStream.volume}
-      onVolumeChange={handleChangeVolume}
-      onPause={handlePause}
-      onPlay={handlePlay}
-      onFullscreenExit={handleTakeOffControll}
-      fullScreen={takeControll}
-      autoplay={autoplay}
-    >
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        className={styles.streamTooltip}
+    <div className={classNames([styles.stream], { [styles.hideStream]: hide })}>
+      <VideoPlayer
+        stream={clientStream.stream}
+        initVolume={clientStream.volume}
+        onVolumeChange={handleChangeVolume}
+        onPause={handlePause}
+        onPlay={handlePlay}
+        autoplay={autoplay}
+        controls={!hide}
       >
-        <Typography>{client.user?.username || client.user?.id}</Typography>
-        {allowControl && (
-          <Tooltip title="Take control">
-            <Button aria-label="Take control" onClick={handleTakeControll}>
-              <KeyboardIcon />
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          className={styles.streamTooltip}
+        >
+          <Typography>{client.user?.username || client.user?.id}</Typography>
+
+          <Tooltip title="Hide stream">
+            <Button aria-label="Hide stream" onClick={handleHide}>
+              <RemoveIcon />
             </Button>
           </Tooltip>
-        )}
-      </Stack>
-    </VideoPlayer>
+        </Stack>
+      </VideoPlayer>
+
+      {hide && (
+        <div className={styles.unhide}>
+          <Tooltip title="Unhide stream">
+            <Button aria-label="Unhide stream" onClick={handleHide}>
+              <RemoveIcon />
+            </Button>
+          </Tooltip>
+        </div>
+      )}
+    </div>
   )
 }

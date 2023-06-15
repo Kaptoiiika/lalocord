@@ -1,13 +1,4 @@
-.RoomStreams {
-  border-bottom: var(--box-border);
-  border-top: var(--box-border);
-  padding: 8px;
+.RoomStreams{
+  position: relative;
 }
 
-.stream {
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  border: var(--box-border);
-  background-color: var(--bg-app);
-}

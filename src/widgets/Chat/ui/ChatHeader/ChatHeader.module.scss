@@ -6,17 +6,18 @@ $animationTime: 0.3s;
     right: 0;
     width: 64px;
   }
+
   right: 0px;
   position: absolute;
   transition: width $animationTime;
-  width: calc($chatWidth - 1px);
+  width: $chatWidth;
   min-width: 64px;
   height: var(--header-height);
-  border-left: var(--box-border);
 }
 
 .headerButton {
   height: 100%;
   width: 100%;
   border-radius: 0;
+  border: var(--box-border);
 }

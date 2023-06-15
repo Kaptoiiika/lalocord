@@ -8,11 +8,11 @@ type RoomActionsProps = {}
 
 export const RoomActions = (props: RoomActionsProps) => {
   return (
-    <Stack direction="row" alignItems="end">
+    <Stack direction="row" alignItems="center">
       <ShareMicrophoneMenu />
       <ShareWebCamMenu />
       <ShareScreenMenu />
-      <Stack className={styles.group} direction="row" alignItems="end">
+      <Stack className={styles.group} direction="row" alignItems="center">
         <VideoSettingsMenu />
       </Stack>
     </Stack>

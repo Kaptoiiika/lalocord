@@ -9,6 +9,7 @@ $animationTime: 0.3s;
   width: $chatWidth;
   height: 100%;
   transition: width $animationTime;
+
   &.collapsed {
     width: 1px;
 
@@ -27,7 +28,6 @@ $animationTime: 0.3s;
   flex-direction: column;
   justify-content: flex-end;
   display: flex;
-  border-top: var(--box-border);
   border-left: var(--box-border);
   overflow: hidden;
   transition: opacity $animationTime;

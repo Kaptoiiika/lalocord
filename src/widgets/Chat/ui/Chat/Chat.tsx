@@ -29,7 +29,7 @@ export const Chat = (props: ChatProps) => {
   const { onSendMessage, onSendFile } = props
   const messages = useChatStore(getMessages)
   const [collapsed, setCollapsed] = useState(getChatCollapsedFromLocalStorage())
-  const [readedMessage, setReadedMessage] = useState(0)
+  const [readedMessage, setReadedMessage] = useState(messages.length)
 
   const handleCollapse = useCallback(() => {
     setCollapsed((prev) => {

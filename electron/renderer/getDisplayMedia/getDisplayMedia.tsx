@@ -22,6 +22,7 @@ export const getDisplayMedia = async (
     set.video.mandatory = {
       ...constatins.video,
       chromeMediaSource: "desktop",
+      cursor: "motion",
     }
     if (selectedSource)
       set.video.mandatory.chromeMediaSourceId = selectedSource.id
