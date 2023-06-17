@@ -222,7 +222,6 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
   updateBitrate(type: MediaStreamTypes) {
     if (!this.peer) return
-
     const videoSender = this.senders[type]
     if (!videoSender) return
     videoSender?.map((sender) => {
@@ -231,20 +230,23 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       }
 
       const params = sender.getParameters()
-      const encoders = params.encodings.map((encod) => {
-        if (this.pause[type]) {
+      const encoders = params.encodings.map<RTCRtpEncodingParameters>(
+        (encod) => {
+          if (this.pause[type]) {
+            return {
+              ...encod,
+              ...this.encodingSettings,
+              active: false,
+            }
+          }
+
           return {
             ...encod,
             ...this.encodingSettings,
-            maxBitrate: 100000,
+            active: true,
           }
         }
-
-        return {
-          ...encod,
-          ...this.encodingSettings,
-        }
-      })
+      )
       params.encodings = encoders
       sender.setParameters(params)
     })
