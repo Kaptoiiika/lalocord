@@ -183,13 +183,15 @@ export class RTCClient extends Emitter<RTCClientEvents> {
         return true
       })
       .join("a=")
-    await this.peer.setLocalDescription({
+    const changedAnswer: RTCLocalSessionDescriptionInit = {
       sdp: changedSDP,
       type: answer.type,
-    })
-    const resp = { id: this.id, answer: answer }
+    }
+    await this.peer.setLocalDescription(changedAnswer)
+    const resp = { id: this.id, answer: changedAnswer }
     this.log("createAnswer", answer)
-    if (this.channel.channelIsOpen) this.channel.sendData("answer", answer)
+    if (this.channel.channelIsOpen)
+      this.channel.sendData("answer", changedAnswer)
     else socketClient.emit("new_answer", resp)
   }
 
@@ -208,11 +210,14 @@ export class RTCClient extends Emitter<RTCClientEvents> {
         return true
       })
       .join("a=")
-    console.log(changedSDP)
-    await this.peer.setLocalDescription({ sdp: changedSDP, type: offer.type })
-    const data = { id: this.id, offer: offer }
+    const changedOffer: RTCLocalSessionDescriptionInit = {
+      sdp: changedSDP,
+      type: offer.type,
+    }
+    await this.peer.setLocalDescription(changedOffer)
+    const data = { id: this.id, offer: changedOffer }
     this.log("createdoffer", offer)
-    if (this.channel.channelIsOpen) this.channel.sendData("offer", offer)
+    if (this.channel.channelIsOpen) this.channel.sendData("offer", changedOffer)
     else socketClient.emit("new_offer", data)
   }
 
