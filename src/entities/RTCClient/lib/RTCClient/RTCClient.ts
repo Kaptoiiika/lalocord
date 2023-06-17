@@ -160,8 +160,8 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       const recvCodecs = RTCRtpReceiver.getCapabilities(kind)?.codecs
 
       if (kind === "video") {
-        const newsendCodecs = RTCClient.preferCodec(sendCodecs, "video/H264")
-        const newrecvCodecs = RTCClient.preferCodec(recvCodecs, "video/H264")
+        const newsendCodecs = RTCClient.preferCodec(sendCodecs, "video/AV1")
+        const newrecvCodecs = RTCClient.preferCodec(recvCodecs, "video/AV1")
         transceiver.setCodecPreferences([...newsendCodecs, ...newrecvCodecs])
         this.log("change codecs to", [...newsendCodecs, ...newrecvCodecs])
       }
@@ -172,18 +172,19 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     if (!this.peer) return
     await this.peer.setRemoteDescription(offer)
     const answer = await this.peer.createAnswer()
-    const changedAnswer = answer.sdp
+    const changedSDP = answer.sdp
       ?.split("a=")
       .filter((option) => {
         if (option.includes("transport-cc")) return false
         if (option.includes("goog-remb")) return false
         if (option.includes("nack")) return false
         if (option.includes("nack pli")) return false
+        if (option.includes("ccm fir")) return false
         return true
       })
       .join("a=")
     await this.peer.setLocalDescription({
-      sdp: changedAnswer,
+      sdp: changedSDP,
       type: answer.type,
     })
     const resp = { id: this.id, answer: answer }
@@ -196,17 +197,19 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     if (!this.peer) return
     this.changeCodecs()
     const offer = await this.peer.createOffer()
-    const changedOffer = offer.sdp
+    const changedSDP = offer.sdp
       ?.split("a=")
       .filter((option) => {
         if (option.includes("transport-cc")) return false
         if (option.includes("goog-remb")) return false
         if (option.includes("nack")) return false
         if (option.includes("nack pli")) return false
+        if (option.includes("ccm fir")) return false
         return true
       })
       .join("a=")
-    await this.peer.setLocalDescription({ sdp: changedOffer, type: offer.type })
+    console.log(changedSDP)
+    await this.peer.setLocalDescription({ sdp: changedSDP, type: offer.type })
     const data = { id: this.id, offer: offer }
     this.log("createdoffer", offer)
     if (this.channel.channelIsOpen) this.channel.sendData("offer", offer)
