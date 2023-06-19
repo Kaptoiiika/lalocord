@@ -49,14 +49,14 @@ export const ClientStream = (props: ClientStreamProps) => {
   }
 
   const handleHide = async () => {
-    if (!played) handlePause()
+    if (played) handlePause()
     handleClosefullscreen()
     await startViewTransition()
     setHide(true)
   }
 
   const handleUnHide = async () => {
-    if (played) handlePlay()
+    if (!played) handlePlay()
     await startViewTransition()
     setHide(false)
   }
