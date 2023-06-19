@@ -4,6 +4,7 @@ import styles from "./ClientStream.module.scss"
 import { useState } from "react"
 import RemoveIcon from "@mui/icons-material/Remove"
 import { classNames } from "@/shared/lib/classNames/classNames"
+import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
 
 type ClientStreamProps = {
   stream: MediaStream | null
@@ -14,12 +15,21 @@ export const LocalClientStream = (props: ClientStreamProps) => {
   const { name, stream } = props
   const [hide, setHide] = useState(false)
 
-  const handleHide = () => {
-    setHide((prev) => !prev)
+  const handleHide = async () => {
+    await startViewTransition()
+    setHide(true)
+  }
+
+  const handleUnHide = async () => {
+    await startViewTransition()
+    setHide(false)
   }
 
   return (
     <div
+      style={{
+        viewTransitionName: `localstream-${name}`,
+      }}
       className={classNames([styles.stream], {
         [styles.hideStream]: hide,
         [styles.unhideRight]: hide,
@@ -42,7 +52,7 @@ export const LocalClientStream = (props: ClientStreamProps) => {
       {hide && (
         <div className={styles.unhide}>
           <Tooltip title="Unhide stream">
-            <Button aria-label="Unhide stream" onClick={handleHide}>
+            <Button aria-label="Unhide stream" onClick={handleUnHide}>
               <RemoveIcon />
             </Button>
           </Tooltip>

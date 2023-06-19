@@ -2,7 +2,7 @@ import { RTCClientMediaStream } from "@/entities/RTCClient/lib/RTCClient/RTCClie
 import { useRoomRTCStore } from "@/entities/RTCClient/model/store/RoomRTCStore"
 import { getLocalUser, useUserStore } from "@/entities/User"
 import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
-import React, { memo, useEffect, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import { RTCClient } from "../../../../entities/RTCClient/lib/RTCClient/RTCClient"
 import {
   getDisplayMediaStream,
@@ -12,6 +12,7 @@ import {
 import { ClientStream } from "./ClientStream/ClientStream"
 import { LocalClientStream } from "./ClientStream/LocalClientStream"
 import styles from "./RoomStreams.module.scss"
+import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
 
 export const RoomStreams = memo(function RoomStreams() {
   const users = useRoomRTCStore(getRoomUsers)
@@ -22,7 +23,8 @@ export const RoomStreams = memo(function RoomStreams() {
 
   useEffect(() => {
     const listeners = Object.values(users).map((user) => {
-      const fn = () => {
+      const fn = async () => {
+        await startViewTransition()
         update((prev) => prev + 1)
       }
       user.media.on("newstream", fn)

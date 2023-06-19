@@ -4,6 +4,7 @@ import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
 type events = "close" | "open"
 
 export class RTCClientMediaStream extends Emitter<events> {
+  id: string
   stream: MediaStream
   type: MediaStreamTypes
   allowControl?: boolean
@@ -20,6 +21,7 @@ export class RTCClientMediaStream extends Emitter<events> {
 
     this.hasvideo = !!this.stream.getVideoTracks().length
     this.hasaudio = !!this.stream.getAudioTracks().length
+    this.id = this.stream.getTracks()?.[0]?.id || new Date().toString()
 
     this.isOpen = true
   }

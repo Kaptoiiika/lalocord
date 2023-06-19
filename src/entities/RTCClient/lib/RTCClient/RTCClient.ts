@@ -189,7 +189,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     }
     await this.peer.setLocalDescription(changedAnswer)
     const resp = { id: this.id, answer: changedAnswer }
-    this.log("createAnswer", answer)
+    this.log("createAnswer", changedAnswer)
     if (this.channel.channelIsOpen)
       this.channel.sendData("answer", changedAnswer)
     else socketClient.emit("new_answer", resp)
@@ -216,7 +216,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     }
     await this.peer.setLocalDescription(changedOffer)
     const data = { id: this.id, offer: changedOffer }
-    this.log("createdoffer", offer)
+    this.log("createdoffer", changedOffer)
     if (this.channel.channelIsOpen) this.channel.sendData("offer", changedOffer)
     else socketClient.emit("new_offer", data)
   }

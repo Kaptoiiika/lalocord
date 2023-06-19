@@ -51,7 +51,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     ...other
   } = props
   const [played, setPlayed] = useState(false)
-  const [fullscreen, setFullscreen] = useState(propsFullScreen)
+  const [fullscreen, setFullscreen] = useState(false)
   const [volume, setVolume] = useState(
     getNumberBeetwenTwoValues(initVolume, 0, 1)
   )
@@ -110,7 +110,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
 
   const handleEnterFullscreen = useCallback(() => {
     try {
-      playerRef.current?.requestFullscreen()
+      playerRef.current?.requestFullscreen().catch(console.error)
       setFullscreen(true)
       onFullscreenEnter?.()
     } catch (error) {
@@ -119,7 +119,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   }, [onFullscreenEnter])
   const handleExitFullscreen = useCallback(() => {
     try {
-      document.exitFullscreen()
+      document.exitFullscreen().catch(console.error)
       setFullscreen(false)
       onFullscreenExit?.()
     } catch (error) {
@@ -138,6 +138,8 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   useEffect(() => {
     if (propsFullScreen === true && fullscreen === false) {
       handleEnterFullscreen()
+    } else if (propsFullScreen === false && fullscreen === true) {
+      handleExitFullscreen()
     }
     if (!playerRef.current) return
     playerRef.current.onfullscreenchange = () => {

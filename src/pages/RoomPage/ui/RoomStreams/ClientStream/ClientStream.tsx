@@ -6,6 +6,8 @@ import { useState } from "react"
 import { RTCClient, RTCClientMediaStream } from "@/entities/RTCClient"
 import RemoveIcon from "@mui/icons-material/Remove"
 import { classNames } from "@/shared/lib/classNames/classNames"
+import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
+import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
 
 type ClientStreamProps = {
   client: RTCClient
@@ -16,6 +18,11 @@ export const ClientStream = (props: ClientStreamProps) => {
   const { client, clientStream } = props
   const [autoplay, setAutoplay] = useState(!document.hidden)
   const [hide, setHide] = useState(false)
+  const {
+    handleOpen: handleOpenfullscreen,
+    handleClose: handleClosefullscreen,
+    open: fullScreen,
+  } = useIsOpen()
 
   useMountedEffect(() => {
     const fn = () => {
@@ -38,19 +45,35 @@ export const ClientStream = (props: ClientStreamProps) => {
     client.channel.sendData("resumeStream", clientStream.type)
   }
 
-  const handleHide = () => {
+  const handleHide = async () => {
     handlePause()
-    setHide((prev) => !prev)
+    handleClosefullscreen()
+    await startViewTransition()
+    setHide(true)
+  }
+
+  const handleUnHide = async () => {
+    handlePlay()
+    await startViewTransition()
+    setHide(false)
   }
 
   return (
-    <div className={classNames([styles.stream], { [styles.hideStream]: hide })}>
+    <div
+      style={{
+        viewTransitionName: `stream-${clientStream.id}`,
+      }}
+      className={classNames([styles.stream], { [styles.hideStream]: hide })}
+    >
       <VideoPlayer
         stream={clientStream.stream}
         initVolume={clientStream.volume}
         onVolumeChange={handleChangeVolume}
         onPause={handlePause}
         onPlay={handlePlay}
+        fullScreen={fullScreen}
+        onFullscreenEnter={handleOpenfullscreen}
+        onFullscreenExit={handleClosefullscreen}
         autoplay={autoplay}
         controls={!hide}
       >
@@ -72,7 +95,7 @@ export const ClientStream = (props: ClientStreamProps) => {
       {hide && (
         <div className={styles.unhide}>
           <Tooltip title="Unhide stream">
-            <Button aria-label="Unhide stream" onClick={handleHide}>
+            <Button aria-label="Unhide stream" onClick={handleUnHide}>
               <RemoveIcon />
             </Button>
           </Tooltip>
