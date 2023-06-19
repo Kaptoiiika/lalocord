@@ -17,6 +17,7 @@ type ClientStreamProps = {
 export const ClientStream = (props: ClientStreamProps) => {
   const { client, clientStream } = props
   const [autoplay, setAutoplay] = useState(!document.hidden)
+  const [played, setPlayed] = useState(false)
   const [hide, setHide] = useState(false)
   const {
     handleOpen: handleOpenfullscreen,
@@ -39,21 +40,23 @@ export const ClientStream = (props: ClientStreamProps) => {
     clientStream.volume = value
   }
   const handlePause = () => {
+    setPlayed(false)
     client.channel.sendData("pauseStream", clientStream.type)
   }
   const handlePlay = () => {
+    setPlayed(true)
     client.channel.sendData("resumeStream", clientStream.type)
   }
 
   const handleHide = async () => {
-    handlePause()
+    if (!played) handlePause()
     handleClosefullscreen()
     await startViewTransition()
     setHide(true)
   }
 
   const handleUnHide = async () => {
-    handlePlay()
+    if (played) handlePlay()
     await startViewTransition()
     setHide(false)
   }
