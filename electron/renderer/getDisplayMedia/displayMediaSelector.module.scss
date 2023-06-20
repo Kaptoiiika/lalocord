@@ -1,0 +1,35 @@
+.wrapper {
+  position: absolute;
+  padding: 1em;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1em;
+  padding: 1em;
+  background-color: rgb(var(--bg-primary-color));
+  border-radius: 15px;
+  max-width: 500px;
+}
+
+
+.sourceList {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1em;
+}
+
+.sourceButton {
+  width: 100px;
+  aspect-ratio: 16 / 9;
+  height: 100%;
+}

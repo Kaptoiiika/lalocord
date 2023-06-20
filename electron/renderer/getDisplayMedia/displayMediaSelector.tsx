@@ -1,7 +1,7 @@
 import { Button } from "@mui/material"
 import { IpcChannels } from "../../main/types/ipcChannels"
-import React from "react"
 import { createRoot } from "react-dom/client"
+import styles from './displayMediaSelector.module.scss'
 
 type SourceType = Awaited<
   ReturnType<typeof window.electron.ipcRenderer.invoke<IpcChannels.getMediaSource>>
@@ -35,34 +35,30 @@ export const displayMediaSelector = (): Promise<SourceType | undefined> =>
     }
     const Selector = () => {
       return (
-        <div
-          style={{
-            position: "absolute",
-            padding: "1em",
-            top: "0",
-            left: 0,
-            bottom: 0,
-            right: 0,
-          }}
-        >
-          <div>
-            <button
-              onClick={() => {
+        <div className={styles.wrapper}>
+          <div
+            className={styles.container}
+          >
+            <div className={styles.sourceList}>
+              <button
+                onClick={() => {
                 accept()
               }}
-            >
-              All screen
-            </button>
-            {sources.map((source) => (
-              <button key={source.id} onClick={() => accept(source)}>
-                {source.name}
+              >
+                All screen
               </button>
+              {sources.map((source) => (
+                <button className={styles.sourceButton} key={source.id} onClick={() => accept(source)}>
+                  {/* <img  className={styles.sourceButtonImg}  /> */}
+                  {source.name}
+                </button>
             ))}
-          </div>
+            </div>
 
-          <Button variant="contained" onClick={cancel}>
-            cancel
-          </Button>
+            <Button variant="contained" onClick={cancel}>
+              cancel
+            </Button>
+          </div>
         </div>
       )
     }
