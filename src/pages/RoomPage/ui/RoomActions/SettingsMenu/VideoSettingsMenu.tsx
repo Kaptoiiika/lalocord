@@ -73,8 +73,8 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
 
   return (
     <>
-      <Tooltip title="Share your screen" arrow>
-        <IconButton aria-label={"Share your screen"} onClick={handleOpen}>
+      <Tooltip title="Settings" arrow>
+        <IconButton aria-label={"Settings"} onClick={handleOpen}>
           <SettingsIcon />
         </IconButton>
       </Tooltip>
