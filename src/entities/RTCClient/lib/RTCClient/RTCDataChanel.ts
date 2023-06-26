@@ -38,6 +38,7 @@ export class RTCDataChanel<
     this.user = user
 
     this.channel = this.peer.createDataChannel("text")
+    this.channel.binaryType = "arraybuffer"
     this.channel.onopen = () => {
       this.channelIsOpen = true
       this.messagesBuffer.forEach((data) => {
