@@ -2,7 +2,7 @@ import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
 import { Button, Stack, Tooltip, Typography } from "@mui/material"
 import styles from "./ClientStream.module.scss"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { useState } from "react"
+import { useId, useState } from "react"
 import { RTCClient, RTCClientMediaStream } from "@/entities/RTCClient"
 import RemoveIcon from "@mui/icons-material/Remove"
 import { classNames } from "@/shared/lib/classNames/classNames"
@@ -16,6 +16,7 @@ type ClientStreamProps = {
 
 export const ClientStream = (props: ClientStreamProps) => {
   const { client, clientStream } = props
+  const componentId = useId().split(":").join("")
   const [autoplay, setAutoplay] = useState(!document.hidden)
   const [played, setPlayed] = useState(false)
   const [hide, setHide] = useState(false)
@@ -64,7 +65,7 @@ export const ClientStream = (props: ClientStreamProps) => {
   return (
     <div
       style={{
-        viewTransitionName: `stream-${clientStream.id}`,
+        viewTransitionName: componentId,
       }}
       className={classNames([styles.stream], { [styles.hideStream]: hide })}
     >

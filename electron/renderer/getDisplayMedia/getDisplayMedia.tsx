@@ -7,13 +7,15 @@ export const getDisplayMedia = async (
   const set: any = {}
 
   if (typeof constatins.audio === "object") {
+    const audioConstains: MediaStreamConstraints["audio"] = {
+      ...constatins.audio,
+    }
     set.audio = {}
     set.audio.mandatory = {
-      ...constatins.audio,
+      ...audioConstains,
       chromeMediaSource: "desktop",
     }
     if (selectedSource)
-      //@ts-ignore
       set.audio.mandatory.chromeMediaSourceId = selectedSource.id
   }
 
@@ -21,6 +23,7 @@ export const getDisplayMedia = async (
     set.video = {}
     set.video.mandatory = {
       ...constatins.video,
+      maxFrameRate: constatins.video.frameRate,
       chromeMediaSource: "desktop",
       cursor: "motion",
     }
@@ -28,6 +31,7 @@ export const getDisplayMedia = async (
       set.video.mandatory.chromeMediaSourceId = selectedSource.id
   }
 
+  console.log(set)
   const stream = await navigator.mediaDevices.getUserMedia(set)
   return stream
 }

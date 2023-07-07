@@ -1,7 +1,7 @@
 import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
 import { Button, Stack, Tooltip, Typography } from "@mui/material"
 import styles from "./ClientStream.module.scss"
-import { useState } from "react"
+import { useId, useState } from "react"
 import RemoveIcon from "@mui/icons-material/Remove"
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
@@ -13,6 +13,7 @@ type ClientStreamProps = {
 
 export const LocalClientStream = (props: ClientStreamProps) => {
   const { name, stream } = props
+  const componentId = useId().split(":").join("")
   const [hide, setHide] = useState(false)
 
   const handleHide = async () => {
@@ -28,7 +29,7 @@ export const LocalClientStream = (props: ClientStreamProps) => {
   return (
     <div
       style={{
-        viewTransitionName: `localstream-${name}`,
+        viewTransitionName: componentId,
       }}
       className={classNames([styles.stream], {
         [styles.hideStream]: hide,

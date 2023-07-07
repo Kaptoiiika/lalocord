@@ -1,20 +1,32 @@
-import { app, BrowserWindow } from "electron"
+import { app, BrowserWindow, shell } from "electron"
 import "./main/index"
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string
+import contextMenu from "electron-context-menu"
+
+contextMenu({
+  showSearchWithGoogle: false,
+  showSaveImageAs: true,
+  showSelectAll: false,
+})
 
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    minWidth: 800,
+    minHeight: 600,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      spellcheck: true,
     },
   })
   if (__IS_DEV__ === false) {
     win.setMenu(null)
   }
   win.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url)
+    return { action: "deny" }
+  })
 }
 
 app.commandLine.appendSwitch("force_high_performance_gpu")

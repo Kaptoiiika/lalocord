@@ -36,7 +36,6 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
   const handleStartDisplayMediaStream = async () => {
     handleClose()
     try {
-      console.log(streamSettings)
       const stream = await navigator.mediaDevices.getDisplayMedia(
         streamSettings
       )

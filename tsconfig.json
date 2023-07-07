@@ -10,22 +10,25 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "types": ["node"],
 
     /* Bundler mode */
     "outDir": "./dist/",
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
-    "noEmit": true,
     "jsx": "react-jsx",
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  },
   "include": ["src", "./electron/", "./config/jest/setupTest.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["./src/**/*.test.*"]
 }
