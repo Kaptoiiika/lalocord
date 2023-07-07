@@ -3,10 +3,10 @@ import { displayMediaSelector } from "./displayMediaSelector"
 export const getDisplayMedia = async (
   constatins: MediaStreamConstraints
 ): Promise<MediaStream> => {
-  const selectedSource = await displayMediaSelector()
+  const { source, allowAudio } = await displayMediaSelector()
   const set: any = {}
 
-  if (typeof constatins.audio === "object") {
+  if (typeof constatins.audio === "object" && allowAudio === true) {
     const audioConstains: MediaStreamConstraints["audio"] = {
       ...constatins.audio,
     }
@@ -15,8 +15,7 @@ export const getDisplayMedia = async (
       ...audioConstains,
       chromeMediaSource: "desktop",
     }
-    if (selectedSource)
-      set.audio.mandatory.chromeMediaSourceId = selectedSource.id
+    if (source) set.audio.mandatory.chromeMediaSourceId = source.id
   }
 
   if (typeof constatins.video === "object") {
@@ -27,8 +26,7 @@ export const getDisplayMedia = async (
       chromeMediaSource: "desktop",
       cursor: "motion",
     }
-    if (selectedSource)
-      set.video.mandatory.chromeMediaSourceId = selectedSource.id
+    if (source) set.video.mandatory.chromeMediaSourceId = source.id
   }
 
   console.log(set)
