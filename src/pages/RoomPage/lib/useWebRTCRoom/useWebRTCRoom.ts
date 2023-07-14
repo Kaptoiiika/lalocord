@@ -14,11 +14,15 @@ import {
 } from "../../../../entities/RTCClient/lib/RTCClient/RTCClient"
 import { useRoomRTCStore } from "@/entities/RTCClient"
 import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
+import { useAudio } from "@/entities/AudioEffect"
+import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
 
 export const useWebRTCRoom = () => {
   const users = useRoomRTCStore(getRoomUsers)
   const addMessageToChat = useChatStore((store) => store.addMessage)
   const deleteUser = useRoomRTCStore(getActionDeleteConnectedUsers)
+  const joinToRoomAudioPlay = useAudio(AudioName.joinToRoom)
+  const exitFromRoomAudioPlay = useAudio(AudioName.exitFromRoom)
 
   const usersRef = useRef(users)
   usersRef.current = users
@@ -55,14 +59,16 @@ export const useWebRTCRoom = () => {
     const addUser = (user: UserModel) => {
       const alreadyInList = getUserById(user.id)
       if (alreadyInList) {
-        console.warn(`User ${alreadyInList} is already in list`)
+        console.warn(`User ${alreadyInList.id} is already in list`)
       }
       createNewUser(user)
+      joinToRoomAudioPlay()
     }
 
     const userDisconnect = (user: ClientId) => {
       getUserById(user.id)?.close()
       deleteRef.current(user.id)
+      exitFromRoomAudioPlay()
     }
 
     const saveAnswer = (data: Answer & ClientId) => {
@@ -97,7 +103,7 @@ export const useWebRTCRoom = () => {
       socketClient.off("new_offer", createAnswer)
       socketClient.off("new_ice", saveIce)
     }
-  }, [])
+  }, [exitFromRoomAudioPlay, joinToRoomAudioPlay])
 
   const handleSendMessage = useCallback((msg: string) => {
     Object.values(usersRef.current).forEach((user) => {

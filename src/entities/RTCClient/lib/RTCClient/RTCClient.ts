@@ -160,8 +160,8 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       const recvCodecs = RTCRtpReceiver.getCapabilities(kind)?.codecs
 
       if (kind === "video") {
-        const newsendCodecs = RTCClient.preferCodec(sendCodecs, "video/AV1")
-        const newrecvCodecs = RTCClient.preferCodec(recvCodecs, "video/AV1")
+        const newsendCodecs = RTCClient.preferCodec(sendCodecs, "video/H264")
+        const newrecvCodecs = RTCClient.preferCodec(recvCodecs, "video/H264")
         transceiver.setCodecPreferences([...newsendCodecs, ...newrecvCodecs])
         this.log("change codecs to", [...newsendCodecs, ...newrecvCodecs])
       }

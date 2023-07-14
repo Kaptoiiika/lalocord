@@ -2,7 +2,6 @@ import { Link, Typography } from "@mui/material"
 import Linkify from "react-linkify"
 import { MessageModel } from "../../model/types/ChatSchema"
 import { MessageFile } from "./MessageFile"
-import styles from "./Message.module.scss"
 import { useImagePreviewStore } from "@/features/ImagePreview/model/store/ImagePreviewStore"
 import { getActionSeletFileToImagePreview } from "@/features/ImagePreview"
 

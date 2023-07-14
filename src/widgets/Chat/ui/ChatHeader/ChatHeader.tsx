@@ -3,11 +3,8 @@ import styles from "./ChatHeader.module.scss"
 import ChatIcon from "@mui/icons-material/Chat"
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { memo } from "react"
-import { useChatStore } from "../../model/store/ChatStore"
-import {
-  getChangeSilentMode,
-  getSilentMode,
-} from "../../model/selectors/ChatStoreSelectors"
+import { useAudioEffectStore } from "@/entities/AudioEffect"
+import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
 
 type ChatHeaderProps = {
   handleCollapse: () => void
@@ -17,12 +14,13 @@ type ChatHeaderProps = {
 
 export const ChatHeader = memo(function ChatHeader(props: ChatHeaderProps) {
   const { handleCollapse, collapsed, unreadedMessage } = props
-  const silent = useChatStore(getSilentMode)
-  const handleChangeMode = useChatStore(getChangeSilentMode)
+  const audioVolumes = useAudioEffectStore((state) => state.audioSettings)
+  const handleChangeMode = useAudioEffectStore((state) => state.changeMuted)
+  const isSilent = audioVolumes.notification.muted
 
   const handleOpenContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
-    handleChangeMode(!silent)
+    handleChangeMode(AudioName.notification, !isSilent)
   }
 
   return (
@@ -39,7 +37,7 @@ export const ChatHeader = memo(function ChatHeader(props: ChatHeaderProps) {
         aria-label={collapsed ? "Open chat" : "Hide chat"}
       >
         <Badge color="secondary" badgeContent={unreadedMessage}>
-          <ChatIcon color={silent ? "disabled" : "primary"} />
+          <ChatIcon color={isSilent ? "disabled" : "primary"} />
         </Badge>
       </Button>
     </header>
