@@ -19,10 +19,6 @@ export class RTCClientMediaStream extends Emitter<events> {
     this.stream = mediastream
     this.type = type
 
-    console.log(
-      "channelCount:",
-      this.stream.getAudioTracks()[0].getSettings().channelCount
-    )
     this.hasvideo = !!this.stream.getVideoTracks().length
     this.hasaudio = !!this.stream.getAudioTracks().length
     this.id = this.stream.getTracks()?.[0]?.id || new Date().toString()
