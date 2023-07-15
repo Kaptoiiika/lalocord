@@ -1,24 +1,27 @@
-import { RTCClientMediaStream } from "@/entities/RTCClient/lib/RTCClient/RTCClientMediaStream"
-import { useRoomRTCStore } from "@/entities/RTCClient/model/store/RoomRTCStore"
+import {
+  RTCClient,
+  useRoomRTCStore,
+  RTCClientMediaStream,
+} from "@/entities/RTCClient"
 import { getLocalUser, useUserStore } from "@/entities/User"
 import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
 import { memo, useEffect, useState } from "react"
-import { RTCClient } from "../../../../entities/RTCClient/lib/RTCClient/RTCClient"
 import {
   getDisplayMediaStream,
   getRoomUsers,
   getWebCamStream,
 } from "../../model/selectors/RoomRTCSelectors"
-import { ClientStream } from "./ClientStream/ClientStream"
-import { LocalClientStream } from "./ClientStream/LocalClientStream"
 import styles from "./RoomStreams.module.scss"
 import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
+import { RoomStream } from "./RoomStream/RoomStream"
+import { classNames } from "@/shared/lib/classNames/classNames"
 
 export const RoomStreams = memo(function RoomStreams() {
   const users = useRoomRTCStore(getRoomUsers)
   const localUser = useUserStore(getLocalUser)
   const mediaStream = useRoomRTCStore(getDisplayMediaStream)
   const webCamStream = useRoomRTCStore(getWebCamStream)
+  const [hiddenStream, setHiddenStream] = useState<string[]>([])
   const [, update] = useState(0)
 
   useEffect(() => {
@@ -56,21 +59,55 @@ export const RoomStreams = memo(function RoomStreams() {
   if (webCamStream)
     localStreams.push({ stream: webCamStream, name: localUser.username })
 
+  const someStreamIsHide = hiddenStream.length
+
   return (
-    <StreamViewer className={styles.RoomStreams}>
+    <StreamViewer
+      className={classNames("", { [styles.RoomStreamsWithHiddenStream]: !!someStreamIsHide })}
+    >
       {localStreams.map((local) => (
-        <LocalClientStream
+        <RoomStream
           key={local.stream.id}
           stream={local.stream}
-          name={local.name}
+          title={local.name}
+          autoplay={false}
+          mute
+          hide={!!hiddenStream.find((id) => id === local.stream.id)}
+          onHide={() => {
+            setHiddenStream((prev) => [...prev, local.stream.id])
+          }}
+          onUnHide={() => {
+            setHiddenStream((prev) =>
+              prev.filter((id) => id !== local.stream.id)
+            )
+          }}
         />
       ))}
 
       {streams.map((user) => (
-        <ClientStream
+        <RoomStream
           key={user.clientStream.stream.id}
-          client={user.client}
-          clientStream={user.clientStream}
+          stream={user.clientStream.stream}
+          title={user.client?.user?.username ?? user.client?.user?.id}
+          hide={!!hiddenStream.find((id) => id === user.clientStream.stream.id)}
+          onHide={() => {
+            setHiddenStream((prev) => [...prev, user.clientStream.stream.id])
+          }}
+          onUnHide={() => {
+            setHiddenStream((prev) =>
+              prev.filter((id) => id !== user.clientStream.stream.id)
+            )
+          }}
+          onPlay={() => {
+            user.client.channel.sendData("resumeStream", user.clientStream.type)
+          }}
+          onPause={() => {
+            user.client.channel.sendData("pauseStream", user.clientStream.type)
+          }}
+          onVolumeChange={(value) => {
+            user.clientStream.volume = value
+          }}
+          volume={user.clientStream.volume}
         />
       ))}
     </StreamViewer>

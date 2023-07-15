@@ -1,21 +1,47 @@
 import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
 import { Button, Stack, Tooltip, Typography } from "@mui/material"
-import styles from "./ClientStream.module.scss"
+import styles from "./RoomStream.module.scss"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { useId, useState } from "react"
-import { RTCClient, RTCClientMediaStream } from "@/entities/RTCClient"
+import { memo, useId, useState } from "react"
 import RemoveIcon from "@mui/icons-material/Remove"
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
 import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
 
-type ClientStreamProps = {
-  client: RTCClient
-  clientStream: RTCClientMediaStream
+type RoomStreamProps = {
+  stream: MediaStream
+  /**
+   * default auto
+   * if (document.hidden === true) autoplay = true
+   *
+   * @type {string}
+   */
+  autoplay?: boolean
+  hide?: boolean
+  title?: string
+  volume?: number
+  mute?: boolean
+  onHide?: () => void
+  onUnHide?: () => void
+  onVolumeChange?: (volume: number) => void
+  onPlay?: () => void
+  onPause?: () => void
 }
 
-export const ClientStream = (props: ClientStreamProps) => {
-  const { client, clientStream } = props
+export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
+  const {
+    stream,
+    title,
+    volume,
+    mute,
+    autoplay: propsAutoPlay,
+    hide: propsHide,
+    onVolumeChange,
+    onHide,
+    onPause,
+    onPlay,
+    onUnHide,
+  } = props
   const componentId = useId().split(":").join("")
   const [autoplay, setAutoplay] = useState(!document.hidden)
   const [played, setPlayed] = useState(false)
@@ -37,16 +63,13 @@ export const ClientStream = (props: ClientStreamProps) => {
     }
   })
 
-  const handleChangeVolume = (value: number) => {
-    clientStream.volume = value
-  }
   const handlePause = () => {
     setPlayed(false)
-    client.channel.sendData("pauseStream", clientStream.type)
+    onPause?.()
   }
   const handlePlay = () => {
     setPlayed(true)
-    client.channel.sendData("resumeStream", clientStream.type)
+    onPlay?.()
   }
 
   const handleHide = async () => {
@@ -54,39 +77,48 @@ export const ClientStream = (props: ClientStreamProps) => {
     handleClosefullscreen()
     await startViewTransition()
     setHide(true)
+    onHide?.()
   }
 
   const handleUnHide = async () => {
     if (!played) handlePlay()
     await startViewTransition()
     setHide(false)
+    onUnHide?.()
   }
+
+  useMountedEffect(() => {
+    return onUnHide
+  })
+
+  const isHidden = propsHide ?? hide
 
   return (
     <div
       style={{
         viewTransitionName: componentId,
       }}
-      className={classNames([styles.stream], { [styles.hideStream]: hide })}
+      className={classNames([styles.stream], { [styles.hideStream]: isHidden })}
     >
       <VideoPlayer
-        stream={clientStream.stream}
-        initVolume={clientStream.volume}
-        onVolumeChange={handleChangeVolume}
+        stream={stream}
+        initVolume={volume}
+        onVolumeChange={onVolumeChange}
         onPause={handlePause}
         onPlay={handlePlay}
         fullScreen={fullScreen}
         onFullscreenEnter={handleOpenfullscreen}
         onFullscreenExit={handleClosefullscreen}
-        autoplay={autoplay}
-        controls={!hide}
+        autoplay={propsAutoPlay ?? autoplay}
+        controls={!isHidden}
+        mute={mute}
       >
         <Stack
           direction="row"
           justifyContent="space-between"
           className={styles.streamTooltip}
         >
-          <Typography>{client.user?.username || client.user?.id}</Typography>
+          <Typography>{title}</Typography>
 
           <Tooltip title="Hide stream">
             <Button aria-label="Hide stream" onClick={handleHide}>
@@ -96,7 +128,7 @@ export const ClientStream = (props: ClientStreamProps) => {
         </Stack>
       </VideoPlayer>
 
-      {hide && (
+      {isHidden && (
         <div className={styles.unhide}>
           <Tooltip title="Unhide stream">
             <Button aria-label="Unhide stream" onClick={handleUnHide}>
@@ -107,4 +139,4 @@ export const ClientStream = (props: ClientStreamProps) => {
       )}
     </div>
   )
-}
+})

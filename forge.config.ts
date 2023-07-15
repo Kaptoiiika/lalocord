@@ -2,6 +2,7 @@ import type { ForgeConfig } from "@electron-forge/shared-types"
 import { MakerSquirrel } from "@electron-forge/maker-squirrel"
 import { WebpackPlugin } from "@electron-forge/plugin-webpack"
 import webPackConfig from "./webpack.config.electron"
+import githubPublisher from "@electron-forge/publisher-github"
 
 const webPackConfigList = webPackConfig({})
 const mainConfig = webPackConfigList[0]
@@ -16,7 +17,6 @@ const config: ForgeConfig = {
       Microphone: "Needed for voice calls",
     },
     icon: "./public/favicon.ico",
-    
   },
   rebuildConfig: {
     disablePreGypCopy: true,
@@ -24,6 +24,7 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({
       setupIcon: "./public/favicon.ico",
+      remoteReleases: "https://github.com/Kaptoiiika/RipCornd",
     }),
   ],
   plugins: [
@@ -47,16 +48,12 @@ const config: ForgeConfig = {
     }),
   ],
   publishers: [
-    {
-      name: "@electron-forge/publisher-github",
-      config: {
-        repository: {
-          owner: "Kaptoiiika",
-          name: "RipCornd",
-        },
-        prerelease: true,
+    new githubPublisher({
+      repository: {
+        owner: "Kaptoiiika",
+        name: "RipCornd",
       },
-    },
+    }),
   ],
 }
 
