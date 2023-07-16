@@ -13,6 +13,7 @@ export const ConvertUserSettingsToMediaSettings = (
       frameRate: userSettings.video.frameRate,
       height: { ideal: userSettings.video.height },
       deviceId: userSettings.video.deviceId,
+      //@ts-ignore it work
       displaySurface: "monitor",
     },
   }
