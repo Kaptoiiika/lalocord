@@ -7,7 +7,7 @@ import { RoomActions } from "../RoomActions/RoomActions"
 import { RoomIsFull } from "../RoomIsFull/RoomIsFull"
 import { RoomStreams } from "../RoomStreams/RoomStreams"
 import { RoomUsers } from "../RoomUsers/RoomUsers"
-import { WaitUserClick } from "../WaitUserClick/WaitUserClick"
+import { WaitUserClick } from "@/features/WaitUserClick"
 import styles from "./RoomLobby.module.scss"
 
 export const RoomLobby = () => {
