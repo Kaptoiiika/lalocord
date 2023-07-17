@@ -6,7 +6,7 @@
     "name": "Nikita Ozhegov",
     "email": "nikita.ozhegov8@mail.ru"
   },
-  "main": ".webpack/main/index.js",
+  "main": ".webpack/main",
   "scripts": {
     "start": "vite",
     "build": "vite build --emptyOutDir",
