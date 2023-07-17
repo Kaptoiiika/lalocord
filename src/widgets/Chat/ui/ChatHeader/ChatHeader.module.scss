@@ -27,3 +27,7 @@ $animationTime: 0.3s;
   border-left: var(--box-border);
   border-bottom: var(--box-border);
 }
+
+.contextMenu{
+  min-width: calc($chatWidth / 2);
+}

@@ -8,7 +8,7 @@ export class RTCClientMediaStream extends Emitter<events> {
   stream: MediaStream
   type: MediaStreamTypes
   allowControl?: boolean
-  volume = 0
+  volume = 1
   isOpen: boolean
   isMute: boolean
 
