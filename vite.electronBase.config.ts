@@ -7,9 +7,6 @@ export default function defineConfig(): UserConfig {
 
   const baseConfig: UserConfig = {
     mode: env.mode,
-    server: {
-      port: env.port,
-    },
     resolve: {
       alias: { "@": env.paths.src },
     },

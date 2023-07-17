@@ -16,7 +16,7 @@ export default function defineConfig(): UserConfig {
       alias: { "@": env.paths.src },
     },
     build: {
-      sourcemap: true,
+      sourcemap: "hidden",
       outDir: env.paths.build,
       rollupOptions: {
         input: {

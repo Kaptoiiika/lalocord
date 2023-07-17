@@ -1,38 +1,60 @@
 import type { ForgeConfig } from "@electron-forge/shared-types"
 import { MakerSquirrel } from "@electron-forge/maker-squirrel"
-import { VitePlugin } from "@electron-forge/plugin-vite"
+import { WebpackPlugin } from "@electron-forge/plugin-webpack"
+import webPackConfig from "./webpack.config.electron"
+import githubPublisher from "@electron-forge/publisher-github"
+
+const webPackConfigList = webPackConfig()
+const mainConfig = webPackConfigList[0]
+const rendererConfig = webPackConfigList[1]
+const preloadConfig = webPackConfigList[2]
 
 const config: ForgeConfig = {
   packagerConfig: {
+    asar: true,
     usageDescription: {
       Camera: "Needed for video calls",
       Microphone: "Needed for voice calls",
     },
     icon: "./public/favicon.ico",
   },
+  rebuildConfig: {
+    disablePreGypCopy: true,
+  },
   makers: [
     new MakerSquirrel({
       setupIcon: "./public/favicon.ico",
+      remoteReleases: "https://github.com/Kaptoiiika/RipCornd",
     }),
   ],
   plugins: [
-    new VitePlugin({
-      build: [
-        {
-          entry: "./electron/main.ts",
-          config: "./vite.electronMain.config.ts",
-        },
-        {
-          entry: "./electron/preload.ts",
-          config: "./vite.electronPreload.config.ts",
-        },
-      ],
-      renderer: [
-        {
-          name: "main_window",
-          config: "./vite.electronRenderer.config.ts",
-        },
-      ],
+    new WebpackPlugin({
+      mainConfig,
+      devContentSecurityPolicy: "*",
+      renderer: {
+        config: rendererConfig,
+        entryPoints: [
+          {
+            html: "./index.electron.html",
+            js: "./electron/renderer.ts",
+            name: "main_window",
+
+            preload: {
+              config: preloadConfig,
+              js: "./electron/preload.ts",
+            },
+          },
+        ],
+      },
+    }),
+  ],
+  publishers: [
+    new githubPublisher({
+      repository: {
+        owner: "Kaptoiiika",
+        name: "RipCornd",
+      },
+      authToken: process.env.GITHUB_TOKEN
     }),
   ],
 }
