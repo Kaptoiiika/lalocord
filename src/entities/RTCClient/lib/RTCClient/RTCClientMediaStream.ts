@@ -8,7 +8,7 @@ export class RTCClientMediaStream extends Emitter<events> {
   stream: MediaStream
   type: MediaStreamTypes
   allowControl?: boolean
-  volume = 1
+  volume = 0
   isOpen: boolean
   isMute: boolean
 
@@ -19,6 +19,7 @@ export class RTCClientMediaStream extends Emitter<events> {
     super()
     this.stream = mediastream
     this.type = type
+    if (type === "microphone") this.volume = 1
 
     this.hasvideo = !!this.stream.getVideoTracks().length
     this.hasaudio = !!this.stream.getAudioTracks().length

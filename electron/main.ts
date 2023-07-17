@@ -1,8 +1,16 @@
 import { app, BrowserWindow, shell } from "electron"
 import "./main/index"
-declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string
-declare const MAIN_WINDOW_WEBPACK_ENTRY: string
+declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string
+declare const MAIN_WINDOW_VITE_NAME: string
 import contextMenu from "electron-context-menu"
+import updateElectronApp from "update-electron-app"
+import path from "path"
+
+updateElectronApp({
+  host: "https://github.com",
+  repo: "Kaptoiiika/RipCornd",
+  notifyUser: true,
+})
 
 contextMenu({
   showSearchWithGoogle: false,
@@ -15,14 +23,20 @@ const createWindow = () => {
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: path.join(__dirname, `preload.js`),
       spellcheck: true,
     },
   })
-  if (__IS_DEV__ === false) {
+
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
+  } else {
     win.setMenu(null)
+    win.loadFile(
+      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
+    )
   }
-  win.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
+
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url)
     return { action: "deny" }
