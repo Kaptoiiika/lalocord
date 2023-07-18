@@ -18,9 +18,13 @@ export default () => {
     isElectron: true,
   }
 
+  const DefinePlugin = new webpack.DefinePlugin({
+    ...buildDefinePlugins(options),
+  })
+
   const main: webpack.Configuration = {
     entry: "./electron/main.ts",
-    plugins: [new webpack.DefinePlugin(buildDefinePlugins(options))],
+    plugins: [DefinePlugin],
     module: {
       rules: [
         {
@@ -40,10 +44,7 @@ export default () => {
   }
 
   const renderer: webpack.Configuration = {
-    plugins: [
-      new webpack.DefinePlugin(buildDefinePlugins(options)),
-      new MiniCssExtractPlugin(),
-    ],
+    plugins: [DefinePlugin, new MiniCssExtractPlugin()],
     module: {
       rules: buildLoaders(options),
     },
