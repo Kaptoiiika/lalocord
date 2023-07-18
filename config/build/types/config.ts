@@ -14,6 +14,7 @@ export interface BuildOptions {
   port: number
   isDev: boolean
   apiURL: string
+  isElectron: boolean
 }
 
 export interface BuildEnv {

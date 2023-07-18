@@ -1,6 +1,5 @@
 import { PropsWithChildren } from "react"
 import { BrowserRouter, HashRouter } from "react-router-dom"
-import styles from "./RoterProvider.module.scss"
 
 type RoterProviderProps = {} & PropsWithChildren
 

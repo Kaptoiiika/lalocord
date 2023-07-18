@@ -1,11 +1,9 @@
 import { BuildOptions } from "../types/config"
 
 export const buildDefinePlugins = (
-  options: Pick<BuildOptions, "apiURL" | "isDev">,
-  otherOption: { isElectron?: boolean } = {} 
+  options: Pick<BuildOptions, "apiURL" | "isDev" | "isElectron">,
 ) => {
-  const { isDev, apiURL } = options
-  const { isElectron } = otherOption
+  const { isDev, apiURL, isElectron } = options
 
   return {
     __IS_DEV__: JSON.stringify(isDev),

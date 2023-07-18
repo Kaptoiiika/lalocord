@@ -2,7 +2,7 @@ import path from "path"
 import dotenv from "dotenv"
 import { BuildOptions, BuildPaths } from "../types/config"
 
-export const getEnv = (dirName: string): BuildOptions => {
+export const getEnv = (dirName: string): Omit<BuildOptions, "isElectron"> => {
   const MODE = process.env.mode === "development" ? "development" : "production"
   const isDev = MODE === "development"
 

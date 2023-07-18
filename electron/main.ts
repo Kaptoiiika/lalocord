@@ -6,7 +6,6 @@ import contextMenu from "electron-context-menu"
 import updateElectronApp from "update-electron-app"
 
 updateElectronApp({
-  host: "https://github.com",
   repo: "Kaptoiiika/RipCornd",
   notifyUser: true,
 })

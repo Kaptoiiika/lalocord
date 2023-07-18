@@ -4,12 +4,13 @@ import {
   AppRouteProps,
   AppRoutes,
 } from "@/shared/config/routeConfig/routeConfig"
+import { Navigate } from "react-router-dom"
 
 export const RoutesConfig: Record<string, AppRouteProps> = {
-  [AppRoutes.INDEX]: {
-    element: <MainPage />,
+  "*": {
+    element: <Navigate to={AppRoutes.MAIN_PAGE} />,
   },
-
+  
   [AppRoutes.MAIN_PAGE]: {
     element: <MainPage />,
   },

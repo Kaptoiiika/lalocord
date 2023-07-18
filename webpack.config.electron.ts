@@ -15,6 +15,7 @@ export default () => {
     port: env.port,
     apiURL: env.apiURL,
     isDev: env.isDev,
+    isElectron: true,
   }
 
   const main: webpack.Configuration = {
