@@ -63,7 +63,9 @@ export const RoomStreams = memo(function RoomStreams() {
 
   return (
     <StreamViewer
-      className={classNames("", { [styles.RoomStreamsWithHiddenStream]: !!someStreamIsHide })}
+      className={classNames("", {
+        [styles.RoomStreamsWithHiddenStream]: !!someStreamIsHide,
+      })}
     >
       {localStreams.map((local) => (
         <RoomStream
@@ -72,6 +74,7 @@ export const RoomStreams = memo(function RoomStreams() {
           title={local.name}
           autoplay={false}
           mute
+          volume={0}
           hide={!!hiddenStream.find((id) => id === local.stream.id)}
           onHide={() => {
             setHiddenStream((prev) => [...prev, local.stream.id])

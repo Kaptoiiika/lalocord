@@ -32,7 +32,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   const {
     stream,
     title,
-    volume,
+    volume = 0,
     mute,
     autoplay: propsAutoPlay,
     hide: propsHide,
