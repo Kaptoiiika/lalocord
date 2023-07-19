@@ -1,10 +1,15 @@
 import { create, StateCreator } from "zustand"
-import { AudioEffectSchema, AudioName } from "../types/AudioEffectSchema"
+import {
+  AudioEffectSchema,
+  AudioName,
+  AudioSettingsList,
+} from "../types/AudioEffectSchema"
 import { persist } from "zustand/middleware"
 import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
 import notificationSound from "@/shared/assets/audio/notification.mp3"
 import joinToRoomSound from "@/shared/assets/audio/joinToRoom.mp3"
 import exitFromRoomSound from "@/shared/assets/audio/exitFromRoom.mp3"
+import { clamp } from "@/shared/lib/utils/Numbers"
 
 type AudioSrc = string
 const AudioSourceList: [AudioName, AudioSrc][] = [
@@ -23,31 +28,25 @@ const AudioInstance = AudioSourceList.reduce<Record<string, HTMLAudioElement>>(
 )
 
 const store: StateCreator<AudioEffectSchema> = (set, get) => ({
-  audioSettings: {
-    [AudioName.notification]: {
-      muted: AudioInstance[AudioName.notification].muted,
-      volume: AudioInstance[AudioName.notification].volume,
+  audioSettings: Object.entries(AudioInstance).reduce<AudioSettingsList>(
+    (prev, [name, audio]) => {
+      prev[name] = { volume: audio.volume, muted: audio.muted }
+      return prev
     },
-    [AudioName.joinToRoom]: {
-      muted: AudioInstance[AudioName.joinToRoom].muted,
-      volume: AudioInstance[AudioName.joinToRoom].volume,
-    },
-    [AudioName.exitFromRoom]: {
-      muted: AudioInstance[AudioName.exitFromRoom].muted,
-      volume: AudioInstance[AudioName.exitFromRoom].volume,
-    },
-  },
+    {}
+  ),
 
   play(audioName) {
     const state = get()
     AudioInstance[audioName].currentTime = 0
-    AudioInstance[audioName].volume = state.audioSettings[audioName].volume
-    AudioInstance[audioName].muted = state.audioSettings[audioName].muted
+    AudioInstance[audioName].volume = state.audioSettings[audioName].volume ?? 1
+    AudioInstance[audioName].muted =
+      state.audioSettings[audioName].muted ?? false
     return AudioInstance[audioName].play()
   },
 
   changeVolume(audioName, volume = 0) {
-    const clampedValue = Math.max(1, Math.min(0, volume))
+    const clampedValue = clamp(volume, 0, 1)
     set((state) => ({
       ...state,
       audioSettings: {

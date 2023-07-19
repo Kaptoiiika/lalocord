@@ -3,7 +3,7 @@ import type { UserModel } from "@/entities/User"
 import { convertBlobToBase64 } from "@/shared/lib/utils/Blob/convertBlobToBase64/convertBlobToBase64"
 import { covertBase64ToBlob } from "@/shared/lib/utils/Blob/covertBase64ToBlob/covertBase64ToBlob"
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
-import { splitStringToChunks } from "@/shared/lib/utils/String/splitStringToChunks"
+import { splitStringToChunks } from "@/shared/lib/utils/String"
 // eslint-disable-next-line boundaries/element-types
 import type {
   MessageData,

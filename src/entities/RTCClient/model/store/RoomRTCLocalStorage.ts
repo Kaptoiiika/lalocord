@@ -1,10 +1,10 @@
 import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
-import { getNumberBeetwenTwoValues } from "@/shared/lib/utils/Numbers/getNumberBeetwenTwoValues"
 import {
   PriorityNumberToText,
   PriorityTextToNumber,
 } from "../../utils/FormatePriority"
 import { UserStreamSettings } from "../types/RoomRTCSchema"
+import { clamp } from "@/shared/lib/utils/Numbers"
 
 const defaultEncodingSettings: RTCRtpEncodingParameters = {
   maxBitrate: 1024 * 1024 * 10,
@@ -24,7 +24,7 @@ export const getEncodingSettingsFromLocalStorage =
         ? PriorityNumberToText(PriorityTextToNumber(data?.priority))
         : defaultEncodingSettings.priority,
       scaleResolutionDownBy: data?.scaleResolutionDownBy
-        ? getNumberBeetwenTwoValues(Number(data?.scaleResolutionDownBy), 1, 10)
+        ? clamp(Number(data?.scaleResolutionDownBy), 1, 10)
         : defaultEncodingSettings.scaleResolutionDownBy,
     }
     return res
@@ -47,9 +47,9 @@ const defaultStreamSettings = {
     channelCount: 2,
   },
   video: {
-    frameRate: 60,
+    frameRate: 30,
     // width: { ideal: 1924 },
-    height: 1080,
+    height: 720,
     displaySurface: "monitor",
   },
   surfaceSwitching: "include",

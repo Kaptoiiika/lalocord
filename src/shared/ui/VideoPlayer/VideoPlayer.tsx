@@ -9,12 +9,12 @@ import {
   useState,
 } from "react"
 import styles from "./VideoPlayer.module.scss"
-import { getNumberBeetwenTwoValues } from "@/shared/lib/utils/Numbers/getNumberBeetwenTwoValues"
 import { VideoPlayerDebugInfo } from "./VideoPlayerDebugInfo/VideoPlayerDebugInfo"
 import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
 import { VideoPlayerActions } from "./VideoPlayerActions/VideoPlayerActions"
 import { VideoPlayerTooltip } from "./VideoPlayerTooltip/VideoPlayerTooltip"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
+import { clamp } from "@/shared/lib/utils/Numbers"
 
 type VideoPlayerProps = {
   stream?: MediaStream | null
@@ -52,9 +52,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   } = props
   const [played, setPlayed] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
-  const [volume, setVolume] = useState(
-    getNumberBeetwenTwoValues(initVolume, 0, 1)
-  )
+  const [volume, setVolume] = useState(clamp(initVolume, 0, 1))
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<HTMLDivElement | null>(null)
   const { handleClose, handleOpen, open } = useIsOpen({ time: 3000 })

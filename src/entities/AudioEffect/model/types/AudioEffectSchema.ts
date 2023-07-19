@@ -6,12 +6,14 @@ export const enum AudioName {
 
 type AudioNames = keyof typeof AudioName | AudioName
 type AudioSettings = {
-  muted: boolean
+  muted?: boolean
   volume: number
 }
 
+export type AudioSettingsList = Record<string, AudioSettings>
+
 export interface AudioEffectSchema {
-  audioSettings: Record<AudioNames, AudioSettings>
+  audioSettings: AudioSettingsList
   play: (audioName: AudioNames) => Promise<void>
   changeVolume: (audioName: AudioNames, volume: number) => void
   changeMuted: (audioName: AudioNames, mute: boolean) => void
