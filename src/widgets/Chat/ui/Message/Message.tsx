@@ -1,4 +1,4 @@
-import { Link, Typography } from "@mui/material"
+import { Link as MuiLink, Typography } from "@mui/material"
 import Linkify from "react-linkify"
 import { MessageModel } from "../../model/types/ChatSchema"
 import { MessageFile } from "./MessageFile"
@@ -40,9 +40,9 @@ export const Message = (props: MessageProps) => {
               )
 
             return (
-              <Link key={key} href={href} target="_blank" rel="noreferrer">
+              <MuiLink key={key} href={href} target="_blank" rel="noreferrer">
                 {text}
-              </Link>
+              </MuiLink>
             )
           }}
         >

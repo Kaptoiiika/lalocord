@@ -1,10 +1,10 @@
-import { Suspense, useCallback } from "react"
+import { Suspense, useCallback, memo } from "react"
 import { Routes, Route } from "react-router-dom"
 import { PageLoader } from "@/widgets/PageLoader"
 import { AppRouteProps } from "@/shared/config/routeConfig/routeConfig"
 import { RoutesConfig } from "./Routes"
 
-export const AppRouter = () => {
+export const AppRouter = memo(function AppRouter() {
   const routerWrapper = useCallback(
     (path: string, routerProps: AppRouteProps) => {
       return (
@@ -27,4 +27,4 @@ export const AppRouter = () => {
       </Routes>
     </Suspense>
   )
-}
+})

@@ -3,6 +3,7 @@ import { Navbar } from "@/widgets/Navbar"
 import { Stack } from "@mui/material"
 import { Suspense } from "react"
 import { AppRouter } from "./providers/Router/ui/AppRouter"
+import LoadingBars from "@/shared/assets/icons/LoaderBars.svg"
 
 const App = () => {
   useMountedEffect(() => {
@@ -10,7 +11,7 @@ const App = () => {
   })
 
   return (
-    <Suspense>
+    <Suspense fallback={<LoadingBars />}>
       <Stack className={"app"} direction={"row"}>
         <Navbar />
         <AppRouter />

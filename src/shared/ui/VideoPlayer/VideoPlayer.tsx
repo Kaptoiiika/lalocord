@@ -15,6 +15,7 @@ import { VideoPlayerActions } from "./VideoPlayerActions/VideoPlayerActions"
 import { VideoPlayerTooltip } from "./VideoPlayerTooltip/VideoPlayerTooltip"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
 import { clamp } from "@/shared/lib/utils/Numbers"
+import { ErrorBoundary } from "../ErrorBoundary"
 
 type VideoPlayerProps = {
   stream?: MediaStream | null
@@ -36,7 +37,7 @@ let debugValue = !!localStorage.getItem("debug")
 export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const {
     stream = null,
-    initVolume,
+    initVolume = 0,
     className,
     mute,
     autoplay,
@@ -178,45 +179,47 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   }, [handleOpen])
 
   return (
-    <div
-      className={styles.player}
-      ref={handleRefPlayer}
-      onFocus={handleFocus}
-      onMouseEnter={handleOpen}
-      onMouseMove={handleOpen}
-      onClick={handleOpen}
-      onBlur={handleClose}
-      onMouseLeave={handleClose}
-    >
-      {debug && <VideoPlayerDebugInfo stream={stream} />}
-      {controls && (
-        <>
-          <VideoPlayerTooltip open={!toolsIsClosed} top>
-            {children}
-          </VideoPlayerTooltip>
-          <VideoPlayerActions
-            stream={stream}
-            open={!toolsIsClosed}
-            fullscreen={fullscreen}
-            played={played}
-            volume={volume}
-            mute={mute}
-            handleChangeVolume={handleChangeVolume}
-            handleExitFullscreen={handleExitFullscreen}
-            handleFullscreen={handleEnterFullscreen}
-            handlePlayPause={handlePlayPause}
-          />
-        </>
-      )}
-      <video
-        {...other}
-        onDoubleClick={handleFullscreenToggle}
-        ref={handleRefVideo}
-        className={classNames([styles.video, className], {
-          [styles.cursorHide]: toolsIsClosed,
-        })}
-        playsInline
-      />
-    </div>
+    <ErrorBoundary errorText="Video player is dead">
+      <div
+        className={styles.player}
+        ref={handleRefPlayer}
+        onFocus={handleFocus}
+        onMouseEnter={handleOpen}
+        onMouseMove={handleOpen}
+        onClick={handleOpen}
+        onBlur={handleClose}
+        onMouseLeave={handleClose}
+      >
+        {debug && <VideoPlayerDebugInfo stream={stream} />}
+        {controls && (
+          <>
+            <VideoPlayerTooltip open={!toolsIsClosed} top>
+              {children}
+            </VideoPlayerTooltip>
+            <VideoPlayerActions
+              stream={stream}
+              open={!toolsIsClosed}
+              fullscreen={fullscreen}
+              played={played}
+              volume={volume}
+              mute={mute}
+              handleChangeVolume={handleChangeVolume}
+              handleExitFullscreen={handleExitFullscreen}
+              handleFullscreen={handleEnterFullscreen}
+              handlePlayPause={handlePlayPause}
+            />
+          </>
+        )}
+        <video
+          {...other}
+          onDoubleClick={handleFullscreenToggle}
+          ref={handleRefVideo}
+          className={classNames([styles.video, className], {
+            [styles.cursorHide]: toolsIsClosed,
+          })}
+          playsInline
+        />
+      </div>
+    </ErrorBoundary>
   )
 })

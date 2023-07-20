@@ -1,11 +1,10 @@
 import { AppRoutes } from "@/shared/config/routeConfig/routeConfig"
 import { IconButton } from "@mui/material"
 import { Stack } from "@mui/material"
-import { Link } from "react-router-dom"
 import HomeIcon from "@mui/icons-material/Home"
 import styles from "./Navbar.module.scss"
 import { ThemeSwitcher } from "@/features/ThemeSwitcher"
-import { UserSettingsModal } from "@/entities/UserSettings"
+import { Link } from "@/shared/ui/Link/Link"
 
 // const links = [
 //   {

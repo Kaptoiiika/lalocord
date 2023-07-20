@@ -2,7 +2,7 @@ import { RoomList } from "@/entities/Room"
 import { useUserStore } from "@/entities/User"
 import { AppFooter } from "@/widgets/Footer"
 import { PageWrapper } from "@/widgets/Page"
-import { Link, Stack, TextField, Typography } from "@mui/material"
+import { Link as MuiLink, Stack, TextField, Typography } from "@mui/material"
 import styles from "./MainPage.module.scss"
 
 export const MainPage = () => {
@@ -33,13 +33,13 @@ export const MainPage = () => {
         </Stack>
         {!__IS_ELECTRON__ && (
           <Typography className={styles.releaseLink}>
-            <Link
+            <MuiLink
               href="https://github.com/Kaptoiiika/RipCornd/releases/latest"
               target="_blank"
               rel="noreferrer"
             >
               Download windows app
-            </Link>
+            </MuiLink>
           </Typography>
         )}
       </Stack>

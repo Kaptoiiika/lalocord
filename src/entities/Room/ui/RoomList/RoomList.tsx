@@ -1,6 +1,6 @@
 import React, { memo, useState } from "react"
 import { Button, Divider, Skeleton, Stack, Typography } from "@mui/material"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "@/shared/config/routeConfig/routeConfig"
 import styles from "./RoomList.module.scss"
 import { RoomModel } from "../../model/types/RoomSchema"
@@ -8,6 +8,7 @@ import PeopleAltIcon from "@mui/icons-material/PeopleAlt"
 import useSWR from "swr"
 import { apiClient } from "@/shared/api/apiClient"
 import TextField from "@mui/material/TextField"
+import { Link } from "@/shared/ui/Link/Link"
 
 type RoomListProps = {
   className?: string
@@ -47,7 +48,7 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
           onClick={handleCreateRoom}
           variant="contained"
         >
-          CreateRoom
+          Create Room
         </Button>
       </Stack>
 

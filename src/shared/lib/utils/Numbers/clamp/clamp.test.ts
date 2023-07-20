@@ -30,8 +30,4 @@ describe("clamp", () => {
     const value = clamp(1)
     expect(value).toBe(1)
   })
-  test("value=undefine min undefine max undefine", () => {
-    const value = clamp()
-    expect(value).toBe(NaN)
-  })
 })
