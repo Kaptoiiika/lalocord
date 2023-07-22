@@ -4,11 +4,12 @@ import { BuildOptions, BuildPaths } from "../types/config"
 
 export const getEnv = (dirName: string): Omit<BuildOptions, "isElectron"> => {
   const MODE = process.env.mode === "development" ? "development" : "production"
-  const isDev = true //MODE === "development"
+  const isDev = MODE === "development"
 
   const fileEnv = isDev
-    ? dotenv.config({ path: "../../../.env.development" }).parsed
-    : dotenv.config({ path: "../../.././.env" }).parsed
+    ? dotenv.config({ path: path.resolve(dirName, "./.env.development") })
+        .parsed
+    : dotenv.config({ path: path.resolve(dirName, "./.env") }).parsed
 
   const paths: BuildPaths = {
     build: path.resolve(
