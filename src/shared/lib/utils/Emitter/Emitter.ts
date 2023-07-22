@@ -1,34 +1,32 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type EventMap = Record<string, ((...args: any[]) => any)[]>
 
-type EventReceiver<T> = (params: T) => void
+type Callback<A> = (a: A) => void
+export type Events = Record<string, any>
 
-class Emitter<EventKeys extends string = string> {
-  private events: EventMap
+/**
+ *
+ * @class Emitter
+ * @template E 
+ * where: keyof E = eventName,
+ * E.eventName = callback args
+ */
+class Emitter<E extends Events> {
+  private events = new Map<keyof E, Set<Callback<any>>>()
 
-  constructor() {
-    this.events = {}
-  }
-
-  emit<T>(event: EventKeys, ...args: T[]) {
-    if (this.events[event]) {
-      this.events[event].forEach((fn) => fn(...args))
-    }
+  emit<K extends keyof E>(eventName: K, value: E[K]) {
+    this.events.get(eventName)?.forEach((fn) => fn(value))
     return this
   }
 
-  on<T>(event: EventKeys, fn: EventReceiver<T>) {
-    if (this.events[event]) this.events[event].push(fn)
-    else this.events[event] = [fn]
+  on<K extends keyof E>(eventName: K, callback: Callback<E[K]>) {
+    const listeners = this.events.get(eventName)
+    if (listeners) listeners.add(callback)
+    else this.events.set(eventName, new Set([callback]))
     return this
   }
 
-  off<T>(event: EventKeys, fn?: EventReceiver<T>) {
-    if (event) {
-      const listeners = this.events[event]
-      const index = listeners.findIndex((_fn) => _fn === fn)
-      listeners.splice(index, 1)
-    } else this.events[event] = []
+  off<K extends keyof E>(eventName: K, callback: Callback<E[K]>) {
+    this.events.get(eventName)?.delete(callback)
     return this
   }
 }

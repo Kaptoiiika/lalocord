@@ -26,6 +26,7 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   )
 
   const handleSendFile = async (blob: Blob) => {
+    console.log(blob)
     onSendFile?.(blob)
     addMessage(
       {

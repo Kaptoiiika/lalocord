@@ -1,7 +1,7 @@
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
 
-type events = "close" | "open"
+type events = { close: void; open: void }
 
 export class RTCClientMediaStream extends Emitter<events> {
   id: string
@@ -31,12 +31,12 @@ export class RTCClientMediaStream extends Emitter<events> {
 
   close() {
     this.isOpen = false
-    this.emit("close")
+    this.emit("close", undefined)
   }
 
   open() {
     this.isOpen = true
-    this.emit("open")
+    this.emit("open", undefined)
   }
 
   setAllowcontrol(value: boolean) {

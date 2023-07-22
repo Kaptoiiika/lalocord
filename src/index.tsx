@@ -1,4 +1,3 @@
-import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { ThemeProvider } from "@/app/providers/ThemeProvider"
 import { AppRouterProvider } from "@/app/providers/Router"
@@ -17,15 +16,15 @@ if (!container) {
 const root = createRoot(container)
 
 root.render(
-  <StrictMode>
-    <ErrorBoundary>
-      <AppRouterProvider>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
-      </AppRouterProvider>
-    </ErrorBoundary>
-  </StrictMode>
+  // <StrictMode>
+  <ErrorBoundary>
+    <AppRouterProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </AppRouterProvider>
+  </ErrorBoundary>
+  // </StrictMode>
 )
 
 if (__IS_ELECTRON__ === false) {

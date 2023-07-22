@@ -1,9 +1,10 @@
 import path from "path"
+import type { Config } from "jest"
 
-export default {
+const config: Config = {
   preset: "ts-jest",
 
-  rootDir: "../..",
+  rootDir: ".",
   modulePaths: ["<rootDir>/src"],
 
   clearMocks: true,
@@ -13,7 +14,7 @@ export default {
     "^.+\\.ts?$": "ts-jest",
   },
 
-  transformIgnorePatterns: ['<rootDir>/node_modules/'],
+  transformIgnorePatterns: ["<rootDir>/node_modules/"],
   coveragePathIgnorePatterns: ["\\\\node_modules\\\\"],
 
   moduleDirectories: ["node_modules"],
@@ -29,7 +30,6 @@ export default {
     "node",
   ],
 
-
   setupFilesAfterEnv: ["<rootDir>//config/jest/setupTests.ts"],
 
   testMatch: ["<rootDir>/src/**/*(*.)@(spec|test).[tj]s?(x)"],
@@ -41,7 +41,7 @@ export default {
       path.resolve(__dirname, "fileMock.ts"),
     "^@/(.*)$": "<rootDir>/src/$1",
   },
-  
+
   reporters: [
     "default",
     [
@@ -55,3 +55,4 @@ export default {
     ],
   ],
 }
+export default config

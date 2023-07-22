@@ -9,3 +9,4 @@ todo.md
 /out
 /.webpack
 /.vite
+/.hidden

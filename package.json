@@ -8,7 +8,7 @@
   },
   "main": ".webpack/main",
   "scripts": {
-    "start": "vite",
+    "start": "vite --mode development",
     "build": "vite build --emptyOutDir",
     "electron": "electron-forge start",
     "package": "electron-forge package",

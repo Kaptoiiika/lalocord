@@ -7,11 +7,12 @@ import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
 import { RTCClientMediaStream } from "./RTCClientMediaStream"
 
-export type RTCMediaStreamEvents =
-  | "newstream"
-  | "stopStream"
-  | "sendStream"
-  | "needUpdateStreamType"
+export type RTCMediaStreamEvents = {
+  newstream: RTCClientMediaStream | null
+  stopStream: MediaStreamTypes
+  sendStream: void
+  needUpdateStreamType: void
+}
 
 export type RemoteTracksTypes = {
   type: MediaStreamTypes
@@ -128,7 +129,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
     })
 
     this.senders[type] = await Promise.all(senders)
-    this.emit("sendStream")
+    this.emit("sendStream", undefined)
   }
 
   getStreamType(): RemoteTracksTypes[] {
@@ -155,14 +156,14 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
   setAllowControl(value: boolean) {
     this.allowControl = value
-    this.emit("sendStream")
+    this.emit("sendStream", undefined)
   }
 
   reciveTrack(event: RTCTrackEvent) {
     const track = event.track
     this.remoteTrack[track.id] = track
 
-    this.emit("needUpdateStreamType")
+    this.emit("needUpdateStreamType", undefined)
     this.log("reciveTrack", track)
   }
 
@@ -204,10 +205,10 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
         this.availableStreamList = this.availableStreamList.filter(
           (cur) => cur !== clientStream
         )
-        this.emit("newstream")
+        this.emit("newstream", clientStream)
       })
       clientStream.open()
-      this.emit("newstream")
+      this.emit("newstream", clientStream)
     })
   }
 

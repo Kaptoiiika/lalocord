@@ -30,5 +30,6 @@
       "module": "CommonJS"
     }
   },
-  "include": ["src", "./electron/", "./config/jest/setupTest.ts"]
+  "include": ["src", "./electron/", "./config/jest/setupTest.ts"],
+  "exclude": []
 }

@@ -9,6 +9,7 @@ import type {
   MessageData,
   MessageModel,
 } from "@/widgets/Chat/model/types/ChatSchema"
+import { RTCChatDataChanel } from "./new/RTCChatDataChanel"
 
 export type DataChunk = {
   id: string
@@ -20,13 +21,14 @@ export type DataChunk = {
 
 export type BaseMessageKeys = "file" | "text"
 
-type RTCDataChanelEvents = "newMessage"
+type RTCDataChanelEvents = { newMessage: MessageModel }
 
 export class RTCDataChanel<
   MessageKeys extends string = string
 > extends Emitter<RTCDataChanelEvents> {
   peer: RTCPeerConnection | null
   channel: RTCDataChannel
+  dataChannel: RTCChatDataChanel
   user: UserModel
   channelIsOpen = false
   private messagesBuffer: string[] = []
@@ -48,9 +50,13 @@ export class RTCDataChanel<
     this.channel.onclose = () => {
       this.channelIsOpen = false
     }
+
+    this.dataChannel = new RTCChatDataChanel(this.peer, "chat2")
+    this.dataChannel.on("newMessage", (mes) => console.log("mes", mes))
   }
 
   async sendBlob(blob: Blob) {
+    this.dataChannel.sendBlob(blob)
     const MAX_SIZE_CHUNK = 1024 * 32 * 2
     const MAX_STACK = 255
     if (blob.size > MAX_SIZE_CHUNK * MAX_STACK)

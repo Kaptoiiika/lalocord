@@ -35,6 +35,10 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
     }
   })
 
+  if (__IS_DEV__) {
+    return <>{children}</>
+  }
+
   //@ts-ignore not in firefox
   if (navigator.userActivation && !navigator.userActivation?.hasBeenActive) {
     return (

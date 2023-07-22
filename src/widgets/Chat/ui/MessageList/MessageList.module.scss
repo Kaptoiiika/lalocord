@@ -8,18 +8,21 @@
   &Group {
     margin-top: 4px;
   }
+
   &User {
     margin: 0;
     font-size: 1.25em;
     font-weight: bold;
     overflow-wrap: break-word;
   }
+
   &Text {
     margin: 0;
     margin-left: 4px;
     overflow-wrap: break-word;
-    white-space: normal;
+    white-space: break-spaces;
   }
+
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
   }

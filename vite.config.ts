@@ -25,6 +25,6 @@ export default function defineConfig(): UserConfig {
       },
     },
     plugins: [react(), svgr({ exportAsDefault: true })],
-    define: buildDefinePlugins(env),
+    define: buildDefinePlugins({ ...env, isElectron: false }),
   }
 }

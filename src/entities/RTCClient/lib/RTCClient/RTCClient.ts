@@ -27,7 +27,7 @@ type MessageType =
   | "clientPressKey"
   | "clientMouseChange"
 
-type RTCClientEvents = "iceconnectionStatusChange"
+type RTCClientEvents = { iceconnectionStatusChange: void }
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
@@ -87,6 +87,9 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
     this.peer.ondatachannel = (event) => {
       const remoteChannel = event.channel
+      if (event.channel.label === "chat2") {
+        return
+      }
       remoteChannel.onmessage = this.initDataChanel.bind(this)
     }
     this.peer.onicecandidate = (event) => {
@@ -103,7 +106,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     }
 
     this.peer.oniceconnectionstatechange = (e) => {
-      this.emit("iceconnectionStatusChange")
+      this.emit("iceconnectionStatusChange", undefined)
       switch (this.peer?.iceConnectionState) {
         case "completed":
         case "connected":
@@ -242,9 +245,10 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   }
 
   private initDataChanel(e: MessageEvent) {
+    if (e.data instanceof ArrayBuffer) return console.log(e.data)
     try {
       const msg: { type: MessageType; data: any } = JSON.parse(e.data)
-      this.log("reciveData", msg)
+      // this.log("reciveData", msg)
 
       if (!msg.type) return
       const { data, type } = msg
