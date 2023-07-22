@@ -7,8 +7,8 @@ export const getEnv = (dirName: string): Omit<BuildOptions, "isElectron"> => {
   const isDev = true //MODE === "development"
 
   const fileEnv = isDev
-    ? dotenv.config({ path: "./.env.development" }).parsed
-    : dotenv.config({ path: "./.env" }).parsed
+    ? dotenv.config({ path: "../../../.env.development" }).parsed
+    : dotenv.config({ path: "../../.././.env" }).parsed
 
   const paths: BuildPaths = {
     build: path.resolve(

@@ -3,11 +3,14 @@ import { MakerSquirrel } from "@electron-forge/maker-squirrel"
 import { WebpackPlugin } from "@electron-forge/plugin-webpack"
 import webPackConfig from "./webpack.config.electron"
 import githubPublisher from "@electron-forge/publisher-github"
+import dotenv from "dotenv"
 
 const webPackConfigList = webPackConfig()
 const mainConfig = webPackConfigList[0]
 const rendererConfig = webPackConfigList[1]
 const preloadConfig = webPackConfigList[2]
+
+const fileEnv = dotenv.config({ path: "./.env" }).parsed
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -54,7 +57,7 @@ const config: ForgeConfig = {
         owner: "Kaptoiiika",
         name: "RipCornd",
       },
-      authToken: process.env.GITHUB_TOKEN
+      authToken: process.env.GITHUB_TOKEN ?? fileEnv?.GITHUB_TOKEN,
     }),
   ],
 }
