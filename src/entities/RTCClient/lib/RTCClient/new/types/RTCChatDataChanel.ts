@@ -1,6 +1,6 @@
 export type RTCChatMessage = {
   id: string
-  type: "text" | "file" | "fileParams"
+  type: "text" | "file" | "fileParams" | "transmission"
   message?: string
   blob?: Blob
   blobParams?: {
@@ -8,10 +8,20 @@ export type RTCChatMessage = {
     loaded: number
     type?: string
   }
+  transmission?: {
+    length: number
+    loaded: number
+  }
+  isSystemMessage?: boolean
 }
+
+export type TransmissionMessage = Required<
+  Pick<RTCChatMessage, "id" | "transmission" | "type" | "isSystemMessage">
+>
 
 export type RTCChatDataChanelEvents = {
   newMessage: RTCChatMessage
+  transmission: TransmissionMessage
 }
 
 export interface IRTCChatDataChanel {

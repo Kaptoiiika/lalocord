@@ -14,6 +14,16 @@ const MessageItem = (
   index: number,
   arr: MessageModelNew[]
 ) => {
+  if (message.message.isSystemMessage) {
+    return (
+      <Message
+        key={message.message.id}
+        data={message}
+        className={styles.messageText}
+      />
+    )
+  }
+
   if (index && arr[index - 1]?.user === message.user) {
     return (
       <li
@@ -26,7 +36,10 @@ const MessageItem = (
   }
 
   return (
-    <li className={styles.message} key={`${message.message.id}-${message.message.blobParams?.loaded}`}>
+    <li
+      className={styles.message}
+      key={`${message.message.id}-${message.message.blobParams?.loaded}`}
+    >
       <Typography component="h6" className={styles.messageUser}>
         {message.user.username || message.user.id}
       </Typography>

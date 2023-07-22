@@ -107,8 +107,16 @@ export class RTCChatDataChanel
           `send chunk withRawData${dataChunk.byteLength} №${chunkid} id:${dataid}`,
           chunk
         )
-
         chunknumber++
+        this.emit("transmission", {
+          id: dataid.join(""),
+          type: "transmission",
+          transmission: {
+            length: params.length,
+            loaded: chunknumber * chunkSize,
+          },
+          isSystemMessage: true,
+        })
         this.channel.send(chunk)
       }
     }

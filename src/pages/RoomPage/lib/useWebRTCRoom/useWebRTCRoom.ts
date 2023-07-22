@@ -12,14 +12,17 @@ import {
   Offer,
   RTCClient,
 } from "../../../../entities/RTCClient/lib/RTCClient/RTCClient"
-import { RTCChatMessage, useRoomRTCStore } from "@/entities/RTCClient"
+import {
+  RTCChatMessage,
+  TransmissionMessage,
+  useRoomRTCStore,
+} from "@/entities/RTCClient"
 import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
 import { useAudio } from "@/entities/AudioEffect"
 import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
 
 export const useWebRTCRoom = () => {
   const users = useRoomRTCStore(getRoomUsers)
-  const addMessageToChat = useChatStore((store) => store.addMessage)
   const addMessage = useChatStore((store) => store.addNewMessage)
   const deleteUser = useRoomRTCStore(getActionDeleteConnectedUsers)
   const joinToRoomAudioPlay = useAudio(AudioName.joinToRoom)
@@ -41,29 +44,22 @@ export const useWebRTCRoom = () => {
   }
 
   useEffect(() => {
-    Object.values(users).forEach((client) => {
-      client.channel.on("newMessage", addMessageToChat)
-    })
-
-    return () => {
-      Object.values(users).forEach((client) => {
-        client.channel.off("newMessage", addMessageToChat)
-      })
-    }
-  }, [addMessageToChat, users])
-
-  useEffect(() => {
     const fnList = Object.values(users).map((client) => {
       const fn = (message: RTCChatMessage) => {
         addMessage(message, client.user)
       }
+      const fn2 = (transmission: TransmissionMessage) => {
+        addMessage(transmission, client.user)
+      }
+      client.dataChannel.on("transmission", fn2)
       client.dataChannel.on("newMessage", fn)
-      return { client, fn }
+      return { client, fn, fn2 }
     })
 
     return () => {
-      fnList.forEach(({ client, fn }) => {
+      fnList.forEach(({ client, fn, fn2 }) => {
         client.dataChannel.off("newMessage", fn)
+        client.dataChannel.off("transmission", fn2)
       })
     }
   }, [addMessage, users])
