@@ -2,16 +2,18 @@ import { getActionSeletFileToImagePreview } from "@/features/ImagePreview"
 import { useImagePreviewStore } from "@/features/ImagePreview/model/store/ImagePreviewStore"
 import { Link } from "@mui/material"
 import { useState } from "react"
-import { FileMessage } from "../../model/types/ChatSchema"
+import { RTCChatMessage } from "@/entities/RTCClient"
+import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
 
 type MessageFileProps = {
-  message: FileMessage
+  data: RequireOnlyOne<RTCChatMessage, "blob">
 }
 
 export const MessageFile = (props: MessageFileProps) => {
   const selectImage = useImagePreviewStore(getActionSeletFileToImagePreview)
   const [error, setError] = useState(false)
-  const { message } = props
+  const { data } = props
+  const [blobUrl, setBlobUrl] = useState<string>()
 
   const handleClick = (e: React.MouseEvent<HTMLImageElement>) => {
     selectImage(e.currentTarget.src)
@@ -21,10 +23,22 @@ export const MessageFile = (props: MessageFileProps) => {
     setError(true)
   }
 
+  useMountedEffect(() => {
+    const url = URL.createObjectURL(data.blob)
+    setBlobUrl(url)
+    return () => {
+      URL.revokeObjectURL(url)
+    }
+  })
+
+  if (!blobUrl) {
+    return <span>...loading</span>
+  }
+
   if (error) {
     return (
-      <Link href={message.src} target="_blank" rel="noreferrer">
-        {message.type || "unknown file"}
+      <Link href={blobUrl} target="_blank" rel="noreferrer">
+        {data.blob.type || "unknown file"}
       </Link>
     )
   }
@@ -34,7 +48,7 @@ export const MessageFile = (props: MessageFileProps) => {
       onError={handleError}
       onClick={handleClick}
       alt=""
-      src={message.src}
+      src={blobUrl}
       style={{ width: "100%", objectFit: "contain" }}
     />
   )

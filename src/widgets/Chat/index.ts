@@ -3,5 +3,4 @@ export type {
   MessageModel,
   MessageData,
   FileMessage,
-  FileMessageType,
 } from "./model/types/ChatSchema"

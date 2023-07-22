@@ -12,7 +12,7 @@ import {
   Offer,
   RTCClient,
 } from "../../../../entities/RTCClient/lib/RTCClient/RTCClient"
-import { useRoomRTCStore } from "@/entities/RTCClient"
+import { RTCChatMessage, useRoomRTCStore } from "@/entities/RTCClient"
 import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
 import { useAudio } from "@/entities/AudioEffect"
 import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
@@ -20,6 +20,7 @@ import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
 export const useWebRTCRoom = () => {
   const users = useRoomRTCStore(getRoomUsers)
   const addMessageToChat = useChatStore((store) => store.addMessage)
+  const addMessage = useChatStore((store) => store.addNewMessage)
   const deleteUser = useRoomRTCStore(getActionDeleteConnectedUsers)
   const joinToRoomAudioPlay = useAudio(AudioName.joinToRoom)
   const exitFromRoomAudioPlay = useAudio(AudioName.exitFromRoom)
@@ -50,6 +51,22 @@ export const useWebRTCRoom = () => {
       })
     }
   }, [addMessageToChat, users])
+
+  useEffect(() => {
+    const fnList = Object.values(users).map((client) => {
+      const fn = (message: RTCChatMessage) => {
+        addMessage(message, client.user)
+      }
+      client.dataChannel.on("newMessage", fn)
+      return { client, fn }
+    })
+
+    return () => {
+      fnList.forEach(({ client, fn }) => {
+        client.dataChannel.off("newMessage", fn)
+      })
+    }
+  }, [addMessage, users])
 
   useEffect(() => {
     const initClients = (users: UserModel[]) => {
@@ -107,13 +124,13 @@ export const useWebRTCRoom = () => {
 
   const handleSendMessage = useCallback((msg: string) => {
     Object.values(usersRef.current).forEach((user) => {
-      user.channel.sendMessage(msg)
+      user.dataChannel.sendMessage(msg)
     })
   }, [])
 
   const handleSendBlob = useCallback((blob: Blob) => {
     Object.values(usersRef.current).forEach((user) => {
-      user.channel.sendBlob(blob)
+      user.dataChannel.sendBlob(blob)
     })
   }, [])
 

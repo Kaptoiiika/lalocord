@@ -6,6 +6,7 @@ import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 
 import { RTCMedia } from "./RTCMedia"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
+import { RTCChatDataChanel } from "./new/RTCChatDataChanel"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
@@ -34,6 +35,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   user: UserModel
   peer: RTCPeerConnection | null
   channel: RTCDataChanel<MessageType>
+  dataChannel: RTCChatDataChanel
   media: RTCMedia
 
   private offerCreater: boolean
@@ -72,6 +74,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.id = user.id
     this.user = user
     this.channel = new RTCDataChanel(this.peer, this.user)
+    this.dataChannel = new RTCChatDataChanel(this.peer, "chat")
     this.media = new RTCMedia(this.peer)
     this.media.on("needUpdateStreamType", () => {
       this.channel.sendData("requset_stream_type")
@@ -87,7 +90,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
     this.peer.ondatachannel = (event) => {
       const remoteChannel = event.channel
-      if (event.channel.label === "chat2") {
+      if (event.channel.label === "chat") {
         return
       }
       remoteChannel.onmessage = this.initDataChanel.bind(this)
@@ -287,9 +290,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "file":
           this.channel.reciveBlobChunk(data)
-          break
-        case "text":
-          this.channel.onNewMessage(data)
           break
         default:
           this.log(msg)

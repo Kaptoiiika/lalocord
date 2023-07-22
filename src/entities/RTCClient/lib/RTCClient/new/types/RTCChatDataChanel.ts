@@ -1,11 +1,17 @@
-export type Message = {
-  type: "text" | "file"
+export type RTCChatMessage = {
+  id: string
+  type: "text" | "file" | "fileParams"
   message?: string
   blob?: Blob
+  blobParams?: {
+    length: number
+    loaded: number
+    type?: string
+  }
 }
 
 export type RTCChatDataChanelEvents = {
-  newMessage: Message
+  newMessage: RTCChatMessage
 }
 
 export interface IRTCChatDataChanel {

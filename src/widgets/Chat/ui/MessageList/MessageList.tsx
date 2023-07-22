@@ -3,41 +3,46 @@ import { Typography } from "@mui/material"
 import { memo } from "react"
 import { getMessages } from "../../model/selectors/ChatStoreSelectors"
 import { useChatStore } from "../../model/store/ChatStore"
-import { MessageModel } from "../../model/types/ChatSchema"
+import { MessageModelNew } from "../../model/types/ChatSchema"
 import { Message } from "../Message/Message"
 import styles from "./MessageList.module.scss"
 
 type MessageListProps = {}
 
 const MessageItem = (
-  message: MessageModel,
+  message: MessageModelNew,
   index: number,
-  arr: MessageModel[]
+  arr: MessageModelNew[]
 ) => {
   if (index && arr[index - 1]?.user === message.user) {
     return (
       <li
         className={classNames([styles.message, styles.messageGroup])}
-        key={index}
+        key={`${message.message.id}-${message.message.blobParams?.loaded}`}
       >
-        <Message message={message} className={styles.messageText} />
+        <Message data={message} className={styles.messageText} />
       </li>
     )
   }
 
   return (
-    <li className={styles.message} key={index}>
+    <li className={styles.message} key={`${message.message.id}-${message.message.blobParams?.loaded}`}>
       <Typography component="h6" className={styles.messageUser}>
         {message.user.username || message.user.id}
       </Typography>
-      <Message message={message} className={styles.messageText} />
+      <Message data={message} className={styles.messageText} />
     </li>
   )
 }
 
 export const MessageList = memo(function MessageList(props: MessageListProps) {
-  const messages = useChatStore(getMessages)
+  const [messageList] = useChatStore(getMessages)
   const {} = props
+
+  const messages: MessageModelNew[] = []
+  messageList.forEach((message) => {
+    messages.push(message)
+  })
 
   return (
     <ul

@@ -1,7 +1,6 @@
 import { useUserStore, getLocalUser } from "@/entities/User"
 import { FilledInput, IconButton, Stack, Tooltip } from "@mui/material"
 import { useState, useCallback, memo } from "react"
-import { getActionAddMessage } from "../../model/selectors/ChatStoreSelectors"
 import { useChatStore } from "../../model/store/ChatStore"
 import styles from "./ChatInput.module.scss"
 import SendIcon from "@mui/icons-material/Send"
@@ -14,7 +13,7 @@ type ChatInputProps = {
 
 export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   const { onSendMessage, onSendFile } = props
-  const addMessage = useChatStore(getActionAddMessage)
+  const addMessage = useChatStore((state) => state.addNewMessage)
   const localUser = useUserStore(getLocalUser)
   const [text, setText] = useState("")
 
@@ -26,14 +25,14 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   )
 
   const handleSendFile = async (blob: Blob) => {
-    console.log(blob)
     onSendFile?.(blob)
     addMessage(
       {
-        data: { type: blob.type, src: URL.createObjectURL(blob) },
-        user: localUser,
+        id: crypto.randomUUID(),
+        blob: blob,
+        type: "file",
       },
-      true
+      localUser
     )
   }
 
@@ -60,7 +59,10 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   const handleSendMessage = () => {
     if (text === "") return
     const message = text.trim()
-    addMessage({ data: message, user: localUser }, true)
+    addMessage(
+      { id: crypto.randomUUID(), type: "text", message: message },
+      localUser
+    )
     onSendMessage?.(message)
     setText("")
   }

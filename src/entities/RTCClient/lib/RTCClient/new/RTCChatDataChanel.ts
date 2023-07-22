@@ -35,7 +35,6 @@ export class RTCChatDataChanel
     this.channel = this.peer.createDataChannel(label)
     this.channel.binaryType = "arraybuffer"
     this.channel.bufferedAmountLowThreshold = maxTransmitionChunkSize
-    this.channel.bufferedAmount
     this.channel.onopen = () => {
       this._isOpen = true
     }
@@ -167,7 +166,11 @@ export class RTCChatDataChanel
 
   onNewMessage(data: string | ArrayBuffer) {
     if (typeof data === "string") {
-      this.emit("newMessage", { type: "text", message: data })
+      this.emit("newMessage", {
+        id: crypto.randomUUID(),
+        type: "text",
+        message: data,
+      })
     }
 
     if (typeof data === "object") {
@@ -180,6 +183,15 @@ export class RTCChatDataChanel
 
         const stringId = chunk.dataid.join("")
         const temp = this.tempData.get(stringId)
+        this.emit("newMessage", {
+          id: stringId,
+          type: "fileParams",
+          blobParams: {
+            length: chunk.params.length,
+            loaded: chunkSize * chunk.chunkid,
+            type: chunk.params?.type,
+          },
+        })
 
         if (temp) {
           temp.set(new Uint8Array(chunk.data), chunkSize * chunk.chunkid)
@@ -189,13 +201,16 @@ export class RTCChatDataChanel
           this.tempData.set(stringId, head)
         }
         if (chunkSize * (chunk.chunkid + 1) >= chunk.params.length) {
-          const file = new Blob([temp ?? chunk.data], { type: chunk.params?.type })
+          const file = new Blob([temp ?? chunk.data], {
+            type: chunk.params?.type,
+          })
           this.log("recived all data for create blob", file)
           this.emit("newMessage", {
+            id: stringId,
             type: "file",
             blob: file,
           })
-          // this.tempData.delete(stringId)
+          this.tempData.delete(stringId)
         }
         return
       }

@@ -5,6 +5,7 @@ import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
 
 const store: StateCreator<ChatSchema> = (set, get) => ({
   messages: [],
+  messageList: [new Map()],
   addMessage(message, silent = false) {
     if (!silent) useAudioEffectStore.getState().play(AudioName.notification)
     if (typeof message.data === "string") {
@@ -16,8 +17,14 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
       }))
     }
   },
+  addNewMessage(message, user) {
+    const { messageList } = get()
+    messageList[0].set(message.id, { message: message, user: user })
+    console.log(messageList[0])
+    set((state) => ({ ...state, messageList: [messageList[0]] }))
+  },
   clearMessages: () => {
-    set((state) => ({ ...state, messages: [] }))
+    set((state) => ({ ...state, messages: [], messageList: [new Map()] }))
   },
 })
 
