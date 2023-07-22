@@ -73,7 +73,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     })
     this.id = user.id
     this.user = user
-    this.channel = new RTCDataChanel(this.peer, this.user)
+    this.channel = new RTCDataChanel(this.peer)
     this.dataChannel = new RTCChatDataChanel(this.peer, "chat")
     this.media = new RTCMedia(this.peer)
     this.media.on("needUpdateStreamType", () => {
@@ -287,9 +287,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "clientPressKey":
           this.media.clientPressKey(data)
-          break
-        case "file":
-          this.channel.reciveBlobChunk(data)
           break
         default:
           this.log(msg)

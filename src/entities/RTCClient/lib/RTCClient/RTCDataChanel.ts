@@ -1,9 +1,3 @@
-// eslint-disable-next-line boundaries/element-types
-import type { UserModel } from "@/entities/User"
-import Emitter from "@/shared/lib/utils/Emitter/Emitter"
-// eslint-disable-next-line boundaries/element-types
-import type { MessageModel } from "@/widgets/Chat/model/types/ChatSchema"
-
 export type DataChunk = {
   id: string
   data: string
@@ -14,21 +8,14 @@ export type DataChunk = {
 
 export type BaseMessageKeys = "file" | "text"
 
-type RTCDataChanelEvents = { newMessage: MessageModel }
-
-export class RTCDataChanel<
-  MessageKeys extends string = string
-> extends Emitter<RTCDataChanelEvents> {
+export class RTCDataChanel<MessageKeys extends string = string> {
   peer: RTCPeerConnection | null
   channel: RTCDataChannel
-  user: UserModel
   channelIsOpen = false
   private messagesBuffer: string[] = []
 
-  constructor(peer: RTCPeerConnection, user: UserModel) {
-    super()
+  constructor(peer: RTCPeerConnection) {
     this.peer = peer
-    this.user = user
 
     this.channel = this.peer.createDataChannel("text")
     this.channel.binaryType = "arraybuffer"
@@ -43,13 +30,9 @@ export class RTCDataChanel<
     }
   }
 
-  async sendBlob(blob: Blob) {}
-
   sendMessage(msg: string) {
     this.sendData("text", msg)
   }
-
-  async reciveBlobChunk(fileChunk: DataChunk) {}
 
   sendData(type: MessageKeys | BaseMessageKeys, msg?: unknown) {
     const json = JSON.stringify({ type: type, data: msg })
@@ -69,8 +52,6 @@ export class RTCDataChanel<
       this.messagesBuffer.push(data)
     }
   }
-
-  onNewMessage() {}
 
   close() {
     this.messagesBuffer = []
