@@ -9,11 +9,14 @@ type FileHeader = {
   length: number
   type?: string
 }
+type ChunkFileHeader = Omit<FileHeader, "id">
 
+const maxTransmitionChunkSize = 1024 * 64 - 1
 const headerUTF8 = new TextEncoder().encode("lalohead")
 const headerLeangth = 256
 const idLength = 16
 const maxbitdepthForChunkId = 4
+const chunkSize = maxTransmitionChunkSize - headerLeangth
 
 export class RTCChatDataChanel
   extends Emitter<RTCChatDataChanelEvents>
@@ -24,14 +27,14 @@ export class RTCChatDataChanel
   get isOpen() {
     return this._isOpen
   }
-  private tempData = new Map()
+  private tempData = new Map<string, Uint8Array>()
 
   constructor(private readonly peer: RTCPeerConnection, label = "chat") {
     super()
 
     this.channel = this.peer.createDataChannel(label)
     this.channel.binaryType = "arraybuffer"
-    this.channel.bufferedAmountLowThreshold = 1024 * 64 - 1
+    this.channel.bufferedAmountLowThreshold = maxTransmitionChunkSize
     this.channel.bufferedAmount
     this.channel.onopen = () => {
       this._isOpen = true
@@ -60,8 +63,6 @@ export class RTCChatDataChanel
     if (typeof data === "string") this.channel.send(data)
     if (typeof data === "object") {
       const dataid = params.id
-      const maxChunkSize = this.channel.bufferedAmountLowThreshold
-      const chunkSize = maxChunkSize - headerLeangth
       let chunknumber = startWith
 
       while (data.byteLength > chunknumber * chunkSize && this.isOpen) {
@@ -80,9 +81,20 @@ export class RTCChatDataChanel
             return chunknumber >> (index * 8)
           })
           .reverse()
+        const ChunkParams: ChunkFileHeader = {
+          length: params.length,
+          type: params.type,
+        }
+        const headerparams = new TextEncoder().encode(
+          JSON.stringify(ChunkParams)
+        )
         header.set(headerUTF8, 0)
         header.set(dataid, headerUTF8.byteLength)
         header.set(chunkid, headerUTF8.byteLength + dataid.byteLength)
+        header.set(
+          headerparams,
+          headerUTF8.byteLength + dataid.byteLength + chunkid.byteLength
+        )
 
         const dataChunk = data.slice(
           chunknumber * chunkSize,
@@ -122,6 +134,20 @@ export class RTCChatDataChanel
         chunkHeader.byteLength + dataid.byteLength,
         chunkHeader.byteLength + dataid.byteLength + maxbitdepthForChunkId
       )
+      const chunkparams = chunkData
+        .slice(
+          chunkHeader.byteLength + dataid.byteLength + maxbitdepthForChunkId
+        )
+        .filter(Boolean)
+      const params = new TextDecoder().decode(chunkparams).trim()
+      let jsonParams: ChunkFileHeader
+      try {
+        jsonParams = JSON.parse(params)
+      } catch (error) {
+        console.log(params)
+        console.log(error)
+        jsonParams = { length: chunkHeader.byteLength }
+      }
 
       const rawData = data.slice(headerLeangth)
 
@@ -134,6 +160,7 @@ export class RTCChatDataChanel
         dataid: dataid,
         chunkid: convertedChunkId,
         data: rawData,
+        params: jsonParams,
       }
     }
   }
@@ -150,6 +177,26 @@ export class RTCChatDataChanel
           `recived chunkId ${chunk.chunkid} for data ${chunk.dataid}`,
           chunk
         )
+
+        const stringId = chunk.dataid.join("")
+        const temp = this.tempData.get(stringId)
+
+        if (temp) {
+          temp.set(new Uint8Array(chunk.data), chunkSize * chunk.chunkid)
+        } else {
+          const head = new Uint8Array(chunk.params.length)
+          head.set(new Uint8Array(chunk.data), chunkSize * chunk.chunkid)
+          this.tempData.set(stringId, head)
+        }
+        if (chunkSize * (chunk.chunkid + 1) >= chunk.params.length) {
+          const file = new Blob([temp ?? chunk.data], { type: chunk.params?.type })
+          this.log("recived all data for create blob", file)
+          this.emit("newMessage", {
+            type: "file",
+            blob: file,
+          })
+          // this.tempData.delete(stringId)
+        }
         return
       }
     }
@@ -181,6 +228,7 @@ export class RTCChatDataChanel
 
   close() {
     this.channel.close()
+    this.tempData = new Map()
   }
 
   private getNewId() {

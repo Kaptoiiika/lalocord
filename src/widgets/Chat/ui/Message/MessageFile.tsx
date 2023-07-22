@@ -24,7 +24,7 @@ export const MessageFile = (props: MessageFileProps) => {
   if (error) {
     return (
       <Link href={message.src} target="_blank" rel="noreferrer">
-        {message.type || 'unknown file'}
+        {message.type || "unknown file"}
       </Link>
     )
   }

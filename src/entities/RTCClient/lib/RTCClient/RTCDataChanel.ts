@@ -52,11 +52,18 @@ export class RTCDataChanel<
     }
 
     this.dataChannel = new RTCChatDataChanel(this.peer, "chat2")
-    this.dataChannel.on("newMessage", (mes) => console.log("mes", mes))
+    this.dataChannel.on("newMessage", (message) => {
+      if (message.blob instanceof Blob)
+        this.onNewMessage({
+          src: URL.createObjectURL(message.blob),
+          type: message.blob.type,
+        })
+    })
   }
 
   async sendBlob(blob: Blob) {
     this.dataChannel.sendBlob(blob)
+    return
     const MAX_SIZE_CHUNK = 1024 * 32 * 2
     const MAX_STACK = 255
     if (blob.size > MAX_SIZE_CHUNK * MAX_STACK)

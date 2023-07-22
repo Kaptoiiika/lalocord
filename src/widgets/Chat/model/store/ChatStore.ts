@@ -7,7 +7,14 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
   messages: [],
   addMessage(message, silent = false) {
     if (!silent) useAudioEffectStore.getState().play(AudioName.notification)
-    set((state) => ({ ...state, messages: [...state.messages, message] }))
+    if (typeof message.data === "string") {
+      set((state) => ({ ...state, messages: [...state.messages, message] }))
+    } else {
+      set((state) => ({
+        ...state,
+        messages: [...state.messages, message],
+      }))
+    }
   },
   clearMessages: () => {
     set((state) => ({ ...state, messages: [] }))
