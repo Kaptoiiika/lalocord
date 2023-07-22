@@ -38,7 +38,7 @@ export const MessageFile = (props: MessageFileProps) => {
   if (error) {
     return (
       <Link href={blobUrl} target="_blank" rel="noreferrer">
-        {data.blob.type || "unknown file"}
+        {data.blob.type || "unknown file"} - {data.blob.size}
       </Link>
     )
   }
