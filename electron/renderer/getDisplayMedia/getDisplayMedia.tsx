@@ -29,7 +29,6 @@ export const getDisplayMedia = async (
     if (source) set.video.mandatory.chromeMediaSourceId = source.id
   }
 
-  console.log(set)
   const stream = await navigator.mediaDevices.getUserMedia(set)
   return stream
 }

@@ -20,7 +20,6 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
   addNewMessage(message, user) {
     const { messageList } = get()
     messageList[0].set(message.id, { message: message, user: user })
-    console.log(messageList[0])
     set((state) => ({ ...state, messageList: [messageList[0]] }))
   },
   clearMessages: () => {
