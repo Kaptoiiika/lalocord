@@ -113,12 +113,7 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
           <IconButton>
             <label className={styles.selectInputFile}>
               <InsertDriveFileIcon />
-              <input
-                onChange={handleSelectFile}
-                hidden
-                type="file"
-                accept="image/*"
-              />
+              <input onChange={handleSelectFile} hidden type="file" />
             </label>
           </IconButton>
         </Tooltip>

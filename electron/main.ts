@@ -30,7 +30,9 @@ const createWindow = () => {
   }
   win.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
   win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith("blob:")) return { action: "allow" }
     shell.openExternal(url)
+
     return { action: "deny" }
   })
 }
