@@ -13,7 +13,7 @@ type RoomStreamProps = {
   /**
    * default auto
    * if (document.hidden === true) autoplay = true
-   *
+   * else autoplay = false
    * @type {string}
    */
   autoplay?: boolean

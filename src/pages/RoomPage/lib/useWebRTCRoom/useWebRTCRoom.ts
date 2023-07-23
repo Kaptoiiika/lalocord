@@ -4,7 +4,7 @@ import { useRef, useEffect, useCallback } from "react"
 import {
   getActionDeleteConnectedUsers,
   getRoomUsers,
-} from "../../model/selectors/RoomRTCSelectors"
+} from "../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
 import {
   Answer,
   ClientId,

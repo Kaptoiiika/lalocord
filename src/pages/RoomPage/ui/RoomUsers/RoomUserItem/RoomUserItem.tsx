@@ -12,6 +12,7 @@ import {
 import { useEffect, useRef, useState } from "react"
 import styles from "./RoomUserItem.module.scss"
 import { useAudioEffectStore } from "@/entities/AudioEffect"
+import { VolumeMeter } from "./VolumeMeter"
 
 type RoomUserItemProps = {
   client: RTCClient
@@ -48,10 +49,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
     (state) => state.changeUserVolume
   )
   const microphoneStream = client.media.remoteStream.microphone
-  const userVolume = audioUserSettings[client.user.username]?.microphone
-  const [microphoneStreamVolume, setMicroVolume] = useState(
-    userVolume ?? microphoneStream?.volume ?? 1
-  )
+  const userVolume = audioUserSettings[client.user.username]?.microphone ?? 1
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -90,17 +88,15 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   useEffect(() => {
     if (microphoneStream && audioRef.current) {
       audioRef.current.srcObject = microphoneStream.stream
-      audioRef.current.volume = microphoneStream.volume
       audioRef.current.play()
     }
   }, [microphoneStream])
 
   useEffect(() => {
-    if (microphoneStream && audioRef.current) {
-      microphoneStream.volume = microphoneStreamVolume
-      audioRef.current.volume = microphoneStreamVolume
+    if (audioRef.current) {
+      audioRef.current.volume = userVolume
     }
-  }, [microphoneStream, microphoneStreamVolume])
+  }, [userVolume])
 
   const handleChangeVolume = (
     event: Event,
@@ -108,12 +104,11 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
     activeThumb: number
   ) => {
     if (typeof value === "number") {
-      setMicroVolume(value)
       changeVolumeHandle(client.user.username, "microphone", value)
     }
   }
 
-  const formatedMicroVolume = (microphoneStreamVolume * 100).toFixed(0)
+  const formatedMicroVolume = (userVolume * 100).toFixed(0)
   return (
     <>
       <Tooltip title={username} describeChild>
@@ -131,6 +126,9 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
             alt={username}
             status={status}
           />
+          {!!audioRef.current && !!microphoneStream && microphoneStream.isOpen &&  (
+            <VolumeMeter  stream={microphoneStream.stream} />
+          )}
         </IconButton>
       </Tooltip>
       <Menu
@@ -145,7 +143,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
           <Typography>Volume: {formatedMicroVolume}</Typography>
           <Slider
             aria-label="microphone volume"
-            value={microphoneStreamVolume}
+            value={userVolume}
             onChange={handleChangeVolume}
             step={0.01}
             min={0}

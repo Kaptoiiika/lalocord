@@ -10,7 +10,7 @@ import {
   getDisplayMediaStream,
   getRoomUsers,
   getWebCamStream,
-} from "../../model/selectors/RoomRTCSelectors"
+} from "../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
 import styles from "./RoomStreams.module.scss"
 import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
 import { RoomStream } from "./RoomStream/RoomStream"

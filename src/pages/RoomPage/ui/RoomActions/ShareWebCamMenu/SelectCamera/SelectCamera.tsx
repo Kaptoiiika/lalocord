@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography"
 import styles from "./SelectCamera.module.scss"
 import { SelectChangeEvent } from "@mui/material/Select/SelectInput"
 import { UserStreamSettings } from "@/entities/RTCClient/model/types/RoomRTCSchema"
-import { getUserStreamSettings } from "../../../../model/selectors/RoomRTCSelectors"
+import { getUserStreamSettings } from "../../../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
 
 type SelectCameraProps = {}
 

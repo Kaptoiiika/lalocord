@@ -2,7 +2,7 @@ import {
   getMicrophoneStream,
   getActionStartMicrophoneStream,
   getActionStopMicrophoneStream,
-} from "@/pages/RoomPage/model/selectors/RoomRTCSelectors"
+} from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
 import { Tooltip, IconButton } from "@mui/material"
 import { useCallback } from "react"
 import MicIcon from "@mui/icons-material/Mic"

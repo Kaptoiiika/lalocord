@@ -2,7 +2,7 @@ import {
   getActionSetDisaplyMediaStream,
   getDisplayMediaStream,
   getStreamSettings,
-} from "../../../model/selectors/RoomRTCSelectors"
+} from "../../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
 import {
   IconButton,
   Tooltip,

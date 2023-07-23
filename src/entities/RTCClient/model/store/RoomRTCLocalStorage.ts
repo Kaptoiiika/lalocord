@@ -8,8 +8,6 @@ import { clamp } from "@/shared/lib/utils/Numbers"
 
 const defaultEncodingSettings: RTCRtpEncodingParameters = {
   maxBitrate: 1024 * 1024 * 10,
-  priority: "high",
-  scaleResolutionDownBy: 1.0,
 }
 
 export const getEncodingSettingsFromLocalStorage =

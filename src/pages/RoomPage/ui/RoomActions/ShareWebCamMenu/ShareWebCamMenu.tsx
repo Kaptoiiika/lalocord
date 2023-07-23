@@ -2,7 +2,7 @@ import {
   getActionStartWebCamStream,
   getActionStopWebCamStream,
   getWebCamStream,
-} from "../../../model/selectors/RoomRTCSelectors"
+} from "../../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
 import { IconButton, Tooltip } from "@mui/material"
 import VideocamIcon from "@mui/icons-material/Videocam"
 import VideocamOffIcon from "@mui/icons-material/VideocamOff"

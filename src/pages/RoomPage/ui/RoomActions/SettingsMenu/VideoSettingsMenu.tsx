@@ -9,7 +9,7 @@ import {
   getUserStreamSettings,
   getEncodingSettings,
   getActionSetEncodingSettings,
-} from "@/pages/RoomPage/model/selectors/RoomRTCSelectors"
+} from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
 import { Menu, Stack, Typography, Slider } from "@mui/material"
 import IconButton from "@mui/material/IconButton/IconButton"
 import Tooltip from "@mui/material/Tooltip"
@@ -27,7 +27,6 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
   const setStreamingSettings = useRoomRTCStore(
     (state) => state.setStreamSettings
   )
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleOpen = (event: MouseEvent<HTMLButtonElement>) => {

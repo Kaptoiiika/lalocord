@@ -2,17 +2,20 @@ import { useUserStore } from "@/entities/User"
 import { UserAvatar } from "@/shared/ui/UserAvatar/UserAvatar"
 import { Stack, Typography } from "@mui/material"
 import {
+  getMicrophoneStream,
   getRoomName,
   getRoomUsers,
-} from "../../model/selectors/RoomRTCSelectors"
+} from "../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
 import { RoomUserItem } from "./RoomUserItem/RoomUserItem"
 import styles from "./RoomUsers.module.scss"
 import { Tooltip } from "@mui/material"
 import { useRoomRTCStore } from "@/entities/RTCClient"
+import { VolumeMeter } from "./RoomUserItem/VolumeMeter"
 
 export const RoomUsers = () => {
   const users = useRoomRTCStore(getRoomUsers)
   const roomName = useRoomRTCStore(getRoomName)
+  const microphoneStream = useRoomRTCStore(getMicrophoneStream)
   const localUsername = useUserStore((state) => state.localUser)
 
   const userList = Object.values(users)
@@ -21,7 +24,10 @@ export const RoomUsers = () => {
     <div className={styles["RoomUsers"]}>
       <Stack className={styles.users} direction="row" gap={1}>
         <Tooltip title={localUsername.username || "You"} describeChild>
-          <UserAvatar alt={localUsername.username || "You"} />
+          <div className={styles.localUser}>
+            <UserAvatar alt={localUsername.username || "You"} />
+            {microphoneStream && <VolumeMeter stream={microphoneStream} />}
+          </div>
         </Tooltip>
 
         {userList.map((client) => (

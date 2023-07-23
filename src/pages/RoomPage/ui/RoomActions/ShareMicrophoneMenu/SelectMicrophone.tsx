@@ -1,6 +1,6 @@
 import { useRoomRTCStore } from "@/entities/RTCClient"
 import { UserStreamSettings } from "@/entities/RTCClient/model/types/RoomRTCSchema"
-import { getUserStreamSettings } from "@/pages/RoomPage/model/selectors/RoomRTCSelectors"
+import { getUserStreamSettings } from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
 import {
   SelectChangeEvent,

@@ -1,4 +1,4 @@
-import { RoomRTCSchema } from "../../../../entities/RTCClient/model/types/RoomRTCSchema"
+import { RoomRTCSchema } from "../types/RoomRTCSchema"
 
 export const getDisplayMediaStream = (state: RoomRTCSchema) =>
   state.displayMediaStream
