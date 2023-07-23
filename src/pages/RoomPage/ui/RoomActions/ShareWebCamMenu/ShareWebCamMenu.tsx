@@ -11,6 +11,7 @@ import { useRoomRTCStore } from "@/entities/RTCClient"
 import { usePopup } from "@/shared/lib/hooks/usePopup/usePopup"
 import Menu from "@mui/material/Menu/Menu"
 import { SelectCamera } from "./SelectCamera/SelectCamera"
+import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
 
 export const ShareWebCamMenu = () => {
   const startStream = useRoomRTCStore(getActionStartWebCamStream)
@@ -20,13 +21,15 @@ export const ShareWebCamMenu = () => {
 
   const handleStartWebCamStream = async () => {
     try {
+      await startViewTransition()
       startStream()
     } catch (error: any) {
       console.log(error)
     }
   }
 
-  const handleStopStream = useCallback(() => {
+  const handleStopStream = useCallback(async () => {
+    await startViewTransition()
     stopStream()
   }, [stopStream])
 

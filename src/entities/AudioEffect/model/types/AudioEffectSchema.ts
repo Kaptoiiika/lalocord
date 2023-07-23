@@ -1,3 +1,5 @@
+import { MediaStreamTypes } from "@/shared/types"
+
 export const enum AudioName {
   "notification" = "notification",
   "joinToRoom" = "joinToRoom",
@@ -11,10 +13,21 @@ type AudioSettings = {
 }
 
 export type AudioSettingsList = Record<string, AudioSettings>
+export type AudioUserSettingsList = Record<
+  string,
+  Partial<Record<MediaStreamTypes, number>>
+>
 
 export interface AudioEffectSchema {
   audioSettings: AudioSettingsList
+  usersAuidoSettings: AudioUserSettingsList
+
   play: (audioName: AudioNames) => Promise<void>
   changeVolume: (audioName: AudioNames, volume: number) => void
+  changeUserVolume: (
+    username: string,
+    type: MediaStreamTypes,
+    volume: number
+  ) => void
   changeMuted: (audioName: AudioNames, mute: boolean) => void
 }

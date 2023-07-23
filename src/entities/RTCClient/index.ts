@@ -8,4 +8,4 @@ export type { Answer, ClientId, Ice, Offer } from "./lib/RTCClient/RTCClient"
 export type {
   RTCChatMessage,
   TransmissionMessage,
-} from "./lib/RTCClient/new/types/RTCChatDataChanel"
+} from "./lib/RTCClient/types/RTCChatDataChanel"

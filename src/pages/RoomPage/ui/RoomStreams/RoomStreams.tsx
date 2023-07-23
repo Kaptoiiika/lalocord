@@ -15,12 +15,19 @@ import styles from "./RoomStreams.module.scss"
 import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
 import { RoomStream } from "./RoomStream/RoomStream"
 import { classNames } from "@/shared/lib/classNames/classNames"
+import { useAudioEffectStore } from "@/entities/AudioEffect"
 
 export const RoomStreams = memo(function RoomStreams() {
   const users = useRoomRTCStore(getRoomUsers)
   const localUser = useUserStore(getLocalUser)
   const mediaStream = useRoomRTCStore(getDisplayMediaStream)
   const webCamStream = useRoomRTCStore(getWebCamStream)
+  const streamVolumeList = useAudioEffectStore(
+    (state) => state.usersAuidoSettings
+  )
+  const changeVolumeHandle = useAudioEffectStore(
+    (state) => state.changeUserVolume
+  )
   const [hiddenStream, setHiddenStream] = useState<string[]>([])
   const [, update] = useState(0)
 
@@ -109,8 +116,17 @@ export const RoomStreams = memo(function RoomStreams() {
           }}
           onVolumeChange={(value) => {
             user.clientStream.volume = value
+            changeVolumeHandle(
+              user.client.user.username,
+              user.clientStream.type,
+              value
+            )
           }}
-          volume={user.clientStream.volume}
+          volume={
+            streamVolumeList[user.client.user.username]?.[
+              user.clientStream.type
+            ] ?? user.clientStream.volume
+          }
         />
       ))}
     </StreamViewer>

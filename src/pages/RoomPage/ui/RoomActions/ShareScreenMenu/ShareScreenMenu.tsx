@@ -15,6 +15,7 @@ import ScreenShareIcon from "@mui/icons-material/ScreenShare"
 import StopScreenShareIcon from "@mui/icons-material/StopScreenShare"
 import { useRoomRTCStore } from "@/entities/RTCClient"
 import { usePopup } from "@/shared/lib/hooks/usePopup/usePopup"
+import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
 // import KeyboardIcon from "@mui/icons-material/Keyboard"
 
 type ShareScreenMenuProps = {}
@@ -25,11 +26,12 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
   const setDisplayMediaStream = useRoomRTCStore(getActionSetDisaplyMediaStream)
   const { handleClick, handleClose, anchorEl, open } = usePopup()
 
-  const handleStopDisplayMediaStream = () => {
+  const handleStopDisplayMediaStream = async () => {
     handleClose()
     mediaStream?.getTracks().forEach((track) => {
       track.stop()
     })
+    await startViewTransition()
     setDisplayMediaStream(null)
   }
 
@@ -43,6 +45,7 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
         tracks.onended = null
         tracks.stop()
       })
+      await startViewTransition()
       setDisplayMediaStream(stream)
       stream.getVideoTracks().forEach((track) => {
         track.onended = () => {

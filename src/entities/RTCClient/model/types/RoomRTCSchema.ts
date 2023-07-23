@@ -25,7 +25,6 @@ export interface RoomRTCSchema {
 
 export type ConnectedUsers = Record<UserId, RTCClient>
 export type UserId = string
-export type MediaStreamTypes = "webCam" | "media" | "microphone"
 export type VideoStreamSettingsHint = "detail" | "motion" | "default"
 export type UserStreamSettings = {
   video: {

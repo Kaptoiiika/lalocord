@@ -11,6 +11,7 @@ import {
 } from "@mui/material"
 import { useEffect, useRef, useState } from "react"
 import styles from "./RoomUserItem.module.scss"
+import { useAudioEffectStore } from "@/entities/AudioEffect"
 
 type RoomUserItemProps = {
   client: RTCClient
@@ -39,10 +40,17 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   const [status, setStatus] = useState(
     getUserStatusOnConnectionState(client.peer?.iceConnectionState)
   )
-  const microphoneStream = client.media.remoteStream.microphone
   const [, update] = useState(0)
+  const audioUserSettings = useAudioEffectStore(
+    (state) => state.usersAuidoSettings
+  )
+  const changeVolumeHandle = useAudioEffectStore(
+    (state) => state.changeUserVolume
+  )
+  const microphoneStream = client.media.remoteStream.microphone
+  const userVolume = audioUserSettings[client.user.username]?.microphone
   const [microphoneStreamVolume, setMicroVolume] = useState(
-    microphoneStream?.volume ?? 1
+    userVolume ?? microphoneStream?.volume ?? 1
   )
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -101,6 +109,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   ) => {
     if (typeof value === "number") {
       setMicroVolume(value)
+      changeVolumeHandle(client.user.username, "microphone", value)
     }
   }
 

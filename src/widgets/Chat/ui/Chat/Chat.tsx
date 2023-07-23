@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react"
 import styles from "./Chat.module.scss"
 import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
 import { useChatStore } from "../../model/store/ChatStore"
-import { getMessages } from "../../model/selectors/ChatStoreSelectors"
 import { MessageList } from "../MessageList/MessageList"
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary"
 import { ImagePreview } from "@/features/ImagePreview"
@@ -27,9 +26,9 @@ type ChatProps = {
 
 export const Chat = (props: ChatProps) => {
   const { onSendMessage, onSendFile } = props
-  const messages = useChatStore(getMessages)
+  const messagesLength = useChatStore((state) => state.messageLeangth)
   const [collapsed, setCollapsed] = useState(getChatCollapsedFromLocalStorage())
-  const [readedMessage, setReadedMessage] = useState(messages.length)
+  const [readedMessage, setReadedMessage] = useState(messagesLength)
 
   const handleCollapse = useCallback(() => {
     setCollapsed((prev) => {
@@ -40,9 +39,9 @@ export const Chat = (props: ChatProps) => {
 
   useEffect(() => {
     if (!collapsed) {
-      setReadedMessage(messages.length)
+      setReadedMessage(messagesLength)
     }
-  }, [messages, collapsed])
+  }, [messagesLength, collapsed])
 
   return (
     <aside
@@ -53,14 +52,14 @@ export const Chat = (props: ChatProps) => {
       <ChatHeader
         collapsed={collapsed}
         handleCollapse={handleCollapse}
-        unreadedMessage={messages.length - readedMessage}
+        unreadedMessage={messagesLength - readedMessage}
       />
-      <div className={styles.chat}>
-        <ErrorBoundary errorText="Chat is broken(">
+      <ErrorBoundary errorText="Chat is broken(">
+        <div className={styles.chat}>
           <MessageList />
           <ChatInput onSendMessage={onSendMessage} onSendFile={onSendFile} />
-        </ErrorBoundary>
-      </div>
+        </div>
+      </ErrorBoundary>
       <ImagePreview />
     </aside>
   )

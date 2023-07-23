@@ -7,13 +7,14 @@ import { MessageModelNew } from "../../model/types/ChatSchema"
 import { Message } from "../Message/Message"
 import styles from "./MessageList.module.scss"
 
-type MessageListProps = {}
-
-const MessageItem = (
-  message: MessageModelNew,
-  index: number,
+type MessageItemProps = {
+  message: MessageModelNew
+  index: number
   arr: MessageModelNew[]
-) => {
+}
+
+const MessageItem = (props: MessageItemProps) => {
+  const { arr, index, message } = props
   if (message.message.isSystemMessage) {
     return (
       <Message
@@ -48,9 +49,8 @@ const MessageItem = (
   )
 }
 
-export const MessageList = memo(function MessageList(props: MessageListProps) {
+export const MessageList = memo(function MessageList() {
   const [messageList] = useChatStore(getMessages)
-  const {} = props
 
   const messages: MessageModelNew[] = []
   messageList.forEach((message) => {
@@ -65,7 +65,9 @@ export const MessageList = memo(function MessageList(props: MessageListProps) {
         node.scrollTop = node.scrollHeight - node.clientHeight
       }}
     >
-      {messages.map(MessageItem)}
+      {messages.map((value, index, arr) => (
+        <MessageItem key={value.message.id} arr={arr} index={index} message={value} />
+      ))}
     </ul>
   )
 })

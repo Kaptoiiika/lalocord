@@ -6,7 +6,7 @@ import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 
 import { RTCMedia } from "./RTCMedia"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
-import { RTCChatDataChanel } from "./new/RTCChatDataChanel"
+import { RTCChatDataChanel } from "./RTCChatDataChanel"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
@@ -174,21 +174,26 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     })
   }
 
+  private changeSDP(sdp?: string) {
+    const changedSDP = sdp
+      ?.split("a=")
+      .filter((option) => {
+        // if (option.includes("transport-cc")) return false
+        // if (option.includes("goog-remb")) return false
+        // if (option.includes("nack")) return false
+        // if (option.includes("nack pli")) return false
+        // if (option.includes("ccm fir")) return false
+        return true
+      })
+      .join("a=")
+    return changedSDP
+  }
+
   async createAnswer(offer: RTCSessionDescription) {
     if (!this.peer) return
     await this.peer.setRemoteDescription(offer)
     const answer = await this.peer.createAnswer()
-    const changedSDP = answer.sdp
-      ?.split("a=")
-      .filter((option) => {
-        if (option.includes("transport-cc")) return false
-        if (option.includes("goog-remb")) return false
-        if (option.includes("nack")) return false
-        if (option.includes("nack pli")) return false
-        if (option.includes("ccm fir")) return false
-        return true
-      })
-      .join("a=")
+    const changedSDP = this.changeSDP(answer.sdp)
     const changedAnswer: RTCLocalSessionDescriptionInit = {
       sdp: changedSDP,
       type: answer.type,
@@ -205,17 +210,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     if (!this.peer) return
     this.changeCodecs()
     const offer = await this.peer.createOffer()
-    const changedSDP = offer.sdp
-      ?.split("a=")
-      .filter((option) => {
-        if (option.includes("transport-cc")) return false
-        if (option.includes("goog-remb")) return false
-        if (option.includes("nack")) return false
-        if (option.includes("nack pli")) return false
-        if (option.includes("ccm fir")) return false
-        return true
-      })
-      .join("a=")
+    const changedSDP = this.changeSDP(offer.sdp)
     const changedOffer: RTCLocalSessionDescriptionInit = {
       sdp: changedSDP,
       type: offer.type,

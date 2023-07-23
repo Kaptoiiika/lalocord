@@ -1,5 +1,5 @@
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
-import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
+import { MediaStreamTypes } from "@/shared/types";
 
 type events = { close: void; open: void }
 

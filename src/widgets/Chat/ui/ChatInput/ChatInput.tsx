@@ -53,7 +53,9 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
 
   const handleSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) handleSendFile(file)
+    if (file) {
+      handleSendFile(file)
+    }
   }
 
   const handleSendMessage = () => {
@@ -113,7 +115,12 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
           <IconButton>
             <label className={styles.selectInputFile}>
               <InsertDriveFileIcon />
-              <input onChange={handleSelectFile} hidden type="file" />
+              <input
+                value={""}
+                onChange={handleSelectFile}
+                hidden
+                type="file"
+              />
             </label>
           </IconButton>
         </Tooltip>

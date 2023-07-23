@@ -35,6 +35,7 @@ const store: StateCreator<AudioEffectSchema> = (set, get) => ({
     },
     {}
   ),
+  usersAuidoSettings: {},
 
   play(audioName) {
     const state = get()
@@ -55,6 +56,17 @@ const store: StateCreator<AudioEffectSchema> = (set, get) => ({
       },
     }))
   },
+
+  changeUserVolume(username, type, volume) {
+    set((state) => ({
+      ...state,
+      usersAuidoSettings: {
+        ...state.usersAuidoSettings,
+        [username]: { ...state.usersAuidoSettings[username], [type]: volume },
+      },
+    }))
+  },
+
   changeMuted(audioName, muted) {
     set((state) => ({
       ...state,
