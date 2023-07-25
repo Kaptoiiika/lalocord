@@ -31,15 +31,10 @@ export default () => {
           test: /\.ts$/,
           use: [{ loader: "ts-loader" }],
         },
-        {
-          test: /\.node$/,
-          loader: "node-loader",
-        },
       ],
     },
     resolve: {
       extensions: [".tsx", ".ts", ".js"],
-      modules: ["./electron", "node_modules"],
     },
   }
 
@@ -62,7 +57,7 @@ export default () => {
     },
     resolve: {
       extensions: [".tsx", ".ts", ".js"],
-      modules: ["./electron", "node_modules"],
+      modules: ["./electron"],
     },
   }
 

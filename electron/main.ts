@@ -5,10 +5,11 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string
 import contextMenu from "electron-context-menu"
 import updateElectronApp from "update-electron-app"
 
-updateElectronApp({
-  repo: "Kaptoiiika/RipCornd",
-  notifyUser: true,
-})
+// if (require("electron-squirrel-startup")) {
+//   app.quit()
+// }
+
+updateElectronApp()
 
 contextMenu({
   showSearchWithGoogle: false,
@@ -18,6 +19,7 @@ contextMenu({
 
 const createWindow = () => {
   const win = new BrowserWindow({
+    backgroundColor: "#1c2128",
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
@@ -37,17 +39,6 @@ const createWindow = () => {
   })
 }
 
-app.commandLine.appendSwitch("force_high_performance_gpu")
-
 app.whenReady().then(() => {
   createWindow()
-
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
 })
-
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") app.quit()
-})
-if (require("electron-squirrel-startup")) app.quit()

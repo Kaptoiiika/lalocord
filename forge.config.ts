@@ -15,25 +15,18 @@ const fileEnv = dotenv.config({ path: "./.env" }).parsed
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
-    usageDescription: {
-      Camera: "Needed for video calls",
-      Microphone: "Needed for voice calls",
-    },
     icon: "./public/favicon.ico",
   },
-  rebuildConfig: {
-    disablePreGypCopy: true,
-  },
+  rebuildConfig: {},
   makers: [
     new MakerSquirrel({
+      iconUrl: "https://kapitoxa.gay/favicon.ico",
       setupIcon: "./public/favicon.ico",
-      remoteReleases: "https://github.com/Kaptoiiika/RipCornd",
     }),
   ],
   plugins: [
     new WebpackPlugin({
       mainConfig,
-      devContentSecurityPolicy: "*",
       renderer: {
         config: rendererConfig,
         entryPoints: [
@@ -55,9 +48,11 @@ const config: ForgeConfig = {
     new githubPublisher({
       repository: {
         owner: "Kaptoiiika",
-        name: "RipCornd",
+        name: "lalocord",
       },
       authToken: process.env.GITHUB_TOKEN ?? fileEnv?.GITHUB_TOKEN,
+      draft: false,
+      prerelease: false,
     }),
   ],
 }

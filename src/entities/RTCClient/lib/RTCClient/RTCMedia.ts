@@ -4,8 +4,8 @@ import {
   ClientMouseEvent,
 } from "@/shared/types/ClientEvents"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
-import { MediaStreamTypes } from "../../model/types/RoomRTCSchema"
 import { RTCClientMediaStream } from "./RTCClientMediaStream"
+import { MediaStreamTypes } from "@/shared/types"
 
 export type RTCMediaStreamEvents = {
   newstream: RTCClientMediaStream | null
