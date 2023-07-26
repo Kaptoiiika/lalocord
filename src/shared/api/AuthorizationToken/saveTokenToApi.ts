@@ -1,5 +1,5 @@
 import { AxiosInstance } from "axios"
-import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { localstorageKeys } from "@/shared/const/localstorageKeys"
 
 export const saveTokenToApi = (api: AxiosInstance, token: string) => {
   const BearerTokken = `Bearer ${token}`

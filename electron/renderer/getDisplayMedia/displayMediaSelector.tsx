@@ -3,7 +3,7 @@ import { IpcChannels } from "../../main/types/ipcChannels"
 import { createRoot } from "react-dom/client"
 import styles from "./displayMediaSelector.module.scss"
 import { useState } from "react"
-import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { localstorageKeys } from "@/shared/const/localstorageKeys"
 
 type SourceType = Awaited<
   ReturnType<typeof window.electron.ipcRenderer.invoke<IpcChannels.getMediaSource>>

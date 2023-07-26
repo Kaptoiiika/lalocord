@@ -5,7 +5,7 @@ import {
   AudioSettingsList,
 } from "../types/AudioEffectSchema"
 import { persist } from "zustand/middleware"
-import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { localstorageKeys } from "@/shared/const/localstorageKeys"
 import notificationSound from "@/shared/assets/audio/notification.mp3"
 import joinToRoomSound from "@/shared/assets/audio/joinToRoom.mp3"
 import exitFromRoomSound from "@/shared/assets/audio/exitFromRoom.mp3"

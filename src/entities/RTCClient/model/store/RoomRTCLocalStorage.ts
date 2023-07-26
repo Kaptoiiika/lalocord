@@ -1,4 +1,4 @@
-import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { localstorageKeys } from "@/shared/const/localstorageKeys"
 import {
   PriorityNumberToText,
   PriorityTextToNumber,

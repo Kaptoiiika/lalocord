@@ -6,6 +6,7 @@ import {
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { RTCClientMediaStream } from "./RTCClientMediaStream"
 import { MediaStreamTypes } from "@/shared/types"
+import { getDebugValue } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
 
 export type RTCMediaStreamEvents = {
   newstream: RTCClientMediaStream | null
@@ -278,6 +279,6 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
   }
 
   private log(...message: any) {
-    if (__IS_DEV__) console.log(...message)
+    if (getDebugValue()) console.log(...message)
   }
 }

@@ -1,5 +1,5 @@
 import { AxiosInstance } from "axios"
-import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { localstorageKeys } from "@/shared/const/localstorageKeys"
 
 export const deleteTokenFromApi = (api: AxiosInstance) => {
   localStorage.removeItem(localstorageKeys.TOKEN)

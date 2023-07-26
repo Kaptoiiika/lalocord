@@ -8,5 +8,6 @@ export enum localstorageKeys {
   "STREAMSETTINGS" = "StreamSettings",
   "CHATSILENT" = "chatsilent",
   "DESKTOPAUDIO" = "DESKTOPAUDIO",
-  "AUDIO" = "audio"
+  "AUDIO" = "audio",
+  "DEBUG" = "debug",
 }

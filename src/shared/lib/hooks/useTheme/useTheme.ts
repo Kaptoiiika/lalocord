@@ -4,7 +4,7 @@ import {
   Theme,
   ThemeContext,
 } from "@/app/providers/ThemeProvider/lib/ThemeContext"
-import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { localstorageKeys } from "@/shared/const/localstorageKeys"
 
 interface UseThemeResult {
   toggleTheme: () => void

@@ -1,7 +1,7 @@
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { useCallback, useEffect, useState } from "react"
 import styles from "./Chat.module.scss"
-import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { localstorageKeys } from "@/shared/const/localstorageKeys"
 import { useChatStore } from "../../model/store/ChatStore"
 import { MessageList } from "../MessageList/MessageList"
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary"

@@ -1,4 +1,4 @@
-import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { localstorageKeys } from "@/shared/const/localstorageKeys"
 import { UserModel } from "../types/UserSchema"
 
 const defaultUser: UserModel = {

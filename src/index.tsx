@@ -4,6 +4,7 @@ import { AppRouterProvider } from "@/app/providers/Router"
 import "@/app/styles/index.scss"
 import App from "./app/App"
 import { ErrorBoundary } from "./shared/ui/ErrorBoundary"
+import { DebugModeProvider } from "./shared/lib/hooks/useDebugMode/useDebugModeProvider"
 
 const container = document.getElementById("root")
 
@@ -20,7 +21,9 @@ root.render(
   <ErrorBoundary>
     <AppRouterProvider>
       <ThemeProvider>
-        <App />
+        <DebugModeProvider>
+          <App />
+        </DebugModeProvider>
       </ThemeProvider>
     </AppRouterProvider>
   </ErrorBoundary>

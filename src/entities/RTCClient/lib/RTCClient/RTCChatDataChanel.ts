@@ -4,6 +4,7 @@ import {
   RTCChatDataChanelEvents,
 } from "./types/RTCChatDataChanel"
 import { MessageCodec } from "../Codec/MessageCodec"
+import { getDebugValue } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
 
 type FileHeader = {
   id: Uint8Array
@@ -60,7 +61,10 @@ export class RTCChatDataChanel
     params: FileHeader,
     startWith = 0
   ) {
-    if (typeof data === "string") this.channel.send(data)
+    if (typeof data === "string") {
+      this.log("send string message", data)
+      this.channel.send(data)
+    }
     if (typeof data === "object") {
       const dataid = params.id
       let chunknumber = startWith
@@ -205,7 +209,7 @@ export class RTCChatDataChanel
   }
 
   private log(...arg0: any) {
-    if (__IS_DEV__) {
+    if (getDebugValue()) {
       console.log(...arg0)
     }
   }

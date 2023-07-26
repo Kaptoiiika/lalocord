@@ -7,6 +7,7 @@ import Emitter from "@/shared/lib/utils/Emitter/Emitter"
 import { RTCMedia } from "./RTCMedia"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { RTCChatDataChanel } from "./RTCChatDataChanel"
+import { getDebugValue } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
@@ -293,6 +294,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   }
 
   private log(...message: any) {
-    if (__IS_DEV__) console.log(...message)
+    if (getDebugValue()) console.log(...message)
   }
 }

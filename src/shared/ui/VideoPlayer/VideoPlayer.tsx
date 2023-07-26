@@ -16,6 +16,7 @@ import { VideoPlayerTooltip } from "./VideoPlayerTooltip/VideoPlayerTooltip"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
 import { clamp } from "@/shared/lib/utils/Numbers"
 import { ErrorBoundary } from "../ErrorBoundary"
+import { useDebugMode } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
 
 type VideoPlayerProps = {
   stream?: MediaStream | null
@@ -31,8 +32,6 @@ type VideoPlayerProps = {
   fullScreen?: boolean
   controls?: boolean
 } & PropsWithChildren
-
-let debugValue = !!localStorage.getItem("debug")
 
 export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const {
@@ -51,26 +50,13 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     controls = true,
     ...other
   } = props
+  const debugMode = useDebugMode()
   const [played, setPlayed] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [volume, setVolume] = useState(clamp(initVolume, 0, 1))
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<HTMLDivElement | null>(null)
   const { handleClose, handleOpen, open } = useIsOpen({ time: 3000 })
-
-  const [debug, setDebug] = useState(debugValue)
-  useEffect(() => {
-    const fn = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key === "F2") {
-        setDebug((prev) => !prev)
-        debugValue = !debugValue
-      }
-    }
-    document.addEventListener("keydown", fn)
-    return () => {
-      document.removeEventListener("keydown", fn)
-    }
-  }, [])
 
   const handlePause = useCallback(() => {
     videoRef.current?.pause()
@@ -190,7 +176,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
         onBlur={handleClose}
         onMouseLeave={handleClose}
       >
-        {debug && <VideoPlayerDebugInfo stream={stream} />}
+        {debugMode && <VideoPlayerDebugInfo stream={stream} />}
         {controls && (
           <>
             <VideoPlayerTooltip open={!toolsIsClosed} top>

@@ -1,4 +1,4 @@
-import { localstorageKeys } from "@/shared/const/localstorageKeys/localstorageKeys"
+import { localstorageKeys } from "@/shared/const/localstorageKeys"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
 import { createTheme, ThemeProvider as ThemeProviderMUI } from "@mui/material"
 import { blue, pink } from "@mui/material/colors"
