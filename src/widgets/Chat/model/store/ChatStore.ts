@@ -1,12 +1,14 @@
 import { create, StateCreator } from "zustand"
 import { ChatSchema } from "../types/ChatSchema"
+import { useAudioEffectStore } from "@/entities/AudioEffect"
 
 const store: StateCreator<ChatSchema> = (set, get) => ({
   messageList: [new Map()],
   messageLeangth: 0,
 
-  addNewMessage(message, user) {
+  addNewMessage(message, user, muteaudio = false) {
     const { messageList, messageLeangth } = get()
+
     const map = messageList[0]
     if (map.has(message.id)) {
       map.set(message.id, { message: message, user: user })
@@ -18,6 +20,11 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
         messageList: [map],
         messageLeangth: messageLeangth + 1,
       }))
+      
+      if (!muteaudio) {
+        const audio = useAudioEffectStore.getState()
+        audio.play("notification")
+      }
     }
   },
 

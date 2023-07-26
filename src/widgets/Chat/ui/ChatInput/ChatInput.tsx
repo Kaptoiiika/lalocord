@@ -32,7 +32,8 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
         blob: blob,
         type: "file",
       },
-      localUser
+      localUser,
+      true
     )
   }
 
@@ -63,7 +64,8 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
     const message = text.trim()
     addMessage(
       { id: crypto.randomUUID(), type: "text", message: message },
-      localUser
+      localUser,
+      true
     )
     onSendMessage?.(message)
     setText("")

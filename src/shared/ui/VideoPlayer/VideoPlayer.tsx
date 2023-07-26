@@ -164,6 +164,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     handleOpen()
   }, [handleOpen])
 
+
   return (
     <ErrorBoundary errorText="Video player is dead">
       <div

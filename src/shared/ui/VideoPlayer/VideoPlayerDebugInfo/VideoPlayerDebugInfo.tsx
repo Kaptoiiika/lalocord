@@ -50,6 +50,7 @@ export const VideoPlayerDebugInfo = (props: VideoPlayerDebugInfoProps) => {
           )
         })}
       </pre>
+      {stream && <></>}
     </div>
   )
 }
