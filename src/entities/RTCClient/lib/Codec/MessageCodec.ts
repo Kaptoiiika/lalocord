@@ -79,17 +79,17 @@ export class MessageCodec implements Required<MessageCodecConsturcorParams> {
     })
     if (!isCurrentChunk) return null
 
-    const chunkData = new Uint8Array(data.slice(0, this.headerNameUTF8.length))
-    const chunkHeader = chunkData.slice(0, this.headerNameUTF8.byteLength)
-    const dataid = chunkData.slice(
+    const chunkMeta = new Uint8Array(data.slice(0, this.headerSize))
+    const chunkHeader = chunkMeta.slice(0, this.headerNameUTF8.byteLength)
+    const dataid = chunkMeta.slice(
       chunkHeader.byteLength,
       chunkHeader.byteLength + this.idLength
     )
-    const chunkid = chunkData.slice(
+    const chunkid = chunkMeta.slice(
       chunkHeader.byteLength + dataid.byteLength,
       chunkHeader.byteLength + dataid.byteLength + this.maxbitdepthForChunkId
     )
-    const chunkparams = chunkData
+    const chunkparams = chunkMeta
       .slice(
         chunkHeader.byteLength + dataid.byteLength + this.maxbitdepthForChunkId
       )
