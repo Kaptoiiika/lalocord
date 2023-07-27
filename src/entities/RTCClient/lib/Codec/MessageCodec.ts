@@ -14,10 +14,10 @@ export class MessageCodec implements Required<MessageCodecConsturcorParams> {
 
   readonly headerName
   readonly headerSize
-  readonly chunkSize
-  readonly maxChunkSize
   readonly maxbitdepthForChunkId
-  readonly idLength: number
+  readonly idLength
+  maxChunkSize
+  chunkSize
 
   constructor(params: MessageCodecConsturcorParams) {
     this.headerName = params.headerName
@@ -30,6 +30,14 @@ export class MessageCodec implements Required<MessageCodecConsturcorParams> {
     )
     this.maxbitdepthForChunkId = params.maxbitdepthForChunkId ?? 4
     this.idLength = params.idLength ?? 16
+  }
+
+  changeChunkSize(value: number) {
+    this.chunkSize = Math.max(
+      this.headerSize,
+      value - this.headerSize
+    )
+    this.maxChunkSize = value
   }
 
   createNewId() {

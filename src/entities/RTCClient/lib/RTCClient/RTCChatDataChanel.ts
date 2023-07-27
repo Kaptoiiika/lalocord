@@ -11,7 +11,7 @@ type FileHeader = {
   length: number
   type?: string
 }
-type ChunkFileHeader = Omit<FileHeader, "id">
+type ChunkFileHeader = Omit<FileHeader, "id"> & { chunkSize: number }
 
 const maxTransmitionChunkSize = 1024 * 64 - 1
 
@@ -35,6 +35,10 @@ export class RTCChatDataChanel
     this.channel.bufferedAmountLowThreshold = maxTransmitionChunkSize
     this.channel.onopen = () => {
       this._isOpen = true
+      if (this.peer.sctp?.maxMessageSize) {
+        this.channel.bufferedAmountLowThreshold = this.peer.sctp.maxMessageSize
+        this.codec.changeChunkSize(this.peer.sctp.maxMessageSize)
+      }
     }
     this.channel.onclose = () => {
       this._isOpen = false
@@ -85,6 +89,7 @@ export class RTCChatDataChanel
         const ChunkParams: ChunkFileHeader = {
           length: params.length,
           type: params.type,
+          chunkSize: this.codec.chunkSize,
         }
         const chunk = this.codec.createChunk(
           data,
@@ -119,6 +124,7 @@ export class RTCChatDataChanel
         type: "text",
         message: data,
       })
+      return
     }
 
     if (typeof data === "object") {
@@ -133,7 +139,8 @@ export class RTCChatDataChanel
         const temp = this.tempData.get(stringId)
         const dataLength = Number(chunk.params.length)
         const chunkType = String(chunk.params?.type)
-        this.emit("newMessage", {
+        const chunkSize = Number(chunk.params?.chunkSize ?? this.codec.chunkSize)
+        this.emit("transmission", {
           id: stringId,
           type: "fileParams",
           blobParams: {
@@ -146,7 +153,7 @@ export class RTCChatDataChanel
         if (temp) {
           temp.set(
             new Uint8Array(chunk.data),
-            this.codec.chunkSize * chunk.chunkid
+            chunkSize * chunk.chunkid
           )
           this.log(
             `recived chunk data №${chunk.chunkid} size ${chunk.data.byteLength}`
@@ -155,14 +162,14 @@ export class RTCChatDataChanel
           const head = new Uint8Array(dataLength)
           head.set(
             new Uint8Array(chunk.data),
-            this.codec.chunkSize * chunk.chunkid
+            chunkSize * chunk.chunkid
           )
           this.log(
             `recived head data №${chunk.chunkid} size ${chunk.data.byteLength}`
           )
           this.tempData.set(stringId, head)
         }
-        if (this.codec.chunkSize * (chunk.chunkid + 1) >= dataLength) {
+        if (chunkSize * (chunk.chunkid + 1) >= dataLength) {
           const file = new Blob([temp ?? chunk.data], {
             type: chunkType,
           })

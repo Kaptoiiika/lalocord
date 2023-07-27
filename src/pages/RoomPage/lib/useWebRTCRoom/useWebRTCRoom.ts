@@ -20,11 +20,13 @@ import {
 import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
 import { useAudio } from "@/entities/AudioEffect"
 import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
+import { useAudioEffectStore } from "@/entities/AudioEffect"
 
 export const useWebRTCRoom = () => {
   const users = useRoomRTCStore(getRoomUsers)
   const addMessage = useChatStore((store) => store.addNewMessage)
   const deleteUser = useRoomRTCStore(getActionDeleteConnectedUsers)
+  const audio = useAudioEffectStore.getState()
   const joinToRoomAudioPlay = useAudio(AudioName.joinToRoom)
   const exitFromRoomAudioPlay = useAudio(AudioName.exitFromRoom)
 
@@ -47,6 +49,7 @@ export const useWebRTCRoom = () => {
     const fnList = Object.values(users).map((client) => {
       const fn = (message: RTCChatMessage) => {
         addMessage(message, client.user)
+        audio.play("notification")
       }
       const fn2 = (transmission: TransmissionMessage) => {
         addMessage(transmission, client.user)
@@ -62,7 +65,7 @@ export const useWebRTCRoom = () => {
         client.dataChannel.off("transmission", fn2)
       })
     }
-  }, [addMessage, users])
+  }, [addMessage, users, audio])
 
   useEffect(() => {
     const initClients = (users: UserModel[]) => {

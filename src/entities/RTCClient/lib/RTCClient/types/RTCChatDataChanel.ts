@@ -15,8 +15,9 @@ export type RTCChatMessage = {
   isSystemMessage?: boolean
 }
 
-export type TransmissionMessage = Required<
-  Pick<RTCChatMessage, "id" | "transmission" | "type" | "isSystemMessage">
+export type TransmissionMessage = Pick<
+  RTCChatMessage,
+  "id" | "transmission" | "type" | "isSystemMessage" | "blobParams"
 >
 
 export type RTCChatDataChanelEvents = {
