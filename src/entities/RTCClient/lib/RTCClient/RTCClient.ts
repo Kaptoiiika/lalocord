@@ -63,10 +63,10 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
     this.peer = new RTCPeerConnection({
       iceServers: [
-        { urls: "stun:kapitoxa.gay:5349" },
-        { urls: "stun:kapitoxa.gay:3478" },
+        { urls: "stun:kapitoxa.lol:5349" },
+        { urls: "stun:kapitoxa.lol:3478" },
         {
-          urls: ["turn:kapitoxa.gay:5349", "turn:kapitoxa.gay:3478"],
+          urls: ["turn:kapitoxa.lol:5349", "turn:kapitoxa.lol:3478"],
           username: "guest",
           credential: "somepassword",
         },

@@ -20,7 +20,7 @@ const config: ForgeConfig = {
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({
-      iconUrl: "https://kapitoxa.gay/favicon.ico",
+      iconUrl: "https://kapitoxa.lol/favicon.ico",
       setupIcon: "./public/favicon.ico",
     }),
   ],
