@@ -25,7 +25,9 @@ const MessageItem = (props: MessageItemProps) => {
     )
   }
 
-  if (index && arr[index - 1]?.user === message.user) {
+  const prevMessage = index ? arr[index - 1] : undefined
+
+  if (prevMessage?.user === message.user) {
     return (
       <li
         className={classNames([styles.message, styles.messageGroup])}
@@ -66,7 +68,12 @@ export const MessageList = memo(function MessageList() {
       }}
     >
       {messages.map((value, index, arr) => (
-        <MessageItem key={value.message.id} arr={arr} index={index} message={value} />
+        <MessageItem
+          key={value.message.id}
+          arr={arr}
+          index={index}
+          message={value}
+        />
       ))}
     </ul>
   )

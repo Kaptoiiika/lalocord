@@ -2,19 +2,17 @@ import { UserModel } from "@/entities/User"
 import { socketClient } from "@/shared/api/socket/socket"
 import { useRef, useEffect, useCallback } from "react"
 import {
-  getActionDeleteConnectedUsers,
-  getRoomUsers,
-} from "../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
-import {
   Answer,
   ClientId,
   Ice,
   Offer,
   RTCClient,
-} from "../../../../entities/RTCClient/lib/RTCClient/RTCClient"
+} from "@/entities/RTCClient/lib/RTCClient/RTCClient"
 import {
   RTCChatMessage,
   TransmissionMessage,
+  getActionDeleteConnectedUsers,
+  getRoomUsers,
   useRoomRTCStore,
 } from "@/entities/RTCClient"
 import { useChatStore } from "@/widgets/Chat/model/store/ChatStore"
@@ -25,6 +23,7 @@ import { useAudioEffectStore } from "@/entities/AudioEffect"
 export const useWebRTCRoom = () => {
   const users = useRoomRTCStore(getRoomUsers)
   const addMessage = useChatStore((store) => store.addNewMessage)
+  const deleteMessage = useChatStore((store) => store.deleteMessage)
   const deleteUser = useRoomRTCStore(getActionDeleteConnectedUsers)
   const audio = useAudioEffectStore.getState()
   const joinToRoomAudioPlay = useAudio(AudioName.joinToRoom)
@@ -52,7 +51,13 @@ export const useWebRTCRoom = () => {
         audio.play("notification")
       }
       const fn2 = (transmission: TransmissionMessage) => {
-        addMessage(transmission, client.user)
+        if (
+          transmission.transmission!.length < transmission.transmission!.loaded
+        ) {
+          deleteMessage(transmission.id)
+        } else {
+          addMessage(transmission, client.user)
+        }
       }
       client.dataChannel.on("transmission", fn2)
       client.dataChannel.on("newMessage", fn)
@@ -65,7 +70,7 @@ export const useWebRTCRoom = () => {
         client.dataChannel.off("transmission", fn2)
       })
     }
-  }, [addMessage, users, audio])
+  }, [addMessage, deleteMessage, users, audio])
 
   useEffect(() => {
     const initClients = (users: UserModel[]) => {

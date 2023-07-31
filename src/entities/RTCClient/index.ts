@@ -9,3 +9,6 @@ export type {
   RTCChatMessage,
   TransmissionMessage,
 } from "./lib/RTCClient/types/RTCChatDataChanel"
+
+
+export * from "./model/selectors/RoomRTCSelectors"
