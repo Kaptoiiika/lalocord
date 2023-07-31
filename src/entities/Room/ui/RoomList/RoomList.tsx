@@ -55,22 +55,25 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
       <Typography variant="h5">Open rooms</Typography>
       <Stack gap={1}>
         {roomList?.map((room) => (
-          <Link
-            className={styles.roomlink}
-            to={AppRoutes.ROOM_ID.replace(":id", room.name)}
-            key={room.id}
-          >
-            <Stack direction="row" justifyContent="space-between" padding={1}>
-              <Typography className={styles.roomlinkName}>
-                {room.name}
-              </Typography>
-              <Stack direction="row" alignItems="center" gap={1}>
-                <Typography>{room.userList?.length}</Typography>
-                <PeopleAltIcon />
+          <Stack direction="row" alignItems="center" key={room.id}>
+            <Link
+              className={styles.roomlink}
+              to={AppRoutes.ROOM_ID.replace(":id", room.name)}
+            >
+              <Stack direction="row" justifyContent="space-between" padding={1}>
+                <Typography className={styles.roomlinkName}>
+                  {room.name}
+                </Typography>
+                <Stack direction="row" alignItems="center" gap={1}>
+                  <Typography>{room.userList?.length}</Typography>
+                  <PeopleAltIcon />
+                </Stack>
               </Stack>
-            </Stack>
-            <Divider />
-          </Link>
+              <Divider />
+            </Link>
+            {" - "}
+            {room.userList?.map((user) => user.username).join(", ")}
+          </Stack>
         ))}
         {roomListIsEmpty && <Typography>nothing💤</Typography>}
         {isLoading && (
