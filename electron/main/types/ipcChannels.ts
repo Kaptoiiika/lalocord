@@ -7,6 +7,7 @@ export const enum IpcChannels {
   getMediaSource = "getMediaSource",
   desktopstream = "desktopstream",
   keypress = "keypress",
+  keyRelease = "keyRelease",
   mousemove = "mousemove",
 }
 
@@ -16,6 +17,7 @@ export type IpcEventMap<T = any> = Record<IpcChannels, T>
 export interface IpcToMainEventMap {
   getMediaSource: any
   desktopstream: any
+  keyRelease: any
   keypress: ClientKeyPressEvent
   mousemove: ClientMouseEvent
 }
@@ -24,6 +26,7 @@ export interface IpcToMainEventMap {
 export interface IpcToRendererEventMap {
   getMediaSource: Electron.DesktopCapturerSource[]
   desktopstream: any
+  keyRelease: any
   keypress: void
   mousemove: void
 }

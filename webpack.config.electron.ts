@@ -31,6 +31,10 @@ export default () => {
           test: /\.ts$/,
           use: [{ loader: "ts-loader" }],
         },
+        {
+          test: /\.node$/,
+          loader: "node-loader",
+        },
       ],
     },
     resolve: {

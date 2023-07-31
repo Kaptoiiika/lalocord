@@ -1,5 +1,5 @@
-import styles from "./RoomUserItem.module.scss"
-import { useState, useEffect } from "react"
+import styles from "./VolumeMeter.module.scss"
+import { useEffect, useRef } from "react"
 
 type VolumeMeterProps = {
   stream: MediaStream
@@ -7,12 +7,13 @@ type VolumeMeterProps = {
 
 export const VolumeMeter = (props: VolumeMeterProps) => {
   const { stream } = props
-  const [strength, setStrength] = useState(0)
+  const metterRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const getElement = () => metterRef.current
     const audioContext = new AudioContext()
     const analyser = audioContext.createAnalyser()
-    analyser.fftSize = 256
+    analyser.fftSize = 64
     const audioSourceNode = audioContext.createMediaStreamSource(stream)
     audioSourceNode.connect(analyser)
     const pcmData = new Uint8Array(analyser.fftSize)
@@ -22,15 +23,16 @@ export const VolumeMeter = (props: VolumeMeterProps) => {
     const onFrame = () => {
       if (isUnmounted) return
       analyser.getByteFrequencyData(pcmData)
-
       let sumSquares = 0.0
       for (const amplitude of pcmData) {
         sumSquares += amplitude * amplitude
       }
-      const strength = Math.sqrt(sumSquares / pcmData.length)
-      setStrength(strength)
+      const strength = 100 - Math.sqrt(sumSquares / pcmData.length)
       window.requestAnimationFrame(onFrame)
+      const elem = getElement()
+      if (elem) elem.style.transform = `translate(0, ${strength.toFixed(0)}%)`
     }
+
     onFrame()
     return () => {
       audioContext.close()
@@ -40,7 +42,7 @@ export const VolumeMeter = (props: VolumeMeterProps) => {
 
   return (
     <div className={styles.volumeMeterWrapper}>
-      <div className={styles.volumeMeter} style={{ height: `${strength}%` }} />
+      <div ref={metterRef} className={styles.volumeMeter} />
     </div>
   )
 }

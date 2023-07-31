@@ -10,7 +10,7 @@ import { RoomUserItem } from "./RoomUserItem/RoomUserItem"
 import styles from "./RoomUsers.module.scss"
 import { Tooltip } from "@mui/material"
 import { useRoomRTCStore } from "@/entities/RTCClient"
-import { VolumeMeter } from "./RoomUserItem/VolumeMeter"
+import { VolumeMeter } from "../../../../features/VolumeMetter/ui/VolumeMeter"
 
 export const RoomUsers = () => {
   const users = useRoomRTCStore(getRoomUsers)

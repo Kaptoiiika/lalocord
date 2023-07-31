@@ -107,5 +107,5 @@ const formatedKeys: Record<ClientKeys, string | null> = {
 }
 
 export const KeyHtmltoRobotJs = (keyEvent: ClientKeyPressEvent) => {
-  return formatedKeys[keyEvent.code] || null
+  return formatedKeys[keyEvent.key] || null
 }

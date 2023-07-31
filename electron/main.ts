@@ -28,7 +28,7 @@ const createWindow = () => {
     },
   })
   if (__IS_DEV__ === false) {
-    win.setMenu(null)
+    // win.setMenu(null)
   }
   win.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
   win.webContents.setWindowOpenHandler(({ url }) => {

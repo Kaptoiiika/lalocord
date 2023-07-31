@@ -10,7 +10,7 @@ export default function defineConfig(): UserConfig {
     resolve: {
       alias: { "@": env.paths.src },
     },
-    define: buildDefinePlugins(env, { isElectron: true }),
+    define: buildDefinePlugins({ ...env, isElectron: true }),
   }
 
   return baseConfig

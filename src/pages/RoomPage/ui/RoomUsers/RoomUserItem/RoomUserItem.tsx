@@ -12,7 +12,7 @@ import {
 import { useEffect, useRef, useState } from "react"
 import styles from "./RoomUserItem.module.scss"
 import { useAudioEffectStore } from "@/entities/AudioEffect"
-import { VolumeMeter } from "./VolumeMeter"
+import { VolumeMeter } from "@/features/VolumeMetter/ui/VolumeMeter"
 
 type RoomUserItemProps = {
   client: RTCClient

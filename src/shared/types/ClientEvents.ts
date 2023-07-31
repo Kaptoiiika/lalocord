@@ -1,6 +1,5 @@
 export interface ClientKeyPressEvent {
-  key: string
-  code: ClientKeys
+  key: ClientKeys
   state: "down" | "up"
   clear?: boolean
 }
