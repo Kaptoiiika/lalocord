@@ -242,7 +242,6 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     this.peer = null
     this.log("peer closed")
   }
-
   private initDataChanel(e: MessageEvent) {
     if (e.data instanceof ArrayBuffer) return console.log(e.data)
     try {

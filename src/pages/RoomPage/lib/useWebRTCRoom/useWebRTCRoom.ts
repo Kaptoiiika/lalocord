@@ -52,7 +52,7 @@ export const useWebRTCRoom = () => {
       }
       const fn2 = (transmission: TransmissionMessage) => {
         if (
-          transmission.transmission!.length < transmission.transmission!.loaded
+          transmission.transmission && transmission.transmission.length < transmission.transmission.loaded
         ) {
           deleteMessage(transmission.id)
         } else {

@@ -10,9 +10,8 @@ import { apiClient } from "@/shared/api/apiClient"
 import TextField from "@mui/material/TextField"
 import { Link } from "@/shared/ui/Link/Link"
 
-type RoomListProps = {
-  className?: string
-}
+type RoomListProps = {}
+
 const fetcher = async (url: string) => {
   const res = await apiClient(url)
   return res.data
