@@ -43,6 +43,8 @@ export const Chat = (props: ChatProps) => {
     }
   }, [messagesLength, collapsed])
 
+  const unreadedMessage = Math.max(messagesLength - readedMessage, 0)
+
   return (
     <aside
       className={classNames(styles.sidebar, {
@@ -52,7 +54,7 @@ export const Chat = (props: ChatProps) => {
       <ChatHeader
         collapsed={collapsed}
         handleCollapse={handleCollapse}
-        unreadedMessage={messagesLength - readedMessage}
+        unreadedMessage={unreadedMessage}
       />
       <ErrorBoundary errorText="Chat is broken(">
         <div className={styles.chat}>

@@ -31,7 +31,6 @@
     "test:ui:report:json": "node scripts/generate-visual-json-report.js",
     "test:ui:report:html": "npx reg-cli --from .loki/report.json --report .loki/report.html",
     "prepare": "husky install",
-    "gen": "node ./scripts/createSlice/index.js",
     "dependency": "npx depcruise --config ./scripts/.dependency-cruiser.js src"
   },
   "devDependencies": {
