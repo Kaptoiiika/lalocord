@@ -23,14 +23,14 @@ export class RTCChanelMedia implements IRTCReciverChanelMedia {
         }
       }
     }
-    const video = document.createElement("video")
-    video.src = window.URL.createObjectURL(this.mediaSource)
-    video.style.position = "absolute"
-    video.style.width = "200px"
-    video.style.aspectRatio = "16/9"
-    video.controls = true
-    document.body.appendChild(video)
-    this.isReady = true
+    // const video = document.createElement("video")
+    // video.src = window.URL.createObjectURL(this.mediaSource)
+    // video.style.position = "absolute"
+    // video.style.width = "200px"
+    // video.style.aspectRatio = "16/9"
+    // video.controls = true
+    // document.body.appendChild(video)
+    // this.isReady = true
 
     this.channel = this.peer.createDataChannel(label)
     this.channel.binaryType = "arraybuffer"
@@ -55,12 +55,13 @@ export class RTCChanelMedia implements IRTCReciverChanelMedia {
     }
     this.peer.addEventListener("datachannel", datachannelfunction)
 
-    this.unsub = useRoomRTCStore.subscribe((state) => {
-      const { displayMediaStream } = state
-      if (displayMediaStream) {
-        this.startTransition(displayMediaStream)
-      }
-    })
+    // this.unsub = useRoomRTCStore.subscribe((state) => {
+    //   const { displayMediaStream } = state
+    //   if (displayMediaStream) {
+    //     this.startTransition(displayMediaStream)
+    //   }
+    // })
+    this.unsub = ()=>{}
   }
 
   play = () => {}
@@ -69,7 +70,7 @@ export class RTCChanelMedia implements IRTCReciverChanelMedia {
     this.unsub()
     this.mediaRecorder = new MediaRecorder(stream, {
       mimeType: mimeType,
-      videoBitsPerSecond: 1024 * 1024,
+      videoBitsPerSecond: 1024 * 1024 * 10,
     })
     this.mediaRecorder.ondataavailable = async (e) => {
       const buffer = await e.data.arrayBuffer()
