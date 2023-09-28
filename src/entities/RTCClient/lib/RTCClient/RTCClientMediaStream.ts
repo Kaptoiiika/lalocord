@@ -1,5 +1,5 @@
 import Emitter from "@/shared/lib/utils/Emitter/Emitter"
-import { MediaStreamTypes } from "@/shared/types";
+import { MediaStreamTypes } from "@/shared/types"
 
 type events = { close: void; open: void }
 
@@ -27,6 +27,10 @@ export class RTCClientMediaStream extends Emitter<events> {
     this.isMute = false
 
     this.isOpen = true
+  }
+
+  magick() {
+ 
   }
 
   close() {

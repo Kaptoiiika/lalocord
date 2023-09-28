@@ -8,6 +8,7 @@ import { RTCMedia } from "./RTCMedia"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { RTCChatDataChanel } from "./RTCChatDataChanel"
 import { getDebugValue } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
+import { RTCChanelMedia } from "./RTCChanelMedia"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
@@ -37,6 +38,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
   peer: RTCPeerConnection | null
   channel: RTCDataChanel<MessageType>
   dataChannel: RTCChatDataChanel
+  mediaChannel: RTCChanelMedia
   media: RTCMedia
 
   private offerCreater: boolean
@@ -65,17 +67,18 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       iceServers: [
         { urls: "stun:kapitoxa.lol:5349" },
         { urls: "stun:kapitoxa.lol:3478" },
-        {
-          urls: ["turn:kapitoxa.lol:5349", "turn:kapitoxa.lol:3478"],
-          username: "guest",
-          credential: "somepassword",
-        },
+        // {
+        //   urls: ["turn:kapitoxa.lol:5349", "turn:kapitoxa.lol:3478"],
+        //   username: "guest",
+        //   credential: "somepassword",
+        // },
       ],
     })
     this.id = user.id
     this.user = user
     this.channel = new RTCDataChanel(this.peer)
     this.dataChannel = new RTCChatDataChanel(this.peer, "chat")
+    this.mediaChannel = new RTCChanelMedia(this.peer, "media")
     this.media = new RTCMedia(this.peer)
     this.media.on("needUpdateStreamType", () => {
       this.channel.sendData("requset_stream_type")
@@ -91,7 +94,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
     this.peer.ondatachannel = (event) => {
       const remoteChannel = event.channel
-      if (event.channel.label === "chat") {
+      if (event.channel.label !== "text") {
         return
       }
       remoteChannel.onmessage = this.initDataChanel.bind(this)
