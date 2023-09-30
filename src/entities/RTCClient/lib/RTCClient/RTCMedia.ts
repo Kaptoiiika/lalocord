@@ -62,6 +62,7 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
         displayMediaStream,
         microphoneStream,
         encodingSettings,
+        experementalEncdoing,
       } = state
       if (webCamStream !== this.stream.webCam && webCamStream)
         this.sendStream(webCamStream, "webCam")
@@ -70,12 +71,14 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
       }
       this.stream.webCam = webCamStream
 
-      if (displayMediaStream !== this.stream.media && displayMediaStream)
-        this.sendStream(displayMediaStream, "media")
-      else if (displayMediaStream !== this.stream.media) {
-        this.stopStream("media")
+      if (!experementalEncdoing) {
+        if (displayMediaStream !== this.stream.media && displayMediaStream)
+          this.sendStream(displayMediaStream, "media")
+        else if (displayMediaStream !== this.stream.media) {
+          this.stopStream("media")
+        }
+        this.stream.media = displayMediaStream
       }
-      this.stream.media = displayMediaStream
 
       if (microphoneStream !== this.stream.media && microphoneStream)
         this.sendStream(microphoneStream, "microphone")

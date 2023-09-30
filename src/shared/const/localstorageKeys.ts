@@ -10,5 +10,6 @@ export enum localstorageKeys {
   "DESKTOPAUDIO" = "DESKTOPAUDIO",
   "AUDIO" = "audio",
   "DEBUG" = "debug",
-  "CURSOR" = "cursor"
+  "CURSOR" = "cursor",
+  "experementalEncoding" = "experementalEncoding",
 }

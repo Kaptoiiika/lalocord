@@ -6,6 +6,7 @@ import {
 } from "../../../../entities/RTCClient/model/types/RoomRTCSchema"
 import {
   getEncodingSettingsFromLocalStorage,
+  getExperementalEncdoingFromLocalStorage,
   getStreamSettingsfromLocalStorage,
   saveEncodingSettingsToLocalStorage,
   saveStreamSettingstoLocalStorage,
@@ -22,6 +23,7 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   displayMediaStream: null,
   webCamStream: null,
   microphoneStream: null,
+  experementalEncdoing: getExperementalEncdoingFromLocalStorage(),
 
   setStreamSettings(streamSettings) {
     saveStreamSettingstoLocalStorage(streamSettings)
@@ -180,6 +182,9 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       tracks.stop()
     })
     set((state) => ({ ...state, microphoneStream: null }))
+  },
+  setExperementalEncdoing(value) {
+    set((state) => ({ ...state, experementalEncdoing: value }))
   },
 })
 

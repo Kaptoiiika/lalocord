@@ -9,6 +9,7 @@ export interface RoomRTCSchema {
   streamSettings: MediaStreamConstraints
   userStreamSettings: UserStreamSettings
   encodingSettings: RTCRtpEncodingParameters
+  experementalEncdoing?: boolean
 
   joinRoom: (room: string) => void
   leaveRoom: () => void
@@ -21,6 +22,7 @@ export interface RoomRTCSchema {
   startMicrophoneStream: () => Promise<void>
   stopMicrophoneStream: () => void
   setStreamSettings: (streamSettings: UserStreamSettings) => void
+  setExperementalEncdoing: (state: boolean) => void
 }
 
 export type ConnectedUsers = Record<UserId, RTCClient>

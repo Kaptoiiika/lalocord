@@ -8,7 +8,7 @@ import { RTCMedia } from "./RTCMedia"
 import { useRoomRTCStore } from "../../model/store/RoomRTCStore"
 import { RTCChatDataChanel } from "./RTCChatDataChanel"
 import { getDebugValue } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
-import { RTCChanelMedia } from "./RTCChanelMedia"
+import { RTCChanelMedia } from "./RTCChanelMedia/RTCChanelMedia"
 
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }

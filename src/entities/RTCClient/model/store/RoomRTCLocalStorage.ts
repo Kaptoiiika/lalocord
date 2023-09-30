@@ -83,3 +83,7 @@ export const saveStreamSettingstoLocalStorage = (
     JSON.stringify(streamSettings)
   )
 }
+
+export const getExperementalEncdoingFromLocalStorage = () => {
+  return !!localStorage.getItem(localstorageKeys.experementalEncoding)
+}
