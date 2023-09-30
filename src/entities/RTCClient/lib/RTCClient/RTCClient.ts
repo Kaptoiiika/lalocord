@@ -67,11 +67,11 @@ export class RTCClient extends Emitter<RTCClientEvents> {
       iceServers: [
         { urls: "stun:kapitoxa.lol:5349" },
         { urls: "stun:kapitoxa.lol:3478" },
-        // {
-        //   urls: ["turn:kapitoxa.lol:5349", "turn:kapitoxa.lol:3478"],
-        //   username: "guest",
-        //   credential: "somepassword",
-        // },
+        {
+          urls: ["turn:kapitoxa.lol:5349", "turn:kapitoxa.lol:3478"],
+          username: "guest",
+          credential: "somepassword",
+        },
       ],
     })
     this.id = user.id
