@@ -16,12 +16,20 @@ import Tooltip from "@mui/material/Tooltip"
 import styles from "./VideoSettingsMenu.module.scss"
 import SettingsIcon from "@mui/icons-material/Settings"
 import { InlineSelect } from "@/shared/ui/InlineSelect/InlineSelect"
+import FormControlLabel from "@mui/material/FormControlLabel"
+import Switch from "@mui/material/Switch"
 
 type VideoSettingsMenuProps = {}
 
 export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
   const {} = props
   const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
+  const experementalVideo = useRoomRTCStore(
+    (state) => state.experementalEncdoing
+  )
+  const setExperementalVideo = useRoomRTCStore(
+    (state) => state.setExperementalEncdoing
+  )
   const encodingSettings = useRoomRTCStore(getEncodingSettings)
   const setEncodingSettings = useRoomRTCStore(getActionSetEncodingSettings)
   const setStreamingSettings = useRoomRTCStore(
@@ -64,6 +72,10 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
       video: { ...userStreamSettings.video, hint: value },
       audio: userStreamSettings.audio,
     })
+  }
+
+  const handleSetExpVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setExperementalVideo(e.currentTarget.checked)
   }
 
   const currentResolution = userStreamSettings.video.height
@@ -130,6 +142,16 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
               max={50}
             />
           </div>
+          <FormControlLabel
+            control={
+              <Switch
+                color="primary"
+                checked={!!experementalVideo}
+                onChange={handleSetExpVideo}
+              />
+            }
+            label="experemental Encoding"
+          />
         </Stack>
       </Menu>
     </>

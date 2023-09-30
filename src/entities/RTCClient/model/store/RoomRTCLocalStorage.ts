@@ -87,3 +87,11 @@ export const saveStreamSettingstoLocalStorage = (
 export const getExperementalEncdoingFromLocalStorage = () => {
   return !!localStorage.getItem(localstorageKeys.experementalEncoding)
 }
+export const saveExperementalEncdoingFromLocalStorage = (value: boolean) => {
+  if (value)
+    localStorage.setItem(
+      localstorageKeys.experementalEncoding,
+      JSON.stringify(value)
+    )
+  else localStorage.removeItem(localstorageKeys.experementalEncoding)
+}

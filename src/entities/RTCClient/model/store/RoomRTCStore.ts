@@ -10,6 +10,7 @@ import {
   getStreamSettingsfromLocalStorage,
   saveEncodingSettingsToLocalStorage,
   saveStreamSettingstoLocalStorage,
+  saveExperementalEncdoingFromLocalStorage,
 } from "./RoomRTCLocalStorage"
 
 const store: StateCreator<RoomRTCSchema> = (set, get) => ({
@@ -184,6 +185,7 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
     set((state) => ({ ...state, microphoneStream: null }))
   },
   setExperementalEncdoing(value) {
+    saveExperementalEncdoingFromLocalStorage(value)
     set((state) => ({ ...state, experementalEncdoing: value }))
   },
 })
