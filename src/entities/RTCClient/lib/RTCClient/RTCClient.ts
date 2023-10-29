@@ -30,7 +30,7 @@ type MessageType =
   | "clientPressKey"
   | "clientMouseChange"
 
-type RTCClientEvents = { iceconnectionStatusChange: void }
+type RTCClientEvents = { iceconnectionStatusChange: void; connectionLost: void }
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
@@ -123,9 +123,9 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "disconnected":
         case "failed":
-          this.reconnect()
-          break
         case "closed":
+          this.emit("connectionLost", undefined)
+          break
         default:
           break
       }

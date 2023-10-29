@@ -1,4 +1,4 @@
-import { Button, Input } from "@mui/material"
+import { Input } from "@mui/material"
 import Typography from "@mui/material/Typography"
 import { ChangeEvent, ReactNode, useState, useEffect } from "react"
 import styles from "./InlineSelect.module.scss"
@@ -64,13 +64,22 @@ export const InlineSelectPrimitive = (props: InlineSelectProps) => {
       {title && <Typography>{title}</Typography>}
       <div className={styles.buttonlist}>
         {list.map((item, index) => (
-          <Button
+          <button
+            style={{
+              cursor: "pointer",
+              background: isCurrentValue(item)
+                ? MuiTheme?.palette.primary.main
+                : "none",
+              color: isCurrentValue(item)
+                ? MuiTheme?.palette.primary.contrastText
+                : MuiTheme?.palette.primary.main,
+              ...MuiTheme?.typography.button,
+            }}
             key={index}
-            variant={isCurrentValue(item) ? "contained" : undefined}
             onClick={() => handleSelect(item)}
           >
             {item}
-          </Button>
+          </button>
         ))}
 
         {allowCustomValue && (

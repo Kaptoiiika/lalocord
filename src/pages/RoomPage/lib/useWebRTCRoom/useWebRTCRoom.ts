@@ -52,7 +52,8 @@ export const useWebRTCRoom = () => {
       }
       const fn2 = (transmission: TransmissionMessage) => {
         if (
-          transmission.transmission && transmission.transmission.length < transmission.transmission.loaded
+          transmission.transmission &&
+          transmission.transmission.length < transmission.transmission.loaded
         ) {
           deleteMessage(transmission.id)
         } else {
@@ -82,8 +83,17 @@ export const useWebRTCRoom = () => {
       if (alreadyInList) {
         console.warn(`User ${alreadyInList.id} is already in list`)
       }
-      createNewUser(user)
+      const client = createNewUser(user)
       joinToRoomAudioPlay()
+
+      const removeUser = () => {
+        setTimeout(() => {
+          deleteRef.current(user.id)
+          exitFromRoomAudioPlay()
+          client.off("connectionLost", removeUser)
+        }, 5000)
+      }
+      client.on("connectionLost", removeUser)
     }
 
     const userDisconnect = (user: ClientId) => {
