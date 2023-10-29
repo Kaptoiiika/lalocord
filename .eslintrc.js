@@ -51,7 +51,6 @@ module.exports = {
     "import/order": "off",
     "import/no-unresolved": "off",
     "import/prefer-default-export": "off",
-    "@typescript-eslint/no-empty-function": "warn",
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/ban-types": "off",
     "@typescript-eslint/no-non-null-assertion": "off",

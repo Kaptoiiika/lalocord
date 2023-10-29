@@ -1,5 +1,4 @@
 import { MouseEvent, useState } from "react"
-import { VideoStreamSettingsHint } from "@/entities/RTCClient/model/types/RoomRTCSchema"
 import {
   useRoomRTCStore,
   bitrateToShortValue,
@@ -15,9 +14,9 @@ import IconButton from "@mui/material/IconButton/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 import styles from "./VideoSettingsMenu.module.scss"
 import SettingsIcon from "@mui/icons-material/Settings"
-import { InlineSelect } from "@/shared/ui/InlineSelect/InlineSelect"
 import FormControlLabel from "@mui/material/FormControlLabel"
 import Switch from "@mui/material/Switch"
+import { InlineSelectPrimitive } from "@/shared/ui/InlineSelect/InlineSelectPrimitive"
 
 type VideoSettingsMenuProps = {}
 
@@ -54,22 +53,20 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
     setEncodingSettings(settings)
   }
 
-  const handleChangeFrameRate = (value: number) => {
+  const handleChangeFrameRate = (value: string) => {
+    const numValue = Number(value)
+    if (!numValue) return
     setStreamingSettings({
-      video: { ...userStreamSettings.video, frameRate: value },
+      video: { ...userStreamSettings.video, frameRate: numValue },
       audio: userStreamSettings.audio,
     })
   }
 
-  const handleChangeResolution = (value: number) => {
+  const handleChangeResolution = (value: string) => {
+    const numValue = Number(value)
+    if (!numValue) return
     setStreamingSettings({
-      video: { ...userStreamSettings.video, height: value },
-      audio: userStreamSettings.audio,
-    })
-  }
-  const handleChangeHint = (value: VideoStreamSettingsHint) => {
-    setStreamingSettings({
-      video: { ...userStreamSettings.video, hint: value },
+      video: { ...userStreamSettings.video, height: numValue },
       audio: userStreamSettings.audio,
     })
   }
@@ -78,9 +75,18 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
     setExperementalVideo(e.currentTarget.checked)
   }
 
-  const currentResolution = userStreamSettings.video.height
   const currentFrameRate = userStreamSettings.video.frameRate
-  const currentHint = userStreamSettings.video.hint
+  
+  const frameRateList = ["5", "30", "60"]
+  const isCustomFrameRate = frameRateList.includes(String(currentFrameRate))
+  ? "90"
+  : `${currentFrameRate}`
+  
+  const currentResolution = userStreamSettings.video.height
+  const resolutionList = ["144", "720", "1080"]
+  const isCustomResolution = resolutionList.includes(String(currentResolution))
+    ? '1440'
+    : `${currentResolution}`
 
   return (
     <>
@@ -102,23 +108,24 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
           horizontal: "center",
         }}
       >
-        <Stack gap={1}>
-          <InlineSelect
-            value={currentHint}
-            list={["detail", "default", "motion"]}
-            onSelect={handleChangeHint}
-          />
-          <InlineSelect
-            title={"Frame Rate"}
-            value={currentFrameRate}
-            list={[5, 30, 60]}
+        <Stack gap={1} className={styles.Settingmenu}>
+          <InlineSelectPrimitive
+            title={`Frame Rate ${currentFrameRate}`}
+            value={`${currentFrameRate}`}
+            list={frameRateList}
             onSelect={handleChangeFrameRate}
+            allowCustomValue
+            customValue={isCustomFrameRate}
+            onCustomValueChange={handleChangeFrameRate}
           />
-          <InlineSelect
-            title={"Resolution"}
-            value={currentResolution}
-            list={[144, 720, 1080]}
+          <InlineSelectPrimitive
+            title={`Resolution ${currentResolution}p`}
+            value={`${currentResolution}`}
+            list={["144", "720", "1080"]}
             onSelect={handleChangeResolution}
+            allowCustomValue
+            customValue={isCustomResolution}
+            onCustomValueChange={handleChangeResolution}
           />
 
           <div className={styles.slider}>

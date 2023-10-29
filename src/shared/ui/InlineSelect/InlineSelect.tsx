@@ -1,5 +1,4 @@
 import { Button } from "@mui/material"
-import ButtonGroup from "@mui/material/ButtonGroup/ButtonGroup"
 import Typography from "@mui/material/Typography"
 import { ReactNode, useState } from "react"
 import styles from "./InlineSelect.module.scss"
@@ -28,7 +27,7 @@ export const InlineSelect = <T,>(props: InlineSelectProps<T>) => {
   return (
     <div className={styles.selector}>
       {title && <Typography>{title}</Typography>}
-      <ButtonGroup fullWidth>
+      <div className={styles.buttonlist}>
         {list.map((item, index) => (
           <Button
             key={index}
@@ -38,7 +37,7 @@ export const InlineSelect = <T,>(props: InlineSelectProps<T>) => {
             {itemTitle ? itemTitle(item) : String(item)}
           </Button>
         ))}
-      </ButtonGroup>
+      </div>
     </div>
   )
 }

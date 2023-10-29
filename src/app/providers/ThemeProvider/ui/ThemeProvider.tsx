@@ -3,38 +3,26 @@ import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMounted
 import { createTheme, ThemeProvider as ThemeProviderMUI } from "@mui/material"
 import { blue, pink } from "@mui/material/colors"
 import { PropsWithChildren, useMemo, useState } from "react"
-import { Theme, ThemeContext } from "../lib/ThemeContext"
+import { ThemeName, ThemeContext } from "../lib/ThemeContext"
 
-const getDefaultTheme = (): Theme => {
+const getDefaultTheme = (): ThemeName => {
   const defaultTheme = localStorage.getItem(localstorageKeys.THEME)
-  if (Object.values(Theme).includes(defaultTheme as Theme)) {
-    return defaultTheme as Theme
+  if (Object.values(ThemeName).includes(defaultTheme as ThemeName)) {
+    return defaultTheme as ThemeName
   }
   if (
     window.matchMedia &&
     window.matchMedia("(prefers-color-scheme: dark)").matches
   ) {
-    return Theme.dark
+    return ThemeName.dark
   }
-  return Theme.dark
+  return ThemeName.dark
 }
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-  const [theme, setTheme] = useState<Theme>(getDefaultTheme())
-  const defaultProps = useMemo(
-    () => ({
-      theme: theme,
-      setTheme: (theme: Theme) => {
-        const container = document.querySelector("body")
-        if (container) {
-          container.className = theme
-          setTheme(theme)
-        }
-      },
-    }),
-    [theme]
-  )
+  const [theme, setTheme] = useState<ThemeName>(getDefaultTheme())
 
+  
   useMountedEffect(() => {
     const container = document.body
     if (container) {
@@ -79,6 +67,21 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
       document.head.insertAdjacentHTML("beforeend", `<style>a,button{cursor:${cursorStyle} !important}</style>`)
     }
   })
+
+  const defaultProps = useMemo(
+    () => ({
+      theme: theme,
+      setTheme: (theme: ThemeName) => {
+        const container = document.querySelector("body")
+        if (container) {
+          container.className = theme
+          setTheme(theme)
+        }
+      },
+      MuiTheme: MuiTheme,
+    }),
+    [theme, MuiTheme]
+  )
 
   return (
     <ThemeContext.Provider value={defaultProps}>
