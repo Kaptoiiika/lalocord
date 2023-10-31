@@ -30,7 +30,7 @@ type MessageType =
   | "clientPressKey"
   | "clientMouseChange"
 
-type RTCClientEvents = { iceconnectionStatusChange: void; connectionLost: void }
+type RTCClientEvents = { iceconnectionStatusChange: RTCIceConnectionState }
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
@@ -113,7 +113,8 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     }
 
     this.peer.oniceconnectionstatechange = (e) => {
-      this.emit("iceconnectionStatusChange", undefined)
+      if (this.peer)
+        this.emit("iceconnectionStatusChange", this.peer.iceConnectionState)
       switch (this.peer?.iceConnectionState) {
         case "completed":
         case "connected":
@@ -123,9 +124,8 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "disconnected":
         case "failed":
-        case "closed":
-          this.emit("connectionLost", undefined)
           break
+        case "closed":
         default:
           break
       }

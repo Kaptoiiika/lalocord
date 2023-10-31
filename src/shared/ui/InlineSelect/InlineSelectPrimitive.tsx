@@ -66,7 +66,6 @@ export const InlineSelectPrimitive = (props: InlineSelectProps) => {
         {list.map((item, index) => (
           <button
             style={{
-              cursor: "pointer",
               background: isCurrentValue(item)
                 ? MuiTheme?.palette.primary.main
                 : "none",
@@ -90,7 +89,7 @@ export const InlineSelectPrimitive = (props: InlineSelectProps) => {
                 : undefined,
               color: customValueIsActive
                 ? MuiTheme?.palette.primary.contrastText
-                : undefined,
+                : MuiTheme?.palette.primary.main,
             }}
             className={styles.input}
             value={customValue}

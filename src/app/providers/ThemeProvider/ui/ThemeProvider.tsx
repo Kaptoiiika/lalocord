@@ -58,16 +58,6 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
     [theme]
   )
 
-  useMountedEffect(() => {
-    const cursor = localStorage.getItem(localstorageKeys.CURSOR)
-    if (cursor) {
-      console.log('apply cursor')
-      const cursorStyle = 'url(https://cdn.discordapp.com/attachments/419197900254347264/1151983333643915304/Untitled-1.webp),default'
-      document.body.style.cursor = cursorStyle
-      document.head.insertAdjacentHTML("beforeend", `<style>a,button{cursor:${cursorStyle} !important}</style>`)
-    }
-  })
-
   const defaultProps = useMemo(
     () => ({
       theme: theme,
