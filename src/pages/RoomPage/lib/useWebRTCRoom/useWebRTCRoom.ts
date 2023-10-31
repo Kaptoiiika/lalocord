@@ -91,8 +91,7 @@ export const useWebRTCRoom = () => {
         if (
           state === "disconnected" ||
           state === "closed" ||
-          state ||
-          "failed"
+          state === "failed"
         ) {
           timer = setTimeout(() => {
             deleteRef.current(user.id)
