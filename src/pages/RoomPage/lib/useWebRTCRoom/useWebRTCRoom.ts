@@ -86,22 +86,22 @@ export const useWebRTCRoom = () => {
       const client = createNewUser(user)
       joinToRoomAudioPlay()
       let timer: ReturnType<typeof setTimeout>
-      const removeUser = (state: RTCIceConnectionState) => {
-        clearTimeout(timer)
-        if (
-          state === "disconnected" ||
-          state === "closed" ||
-          state === "failed"
-        ) {
-          timer = setTimeout(() => {
-            deleteRef.current(user.id)
-            exitFromRoomAudioPlay()
-            client.close()
-            client.off("iceconnectionStatusChange", removeUser)
-          }, 10000)
-        }
-      }
-      client.on("iceconnectionStatusChange", removeUser)
+      // const removeUser = (state: RTCIceConnectionState) => {
+      //   clearTimeout(timer)
+      //   if (
+      //     state === "disconnected" ||
+      //     state === "closed" ||
+      //     state === "failed"
+      //   ) {
+      //     timer = setTimeout(() => {
+      //       deleteRef.current(user.id)
+      //       exitFromRoomAudioPlay()
+      //       client.close()
+      //       client.off("iceconnectionStatusChange", removeUser)
+      //     }, 10000)
+      //   }
+      // }
+      // client.on("iceconnectionStatusChange", removeUser)
     }
 
     const userDisconnect = (user: ClientId) => {
