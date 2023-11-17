@@ -1,14 +1,14 @@
 import { ipcMain } from "electron"
 import { IpcChannels, IpcToMainEventMap } from "../types/ipcChannels"
 import { KeyHtmltoRobotJs } from "./KeyHtmltoRobotJs"
-import { keyToggle } from "robotjs"
+// import { keyToggle } from "robotjs"
 
 const keyDown = new Set<string>()
 
 const sendKeyToPC = (key: string, isDown: boolean) => {
   const state = isDown ? "down" : "up"
   try {
-    keyToggle(key, state)
+    // keyToggle(key, state)
   } catch (error) {}
 }
 

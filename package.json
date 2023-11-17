@@ -116,7 +116,6 @@
     "react-dom": "^18.2.0",
     "react-linkify": "^1.0.0-alpha",
     "react-router-dom": "^6.4.2",
-    "robotjs": "github:Kaptoiiika/robotjs",
     "socket.io-client": "^4.5.4",
     "swr": "^2.1.4",
     "update-electron-app": "^2.0.1",
