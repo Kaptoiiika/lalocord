@@ -10,6 +10,10 @@ $animationTime: 0.3s;
     .headerButton {
       border-bottom: none;
     }
+
+    @media (max-width: 625px) {
+      width: 100%;
+    }
   }
 
   right: 0px;
@@ -26,8 +30,12 @@ $animationTime: 0.3s;
   border-radius: 0;
   border-left: var(--box-border);
   border-bottom: var(--box-border);
+
+  @media (max-width: 625px) {
+    border-left: none;
+  }
 }
 
-.contextMenu{
+.contextMenu {
   min-width: calc($chatWidth / 2);
 }

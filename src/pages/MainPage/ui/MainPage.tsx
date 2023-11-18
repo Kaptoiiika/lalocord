@@ -14,15 +14,18 @@ export const MainPage = () => {
   return (
     <PageWrapper component="div" className={styles.mainPage}>
       <Stack
+        className={styles.container}
         justifyContent="space-between"
         direction="row"
         component="main"
         gap={1}
         margin={1}
-        height={"100%"}
+        height={"100%"} 
       >
-        <Stack direction="column" alignItems="start" gap={1}>
+        <Stack
+          direction="column" alignItems="start" gap={1}>
           <TextField
+            className={styles.mobileWideContainer}
             variant="outlined"
             value={localUser.username}
             label="username"

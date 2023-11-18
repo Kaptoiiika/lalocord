@@ -1,5 +1,11 @@
 $HeaderHeight: var(--header-height);
 
+.lobby {
+  @media (max-width: 625px) {
+    flex-direction: column;
+  }
+}
+
 .mainScreen {
   display: grid;
   position: relative;
@@ -18,5 +24,10 @@ $HeaderHeight: var(--header-height);
     content: '';
     width: 100%;
     border-bottom: var(--box-border);
+  }
+
+  @media (max-width: 625px) {
+    height: 100%;
+    overflow: auto;
   }
 }

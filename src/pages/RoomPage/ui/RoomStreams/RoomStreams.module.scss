@@ -1,5 +1,9 @@
 .RoomStreams {
   margin: calc(var(--box-border-width) * -1);
+
+  @media (max-width: 625px) {
+    margin-right: 0;
+  }
 }
 
 .RoomStreamsWithHiddenStream {

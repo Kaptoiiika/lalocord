@@ -35,8 +35,8 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
   const roomListIsEmpty = roomList?.length === 0 && !isLoading
 
   return (
-    <Stack gap={1}>
-      <Stack direction="row" gap={1}>
+    <Stack className={styles.mobileWideContainer} gap={1}>
+      <Stack className={styles.form} direction="row" gap={1}>
         <TextField
           label="Room name"
           value={roomName}
