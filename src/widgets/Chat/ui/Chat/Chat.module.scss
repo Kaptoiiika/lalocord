@@ -1,6 +1,10 @@
 $chatWidth: var(--chat-width);
 $animationTime: 0.3s;
 
+@media (max-width: 625px) {
+  $chatWidth: 100%;
+}
+
 .sidebar {
   position: relative;
   display: flex;
@@ -9,6 +13,10 @@ $animationTime: 0.3s;
   width: $chatWidth;
   height: 100%;
   transition: width $animationTime;
+
+  @media (max-width: 625px) {
+    height: 50%;
+  }
 
   &.collapsed {
     width: 1px;

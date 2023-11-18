@@ -20,7 +20,7 @@ contextMenu({
 const createWindow = () => {
   const win = new BrowserWindow({
     backgroundColor: "#1c2128",
-    minWidth: 800,
+    minWidth: 380,
     minHeight: 600,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,

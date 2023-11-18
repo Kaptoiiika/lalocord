@@ -1,6 +1,7 @@
 import styles from "./AppFooter.module.scss"
 import MUILink from "@mui/material/Link/Link"
 import Typography from "@mui/material/Typography"
+import useMediaQuery from '@mui/material/useMediaQuery'
 import { useState } from "react"
 
 type AppFooterProps = {}
@@ -8,6 +9,7 @@ type AppFooterProps = {}
 export const AppFooter = (props: AppFooterProps) => {
   const {} = props
   const [buildVersionIsDate, setBuildVersion] = useState(false)
+  const isSmallScreen = useMediaQuery('(max-width:385px)');
 
   const handleChangeVersion = () => {
     setBuildVersion((prev) => !prev)
@@ -25,7 +27,7 @@ export const AppFooter = (props: AppFooterProps) => {
       </div>
       <div onClick={handleChangeVersion}>
         <Typography variant="h6">Build version</Typography>
-        <Typography align="right">
+        <Typography align={isSmallScreen ? 'left' : 'right'}>
           {buildVersionIsDate ? __BUILD_DATE_VERSION__ : __BUILD_VERSION__}
         </Typography>
       </div>

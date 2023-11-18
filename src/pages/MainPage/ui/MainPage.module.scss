@@ -10,3 +10,15 @@
   display: flex;
   align-items: flex-end;
 }
+
+.container {
+  @media (max-width: 625px) {
+    flex-direction: column;
+  }
+}
+
+.mobileWideContainer {
+  @media (max-width: 625px) {
+    width: 100%;
+  }
+}

@@ -5,4 +5,8 @@
   --chat-width: 300px;
 
   --box-border-width: 1px;
+
+  @media (max-width: 625px) {
+    --chat-width: 100%;
+  }
 }
