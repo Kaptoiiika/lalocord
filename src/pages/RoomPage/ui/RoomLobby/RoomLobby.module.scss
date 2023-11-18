@@ -27,6 +27,7 @@ $HeaderHeight: var(--header-height);
   }
 
   @media (max-width: 625px) {
-    height: 50%;
+    height: 100%;
+    overflow: auto;
   }
 }

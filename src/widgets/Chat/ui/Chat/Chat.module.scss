@@ -12,14 +12,21 @@ $animationTime: 0.3s;
   flex: 0 0 auto;
   width: $chatWidth;
   height: 100%;
-  transition: width $animationTime;
+  transition: width, height, $animationTime;
 
   @media (max-width: 625px) {
-    height: 50%;
+    flex: 0 1 auto;
+    overflow: auto;
   }
 
   &.collapsed {
     width: 1px;
+
+    @media (max-width: 625px) {
+      height: var(--header-height);
+      width: 100%;
+      flex: 0 0 auto;
+    }
 
     .chat {
       visibility: hidden;
@@ -40,4 +47,8 @@ $animationTime: 0.3s;
   overflow: hidden;
   transition: opacity $animationTime;
   opacity: 1;
+
+  @media (max-width: 625px) {
+    border-left: none;
+  }
 }
