@@ -47,11 +47,12 @@ export const RoomPage = () => {
         socketClient.emit("join", {
           name: id,
           username: username,
+          reconnect: true,
         })
       }
       isConnected = true
     }
-    
+
     const handleDisconnect = () => {
       isConnected = false
     }

@@ -70,7 +70,7 @@ export const RoomStreams = memo(function RoomStreams() {
 
   return (
     <StreamViewer
-      className={classNames("", {
+      className={classNames(styles.RoomStreams, {
         [styles.RoomStreamsWithHiddenStream]: !!someStreamIsHide,
       })}
     >

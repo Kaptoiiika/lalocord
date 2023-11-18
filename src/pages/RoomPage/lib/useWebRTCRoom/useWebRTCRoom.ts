@@ -20,6 +20,10 @@ import { useAudio } from "@/entities/AudioEffect"
 import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
 import { useAudioEffectStore } from "@/entities/AudioEffect"
 
+type UserConnectModel = Pick<UserModel, "id" | "username"> & {
+  reconnect?: boolean
+}
+
 export const useWebRTCRoom = () => {
   const users = useRoomRTCStore(getRoomUsers)
   const addMessage = useChatStore((store) => store.addNewMessage)
@@ -95,7 +99,7 @@ export const useWebRTCRoom = () => {
   }, [addMessage, deleteMessage, users, audio])
 
   useEffect(() => {
-    const addUser = (user: UserModel, createOffer = false, silent = false) => {
+    const addUser = (user: UserConnectModel, createOffer = false, silent = false) => {
       const alreadyInList = getUserById(user.id)
       if (alreadyInList) {
         console.warn(`User ${alreadyInList.id} is already in list`)
@@ -104,8 +108,8 @@ export const useWebRTCRoom = () => {
       if (!silent) joinToRoomAudioPlay()
     }
 
-    const initClients = (users: UserModel[]) => {
-      users.map((user) => addUser(user, true, true))
+    const initClients = (users: UserConnectModel[]) => {
+      users.map((user) => addUser(user, true, !user.reconnect))
     }
 
     const userDisconnect = (user: ClientId) => {

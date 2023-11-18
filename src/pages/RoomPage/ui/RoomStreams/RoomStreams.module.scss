@@ -1,3 +1,7 @@
+.RoomStreams {
+  margin: calc(var(--box-border-width) * -1);
+}
+
 .RoomStreamsWithHiddenStream {
   padding-bottom: 51px;
 }
