@@ -34,25 +34,32 @@ export const useWebRTCRoom = () => {
   const deleteRef = useRef(deleteUser)
   deleteRef.current = deleteUser
 
-  const createNewUser = (user: UserModel, createOffer?: boolean) => {
-    const newUser = new RTCClient(user, createOffer)
-    let timer: ReturnType<typeof setTimeout>
-    const removeUser = (state: RTCIceConnectionState) => {
-      clearTimeout(timer)
-      console.log(state)
-      if (state === "closed"|| state ==="disconnected" || state === "failed") {
-        timer = setTimeout(() => {
-          deleteRef.current(user.id)
-          exitFromRoomAudioPlay()
-          newUser.close()
-          newUser.off("iceconnectionStatusChange", removeUser)
-        }, 15000)
+  const createNewUser = useCallback(
+    (user: UserModel, createOffer?: boolean) => {
+      const newUser = new RTCClient(user, createOffer)
+      let timer: ReturnType<typeof setTimeout>
+      const removeUser = (state: RTCIceConnectionState) => {
+        clearTimeout(timer)
+        console.log(state)
+        if (
+          state === "closed" ||
+          state === "disconnected" ||
+          state === "failed"
+        ) {
+          timer = setTimeout(() => {
+            deleteRef.current(user.id)
+            exitFromRoomAudioPlay()
+            newUser.close()
+            newUser.off("iceconnectionStatusChange", removeUser)
+          }, 15000)
+        }
       }
-    }
-    newUser.on("iceconnectionStatusChange", removeUser)
+      newUser.on("iceconnectionStatusChange", removeUser)
 
-    return newUser
-  }
+      return newUser
+    },
+    [exitFromRoomAudioPlay]
+  )
 
   const getUserById = (id: string): RTCClient | undefined => {
     const user = usersRef.current[id]
@@ -140,7 +147,7 @@ export const useWebRTCRoom = () => {
       socketClient.off("new_offer", createAnswer)
       socketClient.off("new_ice", saveIce)
     }
-  }, [exitFromRoomAudioPlay, joinToRoomAudioPlay])
+  }, [createNewUser, exitFromRoomAudioPlay, joinToRoomAudioPlay])
 
   const handleSendMessage = useCallback((msg: string) => {
     Object.values(usersRef.current).forEach((user) => {
