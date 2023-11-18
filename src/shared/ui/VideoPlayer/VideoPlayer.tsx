@@ -201,7 +201,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
           {...other}
           onDoubleClick={handleFullscreenToggle}
           ref={handleRefVideo}
-          className={classNames([styles.video, className], {
+          className={classNames(styles.video, className, {
             [styles.cursorHide]: toolsIsClosed,
           })}
           playsInline

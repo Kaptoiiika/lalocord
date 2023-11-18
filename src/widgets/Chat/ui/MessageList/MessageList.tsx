@@ -30,7 +30,7 @@ const MessageItem = (props: MessageItemProps) => {
   if (prevMessage?.user === message.user) {
     return (
       <li
-        className={classNames([styles.message, styles.messageGroup])}
+        className={classNames(styles.message, styles.messageGroup)}
         key={`${message.message.id}-${message.message.blobParams?.loaded}`}
       >
         <Message data={message} className={styles.messageText} />

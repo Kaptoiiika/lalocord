@@ -36,6 +36,21 @@ export const useWebRTCRoom = () => {
 
   const createNewUser = (user: UserModel, createOffer?: boolean) => {
     const newUser = new RTCClient(user, createOffer)
+    let timer: ReturnType<typeof setTimeout>
+    const removeUser = (state: RTCIceConnectionState) => {
+      clearTimeout(timer)
+      console.log(state)
+      if (state === "closed"|| state ==="disconnected" || state === "failed") {
+        timer = setTimeout(() => {
+          deleteRef.current(user.id)
+          exitFromRoomAudioPlay()
+          newUser.close()
+          newUser.off("iceconnectionStatusChange", removeUser)
+        }, 15000)
+      }
+    }
+    newUser.on("iceconnectionStatusChange", removeUser)
+
     return newUser
   }
 
@@ -83,25 +98,8 @@ export const useWebRTCRoom = () => {
       if (alreadyInList) {
         console.warn(`User ${alreadyInList.id} is already in list`)
       }
-      const client = createNewUser(user)
+      createNewUser(user)
       joinToRoomAudioPlay()
-      let timer: ReturnType<typeof setTimeout>
-      // const removeUser = (state: RTCIceConnectionState) => {
-      //   clearTimeout(timer)
-      //   if (
-      //     state === "disconnected" ||
-      //     state === "closed" ||
-      //     state === "failed"
-      //   ) {
-      //     timer = setTimeout(() => {
-      //       deleteRef.current(user.id)
-      //       exitFromRoomAudioPlay()
-      //       client.close()
-      //       client.off("iceconnectionStatusChange", removeUser)
-      //     }, 10000)
-      //   }
-      // }
-      // client.on("iceconnectionStatusChange", removeUser)
     }
 
     const userDisconnect = (user: ClientId) => {

@@ -9,7 +9,7 @@ type PageLoaderProps = {
 export const PageLoader = (props: PageLoaderProps) => {
   const { className } = props
   return (
-    <div className={classNames([styles.PageLoader, className])}>
+    <div className={classNames(styles.PageLoader, className)}>
       <LoaderBars className={styles.icon} />
     </div>
   )

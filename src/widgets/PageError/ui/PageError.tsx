@@ -10,6 +10,6 @@ export const PageError = (props: PageErrorProps) => {
   const { className, title = "Some error))" } = props
 
   return (
-    <div className={classNames([styles.PageError, className])}>{title}</div>
+    <div className={classNames(styles.PageError, className)}>{title}</div>
   )
 }

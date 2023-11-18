@@ -1,19 +1,15 @@
-export type classNamesMods = Record<string, boolean | string | undefined>
-
 export function classNames(
-  cls: string | (string | undefined)[] | undefined,
-  mods: classNamesMods = {}
+  ...args: (string | undefined | Record<string, unknown>)[]
 ): string | undefined {
-  const unionClasses = Array.isArray(cls)
-    ? cls.filter((value) => Boolean(value)).join(" ")
-    : cls
+  const fullClasses = args.map((cn) => {
+    if (!cn) return 
+    if (typeof cn === "string") return cn
 
-  const variableClasses = Object.entries(mods)
-    .filter(([, value]) => Boolean(value))
-    .map(([className]) => className)
-    .join(" ")
+    return Object.entries(cn)
+      .filter(([name, condition]) => Boolean(condition))
+      .map(([name]) => name)
+      .join(" ")
+  })
 
-  const fullClasses = [unionClasses, variableClasses].join(" ")
-
-  return fullClasses.trim()
+  return fullClasses.join(" ").trim()
 }

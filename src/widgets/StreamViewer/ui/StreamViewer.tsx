@@ -15,7 +15,7 @@ export const StreamViewer = (props: StreamViewerProps) => {
   const rows = sliceIntoTotalChunks(childrenArr, totalRows)
 
   return (
-    <div className={classNames([styles.StreamViewer, className])}>
+    <div className={classNames(styles.StreamViewer, className)}>
       {rows.map((rowChildren, index) => (
         <div key={`${index}`} className={styles.row}>
           {rowChildren}

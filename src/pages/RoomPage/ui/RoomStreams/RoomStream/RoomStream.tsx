@@ -98,7 +98,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
       style={{
         viewTransitionName: componentId,
       }}
-      className={classNames([styles.stream], { [styles.hideStream]: isHidden })}
+      className={classNames(styles.stream, { [styles.hideStream]: isHidden })}
     >
       <VideoPlayer
         stream={stream}

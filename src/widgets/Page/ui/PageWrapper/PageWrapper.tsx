@@ -20,7 +20,7 @@ export const PageWrapper = <E extends ElementType = typeof defaultElement>(
   const Tag = component
 
   return (
-    <Tag className={classNames([styles.PageWrapper, className])} {...other}>
+    <Tag className={classNames(styles.PageWrapper, className)} {...other}>
       {children}
     </Tag>
   )
