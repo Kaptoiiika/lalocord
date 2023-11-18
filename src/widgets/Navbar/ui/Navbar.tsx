@@ -5,6 +5,7 @@ import HomeIcon from "@mui/icons-material/Home"
 import styles from "./Navbar.module.scss"
 import { ThemeSwitcher } from "@/features/ThemeSwitcher"
 import { Link } from "@/shared/ui/Link/Link"
+// import { UserSettingsModal } from "@/entities/UserSettings"
 
 // const links = [
 //   {
@@ -32,8 +33,8 @@ export const Navbar = () => {
         </Stack>
 
         <Stack>
-          <ThemeSwitcher />
           {/* <UserSettingsModal /> */}
+          <ThemeSwitcher />
         </Stack>
       </Stack>
     </nav>

@@ -38,6 +38,32 @@ export const RoomPage = () => {
     }
   }, [id, joinToRoom, leaveRoom])
 
+  useEffect(() => {
+    let isConnected = socketClient.active
+
+    const handleConnect = () => {
+      if (isConnected === false) {
+        const username = useUserStore.getState().localUser.username
+        socketClient.emit("join", {
+          name: id,
+          username: username,
+        })
+      }
+      isConnected = true
+    }
+    
+    const handleDisconnect = () => {
+      isConnected = false
+    }
+
+    socketClient.on("connect", handleConnect)
+    socketClient.on("disconnect", handleDisconnect)
+    return () => {
+      socketClient.off("connect", handleConnect)
+      socketClient.off("disconnect", handleDisconnect)
+    }
+  }, [id])
+
   return (
     <PageWrapper>
       <RoomLobby />

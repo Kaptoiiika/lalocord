@@ -40,7 +40,6 @@ export const useWebRTCRoom = () => {
       let timer: ReturnType<typeof setTimeout>
       const removeUser = (state: RTCIceConnectionState) => {
         clearTimeout(timer)
-        console.log(state)
         if (
           state === "closed" ||
           state === "disconnected" ||
@@ -96,17 +95,17 @@ export const useWebRTCRoom = () => {
   }, [addMessage, deleteMessage, users, audio])
 
   useEffect(() => {
-    const initClients = (users: UserModel[]) => {
-      users.map((user) => createNewUser(user, true))
-    }
-
-    const addUser = (user: UserModel) => {
+    const addUser = (user: UserModel, createOffer = false, silent = false) => {
       const alreadyInList = getUserById(user.id)
       if (alreadyInList) {
         console.warn(`User ${alreadyInList.id} is already in list`)
       }
-      createNewUser(user)
-      joinToRoomAudioPlay()
+      createNewUser(user, createOffer)
+      if (!silent) joinToRoomAudioPlay()
+    }
+
+    const initClients = (users: UserModel[]) => {
+      users.map((user) => addUser(user, true, true))
     }
 
     const userDisconnect = (user: ClientId) => {
