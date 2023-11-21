@@ -36,7 +36,7 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
 
   return (
     <Stack className={styles.mobileWideContainer} gap={1}>
-      <Stack className={styles.form} direction="row" gap={1}>
+      <Stack className={styles.form} gap={1}>
         <TextField
           label="Room name"
           value={roomName}

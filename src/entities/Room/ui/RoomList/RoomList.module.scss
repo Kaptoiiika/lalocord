@@ -1,17 +1,21 @@
 .roomlink {
   width: 300px;
+
   .roomlinkName {
     text-align: center;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
   }
+
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
   }
 }
 
 .form {
+  flex-direction: row;
+
   @media (max-width: 625px) {
     flex-direction: column;
   }

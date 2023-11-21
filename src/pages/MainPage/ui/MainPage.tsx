@@ -16,7 +16,6 @@ export const MainPage = () => {
       <Stack
         className={styles.container}
         justifyContent="space-between"
-        direction="row"
         component="main"
         gap={1}
         margin={1}
