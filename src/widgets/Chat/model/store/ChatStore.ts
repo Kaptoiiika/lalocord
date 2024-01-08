@@ -3,10 +3,10 @@ import { ChatSchema } from "../types/ChatSchema"
 
 const store: StateCreator<ChatSchema> = (set, get) => ({
   messageList: [new Map()],
-  messageLeangth: 0,
+  messageLength: 0,
 
   addNewMessage(message, user) {
-    const { messageList, messageLeangth } = get()
+    const { messageList, messageLength } = get()
 
     const map = messageList[0]
     if (map.has(message.id)) {
@@ -17,18 +17,18 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
       set((state) => ({
         ...state,
         messageList: [map],
-        messageLeangth: messageLeangth + 1,
+        messageLength: messageLength + 1,
       }))
     }
   },
 
   deleteMessage(id) {
-    const { messageList, messageLeangth } = get()
+    const { messageList, messageLength } = get()
     const isDeleted = messageList[0].delete(id)
     set((state) => ({
       ...state,
       messageList: [messageList[0]],
-      messageLeangth: isDeleted ? messageLeangth - 1 : messageLeangth,
+      messageLength: isDeleted ? messageLength - 1 : messageLength,
     }))
   },
 
@@ -37,7 +37,7 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
       ...state,
       messages: [],
       messageList: [new Map()],
-      messageLeangth: 0,
+      messageLength: 0,
     }))
   },
 })

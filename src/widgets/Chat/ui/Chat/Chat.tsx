@@ -26,7 +26,7 @@ type ChatProps = {
 
 export const Chat = (props: ChatProps) => {
   const { onSendMessage, onSendFile } = props
-  const messagesLength = useChatStore((state) => state.messageLeangth)
+  const messagesLength = useChatStore((state) => state.messageLength)
   const [collapsed, setCollapsed] = useState(getChatCollapsedFromLocalStorage())
   const [readedMessage, setReadedMessage] = useState(messagesLength)
 

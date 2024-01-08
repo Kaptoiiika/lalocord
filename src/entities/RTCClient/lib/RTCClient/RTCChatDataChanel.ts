@@ -144,14 +144,17 @@ export class RTCChatDataChanel
         const chunkSize = Number(
           chunk.params?.chunkSize ?? this.codec.chunkSize
         )
+        const fileName = String(chunk.params?.name)
+        const params = {
+          length: dataLength,
+          loaded: this.codec.chunkSize * chunk.chunkid,
+          type: chunkType,
+          name: fileName,
+        }
         this.emit("transmission", {
           id: stringId,
           type: "fileParams",
-          blobParams: {
-            length: dataLength,
-            loaded: this.codec.chunkSize * chunk.chunkid,
-            type: chunkType,
-          },
+          blobParams: params,
         })
 
         if (temp) {
@@ -176,6 +179,7 @@ export class RTCChatDataChanel
             id: stringId,
             type: "file",
             blob: file,
+            blobParams: { ...params, length: 0, loaded: 0 },
           })
           this.tempData.delete(stringId)
         }
@@ -186,13 +190,14 @@ export class RTCChatDataChanel
 
   async sendBlob(blob: Blob | ArrayBuffer, name?: string) {
     const id = this.codec.createNewId()
+    const splitedName = name?.slice(-16)
     if (blob instanceof Blob) {
       const data = await blob.arrayBuffer()
       const headerData: FileHeader = {
         id: id,
         type: blob.type,
         length: data.byteLength,
-        name: name,
+        name: splitedName,
       }
 
       this.log(
@@ -202,7 +207,11 @@ export class RTCChatDataChanel
     }
 
     this.log(`prepare data ${id} for send rawdatalength:${blob.byteLength}`)
-    return this.send(blob, { length: blob.byteLength, id: id, name: name })
+    return this.send(blob, {
+      length: blob.byteLength,
+      id: id,
+      name: splitedName,
+    })
   }
 
   async sendMessage(message: string) {

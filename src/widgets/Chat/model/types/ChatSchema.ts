@@ -3,7 +3,7 @@ import { UserModel } from "@/entities/User"
 
 export interface ChatSchema {
   messageList: [Map<string, MessageModelNew>]
-  messageLeangth: number
+  messageLength: number
   addNewMessage: (message: RTCChatMessage, user: UserModel) => void
   deleteMessage: (id: string) => void
   clearMessages: () => void

@@ -54,10 +54,7 @@ const MessageItem = (props: MessageItemProps) => {
 export const MessageList = memo(function MessageList() {
   const [messageList] = useChatStore(getMessages)
 
-  const messages: MessageModelNew[] = []
-  messageList.forEach((message) => {
-    messages.push(message)
-  })
+  const messages: MessageModelNew[] = [...messageList.values()]
 
   return (
     <ul

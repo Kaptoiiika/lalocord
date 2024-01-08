@@ -35,7 +35,6 @@ export const MessageFile = (props: MessageFileProps) => {
   if (!blobUrl) {
     return <span>...loading</span>
   }
-
   if (error) {
     return (
       <Link
@@ -44,7 +43,11 @@ export const MessageFile = (props: MessageFileProps) => {
         target="_blank"
         rel="noreferrer"
       >
-        {data.blob.name || data.blob.type || "unknown file"} - {readablizeBytes(data.blob.size)}
+        {data.blob?.name ||
+          data.blobParams?.name ||
+          data.blob.type ||
+          "unknown file"}{" "}
+        - {readablizeBytes(data.blob.size)}
       </Link>
     )
   }

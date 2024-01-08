@@ -17,7 +17,7 @@ export const MessageLoadingFile = (props: MessageFileProps) => {
 
   return (
     <i>
-      loading {data.blobParams?.type}
+      loading {data.blobParams?.name || data.blobParams?.type}
       <br />
       {readablizeBytes(data.blobParams?.loaded)} / {readablizeBytes(data.blobParams?.length)}
       <LinearProgress variant="determinate" value={progress * 100} />
