@@ -4,19 +4,23 @@
   justify-content: space-between;
   width: 100%;
   overflow: auto;
+
+  main {
+    overflow: auto;
+    margin-top: 0;
+  }
+}
+
+.list {
+  margin-top: 8px;
+  margin-bottom: 24px;
 }
 
 .releaseLink {
   display: flex;
-  align-items: flex-end;
-}
-
-.container {
-  flex-direction: row;
-
-  @media (max-width: 625px) {
-    flex-direction: column;
-  }
+  justify-content: flex-end;
+  position: sticky;
+  bottom: 0;
 }
 
 .mobileWideContainer {

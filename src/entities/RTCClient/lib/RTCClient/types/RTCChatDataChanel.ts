@@ -7,6 +7,7 @@ export type RTCChatMessage = {
     length: number
     loaded: number
     type?: string
+    name?: string
   }
   transmission?: {
     length: number

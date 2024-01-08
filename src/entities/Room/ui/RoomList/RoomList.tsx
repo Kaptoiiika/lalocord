@@ -35,7 +35,7 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
   const roomListIsEmpty = roomList?.length === 0 && !isLoading
 
   return (
-    <Stack className={styles.mobileWideContainer} gap={1}>
+    <Stack overflow="auto"  className={styles.mobileWideContainer} gap={1}>
       <Stack className={styles.form} gap={1}>
         <TextField
           label="Room name"
@@ -70,7 +70,7 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
               </Stack>
               <Divider />
             </Link>
-            {" - "}
+            {!!room.userList.length && " - "}
             {room.userList?.map((user) => user.username).join(", ")}
           </Stack>
         ))}

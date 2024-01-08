@@ -99,7 +99,11 @@ export const useWebRTCRoom = () => {
   }, [addMessage, deleteMessage, users, audio])
 
   useEffect(() => {
-    const addUser = (user: UserConnectModel, createOffer = false, silent = false) => {
+    const addUser = (
+      user: UserConnectModel,
+      createOffer = false,
+      silent = false
+    ) => {
       const alreadyInList = getUserById(user.id)
       if (alreadyInList) {
         console.warn(`User ${alreadyInList.id} is already in list`)
@@ -158,9 +162,9 @@ export const useWebRTCRoom = () => {
     })
   }, [])
 
-  const handleSendBlob = useCallback((blob: Blob) => {
+  const handleSendBlob = useCallback((blob: Blob, name?: string) => {
     Object.values(usersRef.current).forEach((user) => {
-      user.dataChannel.sendBlob(blob)
+      user.dataChannel.sendBlob(blob, name)
     })
   }, [])
 

@@ -4,6 +4,7 @@ import { Link } from "@mui/material"
 import { useState } from "react"
 import { RTCChatMessage } from "@/entities/RTCClient"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
+import { readablizeBytes } from "@/shared/lib/utils/Numbers/readablizeBytes/ReadablizeBytes"
 
 type MessageFileProps = {
   data: RequireOnlyOne<RTCChatMessage, "blob">
@@ -37,8 +38,13 @@ export const MessageFile = (props: MessageFileProps) => {
 
   if (error) {
     return (
-      <Link href={blobUrl} target="_blank" rel="noreferrer">
-        {data.blob.type || "unknown file"} - {data.blob.size}
+      <Link
+        href={blobUrl}
+        download={data.blobParams?.name}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {data.blob.name || data.blob.type || "unknown file"} - {readablizeBytes(data.blob.size)}
       </Link>
     )
   }

@@ -30,7 +30,7 @@ export const RoomLobby = () => {
 
   return (
     <WaitUserClick>
-      <Stack className={styles.lobby} justifyContent="space-between" direction="row" height="100%">
+      <Stack className={styles.lobby} justifyContent="space-between" height="100%">
         <div className={styles.mainScreen}>
           <RoomUsers />
           <RoomStreams />

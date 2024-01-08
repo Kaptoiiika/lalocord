@@ -21,7 +21,7 @@ const saveChatCollapsedToLocalStorage = (state: boolean) => {
 
 type ChatProps = {
   onSendMessage?: (msg: string) => void
-  onSendFile?: (blob: Blob) => void
+  onSendFile?: (blob: Blob, name?: string) => void
 }
 
 export const Chat = (props: ChatProps) => {

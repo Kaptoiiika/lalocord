@@ -10,6 +10,7 @@ type FileHeader = {
   id: Uint8Array
   length: number
   type?: string
+  name?: string
 }
 type ChunkFileHeader = Omit<FileHeader, "id"> & { chunkSize: number }
 
@@ -89,6 +90,7 @@ export class RTCChatDataChanel
         const ChunkParams: ChunkFileHeader = {
           length: params.length,
           type: params.type,
+          name: params.name,
           chunkSize: this.codec.chunkSize,
         }
         const chunk = this.codec.createChunk(
@@ -139,7 +141,9 @@ export class RTCChatDataChanel
         const temp = this.tempData.get(stringId)
         const dataLength = Number(chunk.params.length)
         const chunkType = String(chunk.params?.type)
-        const chunkSize = Number(chunk.params?.chunkSize ?? this.codec.chunkSize)
+        const chunkSize = Number(
+          chunk.params?.chunkSize ?? this.codec.chunkSize
+        )
         this.emit("transmission", {
           id: stringId,
           type: "fileParams",
@@ -151,19 +155,13 @@ export class RTCChatDataChanel
         })
 
         if (temp) {
-          temp.set(
-            new Uint8Array(chunk.data),
-            chunkSize * chunk.chunkid
-          )
+          temp.set(new Uint8Array(chunk.data), chunkSize * chunk.chunkid)
           this.log(
             `recived chunk data №${chunk.chunkid} size ${chunk.data.byteLength}`
           )
         } else {
           const head = new Uint8Array(dataLength)
-          head.set(
-            new Uint8Array(chunk.data),
-            chunkSize * chunk.chunkid
-          )
+          head.set(new Uint8Array(chunk.data), chunkSize * chunk.chunkid)
           this.log(
             `recived head data №${chunk.chunkid} size ${chunk.data.byteLength}`
           )
@@ -186,7 +184,7 @@ export class RTCChatDataChanel
     }
   }
 
-  async sendBlob(blob: Blob | ArrayBuffer) {
+  async sendBlob(blob: Blob | ArrayBuffer, name?: string) {
     const id = this.codec.createNewId()
     if (blob instanceof Blob) {
       const data = await blob.arrayBuffer()
@@ -194,6 +192,7 @@ export class RTCChatDataChanel
         id: id,
         type: blob.type,
         length: data.byteLength,
+        name: name,
       }
 
       this.log(
@@ -203,7 +202,7 @@ export class RTCChatDataChanel
     }
 
     this.log(`prepare data ${id} for send rawdatalength:${blob.byteLength}`)
-    return this.send(blob, { length: blob.byteLength, id: id })
+    return this.send(blob, { length: blob.byteLength, id: id, name: name })
   }
 
   async sendMessage(message: string) {

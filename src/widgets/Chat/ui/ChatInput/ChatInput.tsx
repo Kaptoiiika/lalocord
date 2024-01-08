@@ -8,7 +8,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
 
 type ChatInputProps = {
   onSendMessage?: (msg: string) => void
-  onSendFile?: (blob: Blob) => void
+  onSendFile?: (blob: Blob, name?: string) => void
 }
 
 export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
@@ -24,8 +24,8 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
     []
   )
 
-  const handleSendFile = async (blob: Blob) => {
-    onSendFile?.(blob)
+  const handleSendFile = async (blob: Blob, name?: string) => {
+    onSendFile?.(blob, name)
     addMessage(
       {
         id: crypto.randomUUID(),
@@ -48,13 +48,13 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
     const items = Array.from(e.dataTransfer.items)
     const item = items.find((item) => !!item.getAsFile())
     const blob = item?.getAsFile()
-    if (blob) handleSendFile(blob)
+    if (blob) handleSendFile(blob, blob.name)
   }
 
   const handleSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      handleSendFile(file)
+      handleSendFile(file, file.name)
     }
   }
 

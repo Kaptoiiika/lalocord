@@ -1,6 +1,8 @@
 $HeaderHeight: var(--header-height);
 
 .lobby {
+  flex-direction: row;
+
   @media (max-width: 625px) {
     flex-direction: column;
   }

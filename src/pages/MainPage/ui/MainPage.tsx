@@ -14,15 +14,14 @@ export const MainPage = () => {
   return (
     <PageWrapper component="div" className={styles.mainPage}>
       <Stack
-        className={styles.container}
         justifyContent="space-between"
         component="main"
         gap={1}
         margin={1}
-        height={"100%"} 
+        height={"100%"}
+        direction="column"
       >
-        <Stack
-          direction="column" alignItems="start" gap={1}>
+        <Stack className={styles.list} direction="column" alignItems="start" gap={1}>
           <TextField
             className={styles.mobileWideContainer}
             variant="outlined"
@@ -33,10 +32,12 @@ export const MainPage = () => {
           />
           <RoomList />
         </Stack>
+
         {!__IS_ELECTRON__ && (
           <Typography className={styles.releaseLink}>
             <MuiLink
-              href="https://github.com/Kaptoiiika/RipCornd/releases/latest"
+            
+              href="https://github.com/Kaptoiiika/lalocord/releases/latest"
               target="_blank"
               rel="noreferrer"
             >
