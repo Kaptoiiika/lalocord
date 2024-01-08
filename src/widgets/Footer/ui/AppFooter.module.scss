@@ -5,7 +5,7 @@
   justify-content: space-between;
 
   @media (max-width: 385px) {
-    flex-direction: column;
+    flex-direction: column !important;
     align-items: start;
   }
 }

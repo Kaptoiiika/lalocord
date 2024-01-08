@@ -14,10 +14,10 @@
 }
 
 .form {
-  flex-direction: row;
+  flex-direction: row !important;
 
   @media (max-width: 625px) {
-    flex-direction: column;
+    flex-direction: column !important;
   }
 }
 
