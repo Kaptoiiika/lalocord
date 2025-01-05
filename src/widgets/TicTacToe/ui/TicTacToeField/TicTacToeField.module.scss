@@ -1,0 +1,26 @@
+.TicTacToeField {
+  border-collapse: collapse;
+
+  >tr {
+
+    >td {
+      border: 1em solid gray;
+    }
+
+    >td:first-child {
+      border-left: none;
+    }
+
+    >td:last-child {
+      border-right: none;
+    }
+
+    &:first-child td {
+      border-top: none;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}

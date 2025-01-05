@@ -10,6 +10,7 @@ import { RTCChatDataChanel } from "./RTCChatDataChanel"
 import { getDebugValue } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
 import { RTCChanelMedia } from "./RTCChanelMedia/RTCChanelMedia"
 
+
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
 export type Ice = { ice: RTCIceCandidateInit }
@@ -43,9 +44,9 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
   private offerCreater: boolean
 
-  static preferCodec(codecs: RTCRtpCodecCapability[] = [], mimeType: string) {
-    const otherCodecs: RTCRtpCodecCapability[] = []
-    const sortedCodecs: RTCRtpCodecCapability[] = []
+  static preferCodec(codecs: RTCRtpCodec[] = [], mimeType: string) {
+    const otherCodecs: RTCRtpCodec[] = []
+    const sortedCodecs: RTCRtpCodec[] = []
 
     codecs.forEach((codec) => {
       if (codec.mimeType === mimeType) {
@@ -65,12 +66,12 @@ export class RTCClient extends Emitter<RTCClientEvents> {
 
     this.peer = new RTCPeerConnection({
       iceServers: [
-        { urls: "stun:kapitoxa.lol:5349" },
-        { urls: "stun:kapitoxa.lol:3478" },
+        { urls: "stun:api.kapitoxa.lol:5349" },
+        { urls: "stun:api.kapitoxa.lol:3478" },
         {
-          urls: ["turn:kapitoxa.lol:5349", "turn:kapitoxa.lol:3478"],
-          username: "guest",
-          credential: "somepassword",
+          urls: ["turn:api.kapitoxa.lol:5349", "turn:api.kapitoxa.lol:3478"],
+          username: "lalocord",
+          credential: "lalopas",
         },
       ],
     })

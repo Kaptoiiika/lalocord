@@ -1,0 +1,12 @@
+.TicTacToeBoard{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  .field{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border: 2px black solid;
+  }
+}
