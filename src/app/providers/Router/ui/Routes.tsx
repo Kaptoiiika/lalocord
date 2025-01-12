@@ -1,10 +1,10 @@
+import { TicTacToe } from "@/features/TicTacToe"
 import { MainPage } from "@/pages/MainPage"
 import { RoomPage } from "@/pages/RoomPage"
 import {
   AppRouteProps,
   AppRoutes,
 } from "@/shared/config/routeConfig/routeConfig"
-import { TicTacToe } from "@/widgets/TicTacToe/ui/TicTacToe"
 import { Navigate } from "react-router-dom"
 
 export const RoutesConfig: Record<string, AppRouteProps> = {

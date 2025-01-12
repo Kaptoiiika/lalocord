@@ -1,9 +1,9 @@
-$symbolHeight: 4em;
-$symbolStroke: 1em;
+$symbolHeight: 32px;
+$symbolStroke: 8px;
 
 .TicTacToeCeil {
-  width: calc(($symbolHeight + $symbolStroke) * 1.25);
-  height: calc(($symbolHeight + $symbolStroke) * 1.25);
+  width: calc(($symbolHeight + $symbolStroke) * 1.5);
+  height: calc(($symbolHeight + $symbolStroke) * 1.5);
 
   .button {
     display: flex;
@@ -15,11 +15,16 @@ $symbolStroke: 1em;
     outline: none;
     border: none;
     position: relative;
+
+    &:focus {
+      outline: 4px solid #ffffff;
+    }
   }
 }
 
 .symbolCircle::after {
   content: '';
+  position: absolute;
   height: $symbolHeight;
   border: $symbolStroke solid;
   aspect-ratio: 1;
@@ -49,6 +54,7 @@ $symbolStroke: 1em;
     opacity: .6;
 
     content: '';
+    position: absolute;
     height: $symbolHeight;
     border: $symbolStroke solid;
     aspect-ratio: 1;

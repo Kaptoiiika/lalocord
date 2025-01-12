@@ -1,0 +1,68 @@
+$symbolHeight: 96px;
+$symbolStroke: 24px;
+
+.TicTacToeField {
+  border-collapse: collapse;
+
+  >tr {
+
+    >td {
+      border: 4px solid gray;
+    }
+
+    >td:first-child {
+      border-left: none;
+    }
+
+    >td:last-child {
+      border-right: none;
+    }
+
+    &:first-child td {
+      border-top: none;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+.fieldWinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  &.circle {
+    &::after {
+      content: '';
+      position: absolute;
+      height: $symbolHeight;
+      border: $symbolStroke solid;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border-color: #ee6677;
+    }
+  }
+
+  &.cross {
+    &::after,&::before {
+      content: '';
+      position: absolute;
+      height: calc($symbolHeight*sqrt(4));
+      width: $symbolStroke;
+      background: #18BC9C;
+    }
+
+    &::before {
+      transform: rotate(45deg);
+    }
+    
+    &::after {
+      transform: rotate(-45deg);
+    }
+  }
+}

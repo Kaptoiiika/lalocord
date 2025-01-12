@@ -76,16 +76,16 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
   }
 
   const currentFrameRate = userStreamSettings.video.frameRate
-  
+
   const frameRateList = ["5", "30", "60"]
   const isCustomFrameRate = frameRateList.includes(String(currentFrameRate))
-  ? "90"
-  : `${currentFrameRate}`
-  
+    ? "90"
+    : `${currentFrameRate}`
+
   const currentResolution = userStreamSettings.video.height
   const resolutionList = ["144", "720", "1080"]
   const isCustomResolution = resolutionList.includes(String(currentResolution))
-    ? '1440'
+    ? "1440"
     : `${currentResolution}`
 
   return (

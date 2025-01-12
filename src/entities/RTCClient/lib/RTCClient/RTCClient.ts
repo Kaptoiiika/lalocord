@@ -10,7 +10,6 @@ import { RTCChatDataChanel } from "./RTCChatDataChanel"
 import { getDebugValue } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
 import { RTCChanelMedia } from "./RTCChanelMedia/RTCChanelMedia"
 
-
 export type Answer = { answer: RTCSessionDescription }
 export type Offer = { offer: RTCSessionDescription }
 export type Ice = { ice: RTCIceCandidateInit }
@@ -30,8 +29,12 @@ type MessageType =
   | "pauseStream"
   | "clientPressKey"
   | "clientMouseChange"
+  | "gameMessage"
 
-type RTCClientEvents = { iceconnectionStatusChange: RTCIceConnectionState }
+type RTCClientEvents = {
+  iceconnectionStatusChange: RTCIceConnectionState
+  gameMessage: unknown
+}
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
@@ -286,6 +289,9 @@ export class RTCClient extends Emitter<RTCClientEvents> {
           break
         case "clientPressKey":
           this.media.clientPressKey(data)
+          break
+        case "gameMessage":
+          this.emit("gameMessage", data)
           break
         default:
           this.log(msg)

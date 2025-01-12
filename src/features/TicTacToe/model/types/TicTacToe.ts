@@ -2,8 +2,8 @@ export interface TicTacToeSchema {
   currentPlayer: TicTacToePlayerType
   activePlayer: TicTacToePlayerType
   
-  activeField?: TicTacToeFieldType
   board: TicTacToeBoardType
+  activeFieldId?: number
 
   isMultiplayer: boolean
 

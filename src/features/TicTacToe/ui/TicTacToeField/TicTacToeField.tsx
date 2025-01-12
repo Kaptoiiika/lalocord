@@ -2,6 +2,7 @@ import { sliceIntoChunks } from "@/shared/lib/utils/Arrays"
 import { TicTacToeFieldType } from "../../model/types/TicTacToe"
 import styles from "./TicTacToeField.module.scss"
 import { TicTacToeCeil } from "../TicTacToe/TicTacToeCeil"
+import { classNames } from "@/shared/lib/classNames/classNames"
 
 type TicTacToeFieldProps = {
   fields: TicTacToeFieldType
@@ -10,6 +11,18 @@ type TicTacToeFieldProps = {
 
 export const TicTacToeField = (props: TicTacToeFieldProps) => {
   const { fields, onCeilClick } = props
+
+  if (fields[9]) {
+    const player = fields[9]
+    return (
+      <tbody
+        className={classNames(styles.fieldWinner, {
+          [styles.circle]: player === "circle",
+          [styles.cross]: player === "cross",
+        })}
+      />
+    )
+  }
 
   const splitedFields = sliceIntoChunks(fields, 3)
 
@@ -20,8 +33,8 @@ export const TicTacToeField = (props: TicTacToeFieldProps) => {
           {ceils.map((ceil, ceilIndex) => (
             <TicTacToeCeil
               onClick={() => onCeilClick?.(ceilIndex + 3 * index)}
-              key={ceilIndex}
               active={ceil}
+              key={ceilIndex}
             />
           ))}
         </tr>
