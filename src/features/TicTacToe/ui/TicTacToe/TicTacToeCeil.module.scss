@@ -66,6 +66,7 @@ $symbolStroke: 8px;
 .playerSquare {
   .button:hover {
     opacity: .6;
+
     &::after,
     &:before {
       content: '';

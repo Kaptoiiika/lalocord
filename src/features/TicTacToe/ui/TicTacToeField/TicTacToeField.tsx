@@ -12,22 +12,20 @@ type TicTacToeFieldProps = {
 export const TicTacToeField = (props: TicTacToeFieldProps) => {
   const { fields, onCeilClick } = props
 
-  if (fields[9]) {
-    const player = fields[9]
-    return (
-      <tbody
-        className={classNames(styles.fieldWinner, {
-          [styles.circle]: player === "circle",
-          [styles.cross]: player === "cross",
-        })}
-      />
-    )
-  }
+  const winnerPlayer = fields[9]
 
-  const splitedFields = sliceIntoChunks(fields, 3)
+  const splitedFields = sliceIntoChunks(fields, 3).filter(
+    (chunk) => chunk.length === 3
+  )
 
   return (
-    <tbody className={styles["TicTacToeField"]}>
+    <tbody
+      className={classNames(styles.TicTacToeField, {
+        [styles.fieldWinner]: winnerPlayer,
+        [styles.circle]: winnerPlayer === "circle",
+        [styles.cross]: winnerPlayer === "cross",
+      })}
+    >
       {splitedFields.map((ceils, index) => (
         <tr key={index}>
           {ceils.map((ceil, ceilIndex) => (

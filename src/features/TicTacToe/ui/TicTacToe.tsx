@@ -26,7 +26,6 @@ export const TicTacToe = (props: TicTacToeProps) => {
     <div className={styles.TicTacToe}>
       <div className={styles.wrapper}>
         <Button onClick={handleRestartGame}>restart</Button>
-        {/* <TicTacToeField onCeilClick={handleCeilClick} fields={field} /> */}
         {board ? (
           <TicTacToeBoard
             onCeilClick={handleCeilClick}

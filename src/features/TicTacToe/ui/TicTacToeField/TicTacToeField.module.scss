@@ -3,11 +3,16 @@ $symbolStroke: 24px;
 
 .TicTacToeField {
   border-collapse: collapse;
+  table,
+  tbody,
+  tr,
+  td {
+    display: flex;
+  }
 
   >tr {
-
     >td {
-      border: 4px solid gray;
+      border: 2px solid gray;
     }
 
     >td:first-child {
@@ -29,15 +34,16 @@ $symbolStroke: 24px;
 }
 
 .fieldWinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
   position: relative;
+
+  tr {
+    visibility: hidden;
+  }
 
   &.circle {
     &::after {
+      top: $symbolStroke;
+      left: $symbolStroke;
       content: '';
       position: absolute;
       height: $symbolHeight;
@@ -49,7 +55,11 @@ $symbolStroke: 24px;
   }
 
   &.cross {
-    &::after,&::before {
+
+    &::after,
+    &::before {
+      top: 0;
+      left: calc(50% - $symbolStroke/2);
       content: '';
       position: absolute;
       height: calc($symbolHeight*sqrt(4));
@@ -60,7 +70,7 @@ $symbolStroke: 24px;
     &::before {
       transform: rotate(45deg);
     }
-    
+
     &::after {
       transform: rotate(-45deg);
     }
