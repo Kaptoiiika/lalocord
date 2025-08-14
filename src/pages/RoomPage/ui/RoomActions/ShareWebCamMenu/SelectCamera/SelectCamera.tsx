@@ -5,10 +5,9 @@ import { Select, MenuItem } from "@mui/material"
 import InputLabel from "@mui/material/InputLabel"
 import FormControl from "@mui/material/FormControl"
 import Typography from "@mui/material/Typography"
-import styles from "./SelectCamera.module.scss"
 import { SelectChangeEvent } from "@mui/material/Select/SelectInput"
 import { UserStreamSettings } from "@/entities/RTCClient/model/types/RoomRTCSchema"
-import { getUserStreamSettings } from "../../../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
+import { getUserStreamSettings } from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
 
 type SelectCameraProps = {}
 
@@ -20,6 +19,7 @@ export const SelectCamera = (props: SelectCameraProps) => {
   )
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
   const [error, setError] = useState("")
+  
   useMountedEffect(() => {
     navigator.mediaDevices
       ?.enumerateDevices()

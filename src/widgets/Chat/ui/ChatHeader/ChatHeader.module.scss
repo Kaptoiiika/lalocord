@@ -2,6 +2,13 @@ $chatWidth: var(--chat-width);
 $animationTime: 0.3s;
 
 .header {
+  right: 0px;
+  position: absolute;
+  transition: width $animationTime;
+  width: $chatWidth;
+  min-width: 64px;
+  height: var(--header-height);
+
   &.collapsed {
     right: 0;
     width: 64px;
@@ -15,13 +22,6 @@ $animationTime: 0.3s;
       width: 100%;
     }
   }
-
-  right: 0px;
-  position: absolute;
-  transition: width $animationTime;
-  width: $chatWidth;
-  min-width: 64px;
-  height: var(--header-height);
 }
 
 .headerButton {

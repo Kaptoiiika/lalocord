@@ -43,11 +43,8 @@ export const MessageFile = (props: MessageFileProps) => {
         target="_blank"
         rel="noreferrer"
       >
-        {data.blob?.name ||
-          data.blobParams?.name ||
-          data.blob.type ||
-          "unknown file"}{" "}
-        - {readablizeBytes(data.blob.size)}
+        {data.blobParams?.name || data.blob.type || "unknown file"} -{" "}
+        {readablizeBytes(data.blob.size)}
       </Link>
     )
   }

@@ -39,6 +39,7 @@ export const saveEncodingSettingsToLocalStorage = (
 
 const defaultStreamSettings = {
   audio: {
+    autoOn: true,
     noiseSuppression: false,
     echoCancellation: false,
     autoGainControl: false,

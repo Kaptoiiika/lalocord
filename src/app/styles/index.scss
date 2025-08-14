@@ -1,7 +1,7 @@
-@import "reset";
-@import "variables/global";
-@import "theme/light";
-@import "theme/dark";
+@use "reset";
+@use "variables/global";
+@use "theme/light";
+@use "theme/dark";
 
 :root {
   --app-max-width: 1366px;

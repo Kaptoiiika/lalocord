@@ -36,6 +36,13 @@ type RTCClientEvents = {
   gameMessage: unknown
 }
 
+interface RTCRtpCodec {
+  channels?: number;
+  clockRate: number;
+  mimeType: string;
+  sdpFmtpLine?: string;
+}
+
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
   user: UserModel

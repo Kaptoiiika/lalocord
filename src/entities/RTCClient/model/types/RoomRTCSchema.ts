@@ -36,6 +36,7 @@ export type UserStreamSettings = {
     deviceId?: string
   }
   audio: {
+    autoOn?: boolean
     deviceId?: string
     noiseSuppression: boolean
     echoCancellation: boolean
