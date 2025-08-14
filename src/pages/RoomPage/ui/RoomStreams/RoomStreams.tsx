@@ -48,6 +48,15 @@ export const RoomStreams = memo(function RoomStreams() {
     }
   }, [users])
 
+  useEffect(() => {
+    if (!mediaStream) return
+    setHiddenStream((prev) => [...prev, mediaStream.id])
+
+    return () => {
+      setHiddenStream((prev) => prev.filter((id) => id !== mediaStream.id))
+    }
+  }, [mediaStream])
+
   //🤡
   const initialStreams: {
     client: RTCClient
@@ -62,9 +71,17 @@ export const RoomStreams = memo(function RoomStreams() {
 
   const localStreams = []
   if (mediaStream)
-    localStreams.push({ stream: mediaStream, name: localUser.username })
+    localStreams.push({
+      stream: mediaStream,
+      name: localUser.username,
+      autoplay: false,
+    })
   if (webCamStream)
-    localStreams.push({ stream: webCamStream, name: localUser.username })
+    localStreams.push({
+      stream: webCamStream,
+      name: localUser.username,
+      autoplay: true,
+    })
 
   const someStreamIsHide = hiddenStream.length
 
@@ -79,7 +96,7 @@ export const RoomStreams = memo(function RoomStreams() {
           key={local.stream.id}
           stream={local.stream}
           title={local.name}
-          autoplay={false}
+          autoplay={local.autoplay}
           mute
           volume={0}
           hide={!!hiddenStream.find((id) => id === local.stream.id)}
@@ -127,6 +144,7 @@ export const RoomStreams = memo(function RoomStreams() {
               user.clientStream.type
             ] ?? user.clientStream.volume
           }
+          autoplay
         />
       ))}
     </StreamViewer>

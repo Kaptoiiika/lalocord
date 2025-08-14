@@ -98,10 +98,12 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       playerRef.current?.requestFullscreen().catch(console.error)
       setFullscreen(true)
       onFullscreenEnter?.()
+      handlePlay()
     } catch (error) {
       console.error(error)
     }
-  }, [onFullscreenEnter])
+  }, [onFullscreenEnter, handlePlay])
+  
   const handleExitFullscreen = useCallback(() => {
     try {
       document.exitFullscreen().catch(console.error)
@@ -163,7 +165,6 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const handleFocus = useCallback(() => {
     handleOpen()
   }, [handleOpen])
-
 
   return (
     <ErrorBoundary errorText="Video player is dead">
