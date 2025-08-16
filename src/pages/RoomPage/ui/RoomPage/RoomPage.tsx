@@ -7,10 +7,11 @@ import { useUserStore } from "@/entities/User"
 import { useRoomRTCStore } from "@/entities/RTCClient"
 
 const emitToJoinRoom = (id: string) => {
-  const username = useUserStore.getState().localUser.username
+  const localUser = useUserStore.getState().localUser
   socketClient.emit("join", {
     name: id,
-    username: username,
+    username: localUser.username,
+    avatarSrc: localUser.avatarSrc,
   })
 
   return () => {
@@ -43,10 +44,11 @@ export const RoomPage = () => {
 
     const handleConnect = () => {
       if (isConnected === false) {
-        const username = useUserStore.getState().localUser.username
+        const localUser = useUserStore.getState().localUser
         socketClient.emit("join", {
           name: id,
-          username: username,
+          username: localUser.username,
+          avatarSrc: localUser.avatarSrc,
           reconnect: true,
         })
       }
