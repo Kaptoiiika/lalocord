@@ -156,6 +156,16 @@ export const useWebRTCRoom = () => {
     }
   }, [createNewUser, exitFromRoomAudioPlay, joinToRoomAudioPlay])
 
+  useEffect(()=>{
+    const wakeLock = navigator.wakeLock.request("screen");
+
+    return ()=>{
+      wakeLock.then((wakeLock)=>{
+        wakeLock.release()
+      })
+    }
+  },[])
+
   const handleSendMessage = useCallback((msg: string) => {
     Object.values(usersRef.current).forEach((user) => {
       user.dataChannel.sendMessage(msg)
