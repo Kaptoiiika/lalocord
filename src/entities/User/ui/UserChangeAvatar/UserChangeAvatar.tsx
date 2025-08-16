@@ -56,7 +56,7 @@ export const UserChangeAvatar = (props: UserChangeAvatarProps) => {
         onClick={handleOpen}
         aria-label={"change avatar"}
       >
-        <UserAvatar alt="" src={localUser.avatarSrc} />
+        <UserAvatar alt="avatar" src={localUser.avatarSrc} />
       </IconButton>
 
       <Dialog open={open} onClose={handleClose}>
