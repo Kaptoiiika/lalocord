@@ -20,7 +20,7 @@ import { useAudio } from "@/entities/AudioEffect"
 import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
 import { useAudioEffectStore } from "@/entities/AudioEffect"
 
-type UserConnectModel = Pick<UserModel, "id" | "username"> & {
+type UserConnectModel = Pick<UserModel, "id" | "username" | "avatarSrc"> & {
   reconnect?: boolean
 }
 
@@ -156,15 +156,15 @@ export const useWebRTCRoom = () => {
     }
   }, [createNewUser, exitFromRoomAudioPlay, joinToRoomAudioPlay])
 
-  useEffect(()=>{
-    const wakeLock = navigator.wakeLock.request("screen");
+  useEffect(() => {
+    const wakeLock = navigator.wakeLock.request("screen")
 
-    return ()=>{
-      wakeLock.then((wakeLock)=>{
+    return () => {
+      wakeLock.then((wakeLock) => {
         wakeLock.release()
       })
     }
-  },[])
+  }, [])
 
   const handleSendMessage = useCallback((msg: string) => {
     Object.values(usersRef.current).forEach((user) => {

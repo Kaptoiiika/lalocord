@@ -46,8 +46,7 @@ interface RTCRtpCodec {
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
   user: UserModel
-  avatar?: string
-  
+
   peer: RTCPeerConnection | null
   channel: RTCDataChanel<MessageType>
   dataChannel: RTCChatDataChanel

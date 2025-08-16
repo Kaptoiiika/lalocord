@@ -1,6 +1,5 @@
 import { FileRespounce } from "@/shared/api/types/FilteTypes"
 import { Avatar, AvatarProps, Badge } from "@mui/material"
-import { forwardRef } from "react"
 import styles from "./UserAvatar.module.scss"
 import { classNames } from "@/shared/lib/classNames/classNames"
 
@@ -14,29 +13,29 @@ type UserAvatarProps = {
   micOnline?: boolean
 } & AvatarProps
 
-export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
-  function UserAvatar(props, ref) {
-    const { src, avatar, status, alt, className, micOnline, ...other } = props
+export const UserAvatar = (props: UserAvatarProps) => {
+  const { src, avatar, status, alt, className, micOnline, ...other } = props
 
-    const imageSRC = avatar?.formats?.thumbnail?.url || avatar?.url || src
+  const imageSRC = avatar?.formats?.thumbnail?.url || avatar?.url || src
 
-    return (
-      <Badge
-        className={classNames(styles.badgeStatus, {
-          [styles.red]: status === "offline",
-          [styles.yellow]: status === "idle",
-          [styles.green]: status === "online",
+  return (
+    <Badge
+      className={classNames(styles.badgeStatus, {
+        [styles.red]: status === "offline",
+        [styles.yellow]: status === "idle",
+        [styles.green]: status === "online",
+      })}
+      overlap="circular"
+    >
+      <Avatar
+        className={classNames(className, {
+          [styles.micOnline]: micOnline,
+          [styles.micOffline]: !micOnline,
         })}
-        overlap="circular"
-      >
-        <Avatar
-          className={classNames(className, { [styles.micOnline]: micOnline, })}
-          ref={ref}
-          src={imageSRC}
-          alt={alt}
-          {...other}
-        />
-      </Badge>
-    )
-  }
-)
+        src={imageSRC}
+        alt={alt}
+        {...other}
+      />
+    </Badge>
+  )
+}

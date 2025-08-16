@@ -119,7 +119,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
         >
           <UserAvatar
             micOnline={microphoneStream?.isOpen}
-            src={client.avatar}
+            src={client.user.avatarSrc}
             key={client.id}
             alt={username}
             status={status}
