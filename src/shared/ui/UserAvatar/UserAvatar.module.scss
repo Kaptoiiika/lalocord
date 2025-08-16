@@ -10,6 +10,10 @@
   }
 }
 
+.micOnline {
+  box-shadow: 0px 0px 0px 2px #44b700 inset;
+}
+
 .red {
   &::after {
     border: var(--box-border);

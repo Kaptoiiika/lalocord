@@ -4,7 +4,13 @@ import {
   getActionStopMicrophoneStream,
   getUserStreamSettings,
 } from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
-import { Tooltip, IconButton, FormControlLabel, Switch, Stack } from "@mui/material"
+import {
+  Tooltip,
+  IconButton,
+  FormControlLabel,
+  Switch,
+  Stack,
+} from "@mui/material"
 import { useCallback } from "react"
 import MicIcon from "@mui/icons-material/Mic"
 import MicOffIcon from "@mui/icons-material/MicOff"
@@ -26,7 +32,7 @@ export const ShareMicrophoneMenu = () => {
   const { handleClick, handleClose, anchorEl, open } = usePopup()
   const autoOn = userStreamSettings.audio.autoOn
 
-  const handleStartWebCamStream = async () => {
+  const handleStartMicStream = async () => {
     try {
       startStream()
     } catch (error: any) {
@@ -49,7 +55,7 @@ export const ShareMicrophoneMenu = () => {
   )
 
   useMountedEffect(() => {
-    if (autoOn) handleStartWebCamStream()
+    if (autoOn) handleStartMicStream()
   })
 
   return (
@@ -63,7 +69,7 @@ export const ShareMicrophoneMenu = () => {
       ) : (
         <Tooltip title="Turn on microphone" arrow>
           <IconButton
-            onClick={handleStartWebCamStream}
+            onClick={handleStartMicStream}
             onContextMenu={handleClick}
           >
             <MicOffIcon />

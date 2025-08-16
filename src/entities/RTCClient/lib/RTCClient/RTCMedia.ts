@@ -121,11 +121,11 @@ export class RTCMedia extends Emitter<RTCMediaStreamEvents> {
 
     const senders = stream.getTracks().map(async (track) => {
       if (senderVideo && track.kind === "video") {
-        await senderVideo.replaceTrack(track)
+        await senderVideo.replaceTrack(track).catch(() => {})
         return senderVideo
       }
       if (senderAudio && track.kind === "audio") {
-        await senderAudio.replaceTrack(track)
+        await senderAudio.replaceTrack(track).catch(() => {})
         return senderAudio
       }
 

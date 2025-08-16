@@ -54,7 +54,7 @@ export const useWebRTCRoom = () => {
             exitFromRoomAudioPlay()
             newUser.close()
             newUser.off("iceconnectionStatusChange", removeUser)
-          }, 15000)
+          }, 7000)
         }
       }
       newUser.on("iceconnectionStatusChange", removeUser)

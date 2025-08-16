@@ -1,4 +1,6 @@
 .PageError {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  color: var(--primary-color)
 }

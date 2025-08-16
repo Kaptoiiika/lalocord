@@ -19,10 +19,12 @@ const fetcher = async (url: string) => {
 
 export const RoomList = memo(function RoomList(props: RoomListProps) {
   const navigate = useNavigate()
-  const { data: roomList, isLoading } = useSWR<RoomModel[]>("/room", fetcher, {
+  const { data, isLoading } = useSWR<RoomModel[]>("/room", fetcher, {
     refreshInterval: 5000,
   })
   const [roomName, setRoomName] = useState("")
+
+  const roomList = Array.isArray(data) ? data : []
 
   const handleCreateRoom = () => {
     navigate(AppRoutes.ROOM_ID.replace(":id", roomName))
@@ -35,7 +37,7 @@ export const RoomList = memo(function RoomList(props: RoomListProps) {
   const roomListIsEmpty = roomList?.length === 0 && !isLoading
 
   return (
-    <Stack overflow="auto"  className={styles.mobileWideContainer} gap={1}>
+    <Stack overflow="auto" className={styles.mobileWideContainer} gap={1}>
       <Stack className={styles.form} gap={1}>
         <TextField
           label="Room name"

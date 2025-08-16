@@ -20,6 +20,7 @@ import { useDebugMode } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
 
 type VideoPlayerProps = {
   stream?: MediaStream | null
+  played: boolean
   onPlay?: () => void
   onPause?: () => void
   onFullscreenEnter?: () => void
@@ -37,6 +38,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const {
     stream = null,
     initVolume = 0,
+    played,
     className,
     mute,
     autoplay,
@@ -51,21 +53,23 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     ...other
   } = props
   const debugMode = useDebugMode()
-  const [played, setPlayed] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [volume, setVolume] = useState(clamp(initVolume, 0, 1))
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<HTMLDivElement | null>(null)
   const { handleClose, handleOpen, open } = useIsOpen({ time: 3000 })
 
+  useEffect(() => {
+    if (played) videoRef.current?.play()
+    else videoRef.current?.pause()
+  }, [played])
+
   const handlePause = useCallback(() => {
-    videoRef.current?.pause()
     onPause?.()
   }, [onPause])
 
   const handlePlay = useCallback(() => {
     try {
-      videoRef.current?.play()
       onPlay?.()
     } catch (error) {
       console.error(error)
@@ -98,12 +102,12 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       playerRef.current?.requestFullscreen().catch(console.error)
       setFullscreen(true)
       onFullscreenEnter?.()
-      handlePlay()
+      if (!played) handlePlay()
     } catch (error) {
       console.error(error)
     }
-  }, [onFullscreenEnter, handlePlay])
-  
+  }, [onFullscreenEnter, played, handlePlay])
+
   const handleExitFullscreen = useCallback(() => {
     try {
       document.exitFullscreen().catch(console.error)
@@ -113,6 +117,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       console.error(error)
     }
   }, [onFullscreenExit])
+
   const handleFullscreenToggle = useCallback(
     (e: MouseEvent) => {
       e.preventDefault()
@@ -122,6 +127,7 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     },
     [handleExitFullscreen, handleEnterFullscreen]
   )
+
   useEffect(() => {
     if (propsFullScreen === true && fullscreen === false) {
       handleEnterFullscreen()
@@ -140,12 +146,6 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
       if (!node) return
       if (node.srcObject !== stream) {
         node.srcObject = stream
-      }
-      node.onplay = () => {
-        setPlayed(true)
-      }
-      node.onpause = () => {
-        setPlayed(false)
       }
     },
     [stream]

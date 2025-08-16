@@ -17,6 +17,14 @@ const store: StateCreator<UserSchema> = (set, get) => ({
     set((state) => ({ ...state, localUser: { ...user } }))
     saveUserToLocalStorage(user)
   },
+
+  setLocalAvatar(value) {
+    const user = get().localUser
+    user.avatarSrc = value
+
+    set((state) => ({ ...state, localUser: { ...user } }))
+    saveUserToLocalStorage(user)
+  },
 })
 
 export const useUserStore = create(store)

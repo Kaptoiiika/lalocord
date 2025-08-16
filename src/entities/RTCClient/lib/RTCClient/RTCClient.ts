@@ -37,15 +37,17 @@ type RTCClientEvents = {
 }
 
 interface RTCRtpCodec {
-  channels?: number;
-  clockRate: number;
-  mimeType: string;
-  sdpFmtpLine?: string;
+  channels?: number
+  clockRate: number
+  mimeType: string
+  sdpFmtpLine?: string
 }
 
 export class RTCClient extends Emitter<RTCClientEvents> {
   id: string
   user: UserModel
+  avatar?: string
+  
   peer: RTCPeerConnection | null
   channel: RTCDataChanel<MessageType>
   dataChannel: RTCChatDataChanel
@@ -260,7 +262,7 @@ export class RTCClient extends Emitter<RTCClientEvents> {
     if (e.data instanceof ArrayBuffer) return console.log(e.data)
     try {
       const msg: { type: MessageType; data: any } = JSON.parse(e.data)
-      // this.log("reciveData", msg)
+      this.log("reciveData", msg)
 
       if (!msg.type) return
       const { data, type } = msg

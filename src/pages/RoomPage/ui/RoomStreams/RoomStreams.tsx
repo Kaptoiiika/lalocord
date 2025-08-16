@@ -16,6 +16,12 @@ import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTrans
 import { RoomStream } from "./RoomStream/RoomStream"
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { useAudioEffectStore } from "@/entities/AudioEffect"
+import { useThrottle } from "@/shared/lib/hooks/useThrottle/useThrottle"
+
+type UserWithStream = {
+  client: RTCClient
+  clientStream: RTCClientMediaStream
+}
 
 export const RoomStreams = memo(function RoomStreams() {
   const users = useRoomRTCStore(getRoomUsers)
@@ -28,8 +34,20 @@ export const RoomStreams = memo(function RoomStreams() {
   const changeVolumeHandle = useAudioEffectStore(
     (state) => state.changeUserVolume
   )
-  const [hiddenStream, setHiddenStream] = useState<string[]>([])
+  const [hiddenStream, setHiddenStream] = useState<Set<string>>(new Set())
   const [, update] = useState(0)
+
+  const changeUserStreamVolume = useThrottle(
+    (user: UserWithStream, volume: number) => {
+      user.clientStream.volume = volume
+      changeVolumeHandle(
+        user.client.user.username,
+        user.clientStream.type,
+        volume
+      )
+    },
+    500
+  )
 
   useEffect(() => {
     const listeners = Object.values(users).map((user) => {
@@ -48,26 +66,31 @@ export const RoomStreams = memo(function RoomStreams() {
     }
   }, [users])
 
-  useEffect(() => {
-    if (!mediaStream) return
-    setHiddenStream((prev) => [...prev, mediaStream.id])
+  // useEffect(() => {
+  //   console.log("mediaStream")
+  //   if (!mediaStream) return
+  //   setHiddenStream((prev) => {
+  //     prev.add(mediaStream.id)
+  //     return new Set(prev)
+  //   })
 
-    return () => {
-      setHiddenStream((prev) => prev.filter((id) => id !== mediaStream.id))
-    }
-  }, [mediaStream])
+  //   return () => {
+  //     setHiddenStream((prev) => {
+  //       prev.delete(mediaStream.id)
+  //       return new Set(prev)
+  //     })
+  //   }
+  // }, [mediaStream])
 
-  //🤡
-  const initialStreams: {
-    client: RTCClient
-    clientStream: RTCClientMediaStream
-  }[] = []
-  const streams = Object.values(users).reduce((prev, curent) => {
-    curent.media.availableStreamList.forEach((stream) => {
-      prev.push({ client: curent, clientStream: stream })
-    })
-    return prev
-  }, initialStreams)
+  const streams = Object.values(users).reduce<UserWithStream[]>(
+    (prev, curent) => {
+      curent.media.availableStreamList.forEach((stream) => {
+        prev.push({ client: curent, clientStream: stream })
+      })
+      return prev
+    },
+    []
+  )
 
   const localStreams = []
   if (mediaStream)
@@ -83,7 +106,8 @@ export const RoomStreams = memo(function RoomStreams() {
       autoplay: true,
     })
 
-  const someStreamIsHide = hiddenStream.length
+  const someStreamIsHide = hiddenStream.size
+  const hiddenStreamIds = [...hiddenStream]
 
   return (
     <StreamViewer
@@ -91,22 +115,23 @@ export const RoomStreams = memo(function RoomStreams() {
         [styles.RoomStreamsWithHiddenStream]: !!someStreamIsHide,
       })}
     >
-      {localStreams.map((local) => (
+      {localStreams.map(({ stream, name, autoplay }) => (
         <RoomStream
-          key={local.stream.id}
-          stream={local.stream}
-          title={local.name}
-          autoplay={local.autoplay}
+          key={stream.id}
+          stream={stream}
+          title={name}
+          autoplay={autoplay}
           mute
           volume={0}
-          hide={!!hiddenStream.find((id) => id === local.stream.id)}
+          hide={hiddenStream.has(stream.id)}
+          hideId={hiddenStreamIds.findIndex((id) => id === stream.id)}
           onHide={() => {
-            setHiddenStream((prev) => [...prev, local.stream.id])
+            hiddenStream.add(stream.id)
+            setHiddenStream(new Set(hiddenStream))
           }}
           onUnHide={() => {
-            setHiddenStream((prev) =>
-              prev.filter((id) => id !== local.stream.id)
-            )
+            hiddenStream.delete(stream.id)
+            setHiddenStream(new Set(hiddenStream))
           }}
         />
       ))}
@@ -116,14 +141,17 @@ export const RoomStreams = memo(function RoomStreams() {
           key={user.clientStream.stream.id}
           stream={user.clientStream.stream}
           title={user.client?.user?.username ?? user.client?.user?.id}
-          hide={!!hiddenStream.find((id) => id === user.clientStream.stream.id)}
+          hide={hiddenStream.has(user.clientStream.stream.id)}
+          hideId={hiddenStreamIds.findIndex(
+            (id) => id === user.clientStream.stream.id
+          )}
           onHide={() => {
-            setHiddenStream((prev) => [...prev, user.clientStream.stream.id])
+            hiddenStream.add(user.clientStream.stream.id)
+            setHiddenStream(new Set(hiddenStream))
           }}
           onUnHide={() => {
-            setHiddenStream((prev) =>
-              prev.filter((id) => id !== user.clientStream.stream.id)
-            )
+            hiddenStream.delete(user.clientStream.stream.id)
+            setHiddenStream(new Set(hiddenStream))
           }}
           onPlay={() => {
             user.client.channel.sendData("resumeStream", user.clientStream.type)
@@ -132,12 +160,7 @@ export const RoomStreams = memo(function RoomStreams() {
             user.client.channel.sendData("pauseStream", user.clientStream.type)
           }}
           onVolumeChange={(value) => {
-            user.clientStream.volume = value
-            changeVolumeHandle(
-              user.client.user.username,
-              user.clientStream.type,
-              value
-            )
+            changeUserStreamVolume(user, value)
           }}
           volume={
             streamVolumeList[user.client.user.username]?.[

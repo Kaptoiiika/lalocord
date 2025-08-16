@@ -1,3 +1,5 @@
+import { logger } from "@/shared/lib/logger/Logger"
+
 export type DataChunk = {
   id: string
   data: string
@@ -40,6 +42,7 @@ export class RTCDataChanel<MessageKeys extends string = string> {
   }
 
   private sendMessageToChanel(data: any) {
+    logger('sendMessageToChanel', data)
     if (!this.channelIsOpen) {
       this.messagesBuffer.push(data)
       return
@@ -57,4 +60,6 @@ export class RTCDataChanel<MessageKeys extends string = string> {
     this.messagesBuffer = []
     this.channel.close()
   }
+
+  
 }

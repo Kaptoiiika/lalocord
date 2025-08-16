@@ -6,7 +6,7 @@ type ErrorBoundaryProps = {
   errorText?: string
 } & PropsWithChildren
 
-type ErrorBoundaryState = { hasError: boolean; error: any }
+type ErrorBoundaryState = { hasError: boolean; error: unknown }
 
 export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
@@ -17,23 +17,23 @@ export class ErrorBoundary extends Component<
     this.state = { hasError: false, error: null }
   }
 
-  static getDerivedStateFromError() {
+  static getDerivedStateFromError(error:unknown) {
     // Update state so the next render will show the fallback UI.
-    return { hasError: true }
+    return { hasError: true, error }
   }
 
-  componentDidCatch(error: any, errorInfo: any) {
+  componentDidCatch(error: unknown, errorInfo: unknown) {
     // You can also log the error to an error reporting service
     console.log(error, errorInfo)
   }
 
   render() {
-    const { hasError } = this.state
+    const { hasError, error } = this.state
     const { children, errorText } = this.props
     if (hasError) {
       return (
         <Suspense>
-          <PageError title={errorText} />
+          <PageError title={errorText} description={String(error)} />
         </Suspense>
       )
     }

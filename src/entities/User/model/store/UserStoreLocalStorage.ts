@@ -18,7 +18,7 @@ export const saveUserToLocalStorage = (user: UserModel) => {
 export const getUserFromLocalStorage = (): UserModel => {
   const json = localStorage.getItem(localstorageKeys.USERINFO)
   if (!json) {
-    const user = {
+    const user: UserModel = {
       id: defaultUser.id,
       username: genName(),
     }
@@ -152,5 +152,5 @@ const firstName = [
   "нормальный",
   "магический",
   "добрый",
-  "борзый"
+  "борзый",
 ]

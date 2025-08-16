@@ -14,8 +14,6 @@ import IconButton from "@mui/material/IconButton/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 import styles from "./VideoSettingsMenu.module.scss"
 import SettingsIcon from "@mui/icons-material/Settings"
-import FormControlLabel from "@mui/material/FormControlLabel"
-import Switch from "@mui/material/Switch"
 import { InlineSelectPrimitive } from "@/shared/ui/InlineSelect/InlineSelectPrimitive"
 
 type VideoSettingsMenuProps = {}
@@ -23,12 +21,12 @@ type VideoSettingsMenuProps = {}
 export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
   const {} = props
   const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
-  const experementalVideo = useRoomRTCStore(
-    (state) => state.experementalEncdoing
-  )
-  const setExperementalVideo = useRoomRTCStore(
-    (state) => state.setExperementalEncdoing
-  )
+  // const experementalVideo = useRoomRTCStore(
+  //   (state) => state.experementalEncdoing
+  // )
+  // const setExperementalVideo = useRoomRTCStore(
+  //   (state) => state.setExperementalEncdoing
+  // )
   const encodingSettings = useRoomRTCStore(getEncodingSettings)
   const setEncodingSettings = useRoomRTCStore(getActionSetEncodingSettings)
   const setStreamingSettings = useRoomRTCStore(
@@ -71,9 +69,9 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
     })
   }
 
-  const handleSetExpVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setExperementalVideo(e.currentTarget.checked)
-  }
+  // const handleSetExpVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setExperementalVideo(e.currentTarget.checked)
+  // }
 
   const currentFrameRate = userStreamSettings.video.frameRate
 
@@ -149,7 +147,7 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
               max={50}
             />
           </div>
-          <FormControlLabel
+          {/* <FormControlLabel
             control={
               <Switch
                 color="primary"
@@ -158,7 +156,7 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
               />
             }
             label="experemental Encoding"
-          />
+          /> */}
         </Stack>
       </Menu>
     </>

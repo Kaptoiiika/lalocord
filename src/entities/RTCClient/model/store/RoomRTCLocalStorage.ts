@@ -62,6 +62,7 @@ export const getStreamSettingsfromLocalStorage = (): UserStreamSettings => {
   const settings: UserStreamSettings = {
     audio: {
       ...defaultStreamSettings.audio,
+      ...data?.audio,
       deviceId: data?.audio?.deviceId || undefined,
     },
     video: {

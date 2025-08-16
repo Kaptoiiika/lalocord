@@ -11,11 +11,12 @@ type UserAvatarProps = {
   status?: UserAvatarStatus
   alt: string
   className?: string
+  micOnline?: boolean
 } & AvatarProps
 
 export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
   function UserAvatar(props, ref) {
-    const { src, avatar, status, alt, className, ...other } = props
+    const { src, avatar, status, alt, className, micOnline, ...other } = props
 
     const imageSRC = avatar?.formats?.thumbnail?.url || avatar?.url || src
 
@@ -29,7 +30,7 @@ export const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
         overlap="circular"
       >
         <Avatar
-          className={className}
+          className={classNames(className, { [styles.micOnline]: micOnline, })}
           ref={ref}
           src={imageSRC}
           alt={alt}

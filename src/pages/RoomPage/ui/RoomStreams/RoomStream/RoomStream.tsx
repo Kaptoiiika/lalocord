@@ -2,7 +2,7 @@ import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
 import { Button, Stack, Tooltip, Typography } from "@mui/material"
 import styles from "./RoomStream.module.scss"
 import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { memo, useId, useState } from "react"
+import { memo, useId, useRef, useState } from "react"
 import RemoveIcon from "@mui/icons-material/Remove"
 import { classNames } from "@/shared/lib/classNames/classNames"
 import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
@@ -18,6 +18,7 @@ type RoomStreamProps = {
    */
   autoplay?: boolean
   hide?: boolean
+  hideId?: number
   title?: string
   volume?: number
   mute?: boolean
@@ -36,6 +37,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     mute,
     autoplay: propsAutoPlay,
     hide: propsHide,
+    hideId,
     onVolumeChange,
     onHide,
     onPause,
@@ -87,8 +89,13 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     onUnHide?.()
   }
 
+  const onUnHideRef = useRef(onUnHide)
+  onUnHideRef.current = onUnHide
   useMountedEffect(() => {
-    return onUnHide
+    const getOnUnHideRef = () => onUnHideRef.current
+    return () => {
+      getOnUnHideRef()?.()
+    }
   })
 
   const isHidden = propsHide ?? hide
@@ -97,10 +104,12 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     <div
       style={{
         viewTransitionName: componentId,
+        left: (hideId ?? 0) * 100,
       }}
       className={classNames(styles.stream, { [styles.hideStream]: isHidden })}
     >
       <VideoPlayer
+        played={played}
         stream={stream}
         initVolume={volume}
         onVolumeChange={onVolumeChange}
@@ -109,7 +118,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         fullScreen={fullScreen}
         onFullscreenEnter={handleOpenfullscreen}
         onFullscreenExit={handleClosefullscreen}
-        autoplay={propsAutoPlay ?? autoplay}
+        autoplay={autoplay ? propsAutoPlay : false}
         controls={!isHidden}
         mute={mute}
       >

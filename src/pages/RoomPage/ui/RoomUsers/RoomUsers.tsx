@@ -5,12 +5,12 @@ import {
   getMicrophoneStream,
   getRoomName,
   getRoomUsers,
-} from "../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
+} from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
 import { RoomUserItem } from "./RoomUserItem/RoomUserItem"
 import styles from "./RoomUsers.module.scss"
 import { Tooltip } from "@mui/material"
 import { useRoomRTCStore } from "@/entities/RTCClient"
-import { VolumeMeter } from "../../../../features/VolumeMetter/ui/VolumeMeter"
+import { VolumeMeter } from "@/features/VolumeMetter/ui/VolumeMeter"
 
 export const RoomUsers = () => {
   const users = useRoomRTCStore(getRoomUsers)
@@ -25,7 +25,11 @@ export const RoomUsers = () => {
       <Stack className={styles.users} direction="row" gap={1}>
         <Tooltip title={localUsername.username || "You"} describeChild>
           <div className={styles.localUser}>
-            <UserAvatar alt={localUsername.username || "You"} />
+            <UserAvatar
+              micOnline={microphoneStream?.active}
+              alt={localUsername.username || "You"}
+              src={localUsername.avatarSrc}
+            />
             {microphoneStream && <VolumeMeter stream={microphoneStream} />}
           </div>
         </Tooltip>

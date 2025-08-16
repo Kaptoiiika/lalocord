@@ -18,7 +18,7 @@ const root = createRoot(container)
 
 root.render(
   // <StrictMode>
-  <ErrorBoundary>
+  <ErrorBoundary errorText="App is down">
     <AppRouterProvider>
       <ThemeProvider>
         <DebugModeProvider>

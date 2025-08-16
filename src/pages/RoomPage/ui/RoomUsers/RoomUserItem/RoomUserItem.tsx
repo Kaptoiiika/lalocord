@@ -1,5 +1,4 @@
 import { RTCClient } from "@/entities/RTCClient"
-import { classNames } from "@/shared/lib/classNames/classNames"
 import { UserAvatar, UserAvatarStatus } from "@/shared/ui/UserAvatar/UserAvatar"
 import {
   Typography,
@@ -119,16 +118,17 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
           aria-label={username}
         >
           <UserAvatar
-            className={classNames("", {
-              [styles.micOnline]: !!microphoneStream?.isOpen,
-            })}
+            micOnline={microphoneStream?.isOpen}
+            src={client.avatar}
             key={client.id}
             alt={username}
             status={status}
           />
-          {!!audioRef.current && !!microphoneStream && microphoneStream.isOpen &&  (
-            <VolumeMeter  stream={microphoneStream.stream} />
-          )}
+          {!!audioRef.current &&
+            !!microphoneStream &&
+            microphoneStream.isOpen && (
+              <VolumeMeter stream={microphoneStream.stream} />
+            )}
         </IconButton>
       </Tooltip>
       <Menu
