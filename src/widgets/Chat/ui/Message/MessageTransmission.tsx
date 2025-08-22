@@ -1,5 +1,6 @@
-import { MessageModelNew } from "../../model/types/ChatSchema"
-import LinearProgress from "@mui/material/LinearProgress"
+import { LinearProgress } from '@mui/material'
+
+import type { MessageModelNew } from '../../model/types/ChatSchema'
 
 type MessageFileProps = {
   data: MessageModelNew
@@ -12,15 +13,18 @@ export const MessageTransmission = (props: MessageFileProps) => {
     return null
   }
 
-  if (data.message.transmission.loaded >= data.message.transmission.length)
-    return null
+  if (data.message.transmission.loaded >= data.message.transmission.length) return null
 
-  const progress =
-    data.message.transmission.loaded / data.message.transmission.length
+  const progress = data.message.transmission.loaded / data.message.transmission.length
+
   return (
     <i>
       {data.user.username} is loading
-      <LinearProgress variant="determinate" value={progress * 100} />
+      <LinearProgress
+        variant="determinate"
+        value={progress * 100}
+      />
     </i>
   )
 }
+

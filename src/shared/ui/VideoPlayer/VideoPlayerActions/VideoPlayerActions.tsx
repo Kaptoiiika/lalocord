@@ -1,29 +1,29 @@
-import VolumeDown from "@mui/icons-material/VolumeDown"
-import VolumeUp from "@mui/icons-material/VolumeUp"
-import PlayArrowIcon from "@mui/icons-material/PlayArrow"
-import PauseIcon from "@mui/icons-material/Pause"
-import FullscreenIcon from "@mui/icons-material/Fullscreen"
-import FullscreenExitIcon from "@mui/icons-material/FullscreenExit"
-import { Stack, Slider, IconButton } from "@mui/material"
-import styles from "./VideoPlayerActions.module.scss"
-import { VideoPlayerTooltip } from "../VideoPlayerTooltip/VideoPlayerTooltip"
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import PauseIcon from '@mui/icons-material/Pause';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import VolumeDown from '@mui/icons-material/VolumeDown';
+import VolumeUp from '@mui/icons-material/VolumeUp';
+import { Stack, Slider, IconButton } from '@mui/material';
+
+import { VideoPlayerTooltip } from '../VideoPlayerTooltip/VideoPlayerTooltip';
+
+import styles from './VideoPlayerActions.module.scss';
 
 type VideoPlayerActionsProps = {
-  stream: MediaStream | null
-  open: boolean
-  volume?: number
-  fullscreen?: boolean
-  played?: boolean
-  mute?: boolean
-  handlePlayPause?: () => void
-  handleExitFullscreen?: () => void
-  handleFullscreen?: () => void
-  handleChangeVolume?: (event: Event, newValue: number | number[]) => void
-}
+  stream: MediaStream | null;
+  open: boolean;
+  volume?: number;
+  fullscreen?: boolean;
+  played?: boolean;
+  mute?: boolean;
+  handlePlayPause?: () => void;
+  handleExitFullscreen?: () => void;
+  handleFullscreen?: () => void;
+  handleChangeVolume?: (event: Event, newValue: number | number[]) => void;
+};
 
-const hasAudioOnStream = (stream: MediaStream | null) => {
-  return !!stream?.getAudioTracks().length
-}
+const hasAudioOnStream = (stream: MediaStream | null) => !!stream?.getAudioTracks().length;
 
 export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
   const {
@@ -37,19 +37,22 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
     mute,
     fullscreen,
     stream,
-  } = props
+  } = props;
+
   return (
-    <VideoPlayerTooltip className={styles.actions} open={open} bottom>
+    <VideoPlayerTooltip
+      className={styles.actions}
+      open={open}
+      bottom
+    >
       <Stack direction="row" justifyContent="flex-start">
         <IconButton
-          aria-label={played ? "pause video" : "play video"}
+          aria-label={played ? 'pause video' : 'play video'}
           onClick={handlePlayPause}
         >
-          {played ? (
-            <PauseIcon color="primary" />
-          ) : (
-            <PlayArrowIcon color="primary" />
-          )}
+          {played
+            ? <PauseIcon color="primary" />
+            : <PlayArrowIcon color="primary" />}
         </IconButton>
       </Stack>
       <Stack
@@ -58,7 +61,7 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
         alignItems="center"
         gap={2}
       >
-        <VolumeDown color={"primary"} />
+        <VolumeDown color="primary" />
         <Slider
           disabled={mute || !hasAudioOnStream(stream)}
           aria-label="Volume"
@@ -70,7 +73,11 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
         />
         <VolumeUp color="primary" />
       </Stack>
-      <Stack direction="row" justifyContent="flex-end" gap={2}>
+      <Stack
+        direction="row"
+        justifyContent="flex-end"
+        gap={2}
+      >
         {fullscreen ? (
           <IconButton
             aria-label="Exit fullscreen"
@@ -88,5 +95,5 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
         )}
       </Stack>
     </VideoPlayerTooltip>
-  )
-}
+  );
+};

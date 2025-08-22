@@ -1,25 +1,19 @@
-import { MouseEvent, useState } from "react"
-import {
-  useRoomRTCStore,
-  bitrateToShortValue,
-  bitrateValueText,
-} from "@/entities/RTCClient"
+import type { MouseEvent } from 'react'
+import { useState } from 'react'
+
+import SettingsIcon from '@mui/icons-material/Settings'
+import { Menu, Stack, Typography, Slider, IconButton, Tooltip } from '@mui/material'
+import { useRoomRTCStore, bitrateToShortValue, bitrateValueText } from 'src/entities/RTCClient'
 import {
   getUserStreamSettings,
   getEncodingSettings,
   getActionSetEncodingSettings,
-} from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
-import { Menu, Stack, Typography, Slider } from "@mui/material"
-import IconButton from "@mui/material/IconButton/IconButton"
-import Tooltip from "@mui/material/Tooltip"
-import styles from "./VideoSettingsMenu.module.scss"
-import SettingsIcon from "@mui/icons-material/Settings"
-import { InlineSelectPrimitive } from "@/shared/ui/InlineSelect/InlineSelectPrimitive"
+} from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors'
+import { InlineSelectPrimitive } from 'src/shared/ui/InlineSelect/InlineSelectPrimitive'
 
-type VideoSettingsMenuProps = {}
+import styles from './VideoSettingsMenu.module.scss'
 
-export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
-  const {} = props
+export const VideoSettingsMenu = () => {
   const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
   // const experementalVideo = useRoomRTCStore(
   //   (state) => state.experementalEncdoing
@@ -29,9 +23,7 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
   // )
   const encodingSettings = useRoomRTCStore(getEncodingSettings)
   const setEncodingSettings = useRoomRTCStore(getActionSetEncodingSettings)
-  const setStreamingSettings = useRoomRTCStore(
-    (state) => state.setStreamSettings
-  )
+  const setStreamingSettings = useRoomRTCStore((state) => state.setStreamSettings)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleOpen = (event: MouseEvent<HTMLButtonElement>) => {
@@ -41,30 +33,36 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
   const handleClose = () => {
     setAnchorEl(null)
   }
-  const handleBitrateChange = (
-    event: React.SyntheticEvent | Event,
-    newValue: number | Array<number>
-  ) => {
+  const handleBitrateChange = (event: React.SyntheticEvent | Event, newValue: number | Array<number>) => {
     if (Array.isArray(newValue)) return
     const settings = encodingSettings
+
     settings.maxBitrate = newValue * 1024 * 1024
     setEncodingSettings(settings)
   }
 
   const handleChangeFrameRate = (value: string) => {
     const numValue = Number(value)
+
     if (!numValue) return
     setStreamingSettings({
-      video: { ...userStreamSettings.video, frameRate: numValue },
+      video: {
+        ...userStreamSettings.video,
+        frameRate: numValue,
+      },
       audio: userStreamSettings.audio,
     })
   }
 
   const handleChangeResolution = (value: string) => {
     const numValue = Number(value)
+
     if (!numValue) return
     setStreamingSettings({
-      video: { ...userStreamSettings.video, height: numValue },
+      video: {
+        ...userStreamSettings.video,
+        height: numValue,
+      },
       audio: userStreamSettings.audio,
     })
   }
@@ -75,21 +73,23 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
 
   const currentFrameRate = userStreamSettings.video.frameRate
 
-  const frameRateList = ["5", "30", "60"]
-  const isCustomFrameRate = frameRateList.includes(String(currentFrameRate))
-    ? "90"
-    : `${currentFrameRate}`
+  const frameRateList = ['5', '30', '60']
+  const isCustomFrameRate = frameRateList.includes(String(currentFrameRate)) ? '90' : `${currentFrameRate}`
 
   const currentResolution = userStreamSettings.video.height
-  const resolutionList = ["144", "720", "1080"]
-  const isCustomResolution = resolutionList.includes(String(currentResolution))
-    ? "1440"
-    : `${currentResolution}`
+  const resolutionList = ['144', '720', '1080']
+  const isCustomResolution = resolutionList.includes(String(currentResolution)) ? '1440' : `${currentResolution}`
 
   return (
     <>
-      <Tooltip title="Settings" arrow>
-        <IconButton aria-label={"Settings"} onClick={handleOpen}>
+      <Tooltip
+        title="Settings"
+        arrow
+      >
+        <IconButton
+          aria-label="Settings"
+          onClick={handleOpen}
+        >
           <SettingsIcon />
         </IconButton>
       </Tooltip>
@@ -98,15 +98,18 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center',
         }}
         transformOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
+          vertical: 'bottom',
+          horizontal: 'center',
         }}
       >
-        <Stack gap={1} className={styles.Settingmenu}>
+        <Stack
+          gap={1}
+          className={styles.Settingmenu}
+        >
           <InlineSelectPrimitive
             title={`Frame Rate ${currentFrameRate}`}
             value={`${currentFrameRate}`}
@@ -119,7 +122,7 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
           <InlineSelectPrimitive
             title={`Resolution ${currentResolution}p`}
             value={`${currentResolution}`}
-            list={["144", "720", "1080"]}
+            list={['144', '720', '1080']}
             onSelect={handleChangeResolution}
             allowCustomValue
             customValue={isCustomResolution}
@@ -128,15 +131,10 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
 
           <div className={styles.slider}>
             <Typography className={styles.sliderLabel}>
-              Max bitrate:{" "}
-              <span>
-                {bitrateToShortValue(encodingSettings.maxBitrate || 0)} Mb/s
-              </span>
+              Max bitrate: <span>{bitrateToShortValue(encodingSettings.maxBitrate || 0)} Mb/s</span>
             </Typography>
             <Slider
-              defaultValue={bitrateToShortValue(
-                encodingSettings.maxBitrate || 0
-              )}
+              defaultValue={bitrateToShortValue(encodingSettings.maxBitrate || 0)}
               onChangeCommitted={handleBitrateChange}
               aria-label="bitrate"
               valueLabelDisplay="auto"
@@ -162,3 +160,4 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
     </>
   )
 }
+

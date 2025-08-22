@@ -1,9 +1,8 @@
-import { UserStreamSettings } from "../model/types/RoomRTCSchema"
+import type { UserStreamSettings } from '../model/types/RoomRTCSchema';
 
 export const ConvertUserSettingsToMediaSettings = (
   userSettings: UserStreamSettings
-): MediaStreamConstraints => {
-  return {
+): MediaStreamConstraints => ({
     audio: {
       ...userSettings.audio,
       channelCount: 2,
@@ -11,10 +10,10 @@ export const ConvertUserSettingsToMediaSettings = (
     },
     video: {
       frameRate: userSettings.video.frameRate,
-      height: { ideal: userSettings.video.height },
+      height: {
+        ideal: userSettings.video.height,
+      },
       deviceId: userSettings.video.deviceId,
-      //@ts-ignore it work
-      displaySurface: "monitor",
+      displaySurface: 'monitor',
     },
-  }
-}
+  });

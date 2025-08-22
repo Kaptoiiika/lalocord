@@ -1,1 +1,1 @@
-export { UserSettingsModal } from "./ui/UserSettingsModal/UserSettingsModal"
+export { UserSettingsModal } from './ui/UserSettingsModal/UserSettingsModal';

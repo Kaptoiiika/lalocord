@@ -1,30 +1,45 @@
-import { create, StateCreator } from "zustand"
-import { UserSchema } from "../types/UserSchema"
+import { create } from 'zustand';
+
+import type { UserSchema } from '../types/UserSchema';
+import type { StateCreator } from 'zustand';
+
 import {
   getUserFromLocalStorage,
   saveUserToLocalStorage,
-} from "./UserStoreLocalStorage"
+} from './UserStoreLocalStorage';
 
-const initUser = getUserFromLocalStorage()
+const initUser = getUserFromLocalStorage();
 
 const store: StateCreator<UserSchema> = (set, get) => ({
   localUser: initUser,
 
   setLocalUsername(value) {
-    const user = get().localUser
-    user.username = value
+    const user = get().localUser;
 
-    set((state) => ({ ...state, localUser: { ...user } }))
-    saveUserToLocalStorage(user)
+    user.username = value;
+
+    set((state) => ({
+ ...state,
+localUser: {
+  ...user,
+},
+}));
+    saveUserToLocalStorage(user);
   },
 
   setLocalAvatar(value) {
-    const user = get().localUser
-    user.avatarSrc = value
+    const user = get().localUser;
 
-    set((state) => ({ ...state, localUser: { ...user } }))
-    saveUserToLocalStorage(user)
+    user.avatarSrc = value;
+
+    set((state) => ({
+ ...state,
+localUser: {
+  ...user,
+},
+}));
+    saveUserToLocalStorage(user);
   },
-})
+});
 
-export const useUserStore = create(store)
+export const useUserStore = create(store);

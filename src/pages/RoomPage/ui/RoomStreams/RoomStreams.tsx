@@ -1,70 +1,82 @@
+import { memo, useEffect, useState } from 'react';
+
+
+
+
+import { useAudioEffectStore } from 'src/entities/AudioEffect';
 import {
-  RTCClient,
   useRoomRTCStore,
-  RTCClientMediaStream,
-} from "@/entities/RTCClient"
-import { getLocalUser, useUserStore } from "@/entities/User"
-import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
-import { memo, useEffect, useState } from "react"
+} from 'src/entities/RTCClient';
+import { getLocalUser, useUserStore } from 'src/entities/User';
+import { classNames } from 'src/shared/lib/classNames/classNames';
+import { useThrottle } from 'src/shared/lib/hooks/useThrottle/useThrottle';
+import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition';
+import { StreamViewer } from 'src/widgets/StreamViewer/ui/StreamViewer';
+
+import type { RTCClient,
+  RTCClientMediaStream } from 'src/entities/RTCClient';
+
+import { RoomStream } from './RoomStream/RoomStream';
 import {
   getDisplayMediaStream,
   getRoomUsers,
   getWebCamStream,
-} from "../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
-import styles from "./RoomStreams.module.scss"
-import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
-import { RoomStream } from "./RoomStream/RoomStream"
-import { classNames } from "@/shared/lib/classNames/classNames"
-import { useAudioEffectStore } from "@/entities/AudioEffect"
-import { useThrottle } from "@/shared/lib/hooks/useThrottle/useThrottle"
+} from '../../../../entities/RTCClient/model/selectors/RoomRTCSelectors';
+
+import styles from './RoomStreams.module.scss';
 
 type UserWithStream = {
-  client: RTCClient
-  clientStream: RTCClientMediaStream
-}
+  client: RTCClient;
+  clientStream: RTCClientMediaStream;
+};
 
 export const RoomStreams = memo(function RoomStreams() {
-  const users = useRoomRTCStore(getRoomUsers)
-  const localUser = useUserStore(getLocalUser)
-  const mediaStream = useRoomRTCStore(getDisplayMediaStream)
-  const webCamStream = useRoomRTCStore(getWebCamStream)
+  const users = useRoomRTCStore(getRoomUsers);
+  const localUser = useUserStore(getLocalUser);
+  const mediaStream = useRoomRTCStore(getDisplayMediaStream);
+  const webCamStream = useRoomRTCStore(getWebCamStream);
   const streamVolumeList = useAudioEffectStore(
     (state) => state.usersAuidoSettings
-  )
+  );
   const changeVolumeHandle = useAudioEffectStore(
     (state) => state.changeUserVolume
-  )
-  const [hiddenStream, setHiddenStream] = useState<Set<string>>(new Set())
-  const [, update] = useState(0)
+  );
+  const [hiddenStream, setHiddenStream] = useState<Set<string>>(new Set());
+  const [, update] = useState(0);
 
   const changeUserStreamVolume = useThrottle(
     (user: UserWithStream, volume: number) => {
-      user.clientStream.volume = volume
+      user.clientStream.volume = volume;
       changeVolumeHandle(
         user.client.user.username,
         user.clientStream.type,
         volume
-      )
+      );
     },
     500
-  )
+  );
 
   useEffect(() => {
     const listeners = Object.values(users).map((user) => {
       const fn = async () => {
-        await startViewTransition()
-        update((prev) => prev + 1)
-      }
-      user.media.on("newstream", fn)
-      return { user, fn }
-    })
+        await startViewTransition();
+        update((prev) => prev + 1);
+      };
+
+      user.media.on('newstream', fn);
+
+      return {
+        user,
+        fn,
+      };
+    });
 
     return () => {
       listeners.forEach(({ user, fn }) => {
-        user.media.off("newstream", fn)
-      })
-    }
-  }, [users])
+        user.media.off('newstream', fn);
+      });
+    };
+  }, [users]);
 
   // useEffect(() => {
   //   console.log("mediaStream")
@@ -85,29 +97,34 @@ export const RoomStreams = memo(function RoomStreams() {
   const streams = Object.values(users).reduce<UserWithStream[]>(
     (prev, curent) => {
       curent.media.availableStreamList.forEach((stream) => {
-        prev.push({ client: curent, clientStream: stream })
-      })
-      return prev
+        prev.push({
+          client: curent,
+          clientStream: stream,
+        });
+      });
+
+      return prev;
     },
     []
-  )
+  );
 
-  const localStreams = []
+  const localStreams = [];
+
   if (mediaStream)
     localStreams.push({
       stream: mediaStream,
       name: localUser.username,
       autoplay: false,
-    })
+    });
   if (webCamStream)
     localStreams.push({
       stream: webCamStream,
       name: localUser.username,
       autoplay: true,
-    })
+    });
 
-  const someStreamIsHide = hiddenStream.size
-  const hiddenStreamIds = [...hiddenStream]
+  const someStreamIsHide = hiddenStream.size;
+  const hiddenStreamIds = [...hiddenStream];
 
   return (
     <StreamViewer
@@ -126,12 +143,12 @@ export const RoomStreams = memo(function RoomStreams() {
           hide={hiddenStream.has(stream.id)}
           hideId={hiddenStreamIds.findIndex((id) => id === stream.id)}
           onHide={() => {
-            hiddenStream.add(stream.id)
-            setHiddenStream(new Set(hiddenStream))
+            hiddenStream.add(stream.id);
+            setHiddenStream(new Set(hiddenStream));
           }}
           onUnHide={() => {
-            hiddenStream.delete(stream.id)
-            setHiddenStream(new Set(hiddenStream))
+            hiddenStream.delete(stream.id);
+            setHiddenStream(new Set(hiddenStream));
           }}
         />
       ))}
@@ -146,21 +163,21 @@ export const RoomStreams = memo(function RoomStreams() {
             (id) => id === user.clientStream.stream.id
           )}
           onHide={() => {
-            hiddenStream.add(user.clientStream.stream.id)
-            setHiddenStream(new Set(hiddenStream))
+            hiddenStream.add(user.clientStream.stream.id);
+            setHiddenStream(new Set(hiddenStream));
           }}
           onUnHide={() => {
-            hiddenStream.delete(user.clientStream.stream.id)
-            setHiddenStream(new Set(hiddenStream))
+            hiddenStream.delete(user.clientStream.stream.id);
+            setHiddenStream(new Set(hiddenStream));
           }}
           onPlay={() => {
-            user.client.channel.sendData("resumeStream", user.clientStream.type)
+            user.client.channel.sendData('resumeStream', user.clientStream.type);
           }}
           onPause={() => {
-            user.client.channel.sendData("pauseStream", user.clientStream.type)
+            user.client.channel.sendData('pauseStream', user.clientStream.type);
           }}
           onVolumeChange={(value) => {
-            changeUserStreamVolume(user, value)
+            changeUserStreamVolume(user, value);
           }}
           volume={
             streamVolumeList[user.client.user.username]?.[
@@ -171,5 +188,5 @@ export const RoomStreams = memo(function RoomStreams() {
         />
       ))}
     </StreamViewer>
-  )
-})
+  );
+});

@@ -1,9 +1,13 @@
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import Typography from "@mui/material/Typography"
-import { PropsWithChildren, useState } from "react"
-import styles from "./WaitUserClick.module.scss"
+import type { PropsWithChildren } from 'react'
+import { useState } from 'react'
 
-type WaitUserClickProps = {} & PropsWithChildren
+import { Typography } from '@mui/material'
+import { __IS_DEV__ } from 'src/shared/const/config'
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+
+import styles from './WaitUserClick.module.scss'
+
+type WaitUserClickProps = PropsWithChildren
 
 export const WaitUserClick = (props: WaitUserClickProps) => {
   const { children } = props
@@ -12,26 +16,24 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
 
   useMountedEffect(() => {
     const fn = (e: MouseEvent) => {
-      //@ts-ignore not in firefox
       if (e.isTrusted || navigator.userActivation?.hasBeenActive === true) {
         update((prev) => prev + 1)
-        document.removeEventListener("click", fn)
+        document.removeEventListener('click', fn)
       }
     }
     const fnKey = (e: KeyboardEvent) => {
-      //@ts-ignore not in firefox
       if (e.isTrusted || navigator.userActivation?.hasBeenActive === true) {
         update((prev) => prev + 1)
-        document.removeEventListener("keypress", fnKey)
+        document.removeEventListener('keypress', fnKey)
       }
     }
 
-    document.addEventListener("click", fn)
-    document.addEventListener("keypress", fnKey)
+    document.addEventListener('click', fn)
+    document.addEventListener('keypress', fnKey)
 
     return () => {
-      document.removeEventListener("click", fn)
-      document.removeEventListener("keypress", fnKey)
+      document.removeEventListener('click', fn)
+      document.removeEventListener('keypress', fnKey)
     }
   })
 
@@ -39,7 +41,6 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
     return <>{children}</>
   }
 
-  //@ts-ignore not in firefox
   if (navigator.userActivation && !navigator.userActivation?.hasBeenActive) {
     return (
       <div className={styles.WaitUserClick}>
@@ -50,3 +51,4 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
 
   return <>{children}</>
 }
+

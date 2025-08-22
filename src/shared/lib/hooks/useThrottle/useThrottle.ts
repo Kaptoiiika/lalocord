@@ -1,19 +1,20 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useRef } from 'react';
 
 export const useThrottle = (
-  callback: (...args: any[]) => void,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  callback: (...args: any) => void,
   delayInMS: number
 ) => {
-  const throttleRef = useRef(false)
+  const throttleRef = useRef(false);
 
-  return useCallback((...args: any[]) => {
+  return useCallback((...args: unknown[]) => {
     if (throttleRef.current === false) {
-      callback(...args)
-      throttleRef.current = true
+      callback(...args);
+      throttleRef.current = true;
 
       setTimeout(() => {
-        throttleRef.current = false
-      }, delayInMS)
+        throttleRef.current = false;
+      }, delayInMS);
     }
-  }, [callback, delayInMS])
-}
+  }, [callback, delayInMS]);
+};

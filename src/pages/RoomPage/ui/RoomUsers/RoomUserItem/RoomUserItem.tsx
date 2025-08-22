@@ -1,5 +1,5 @@
-import { RTCClient } from "@/entities/RTCClient"
-import { UserAvatar, UserAvatarStatus } from "@/shared/ui/UserAvatar/UserAvatar"
+import { useEffect, useRef, useState } from 'react';
+
 import {
   Typography,
   IconButton,
@@ -7,112 +7,123 @@ import {
   Slider,
   Stack,
   Tooltip,
-} from "@mui/material"
-import { useEffect, useRef, useState } from "react"
-import styles from "./RoomUserItem.module.scss"
-import { useAudioEffectStore } from "@/entities/AudioEffect"
-import { VolumeMeter } from "@/features/VolumeMetter/ui/VolumeMeter"
+} from '@mui/material';
+import { useAudioEffectStore } from 'src/entities/AudioEffect';
+import { VolumeMeter } from 'src/features/VolumeMetter/ui/VolumeMeter';
+import { UserAvatar } from 'src/shared/ui/UserAvatar/UserAvatar';
+
+import type { RTCClient } from 'src/entities/RTCClient';
+import type { UserAvatarStatus } from 'src/shared/ui/UserAvatar/UserAvatar';
+
+import styles from './RoomUserItem.module.scss';
+
 
 type RoomUserItemProps = {
-  client: RTCClient
-}
+  client: RTCClient;
+};
 
 const getUserStatusOnConnectionState = (
   connectionsState?: RTCIceConnectionState
 ): UserAvatarStatus => {
   switch (connectionsState) {
-    case "completed":
-    case "connected":
-      return "online"
-    case "checking":
-    case "new":
-      return "idle"
-    case "closed":
-    case "disconnected":
-    case "failed":
+    case 'completed':
+    case 'connected':
+      return 'online';
+    case 'checking':
+    case 'new':
+      return 'idle';
+    case 'closed':
+    case 'disconnected':
+    case 'failed':
     default:
-      return "offline"
+      return 'offline';
   }
-}
+};
 
 export const RoomUserItem = (props: RoomUserItemProps) => {
-  const { client } = props
+  const { client } = props;
   const [status, setStatus] = useState(
     getUserStatusOnConnectionState(client.peer?.iceConnectionState)
-  )
-  const [, update] = useState(0)
+  );
+  const [, update] = useState(0);
   const audioUserSettings = useAudioEffectStore(
     (state) => state.usersAuidoSettings
-  )
+  );
   const changeVolumeHandle = useAudioEffectStore(
     (state) => state.changeUserVolume
-  )
-  const microphoneStream = client.media.remoteStream.microphone
-  const userVolume = audioUserSettings[client.user.username]?.microphone ?? 1
+  );
+  const microphoneStream = client.media.remoteStream.microphone;
+  const userVolume = audioUserSettings[client.user.username]?.microphone ?? 1;
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-  const audioRef = useRef<HTMLAudioElement | null>(new Audio())
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const audioRef = useRef<HTMLAudioElement | null>(new Audio());
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    setAnchorEl(event.currentTarget)
-  }
+    event.preventDefault();
+    setAnchorEl(event.currentTarget);
+  };
   const handleClose = () => {
-    setAnchorEl(null)
-  }
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     const fn = () => {
-      setStatus(getUserStatusOnConnectionState(client.peer?.iceConnectionState))
-    }
-    client.on("iceconnectionStatusChange", fn)
+      setStatus(getUserStatusOnConnectionState(client.peer?.iceConnectionState));
+    };
+
+    client.on('iceconnectionStatusChange', fn);
+
     return () => {
-      client.off("iceconnectionStatusChange", fn)
-    }
-  }, [client])
+      client.off('iceconnectionStatusChange', fn);
+    };
+  }, [client]);
 
   useEffect(() => {
     const fn = () => {
-      update((prev) => prev + 1)
-    }
-    client.media.on("newstream", fn)
-    return () => {
-      client.media.off("newstream", fn)
-    }
-  }, [client])
+      update((prev) => prev + 1);
+    };
 
-  const username = client.user?.username || client.id
+    client.media.on('newstream', fn);
+
+    return () => {
+      client.media.off('newstream', fn);
+    };
+  }, [client]);
+
+  const username = client.user?.username || client.id;
 
   useEffect(() => {
     if (microphoneStream && audioRef.current) {
-      audioRef.current.srcObject = microphoneStream.stream
-      audioRef.current.play()
+      audioRef.current.srcObject = microphoneStream.stream;
+      audioRef.current.play();
     }
-  }, [microphoneStream])
+  }, [microphoneStream]);
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = userVolume
+      audioRef.current.volume = userVolume;
     }
-  }, [userVolume])
+  }, [userVolume]);
 
   const handleChangeVolume = (
     event: Event,
     value: number | number[],
-    activeThumb: number
   ) => {
-    if (typeof value === "number") {
-      changeVolumeHandle(client.user.username, "microphone", value)
+    if (typeof value === 'number') {
+      changeVolumeHandle(client.user.username, 'microphone', value);
     }
-  }
+  };
 
-  const formatedMicroVolume = (userVolume * 100).toFixed(0)
+  const formatedMicroVolume = (userVolume * 100).toFixed(0);
+
   return (
     <>
       <Tooltip title={username} describeChild>
         <IconButton
-          sx={{ p: 0 }}
+          sx={{
+            p: 0,
+          }}
           onContextMenu={handleClick}
           onClick={handleClick}
           aria-label={username}
@@ -124,11 +135,10 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
             alt={username}
             status={status}
           />
-          {!!audioRef.current &&
-            !!microphoneStream &&
-            microphoneStream.isOpen && (
-              <VolumeMeter stream={microphoneStream.stream} />
-            )}
+          {!!audioRef.current
+            && !!microphoneStream
+            && microphoneStream.isOpen
+              && <VolumeMeter stream={microphoneStream.stream} />}
         </IconButton>
       </Tooltip>
       <Menu
@@ -152,5 +162,5 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
         </Stack>
       </Menu>
     </>
-  )
-}
+  );
+};

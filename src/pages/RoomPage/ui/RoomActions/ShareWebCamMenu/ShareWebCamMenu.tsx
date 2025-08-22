@@ -1,17 +1,18 @@
+import { useCallback } from 'react'
+
+import VideocamIcon from '@mui/icons-material/Videocam'
+import VideocamOffIcon from '@mui/icons-material/VideocamOff'
+import { IconButton, Tooltip, Menu } from '@mui/material'
+import { useRoomRTCStore } from 'src/entities/RTCClient'
 import {
   getActionStartWebCamStream,
   getActionStopWebCamStream,
   getWebCamStream,
-} from "../../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
-import { IconButton, Tooltip } from "@mui/material"
-import VideocamIcon from "@mui/icons-material/Videocam"
-import VideocamOffIcon from "@mui/icons-material/VideocamOff"
-import { useCallback } from "react"
-import { useRoomRTCStore } from "@/entities/RTCClient"
-import { usePopup } from "@/shared/lib/hooks/usePopup/usePopup"
-import Menu from "@mui/material/Menu/Menu"
-import { SelectCamera } from "./SelectCamera/SelectCamera"
-import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
+} from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors'
+import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
+import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition'
+
+import { SelectCamera } from './SelectCamera/SelectCamera'
 
 export const ShareWebCamMenu = () => {
   const startStream = useRoomRTCStore(getActionStartWebCamStream)
@@ -23,7 +24,7 @@ export const ShareWebCamMenu = () => {
     try {
       await startViewTransition()
       startStream()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error)
     }
   }
@@ -35,14 +36,23 @@ export const ShareWebCamMenu = () => {
 
   return (
     <>
-      {!!webCamStream ? (
-        <Tooltip title="Turn off camera" arrow>
-          <IconButton onClick={handleStopStream} onContextMenu={handleClick}>
+      {webCamStream ? (
+        <Tooltip
+          title="Turn off camera"
+          arrow
+        >
+          <IconButton
+            onClick={handleStopStream}
+            onContextMenu={handleClick}
+          >
             <VideocamIcon color="success" />
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Turn on camera" arrow>
+        <Tooltip
+          title="Turn on camera"
+          arrow
+        >
           <IconButton
             onClick={handleStartWebCamStream}
             onContextMenu={handleClick}
@@ -56,12 +66,12 @@ export const ShareWebCamMenu = () => {
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center',
         }}
         transformOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
+          vertical: 'bottom',
+          horizontal: 'center',
         }}
       >
         <SelectCamera />
@@ -69,3 +79,4 @@ export const ShareWebCamMenu = () => {
     </>
   )
 }
+

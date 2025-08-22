@@ -1,9 +1,11 @@
-import { create, StateCreator } from "zustand"
-import { ConvertUserSettingsToMediaSettings } from "../../utils/ConvertUserSettingsToMediaSettings"
-import {
+import { create } from 'zustand';
+
+import type {
   ConnectedUsers,
   RoomRTCSchema,
-} from "../../../../entities/RTCClient/model/types/RoomRTCSchema"
+} from '../../../../entities/RTCClient/model/types/RoomRTCSchema';
+import type { StateCreator } from 'zustand';
+
 import {
   getEncodingSettingsFromLocalStorage,
   getExperementalEncdoingFromLocalStorage,
@@ -11,7 +13,8 @@ import {
   saveEncodingSettingsToLocalStorage,
   saveStreamSettingstoLocalStorage,
   saveExperementalEncdoingFromLocalStorage,
-} from "./RoomRTCLocalStorage"
+} from './RoomRTCLocalStorage';
+import { ConvertUserSettingsToMediaSettings } from '../../utils/ConvertUserSettingsToMediaSettings';
 
 const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   streamSettings: ConvertUserSettingsToMediaSettings(
@@ -27,7 +30,7 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
   experementalEncdoing: getExperementalEncdoingFromLocalStorage(),
 
   setStreamSettings(streamSettings) {
-    saveStreamSettingstoLocalStorage(streamSettings)
+    saveStreamSettingstoLocalStorage(streamSettings);
     const {
       displayMediaStream,
       webCamStream,
@@ -35,43 +38,46 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       userStreamSettings,
       startWebCamStream,
       startMicrophoneStream,
-    } = get()
-    const streamWithVideo = [displayMediaStream, webCamStream]
+    } = get();
+    const streamWithVideo = [displayMediaStream, webCamStream];
+
     streamWithVideo.map((stream) => {
-      const videoTrack = stream?.getVideoTracks()
-      videoTrack?.forEach((track) =>
-        track.applyConstraints({
-          frameRate:
-            streamSettings.video?.frameRate ||
-            userStreamSettings.video?.frameRate,
-          height:
+      const videoTrack = stream?.getVideoTracks();
+
+      videoTrack?.forEach((track) => track.applyConstraints({
+        frameRate:
+            streamSettings.video?.frameRate
+            || userStreamSettings.video?.frameRate,
+        height:
             streamSettings.video?.height || userStreamSettings.video?.height,
-        })
-      )
-    })
+      }));
+    });
 
     set((state) => ({
       ...state,
       userStreamSettings: streamSettings,
       streamSettings: ConvertUserSettingsToMediaSettings(streamSettings),
-    }))
+    }));
 
     //restart stream?
     if (
-      streamSettings.video.deviceId !== userStreamSettings.video.deviceId &&
-      webCamStream
+      streamSettings.video.deviceId !== userStreamSettings.video.deviceId
+      && webCamStream
     ) {
-      startWebCamStream()
+      startWebCamStream();
     }
     if (
-      streamSettings.audio.deviceId !== userStreamSettings.audio.deviceId &&
-      microphoneStream
+      streamSettings.audio.deviceId !== userStreamSettings.audio.deviceId
+      && microphoneStream
     ) {
-      startMicrophoneStream()
+      startMicrophoneStream();
     }
   },
   joinRoom: (roomName) => {
-    set((state) => ({ ...state, roomName: roomName }))
+    set((state) => ({
+ ...state,
+roomName,
+}));
   },
   leaveRoom: () => {
     const {
@@ -79,19 +85,20 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       displayMediaStream,
       microphoneStream,
       connectedUsers,
-    } = get()
+    } = get();
     const tracks = [
-      ...(displayMediaStream?.getTracks() || []),
-      ...(webCamStream?.getTracks() || []),
-      ...(microphoneStream?.getTracks() || []),
-    ]
+      ...displayMediaStream?.getTracks() || [],
+      ...webCamStream?.getTracks() || [],
+      ...microphoneStream?.getTracks() || [],
+    ];
+
     tracks.forEach((tracks) => {
-      tracks.onended = null
-      tracks.stop()
-    })
+      tracks.onended = null;
+      tracks.stop();
+    });
     Object.values(connectedUsers).forEach((client) => {
-      client.close()
-    })
+      client.close();
+    });
 
     set((state) => ({
       ...state,
@@ -99,62 +106,85 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
       displayMediaStream: null,
       microphoneStream: null,
       connectedUsers: {},
-    }))
+    }));
   },
   setEncodingSettings: (settings) => {
-    saveEncodingSettingsToLocalStorage(settings)
-    set((state) => ({ ...state, encodingSettings: { ...settings } }))
+    saveEncodingSettingsToLocalStorage(settings);
+    set((state) => ({
+ ...state,
+encodingSettings: {
+  ...settings,
+},
+}));
   },
   addConnectedUsers(...newUsers) {
-    const users: ConnectedUsers = {}
+    const users: ConnectedUsers = {};
+
     newUsers.forEach((usr) => {
-      users[usr.id] = usr
-    })
+      users[usr.id] = usr;
+    });
     set((state) => ({
       ...state,
-      connectedUsers: { ...state.connectedUsers, ...users },
-    }))
+      connectedUsers: {
+        ...state.connectedUsers,
+        ...users,
+      },
+    }));
   },
   deleteConnectedUser: (id) => {
-    const usrs = get().connectedUsers
-    delete usrs[id]
+    const usrs = get().connectedUsers;
+
+    delete usrs[id];
     set((state) => ({
       ...state,
-      connectedUsers: { ...usrs },
-    }))
+      connectedUsers: {
+        ...usrs,
+      },
+    }));
   },
   async startWebCamStream() {
-    const { webCamStream, streamSettings, stopWebCamStream } = get()
+    const { webCamStream, streamSettings, stopWebCamStream } = get();
     const stream = await navigator.mediaDevices.getUserMedia({
       video: streamSettings.video,
       audio: false,
-    })
+    });
+
     webCamStream?.getTracks().forEach((tracks) => {
-      tracks.onended = null
-      tracks.stop()
-    })
+      tracks.onended = null;
+      tracks.stop();
+    });
     stream.getVideoTracks().forEach((track) => {
       track.onended = () => {
-        stopWebCamStream()
-      }
-    })
-    set((state) => ({ ...state, webCamStream: stream }))
+        stopWebCamStream();
+      };
+    });
+    set((state) => ({
+ ...state,
+webCamStream: stream,
+}));
   },
   stopWebCamStream() {
-    const { webCamStream } = get()
+    const { webCamStream } = get();
+
     webCamStream?.getTracks().forEach((tracks) => {
-      tracks.onended = null
-      tracks.stop()
-    })
-    set((state) => ({ ...state, webCamStream: null }))
+      tracks.onended = null;
+      tracks.stop();
+    });
+    set((state) => ({
+ ...state,
+webCamStream: null,
+}));
   },
   setdisplayMediaStream(stream) {
-    set((state) => ({ ...state, displayMediaStream: stream }))
+    set((state) => ({
+ ...state,
+displayMediaStream: stream,
+}));
   },
   async startMicrophoneStream() {
-    const { microphoneStream, streamSettings, stopMicrophoneStream } = get()
+    const { microphoneStream, streamSettings, stopMicrophoneStream } = get();
     const audioConstraints =
-      typeof streamSettings.audio === "object" ? streamSettings.audio : {}
+      typeof streamSettings.audio === 'object' ? streamSettings.audio : {};
     const stream = await navigator.mediaDevices.getUserMedia({
       video: false,
       audio: {
@@ -163,31 +193,41 @@ const store: StateCreator<RoomRTCSchema> = (set, get) => ({
         noiseSuppression: true,
         echoCancellation: true,
       },
-    })
+    });
 
     microphoneStream?.getTracks().forEach((tracks) => {
-      tracks.onended = null
-      tracks.stop()
-    })
+      tracks.onended = null;
+      tracks.stop();
+    });
     stream.getVideoTracks().forEach((track) => {
       track.onended = () => {
-        stopMicrophoneStream()
-      }
-    })
-    set((state) => ({ ...state, microphoneStream: stream }))
+        stopMicrophoneStream();
+      };
+    });
+    set((state) => ({
+ ...state,
+microphoneStream: stream,
+}));
   },
   stopMicrophoneStream() {
-    const { microphoneStream } = get()
+    const { microphoneStream } = get();
+
     microphoneStream?.getTracks().forEach((tracks) => {
-      tracks.onended = null
-      tracks.stop()
-    })
-    set((state) => ({ ...state, microphoneStream: null }))
+      tracks.onended = null;
+      tracks.stop();
+    });
+    set((state) => ({
+ ...state,
+microphoneStream: null,
+}));
   },
   setExperementalEncdoing(value) {
-    saveExperementalEncdoingFromLocalStorage(value)
-    set((state) => ({ ...state, experementalEncdoing: value }))
+    saveExperementalEncdoingFromLocalStorage(value);
+    set((state) => ({
+ ...state,
+experementalEncdoing: value,
+}));
   },
-})
+});
 
-export const useRoomRTCStore = create(store)
+export const useRoomRTCStore = create(store);

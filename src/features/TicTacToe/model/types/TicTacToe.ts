@@ -1,18 +1,18 @@
 export interface TicTacToeSchema {
-  currentPlayer: TicTacToePlayerType
-  activePlayer: TicTacToePlayerType
-  
-  board: TicTacToeBoardType
-  activeFieldId?: number
+  currentPlayer: TicTacToePlayerType;
+  activePlayer: TicTacToePlayerType;
 
-  isMultiplayer: boolean
+  board: TicTacToeBoardType;
+  activeFieldId?: number;
 
-  doPlayerMove: (fieldId: number, ceilId: number, player: TicTacToePlayerType) => void
+  isMultiplayer: boolean;
 
-  startGame: (isMultiplayer?: boolean) => void
+  doPlayerMove: (fieldId: number, ceilId: number, player: TicTacToePlayerType) => void;
+
+  startGame: (isMultiplayer?: boolean) => void;
 }
 
-export type TicTacToePlayerType = "circle" | "cross"
-export type TicTacToeCeilType = TicTacToePlayerType | null
-export type TicTacToeFieldType = Array<TicTacToeCeilType>
-export type TicTacToeBoardType = Array<TicTacToeFieldType>
+export type TicTacToePlayerType = 'circle' | 'cross';
+export type TicTacToeCeilType = TicTacToePlayerType | null;
+export type TicTacToeFieldType = Array<TicTacToeCeilType>;
+export type TicTacToeBoardType = Array<TicTacToeFieldType>;

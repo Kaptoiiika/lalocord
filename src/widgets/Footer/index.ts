@@ -1,1 +1,1 @@
-export { AppFooter } from "./ui/AppFooter";
+export { AppFooter } from './ui/AppFooter';

@@ -1,18 +1,22 @@
-import { classNames } from "@/shared/lib/classNames/classNames"
-import { sliceIntoTotalChunks } from "@/shared/lib/utils/Arrays"
-import { Children, PropsWithChildren } from "react"
-import styles from "./StreamViewer.module.scss"
+import type { PropsWithChildren } from 'react';
+import { Children } from 'react';
+
+
+import { classNames } from 'src/shared/lib/classNames/classNames';
+import { sliceIntoTotalChunks } from 'src/shared/lib/utils/Arrays';
+
+import styles from './StreamViewer.module.scss';
 
 type StreamViewerProps = {
-  className?: string
-} & PropsWithChildren
+  className?: string;
+} & PropsWithChildren;
 
 export const StreamViewer = (props: StreamViewerProps) => {
-  const { children, className } = props
-  const childrenArr = Children.toArray(children)
+  const { children, className } = props;
+  const childrenArr = Children.toArray(children);
 
-  const totalRows = Math.round(Math.sqrt(childrenArr.length))
-  const rows = sliceIntoTotalChunks(childrenArr, totalRows)
+  const totalRows = Math.round(Math.sqrt(childrenArr.length));
+  const rows = sliceIntoTotalChunks(childrenArr, totalRows);
 
   return (
     <div className={classNames(styles.StreamViewer, className)}>
@@ -22,5 +26,5 @@ export const StreamViewer = (props: StreamViewerProps) => {
         </div>
       ))}
     </div>
-  )
-}
+  );
+};

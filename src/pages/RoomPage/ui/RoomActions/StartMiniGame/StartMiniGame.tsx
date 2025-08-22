@@ -1,15 +1,15 @@
-import { IconButton, Menu, Stack, Tooltip } from "@mui/material"
-import VideogameAssetIcon from "@mui/icons-material/VideogameAsset"
-import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
-import { TicTacToePrepareGame } from "@/features/TicTacToe"
+import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
+import { IconButton, Menu, Stack, Tooltip } from '@mui/material';
+import { TicTacToePrepareGame } from 'src/features/TicTacToe';
+import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen';
 
 export const StartMiniGame = () => {
-  const { open, anchorEl, handleClose, handleOpen } = useIsOpen()
+  const { open, anchorEl, handleClose, handleOpen } = useIsOpen();
 
   return (
     <>
       <Tooltip title="Settings" arrow>
-        <IconButton aria-label={"Settings"} onClick={handleOpen}>
+        <IconButton aria-label="Settings" onClick={handleOpen}>
           <VideogameAssetIcon />
         </IconButton>
       </Tooltip>
@@ -19,12 +19,12 @@ export const StartMiniGame = () => {
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center',
         }}
         transformOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
+          vertical: 'bottom',
+          horizontal: 'center',
         }}
       >
         <Stack padding={1} gap={1}>
@@ -34,5 +34,5 @@ export const StartMiniGame = () => {
         </Stack>
       </Menu>
     </>
-  )
-}
+  );
+};

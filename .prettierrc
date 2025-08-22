@@ -1,0 +1,29 @@
+{
+  "printWidth": 120,
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": false,
+  "singleQuote": true,
+  "singleAttributePerLine": true,
+  "jsxSingleQuote": false,
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "arrowParens": "always",
+  "endOfLine": "crlf",
+  "overrides": [
+    {
+      "files": [".eslintrc", ".hintrc", ".prettierrc"],
+      "options": {
+        "parser": "json",
+        "trailingComma": "none"
+      }
+    },
+    {
+      "files": "**/*.html",
+      "options": {
+        "printWidth": 120
+      }
+    }
+  ]
+}

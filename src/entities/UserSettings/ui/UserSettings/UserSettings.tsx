@@ -1,3 +1,7 @@
+import type { PropsWithChildren, ReactNode } from 'react';
+import { useState } from 'react';
+
+import CloseIcon from '@mui/icons-material/Close';
 import {
   AppBar,
   Toolbar,
@@ -5,50 +9,61 @@ import {
   IconButton,
   Tab,
   Tabs,
-} from "@mui/material"
-import CloseIcon from "@mui/icons-material/Close"
-import styles from "./UserSettings.module.scss"
-import { PropsWithChildren, ReactNode, useState } from "react"
-import { Broadcasting } from "../Broadcasting/Broadcasting"
+} from '@mui/material';
+
+import { Broadcasting } from '../Broadcasting/Broadcasting';
+
+import styles from './UserSettings.module.scss';
 
 type UserSettingsProps = {
-  onClose?: () => void
-}
+  onClose?: () => void;
+};
 
 type TabPanelProps = {
-  index: number
-  value: number
-} & PropsWithChildren
+  index: number;
+  value: number;
+} & PropsWithChildren;
 function TabPanel(props: TabPanelProps) {
-  const { children, value, index } = props
+  const { children, value, index } = props;
 
-  if (value !== index) return <></>
+  if (value !== index) return <></>;
 
-  return <div className={styles.panel}>{children}</div>
+  return <div className={styles.panel}>{children}</div>;
 }
 
 type AvailableSettings = {
-  label: string
-  component: ReactNode
-}
+  label: string;
+  component: ReactNode;
+};
 const availableSettings: AvailableSettings[] = [
-  { label: "broadcasting", component: <Broadcasting /> },
-  { label: "text", component: <>text</> },
-]
+  {
+    label: 'broadcasting',
+    component: <Broadcasting />,
+  },
+  {
+    label: 'text',
+    component: <>text</>,
+  },
+];
 
 export const UserSettings = (props: UserSettingsProps) => {
-  const { onClose } = props
-  const [value, setValue] = useState(0)
+  const { onClose } = props;
+  const [value, setValue] = useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue)
-  }
+    setValue(newValue);
+  };
 
   return (
     <div className={styles.mainWrapper}>
       <AppBar className={styles.header} position="static">
         <Toolbar className={styles.wrapper} variant="dense">
-          <Typography variant="h5" sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h5"
+            sx={{
+              flexGrow: 1,
+            }}
+          >
             Settings
           </Typography>
           {onClose && (
@@ -69,17 +84,23 @@ export const UserSettings = (props: UserSettingsProps) => {
             onChange={handleChange}
             aria-label="basic tabs example"
           >
-            {availableSettings.map((tab, index) => (
-              <Tab className={styles.tab} key={index} label={tab.label} />
-            ))}
+            {availableSettings.map((tab, index) => (<Tab
+              className={styles.tab}
+              key={index}
+              label={tab.label}
+            />))}
           </Tabs>
           {availableSettings.map((tab, index) => (
-            <TabPanel key={index} value={value} index={index}>
+            <TabPanel
+              key={index}
+              value={value}
+              index={index}
+            >
               {tab.component}
             </TabPanel>
           ))}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

@@ -1,6 +1,7 @@
-import { RTCChatMessage } from "@/entities/RTCClient"
-import { readablizeBytes } from "@/shared/lib/utils/Numbers/readablizeBytes/ReadablizeBytes"
-import LinearProgress from "@mui/material/LinearProgress"
+import { LinearProgress } from '@mui/material'
+import { readablizeBytes } from 'src/shared/lib/utils/Numbers'
+
+import type { RTCChatMessage } from 'src/entities/RTCClient'
 
 type MessageFileProps = {
   data: RTCChatMessage
@@ -20,7 +21,11 @@ export const MessageLoadingFile = (props: MessageFileProps) => {
       loading {data.blobParams?.name || data.blobParams?.type}
       <br />
       {readablizeBytes(data.blobParams?.loaded)} / {readablizeBytes(data.blobParams?.length)}
-      <LinearProgress variant="determinate" value={progress * 100} />
+      <LinearProgress
+        variant="determinate"
+        value={progress * 100}
+      />
     </i>
   )
 }
+

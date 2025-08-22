@@ -1,1 +1,1 @@
-export { splitStringToChunks } from "./splitStringToChunks/splitStringToChunks"
+export { splitStringToChunks } from './splitStringToChunks/splitStringToChunks';

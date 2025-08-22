@@ -1,7 +1,10 @@
-import { TicTacToeBoardType } from "../../model/types/TicTacToe"
-import styles from "./TicTacToeBoard.module.scss"
-import { TicTacToeField } from "../TicTacToeField/TicTacToeField"
-import { classNames } from "@/shared/lib/classNames/classNames"
+import { classNames } from 'src/shared/lib/classNames/classNames'
+
+import type { TicTacToeBoardType } from '../../model/types/TicTacToe'
+
+import { TicTacToeField } from '../TicTacToeField/TicTacToeField'
+
+import styles from './TicTacToeBoard.module.scss'
 
 type TicTacToeBoardProps = {
   board: TicTacToeBoardType
@@ -13,15 +16,13 @@ export const TicTacToeBoard = (props: TicTacToeBoardProps) => {
   const { board, activefield, onCeilClick } = props
 
   return (
-    <div className={styles["TicTacToeBoard"]}>
+    <div className={styles['TicTacToeBoard']}>
       {board.map((field, index) => {
-        const isDisabled =
-          activefield !== undefined && activefield !== index ? true : false
-        const inert = isDisabled ? { inert: "" } : {}
+        const isDisabled = !!(activefield !== undefined && activefield !== index)
 
         return (
           <table
-            {...inert}
+            inert
             className={classNames(styles.field, {
               [styles.disable]: isDisabled,
             })}
@@ -39,3 +40,4 @@ export const TicTacToeBoard = (props: TicTacToeBoardProps) => {
     </div>
   )
 }
+

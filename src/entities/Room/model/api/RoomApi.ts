@@ -1,6 +1,6 @@
-// import { rtkApi } from "@/shared/api/RtkApi"
-// import { socketClient } from "@/shared/api/socket/socket"
-// import { SocketActions } from "@/shared/api/socket/actions"
+// import { rtkApi } from "src/shared/api/RtkApi"
+// import { socketClient } from "src/shared/api/socket/socket"
+// import { SocketActions } from "src/shared/api/socket/actions"
 // import { RoomModel } from "../types/RoomSchema"
 // import { FormateAtributedRoom } from "../service/formateRoom"
 
@@ -34,4 +34,4 @@
 
 // export const useGetRooms = RoomApi.useGetRoomsQuery
 
-export default {}
+export default {};

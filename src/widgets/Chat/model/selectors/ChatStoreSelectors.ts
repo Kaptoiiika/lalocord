@@ -1,4 +1,3 @@
-import { ChatSchema } from "../types/ChatSchema"
+import type { ChatSchema } from '../types/ChatSchema';
 
-export const getMessages = (state: ChatSchema) => state.messageList
-
+export const getMessages = (state: ChatSchema) => state.messageList;

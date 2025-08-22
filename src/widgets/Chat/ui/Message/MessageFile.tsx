@@ -1,39 +1,43 @@
-import { getActionSeletFileToImagePreview } from "@/features/ImagePreview"
-import { useImagePreviewStore } from "@/features/ImagePreview/model/store/ImagePreviewStore"
-import { Link } from "@mui/material"
-import { useState } from "react"
-import { RTCChatMessage } from "@/entities/RTCClient"
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { readablizeBytes } from "@/shared/lib/utils/Numbers/readablizeBytes/ReadablizeBytes"
+import { useState } from 'react';
+
+import { Link } from '@mui/material';
+import { getActionSeletFileToImagePreview } from 'src/features/ImagePreview';
+import { useImagePreviewStore } from 'src/features/ImagePreview/model/store/ImagePreviewStore';
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect';
+import { readablizeBytes } from 'src/shared/lib/utils/Numbers/readablizeBytes/ReadablizeBytes';
+
+import type { RTCChatMessage } from 'src/entities/RTCClient';
 
 type MessageFileProps = {
-  data: RequireOnlyOne<RTCChatMessage, "blob">
-}
+  data: RequireOnlyOne<RTCChatMessage, 'blob'>;
+};
 
 export const MessageFile = (props: MessageFileProps) => {
-  const selectImage = useImagePreviewStore(getActionSeletFileToImagePreview)
-  const [error, setError] = useState(false)
-  const { data } = props
-  const [blobUrl, setBlobUrl] = useState<string>()
+  const selectImage = useImagePreviewStore(getActionSeletFileToImagePreview);
+  const [error, setError] = useState(false);
+  const { data } = props;
+  const [blobUrl, setBlobUrl] = useState<string>();
 
   const handleClick = (e: React.MouseEvent<HTMLImageElement>) => {
-    selectImage(e.currentTarget.src)
-  }
+    selectImage(e.currentTarget.src);
+  };
 
   const handleError = () => {
-    setError(true)
-  }
+    setError(true);
+  };
 
   useMountedEffect(() => {
-    const url = URL.createObjectURL(data.blob)
-    setBlobUrl(url)
+    const url = URL.createObjectURL(data.blob);
+
+    setBlobUrl(url);
+
     return () => {
-      URL.revokeObjectURL(url)
-    }
-  })
+      URL.revokeObjectURL(url);
+    };
+  });
 
   if (!blobUrl) {
-    return <span>...loading</span>
+    return <span>...loading</span>;
   }
   if (error) {
     return (
@@ -43,10 +47,10 @@ export const MessageFile = (props: MessageFileProps) => {
         target="_blank"
         rel="noreferrer"
       >
-        {data.blobParams?.name || data.blob.type || "unknown file"} -{" "}
+        {data.blobParams?.name || data.blob.type || 'unknown file'} -{' '}
         {readablizeBytes(data.blob.size)}
       </Link>
-    )
+    );
   }
 
   return (
@@ -55,7 +59,10 @@ export const MessageFile = (props: MessageFileProps) => {
       onClick={handleClick}
       alt=""
       src={blobUrl}
-      style={{ width: "100%", objectFit: "contain" }}
+      style={{
+        width: '100%',
+        objectFit: 'contain',
+      }}
     />
-  )
-}
+  );
+};

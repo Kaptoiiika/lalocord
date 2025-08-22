@@ -1,40 +1,41 @@
-import { useRoomRTCStore } from "@/entities/RTCClient"
-import { UserStreamSettings } from "@/entities/RTCClient/model/types/RoomRTCSchema"
-import { getUserStreamSettings } from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
+import { useState } from 'react';
+
+import type { SelectChangeEvent } from '@mui/material';
 import {
-  SelectChangeEvent,
   FormControl,
   InputLabel,
   Typography,
   Select,
   MenuItem,
-} from "@mui/material"
-import { useState } from "react"
+} from '@mui/material';
+import { useRoomRTCStore } from 'src/entities/RTCClient';
+import { getUserStreamSettings } from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors';
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect';
 
-type SelectMicrophoneProps = {}
+import type { UserStreamSettings } from 'src/entities/RTCClient/model/types/RoomRTCSchema';
 
-export const SelectMicrophone = (props: SelectMicrophoneProps) => {
-  const {} = props
-  const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
+export const SelectMicrophone = () => {
+  const userStreamSettings = useRoomRTCStore(getUserStreamSettings);
   const setStreamingSettings = useRoomRTCStore(
     (state) => state.setStreamSettings
-  )
-  const [microphones, setmicrophones] = useState<MediaDeviceInfo[]>([])
-  const [error, setError] = useState("")
+  );
+  const [microphones, setmicrophones] = useState<MediaDeviceInfo[]>([]);
+  const [error, setError] = useState('');
+
   useMountedEffect(() => {
     navigator.mediaDevices
       ?.enumerateDevices()
       .then((devices) => {
         const microphones = devices.filter(
-          (device) => device.kind === "audioinput"
-        )
-        setmicrophones(microphones)
+          (device) => device.kind === 'audioinput'
+        );
+
+        setmicrophones(microphones);
       })
       .catch(() => {
-        setError("No access")
-      })
-  })
+        setError('No access');
+      });
+  });
 
   const handleChange = (event: SelectChangeEvent) => {
     const newstreamSettings: UserStreamSettings = {
@@ -43,29 +44,40 @@ export const SelectMicrophone = (props: SelectMicrophoneProps) => {
         ...userStreamSettings.audio,
         deviceId: event.target.value,
       },
-    }
-    setStreamingSettings(newstreamSettings)
-  }
+    };
+
+    setStreamingSettings(newstreamSettings);
+  };
 
   const selectedMicrophone = microphones.find((microphone) => {
-    if (typeof userStreamSettings.video === "object")
-      return microphone.deviceId === userStreamSettings.audio.deviceId
-  })
+    if (typeof userStreamSettings.video === 'object')
+      return microphone.deviceId === userStreamSettings.audio.deviceId;
+  });
 
   if (error) {
     return (
-      <FormControl sx={{ m: 1, width: 200 }}>
+      <FormControl
+        sx={{
+          m: 1,
+          width: 200,
+        }}
+      >
         <InputLabel>{error}</InputLabel>
       </FormControl>
-    )
+    );
   }
 
   return (
-    <FormControl sx={{ m: 1, width: 200 }}>
+    <FormControl
+      sx={{
+        m: 1,
+        width: 200,
+      }}
+    >
       <Typography>Microphone</Typography>
       <Select
         fullWidth
-        value={selectedMicrophone?.deviceId || ""}
+        value={selectedMicrophone?.deviceId || ''}
         onChange={handleChange}
       >
         {microphones.map((microphone) => (
@@ -75,5 +87,5 @@ export const SelectMicrophone = (props: SelectMicrophoneProps) => {
         ))}
       </Select>
     </FormControl>
-  )
-}
+  );
+};

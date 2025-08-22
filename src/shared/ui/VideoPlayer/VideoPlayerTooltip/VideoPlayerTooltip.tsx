@@ -1,16 +1,20 @@
-import { classNames } from "@/shared/lib/classNames/classNames"
-import { PropsWithChildren } from "react"
-import styles from "./VideoPlayerTooltip.module.scss"
+import type { PropsWithChildren } from 'react';
+
+import { classNames } from 'src/shared/lib/classNames/classNames';
+
+import styles from './VideoPlayerTooltip.module.scss';
+
 
 type VideoPlayerTooltipProps = {
-  open: boolean
-  top?: boolean
-  bottom?: boolean
-  className?: string
-} & PropsWithChildren
+  open: boolean;
+  top?: boolean;
+  bottom?: boolean;
+  className?: string;
+} & PropsWithChildren;
 
 export const VideoPlayerTooltip = (props: VideoPlayerTooltipProps) => {
-  const { open, children, top, bottom, className } = props
+  const { open, children, top, bottom, className } = props;
+
   return (
     <div
       className={classNames(styles.tooltip, {
@@ -24,5 +28,5 @@ export const VideoPlayerTooltip = (props: VideoPlayerTooltipProps) => {
       </div>
       <div className={className}>{children}</div>
     </div>
-  )
-}
+  );
+};

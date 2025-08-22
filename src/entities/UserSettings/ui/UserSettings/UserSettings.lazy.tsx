@@ -1,7 +1,5 @@
-import { lazy } from "react"
+import { lazy } from 'react';
 
-export const UserSettingsLazy = lazy(() =>
-  import("./UserSettings").then((module) => ({
+export const UserSettingsLazy = lazy(() => import('./UserSettings').then((module) => ({
     default: module.UserSettings,
-  }))
-)
+  })));

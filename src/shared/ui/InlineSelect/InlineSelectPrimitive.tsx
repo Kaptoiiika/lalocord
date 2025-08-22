@@ -1,20 +1,23 @@
-import { Input } from "@mui/material"
-import Typography from "@mui/material/Typography"
-import { ChangeEvent, ReactNode, useState, useEffect } from "react"
-import styles from "./InlineSelect.module.scss"
-import { useTheme } from "@/shared/lib/hooks/useTheme/useTheme"
+import type { ChangeEvent, ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 
-type AllowType = string
+import { Input, Typography } from '@mui/material';
+import { useTheme } from 'src/shared/lib/hooks/useTheme/useTheme';
+
+import styles from './InlineSelect.module.scss';
+
+
+type AllowType = string;
 
 type InlineSelectProps = {
-  list: AllowType[]
-  value?: AllowType
-  title?: ReactNode
-  allowCustomValue?: boolean
-  customValue?: AllowType
-  onSelect?: (newValue: AllowType) => void
-  onCustomValueChange?: (newValue: AllowType) => void
-}
+  list: AllowType[];
+  value?: AllowType;
+  title?: ReactNode;
+  allowCustomValue?: boolean;
+  customValue?: AllowType;
+  onSelect?: (newValue: AllowType) => void;
+  onCustomValueChange?: (newValue: AllowType) => void;
+};
 
 export const InlineSelectPrimitive = (props: InlineSelectProps) => {
   const {
@@ -25,39 +28,40 @@ export const InlineSelectPrimitive = (props: InlineSelectProps) => {
     onCustomValueChange,
     allowCustomValue,
     customValue: propsCustomValue,
-  } = props
-  const { MuiTheme } = useTheme()
-  const [selectedValue, setSelectedValue] = useState(value)
-  const [customValue, setCustomValue] = useState<AllowType>()
+  } = props;
+  const { MuiTheme } = useTheme();
+  const [selectedValue, setSelectedValue] = useState(value);
+  const [customValue, setCustomValue] = useState<AllowType>();
 
   useEffect(() => {
-    if (propsCustomValue) setCustomValue(propsCustomValue)
-  }, [propsCustomValue])
+    if (propsCustomValue) setCustomValue(propsCustomValue);
+  }, [propsCustomValue]);
 
   const handleSelect = (value: AllowType) => {
-    setSelectedValue(value)
-    onSelect?.(value)
-  }
+    setSelectedValue(value);
+    onSelect?.(value);
+  };
 
   const isCurrentValue = (item: AllowType) => {
-    if (value) return item === value
-    return item === selectedValue
-  }
+    if (value) return item === value;
+
+    return item === selectedValue;
+  };
 
   const handleCustomValueChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    onCustomValueChange?.(e.currentTarget.value)
-    setCustomValue(e.currentTarget.value)
-  }
+    onCustomValueChange?.(e.currentTarget.value);
+    setCustomValue(e.currentTarget.value);
+  };
 
   const handleSelectCustomValue = () => {
     if (customValue) {
-      onCustomValueChange?.(customValue)
+      onCustomValueChange?.(customValue);
     }
-  }
+  };
 
-  const customValueIsActive = customValue ? isCurrentValue(customValue) : false
+  const customValueIsActive = customValue ? isCurrentValue(customValue) : false;
 
   return (
     <div className={styles.selector}>
@@ -68,7 +72,7 @@ export const InlineSelectPrimitive = (props: InlineSelectProps) => {
             style={{
               background: isCurrentValue(item)
                 ? MuiTheme?.palette.primary.main
-                : "none",
+                : 'none',
               color: isCurrentValue(item)
                 ? MuiTheme?.palette.primary.contrastText
                 : MuiTheme?.palette.primary.main,
@@ -99,5 +103,5 @@ export const InlineSelectPrimitive = (props: InlineSelectProps) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};

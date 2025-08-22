@@ -1,33 +1,26 @@
+import { useCallback } from 'react'
+
+import MicIcon from '@mui/icons-material/Mic'
+import MicOffIcon from '@mui/icons-material/MicOff'
+import { Tooltip, IconButton, FormControlLabel, Switch, Stack, Menu } from '@mui/material'
+import { useRoomRTCStore } from 'src/entities/RTCClient'
 import {
   getMicrophoneStream,
   getActionStartMicrophoneStream,
   getActionStopMicrophoneStream,
   getUserStreamSettings,
-} from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
-import {
-  Tooltip,
-  IconButton,
-  FormControlLabel,
-  Switch,
-  Stack,
-} from "@mui/material"
-import { useCallback } from "react"
-import MicIcon from "@mui/icons-material/Mic"
-import MicOffIcon from "@mui/icons-material/MicOff"
-import { useRoomRTCStore } from "@/entities/RTCClient"
-import Menu from "@mui/material/Menu"
-import { usePopup } from "@/shared/lib/hooks/usePopup/usePopup"
-import { SelectMicrophone } from "./SelectMicrophone"
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
+} from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors'
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
+
+import { SelectMicrophone } from './SelectMicrophone'
 // import styles from "./ShareMicrophoneMenu.module.scss"
 
 export const ShareMicrophoneMenu = () => {
   const startStream = useRoomRTCStore(getActionStartMicrophoneStream)
   const stopStream = useRoomRTCStore(getActionStopMicrophoneStream)
   const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
-  const setStreamingSettings = useRoomRTCStore(
-    (state) => state.setStreamSettings
-  )
+  const setStreamingSettings = useRoomRTCStore((state) => state.setStreamSettings)
   const microphoneStream = useRoomRTCStore(getMicrophoneStream)
   const { handleClick, handleClose, anchorEl, open } = usePopup()
   const autoOn = userStreamSettings.audio.autoOn
@@ -35,7 +28,7 @@ export const ShareMicrophoneMenu = () => {
   const handleStartMicStream = async () => {
     try {
       startStream()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error)
     }
   }
@@ -48,7 +41,10 @@ export const ShareMicrophoneMenu = () => {
     (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
       setStreamingSettings({
         ...userStreamSettings,
-        audio: { ...userStreamSettings.audio, autoOn: checked },
+        audio: {
+          ...userStreamSettings.audio,
+          autoOn: checked,
+        },
       })
     },
     [setStreamingSettings, userStreamSettings]
@@ -60,14 +56,23 @@ export const ShareMicrophoneMenu = () => {
 
   return (
     <>
-      {!!microphoneStream ? (
-        <Tooltip title="Turn off microphone" arrow>
-          <IconButton onClick={handleStopStream} onContextMenu={handleClick}>
+      {microphoneStream ? (
+        <Tooltip
+          title="Turn off microphone"
+          arrow
+        >
+          <IconButton
+            onClick={handleStopStream}
+            onContextMenu={handleClick}
+          >
             <MicIcon color="success" />
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Turn on microphone" arrow>
+        <Tooltip
+          title="Turn on microphone"
+          arrow
+        >
           <IconButton
             onClick={handleStartMicStream}
             onContextMenu={handleClick}
@@ -82,12 +87,12 @@ export const ShareMicrophoneMenu = () => {
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center',
         }}
         transformOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
+          vertical: 'bottom',
+          horizontal: 'center',
         }}
       >
         <Stack gap={1}>
@@ -107,3 +112,4 @@ export const ShareMicrophoneMenu = () => {
     </>
   )
 }
+

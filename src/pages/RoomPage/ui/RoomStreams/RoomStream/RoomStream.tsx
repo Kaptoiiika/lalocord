@@ -1,33 +1,35 @@
-import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
-import { Button, Stack, Tooltip, Typography } from "@mui/material"
-import styles from "./RoomStream.module.scss"
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { memo, useId, useRef, useState } from "react"
-import RemoveIcon from "@mui/icons-material/Remove"
-import { classNames } from "@/shared/lib/classNames/classNames"
-import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
-import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
+import { memo, useId, useRef, useState } from 'react';
+
+import RemoveIcon from '@mui/icons-material/Remove';
+import { Button, Stack, Tooltip, Typography } from '@mui/material';
+import { classNames } from 'src/shared/lib/classNames/classNames';
+import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen';
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect';
+import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition';
+import { VideoPlayer } from 'src/shared/ui/VideoPlayer/VideoPlayer';
+
+import styles from './RoomStream.module.scss';
 
 type RoomStreamProps = {
-  stream: MediaStream
+  stream: MediaStream;
   /**
    * default auto
    * if (document.hidden === true) autoplay = true
    * else autoplay = false
    * @type {string}
    */
-  autoplay?: boolean
-  hide?: boolean
-  hideId?: number
-  title?: string
-  volume?: number
-  mute?: boolean
-  onHide?: () => void
-  onUnHide?: () => void
-  onVolumeChange?: (volume: number) => void
-  onPlay?: () => void
-  onPause?: () => void
-}
+  autoplay?: boolean;
+  hide?: boolean;
+  hideId?: number;
+  title?: string;
+  volume?: number;
+  mute?: boolean;
+  onHide?: () => void;
+  onUnHide?: () => void;
+  onVolumeChange?: (volume: number) => void;
+  onPlay?: () => void;
+  onPause?: () => void;
+};
 
 export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   const {
@@ -43,62 +45,66 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     onPause,
     onPlay,
     onUnHide,
-  } = props
-  const componentId = useId().split(":").join("")
-  const [autoplay, setAutoplay] = useState(!document.hidden)
-  const [played, setPlayed] = useState(false)
-  const [hide, setHide] = useState(false)
+  } = props;
+  const componentId = useId().split(':').join('');
+  const [autoplay, setAutoplay] = useState(!document.hidden);
+  const [played, setPlayed] = useState(false);
+  const [hide, setHide] = useState(false);
   const {
     handleOpen: handleOpenfullscreen,
     handleClose: handleClosefullscreen,
     open: fullScreen,
-  } = useIsOpen()
+  } = useIsOpen();
 
   useMountedEffect(() => {
     const fn = () => {
-      if (document.hidden) setAutoplay(false)
-      else setAutoplay(true)
-    }
-    document.addEventListener("visibilitychange", fn)
+      if (document.hidden) setAutoplay(false);
+      else setAutoplay(true);
+    };
+
+    document.addEventListener('visibilitychange', fn);
+
     return () => {
-      document.removeEventListener("visibilitychange", fn)
-    }
-  })
+      document.removeEventListener('visibilitychange', fn);
+    };
+  });
 
   const handlePause = () => {
-    setPlayed(false)
-    onPause?.()
-  }
+    setPlayed(false);
+    onPause?.();
+  };
   const handlePlay = () => {
-    setPlayed(true)
-    onPlay?.()
-  }
+    setPlayed(true);
+    onPlay?.();
+  };
 
   const handleHide = async () => {
-    if (played) handlePause()
-    handleClosefullscreen()
-    await startViewTransition()
-    setHide(true)
-    onHide?.()
-  }
+    if (played) handlePause();
+    handleClosefullscreen();
+    await startViewTransition();
+    setHide(true);
+    onHide?.();
+  };
 
   const handleUnHide = async () => {
-    if (!played) handlePlay()
-    await startViewTransition()
-    setHide(false)
-    onUnHide?.()
-  }
+    if (!played) handlePlay();
+    await startViewTransition();
+    setHide(false);
+    onUnHide?.();
+  };
 
-  const onUnHideRef = useRef(onUnHide)
-  onUnHideRef.current = onUnHide
+  const onUnHideRef = useRef(onUnHide);
+
+  onUnHideRef.current = onUnHide;
   useMountedEffect(() => {
-    const getOnUnHideRef = () => onUnHideRef.current
-    return () => {
-      getOnUnHideRef()?.()
-    }
-  })
+    const getOnUnHideRef = () => onUnHideRef.current;
 
-  const isHidden = propsHide ?? hide
+    return () => {
+      getOnUnHideRef()?.();
+    };
+  });
+
+  const isHidden = propsHide ?? hide;
 
   return (
     <div
@@ -106,7 +112,9 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         viewTransitionName: componentId,
         left: (hideId ?? 0) * 100,
       }}
-      className={classNames(styles.stream, { [styles.hideStream]: isHidden })}
+      className={classNames(styles.stream, {
+        [styles.hideStream]: isHidden,
+      })}
     >
       <VideoPlayer
         played={played}
@@ -147,5 +155,5 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         </div>
       )}
     </div>
-  )
-})
+  );
+});

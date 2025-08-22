@@ -1,48 +1,52 @@
-import { Link as MuiLink, Typography, Button, Menu, Stack } from "@mui/material"
-import Linkify from "react-linkify"
-import { MessageModelNew } from "../../model/types/ChatSchema"
-import { useImagePreviewStore } from "@/features/ImagePreview/model/store/ImagePreviewStore"
-import { getActionSeletFileToImagePreview } from "@/features/ImagePreview"
-import { MessageFile } from "./MessageFile"
-import { RTCChatMessage } from "@/entities/RTCClient"
-import { MessageLoadingFile } from "./MessageLoadingFile"
-import { useState } from "react"
-import { useChatStore } from "../../model/store/ChatStore"
-import { MessageTransmission } from "./MessageTransmission"
+import { useState } from 'react';
+
+import { Link as MuiLink, Typography, Button, Menu, Stack } from '@mui/material';
+import Linkify from 'react-linkify';
+import { getActionSeletFileToImagePreview } from 'src/features/ImagePreview';
+import { useImagePreviewStore } from 'src/features/ImagePreview/model/store/ImagePreviewStore';
+
+import type { MessageModelNew } from '../../model/types/ChatSchema';
+import type { RTCChatMessage } from 'src/entities/RTCClient';
+
+import { MessageFile } from './MessageFile';
+import { MessageLoadingFile } from './MessageLoadingFile';
+import { MessageTransmission } from './MessageTransmission';
+import { useChatStore } from '../../model/store/ChatStore';
+
 
 type MessageProps = {
-  data: MessageModelNew
-  className?: string
-}
+  data: MessageModelNew;
+  className?: string;
+};
 
 function checkURLisImageLink(url: string) {
   return (
-    url.match(/^http[^\?]*.(jpg|jpeg|gif|png|tiff|bmp)(\?(.*))?$/gim) != null
-  )
+    url.match(/^http[^?]*.(jpg|jpeg|gif|png|tiff|bmp)(\?(.*))?$/gim) != null
+  );
 }
 
 export const Message = (props: MessageProps) => {
-  const { data, className } = props
-  const deleteMessageAction = useChatStore((state) => state.deleteMessage)
-  const selectImage = useImagePreviewStore(getActionSeletFileToImagePreview)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
+  const { data, className } = props;
+  const deleteMessageAction = useChatStore((state) => state.deleteMessage);
+  const selectImage = useImagePreviewStore(getActionSeletFileToImagePreview);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
   const handleClick = (e: React.MouseEvent<HTMLImageElement>) => {
-    selectImage(e.currentTarget.src)
-  }
+    selectImage(e.currentTarget.src);
+  };
 
   const handleDeleteMessage = () => {
-    deleteMessageAction(data.message.id)
-  }
+    deleteMessageAction(data.message.id);
+  };
 
   const handleOpenContextMenu = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault()
-    setAnchorEl(e.currentTarget)
-  }
+    e.preventDefault();
+    setAnchorEl(e.currentTarget);
+  };
 
   const handleCloseContextMenu = () => {
-    setAnchorEl(null)
-  }
+    setAnchorEl(null);
+  };
 
   return (
     <Typography
@@ -50,9 +54,13 @@ export const Message = (props: MessageProps) => {
       component="pre"
       className={className}
     >
-      <Menu anchorEl={anchorEl} open={open} onClose={handleCloseContextMenu}>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleCloseContextMenu}
+      >
         <Stack>
-          <Button onClick={handleDeleteMessage}>{"Delete message"}</Button>
+          <Button onClick={handleDeleteMessage}>Delete message</Button>
         </Stack>
       </Menu>
 
@@ -64,15 +72,23 @@ export const Message = (props: MessageProps) => {
                 onClick={handleClick}
                 alt=""
                 src={href}
-                style={{ width: "100%", objectFit: "contain" }}
+                style={{
+                  width: '100%',
+                  objectFit: 'contain',
+                }}
               />
-            )
+            );
 
           return (
-            <MuiLink key={key} href={href} target="_blank" rel="noreferrer">
+            <MuiLink
+              key={key}
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+            >
               {text}
             </MuiLink>
-          )
+          );
         }}
       >
         {data.message.message}
@@ -80,11 +96,11 @@ export const Message = (props: MessageProps) => {
       {/* type guard don't work with this :( */}
       {!!data.message.blob && (
         <MessageFile
-          data={data.message as RequireOnlyOne<RTCChatMessage, "blob">}
+          data={data.message as RequireOnlyOne<RTCChatMessage, 'blob'>}
         />
       )}
       {!!data.message.blobParams && <MessageLoadingFile data={data.message} />}
       {!!data.message.transmission && <MessageTransmission data={data} />}
     </Typography>
-  )
-}
+  );
+};

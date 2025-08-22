@@ -1,20 +1,26 @@
-import { classNames } from "@/shared/lib/classNames/classNames"
-import { Typography } from "@mui/material"
-import { memo } from "react"
-import { getMessages } from "../../model/selectors/ChatStoreSelectors"
-import { useChatStore } from "../../model/store/ChatStore"
-import { MessageModelNew } from "../../model/types/ChatSchema"
-import { Message } from "../Message/Message"
-import styles from "./MessageList.module.scss"
+import { memo } from 'react';
+
+import { Typography } from '@mui/material';
+import { classNames } from 'src/shared/lib/classNames/classNames';
+
+import type { MessageModelNew } from '../../model/types/ChatSchema';
+
+import { getMessages } from '../../model/selectors/ChatStoreSelectors';
+import { useChatStore } from '../../model/store/ChatStore';
+import { Message } from '../Message/Message';
+
+import styles from './MessageList.module.scss';
+
 
 type MessageItemProps = {
-  message: MessageModelNew
-  index: number
-  arr: MessageModelNew[]
-}
+  message: MessageModelNew;
+  index: number;
+  arr: MessageModelNew[];
+};
 
 const MessageItem = (props: MessageItemProps) => {
-  const { arr, index, message } = props
+  const { arr, index, message } = props;
+
   if (message.message.isSystemMessage) {
     return (
       <Message
@@ -22,10 +28,10 @@ const MessageItem = (props: MessageItemProps) => {
         data={message}
         className={styles.messageText}
       />
-    )
+    );
   }
 
-  const prevMessage = index ? arr[index - 1] : undefined
+  const prevMessage = index ? arr[index - 1] : undefined;
 
   if (prevMessage?.user === message.user) {
     return (
@@ -35,7 +41,7 @@ const MessageItem = (props: MessageItemProps) => {
       >
         <Message data={message} className={styles.messageText} />
       </li>
-    )
+    );
   }
 
   return (
@@ -48,20 +54,20 @@ const MessageItem = (props: MessageItemProps) => {
       </Typography>
       <Message data={message} className={styles.messageText} />
     </li>
-  )
-}
+  );
+};
 
 export const MessageList = memo(function MessageList() {
-  const [messageList] = useChatStore(getMessages)
+  const [messageList] = useChatStore(getMessages);
 
-  const messages: MessageModelNew[] = [...messageList.values()]
+  const messages: MessageModelNew[] = [...messageList.values()];
 
   return (
     <ul
       className={styles.list}
       ref={(node) => {
-        if (!node) return
-        node.scrollTop = node.scrollHeight - node.clientHeight
+        if (!node) return;
+        node.scrollTop = node.scrollHeight - node.clientHeight;
       }}
     >
       {messages.map((value, index, arr) => (
@@ -73,5 +79,5 @@ export const MessageList = memo(function MessageList() {
         />
       ))}
     </ul>
-  )
-})
+  );
+});

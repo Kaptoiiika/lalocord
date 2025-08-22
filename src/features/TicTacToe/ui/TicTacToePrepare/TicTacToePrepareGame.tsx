@@ -1,19 +1,22 @@
-import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
-import { Button } from "@mui/material"
-import { PropsWithChildren } from "react"
-import { TicTacToeSelectOpponent } from "../TicTacToeSelectOpponent/TicTacToeSelectOpponent"
+import type { PropsWithChildren } from 'react';
 
-type TicTacToePrepareGameProps = { onStart?: () => void } & PropsWithChildren
+import { Button } from '@mui/material';
+import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen';
+
+import { TicTacToeSelectOpponent } from '../TicTacToeSelectOpponent/TicTacToeSelectOpponent';
+
+
+type TicTacToePrepareGameProps = { onStart?: () => void } & PropsWithChildren;
 
 export const TicTacToePrepareGame = (props: TicTacToePrepareGameProps) => {
-  const { onStart } = props
+  const { onStart } = props;
 
-  const { handleOpen, open, handleClose } = useIsOpen()
+  const { handleOpen, open, handleClose } = useIsOpen();
 
   const handleStartGame = () => {
-    handleClose()
-    onStart?.()
-  }
+    handleClose();
+    onStart?.();
+  };
 
   return (
     <>
@@ -27,5 +30,5 @@ export const TicTacToePrepareGame = (props: TicTacToePrepareGameProps) => {
         onSelect={handleStartGame}
       />
     </>
-  )
-}
+  );
+};

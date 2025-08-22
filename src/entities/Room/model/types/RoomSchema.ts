@@ -1,8 +1,7 @@
-// eslint-disable-next-line boundaries/element-types
-import { UserModel } from "@/entities/User"
+import type { UserModel } from 'src/entities/User';
 
 export interface RoomModel {
-  name: string
-  id: string
-  userList: UserModel[]
+  name: string;
+  id: string;
+  userList: UserModel[];
 }

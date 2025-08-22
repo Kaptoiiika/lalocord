@@ -1,3 +1,3 @@
-import { UserSchema } from "../types/UserSchema"
+import type { UserSchema } from '../types/UserSchema';
 
-export const getLocalUser = (state: UserSchema) => state.localUser
+export const getLocalUser = (state: UserSchema) => state.localUser;

@@ -1,27 +1,28 @@
-
 export function PriorityNumberToText(value: number): RTCPriorityType {
   switch (value) {
     case 4:
-      return "high"
+      return 'high';
     case 3:
-      return "medium"
+      return 'medium';
     case 2:
-      return "low"
+      return 'low';
     case 1:
-      return "very-low"
+      return 'very-low';
   }
-  return "low"
+
+  return 'low';
 }
 export function PriorityTextToNumber(value?: string): number {
   switch (value) {
-    case "high":
-      return 4
-    case "medium":
-      return 3
-    case "low":
-      return 2
-    case "very-low":
-      return 1
+    case 'high':
+      return 4;
+    case 'medium':
+      return 3;
+    case 'low':
+      return 2;
+    case 'very-low':
+      return 1;
   }
-  return 2
+
+  return 2;
 }

@@ -1,14 +1,17 @@
-import { TicTacToe } from "@/features/TicTacToe"
-import { MainPage } from "@/pages/MainPage"
-import { RoomPage } from "@/pages/RoomPage"
+import { Navigate } from 'react-router-dom';
+
+
+import { TicTacToe } from 'src/features/TicTacToe';
+import { MainPage } from 'src/pages/MainPage';
+import { RoomPage } from 'src/pages/RoomPage';
 import {
-  AppRouteProps,
   AppRoutes,
-} from "@/shared/config/routeConfig/routeConfig"
-import { Navigate } from "react-router-dom"
+} from 'src/shared/config/routeConfig/routeConfig';
+
+import type { AppRouteProps } from 'src/shared/config/routeConfig/routeConfig';
 
 export const RoutesConfig: Record<string, AppRouteProps> = {
-  "*": {
+  '*': {
     element: <Navigate to={AppRoutes.MAIN_PAGE} />,
   },
 
@@ -23,4 +26,4 @@ export const RoutesConfig: Record<string, AppRouteProps> = {
   game: {
     element: <TicTacToe />,
   },
-}
+};
