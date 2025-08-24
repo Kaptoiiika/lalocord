@@ -6,7 +6,7 @@ import {
   getRoomName,
   getRoomUsers,
 } from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors';
-import { useUserStore } from 'src/entities/User';
+import { useLocalUserStore } from 'src/entities/User';
 import { VolumeMeter } from 'src/features/VolumeMetter/ui/VolumeMeter';
 import { UserAvatar } from 'src/shared/ui/UserAvatar/UserAvatar';
 
@@ -18,7 +18,7 @@ export const RoomUsers = () => {
   const users = useRoomRTCStore(getRoomUsers);
   const roomName = useRoomRTCStore(getRoomName);
   const microphoneStream = useRoomRTCStore(getMicrophoneStream);
-  const localUsername = useUserStore((state) => state.localUser);
+  const localUsername = useLocalUserStore((state) => state.localUser);
 
   const userList = Object.values(users);
 

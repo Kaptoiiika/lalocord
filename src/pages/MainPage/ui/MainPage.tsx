@@ -1,17 +1,17 @@
-import { Link as MuiLink, Stack, TextField, Typography } from '@mui/material';
-import { RoomList } from 'src/entities/Room';
-import { UserChangeAvatar, useUserStore } from 'src/entities/User';
-import { __IS_ELECTRON__ } from 'src/shared/const/config';
-import { AppFooter } from 'src/widgets/Footer';
-import { PageWrapper } from 'src/widgets/Page';
+import { Link as MuiLink, Stack, TextField, Typography } from '@mui/material'
+import { RoomList } from 'src/entities/Room'
+import { UserCardById, UserChangeAvatar, useLocalUserStore } from 'src/entities/User'
+import { __IS_ELECTRON__ } from 'src/shared/const/config'
+import { AppFooter } from 'src/widgets/Footer'
+import { PageWrapper } from 'src/widgets/Page'
 
-import styles from './MainPage.module.scss';
+import styles from './MainPage.module.scss'
 
 export const MainPage = () => {
-  const { setLocalUsername, localUser } = useUserStore();
+  const { setLocalUsername, localUser } = useLocalUserStore()
   const handleChangeUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalUsername(e.currentTarget.value);
-  };
+    setLocalUsername(e.currentTarget.value)
+  }
 
   return (
     <PageWrapper
@@ -65,5 +65,5 @@ export const MainPage = () => {
 
       <AppFooter />
     </PageWrapper>
-  );
-};
+  )
+}

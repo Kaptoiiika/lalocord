@@ -1,5 +1,8 @@
-export { getLocalUser } from './model/selectors/UserStoreSelectors';
+export { getLocalUser } from './model/selectors/UserStoreSelectors'
 
-export { useUserStore } from './model/store/UserStore';
-export type { UserModel } from './model/types/UserSchema';
-export { UserChangeAvatar } from './ui/UserChangeAvatar/UserChangeAvatar';
+export { useLocalUserStore } from './model/store/LocalUserStore'
+export { useUserStore } from './model/store/UserStore'
+export type { UserModel } from './model/types/UserSchema'
+export { UserChangeAvatar } from './ui/UserChangeAvatar/UserChangeAvatar'
+export { UserCard } from './ui/UserCard/UserCard'
+export { UserCardById } from './ui/UserCard/UserCardById'

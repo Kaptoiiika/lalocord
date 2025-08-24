@@ -1,45 +1,53 @@
-import { create } from 'zustand';
+import { create } from 'zustand'
 
-import type { UserSchema } from '../types/UserSchema';
-import type { StateCreator } from 'zustand';
+import type { UserModel } from '../types/UserSchema'
+import type { StateCreator } from 'zustand'
 
-import {
-  getUserFromLocalStorage,
-  saveUserToLocalStorage,
-} from './UserStoreLocalStorage';
-
-const initUser = getUserFromLocalStorage();
+export type UserSchema = {
+  userList: Map<number, UserModel>
+  addUser: (user: UserModel) => void
+  addUsers: (users: UserModel[]) => void
+  updateUser: (id: number, updatedFields: Partial<UserModel>) => void
+  getUser: (id: number) => UserModel | undefined
+}
 
 const store: StateCreator<UserSchema> = (set, get) => ({
-  localUser: initUser,
+  userList: new Map(),
 
-  setLocalUsername(value) {
-    const user = get().localUser;
-
-    user.username = value;
-
-    set((state) => ({
- ...state,
-localUser: {
-  ...user,
-},
-}));
-    saveUserToLocalStorage(user);
+  addUser: (user) => {
+    set((state) => {
+      const newUserList = new Map(state.userList)
+      newUserList.set(Number(user.id), user)
+      return { ...state, userList: newUserList }
+    })
   },
 
-  setLocalAvatar(value) {
-    const user = get().localUser;
-
-    user.avatarSrc = value;
-
-    set((state) => ({
- ...state,
-localUser: {
-  ...user,
-},
-}));
-    saveUserToLocalStorage(user);
+  addUsers: (users) => {
+    set((state) => {
+      const newUserList = new Map(state.userList)
+      users.forEach((u) => {
+        newUserList.set(Number(u.id), u)
+      })
+      return { ...state, userList: newUserList }
+    })
   },
-});
 
-export const useUserStore = create(store);
+  updateUser: (id, updatedFields) => {
+    set((state) => {
+      const newUserList = new Map(state.userList)
+      const user = newUserList.get(id)
+      if (user) {
+        const updatedUser = { ...user, ...updatedFields }
+        newUserList.set(id, updatedUser)
+      }
+      return { ...state, userList: newUserList }
+    })
+  },
+
+  getUser: (id) => {
+    const userList = get().userList
+    return userList.get(id)
+  },
+})
+
+export const useUserStore = create(store)

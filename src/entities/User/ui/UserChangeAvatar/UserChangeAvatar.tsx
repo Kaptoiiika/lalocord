@@ -11,10 +11,10 @@ import {
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen';
 import { UserAvatar } from 'src/shared/ui/UserAvatar/UserAvatar';
 
-import { useUserStore } from '../../model/store/UserStore';
+import { useLocalUserStore } from '../../model/store/LocalUserStore';
 
 export const UserChangeAvatar = () => {
-  const { setLocalAvatar, localUser } = useUserStore();
+  const { setLocalAvatar, localUser } = useLocalUserStore();
   const srcAvatar = localUser.avatarSrc ?? '';
   const [testSrc, setTestSrc] = useState(srcAvatar);
   const [tempSrc, setTempSrc] = useState(srcAvatar);

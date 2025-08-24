@@ -1,11 +1,9 @@
-export interface UserSchema {
-  localUser: UserModel;
-  setLocalUsername: (value: string) => void;
-  setLocalAvatar: (src: string) => void;
-}
+export type UserStatus = 'idle' | 'online' | 'offline';
 
 export interface UserModel {
   id: string;
   username: string;
   avatarSrc?: string;
+  
+  status?: UserStatus;
 }

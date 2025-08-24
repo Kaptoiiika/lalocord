@@ -3,7 +3,7 @@ import { useState, useCallback, memo } from 'react';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import SendIcon from '@mui/icons-material/Send';
 import { FilledInput, IconButton, Stack, Tooltip } from '@mui/material';
-import { useUserStore, getLocalUser } from 'src/entities/User';
+import { useLocalUserStore, getLocalUser } from 'src/entities/User';
 
 import { useChatStore } from '../../model/store/ChatStore';
 
@@ -18,7 +18,7 @@ type ChatInputProps = {
 export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   const { onSendMessage, onSendFile } = props;
   const addMessage = useChatStore((state) => state.addNewMessage);
-  const localUser = useUserStore(getLocalUser);
+  const localUser = useLocalUserStore(getLocalUser);
   const [text, setText] = useState('');
 
   const handleChangeText = useCallback(

@@ -85,12 +85,7 @@ export default defineConfig([
 
           pathGroups: [
             {
-              pattern: '{./*.scss,./**/*.scss,**/*.scss}',
-              group: 'index',
-              position: 'after',
-            },
-            {
-              pattern: '{react,react-redux,redux/**,react-router-dom,react-dom/**}',
+              pattern: '{react,react-router-dom,react-dom/**}',
               group: 'builtin',
               position: 'before',
             },
@@ -100,23 +95,38 @@ export default defineConfig([
               position: 'before',
             },
             {
-              pattern: 'lodash',
-              group: 'external',
-              position: 'after',
+              pattern: 'app/**',
+              group: 'internal',
+              position: 'before',
             },
             {
-              pattern: '{api/**,components/**,routes/**,ui-kit/**,utils/**,pages/**}',
+              pattern: 'page/**',
               group: 'internal',
               position: 'after',
             },
             {
-              pattern: '{api,hooks,constants/**,context,routes,theme}',
-              group: 'type',
+              pattern: 'widgets/**',
+              group: 'internal',
               position: 'after',
             },
             {
-              pattern: 'assets/**',
-              group: 'sibling',
+              pattern: 'features/**',
+              group: 'internal',
+              position: 'after',
+            },
+            {
+              pattern: 'shared/**',
+              group: 'internal',
+              position: 'after',
+            },
+            {
+              pattern: '../*',
+              group: 'parent',
+              position: 'after',
+            },
+            {
+              pattern: '{./*.scss,./**/*.scss,**/*.scss,*.css,**/*.css}',
+              group: 'index',
               position: 'after',
             },
           ],
@@ -135,4 +145,3 @@ export default defineConfig([
     },
   },
 ])
-

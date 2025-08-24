@@ -2,6 +2,7 @@
 @use "variables/global";
 @use "theme/light";
 @use "theme/dark";
+@use "../../shared/assets/fonts/Roboto/Roboto.scss";
 
 :root {
   --app-max-width: 1366px;
@@ -15,7 +16,8 @@
   min-width: 100vw;
   color: rgb(var(--primary-color));
 }
+
 body {
   background: var(--bg-app);
-  color: var(--primary-color);
+  color: rgb(var(--primary-color));
 }

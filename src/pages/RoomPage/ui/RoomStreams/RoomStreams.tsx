@@ -7,7 +7,7 @@ import { useAudioEffectStore } from 'src/entities/AudioEffect';
 import {
   useRoomRTCStore,
 } from 'src/entities/RTCClient';
-import { getLocalUser, useUserStore } from 'src/entities/User';
+import { getLocalUser, useLocalUserStore } from 'src/entities/User';
 import { classNames } from 'src/shared/lib/classNames/classNames';
 import { useThrottle } from 'src/shared/lib/hooks/useThrottle/useThrottle';
 import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition';
@@ -32,7 +32,7 @@ type UserWithStream = {
 
 export const RoomStreams = memo(function RoomStreams() {
   const users = useRoomRTCStore(getRoomUsers);
-  const localUser = useUserStore(getLocalUser);
+  const localUser = useLocalUserStore(getLocalUser);
   const mediaStream = useRoomRTCStore(getDisplayMediaStream);
   const webCamStream = useRoomRTCStore(getWebCamStream);
   const streamVolumeList = useAudioEffectStore(

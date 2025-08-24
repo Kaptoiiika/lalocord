@@ -1,0 +1,48 @@
+.root {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: var(--box-border);
+  border-radius: 8px;
+  background: rgb(var(--bg-primary-color));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  max-width: 350px;
+  gap: 16px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  gap: 4px;
+}
+
+.username {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgb(var(--primary-color));
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.description {
+  font-size: 0.95rem;
+  color: rgb(var(--secondary-color));
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.errorText {
+  color: var(--color-red);
+  font-size: 0.95rem;
+  margin-top: 4px;
+  word-break: break-all;
+  white-space: pre-line;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

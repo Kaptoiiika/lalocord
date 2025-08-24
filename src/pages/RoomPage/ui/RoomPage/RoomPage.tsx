@@ -3,14 +3,14 @@ import { useParams } from 'react-router-dom';
 
 
 import { useRoomRTCStore } from 'src/entities/RTCClient';
-import { useUserStore } from 'src/entities/User';
+import { useLocalUserStore } from 'src/entities/User';
 import { socketClient } from 'src/shared/api/socket/socket';
 import { PageWrapper } from 'src/widgets/Page';
 
 import { RoomLobby } from '../RoomLobby/RoomLobby';
 
 const emitToJoinRoom = (id: string) => {
-  const localUser = useUserStore.getState().localUser;
+  const localUser = useLocalUserStore.getState().localUser;
 
   socketClient.emit('join', {
     name: id,
@@ -51,7 +51,7 @@ export const RoomPage = () => {
 
     const handleConnect = () => {
       if (isConnected === false) {
-        const localUser = useUserStore.getState().localUser;
+        const localUser = useLocalUserStore.getState().localUser;
 
         socketClient.emit('join', {
           name: id,
