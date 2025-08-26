@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import type { SelectChangeEvent } from '@mui/material'
 import { Button, Dialog, MenuItem, Select } from '@mui/material'
-import { useRoomRTCStore } from 'src/entities/RTCClient'
+import { useWebRTCRoomStore } from 'src/features/WebRTCRoom'
 
 import type { RTCClient } from 'src/entities/RTCClient'
 
@@ -23,7 +23,7 @@ export const TicTacToeSelectOpponent = (props: TicTacToeSelectOpponentProps) => 
     setUser(event.target.value)
   }
 
-  const { connectedUsers } = useRoomRTCStore()
+  const { users } = useWebRTCRoomStore()
 
   return (
     <Dialog
@@ -42,7 +42,7 @@ export const TicTacToeSelectOpponent = (props: TicTacToeSelectOpponentProps) => 
             <i>On one table</i>
           </MenuItem>
 
-          {Object.values(connectedUsers).map((client) => (
+          {Object.values(users).map((client) => (
             <MenuItem
               key={client.id}
               value={client.id}

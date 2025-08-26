@@ -1,5 +1,3 @@
-import { useCallback } from 'react'
-
 import { Stack } from '@mui/material'
 import { useWebRTCRoom } from 'src/features/WebRTCRoom'
 import { Chat } from 'src/widgets/Chat'

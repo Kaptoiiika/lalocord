@@ -1,48 +1,47 @@
-import { localstorageKeys } from 'src/shared/const/localstorageKeys';
+import { localstorageKeys } from 'src/shared/const/localstorageKeys'
 
-import type { UserModel } from '../types/UserSchema';
-
+import type { UserModel } from '../types/UserSchema'
 
 const defaultUser: UserModel = {
-  id: 'You',
-  username: '',
-};
+  id: 0,
+  username: 'You',
+}
 
 const genName = () => {
-  const first = firstName[Math.floor(Math.random() * firstName.length)];
-  const second = secondName[Math.floor(Math.random() * secondName.length)];
+  const first = firstName[Math.floor(Math.random() * firstName.length)]
+  const second = secondName[Math.floor(Math.random() * secondName.length)]
 
-  return `${first} ${second}`;
-};
+  return `${first} ${second}`
+}
 
 export const saveUserToLocalStorage = (user: UserModel) => {
-  localStorage.setItem(localstorageKeys.USERINFO, JSON.stringify(user));
-};
+  localStorage.setItem(localstorageKeys.USERINFO, JSON.stringify(user))
+}
 
 export const getUserFromLocalStorage = (): UserModel => {
-  const json = localStorage.getItem(localstorageKeys.USERINFO);
+  const json = localStorage.getItem(localstorageKeys.USERINFO)
 
   if (!json) {
     const user: UserModel = {
       id: defaultUser.id,
       username: genName(),
-    };
+    }
 
-    saveUserToLocalStorage(user);
+    saveUserToLocalStorage(user)
 
-    return user;
+    return user
   }
-  const data = JSON.parse(json);
+  const data = JSON.parse(json)
   const res: UserModel = {
     id: defaultUser.id,
     username: data?.username ? `${data?.username}` : genName(),
     avatarSrc: data?.avatarSrc,
-  };
+  }
 
-  if (!data?.username) saveUserToLocalStorage(res);
+  if (!data?.username) saveUserToLocalStorage(res)
 
-  return res;
-};
+  return res
+}
 
 const secondName = [
   'тигр',
@@ -62,7 +61,7 @@ const secondName = [
   'конь',
   'кот',
   'пес',
-];
+]
 
 const firstName = [
   'хищный',
@@ -163,4 +162,4 @@ const firstName = [
   'магический',
   'добрый',
   'борзый',
-];
+]
