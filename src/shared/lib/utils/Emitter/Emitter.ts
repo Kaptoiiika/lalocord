@@ -7,7 +7,7 @@ export type Events = Record<string, unknown>;
  * where: keyof E = eventName,
  * E.eventName = callback args
  */
-class Emitter<E extends Events> {
+export class Emitter<E extends Events> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private events = new Map<keyof E, Set<Callback<any>>>();
 
@@ -33,4 +33,3 @@ class Emitter<E extends Events> {
   }
 }
 
-export default Emitter;

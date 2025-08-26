@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 
 import { useWebRTCStore, WebRTCClient } from 'src/entities/WebRTC'
 import { socketClient } from 'src/shared/api'
+import { useChatStore } from 'src/widgets/Chat/model/store/ChatStore'
 
 import type { UserModel } from 'src/entities/User'
 
@@ -24,6 +25,7 @@ export const useWebRTCRoom = () => {
     (userId: number) => userMapRef.current.find((user) => user.id === userId)?.peer,
     []
   )
+
   const handleAddUser = useCallback(
     (user: UserConnectModel, peer: WebRTCClient) =>
       addUser({
@@ -74,6 +76,10 @@ export const useWebRTCRoom = () => {
     const addUser = (user: UserConnectModel, waitOffer = false) => {
       const webRTCClient = new WebRTCClient({ id: user.id })
       handleAddUser(user, webRTCClient)
+
+      webRTCClient.on('onChatMessage', (message) => {
+        useChatStore.getState().addNewMessage({ type: 'text', id: crypto.randomUUID(), message }, user)
+      })
 
       if (!waitOffer) webRTCClient.createOffer()
     }
@@ -131,6 +137,18 @@ export const useWebRTCRoom = () => {
     }
   }, [handleAddUser, handleGetUserPeer, removeUser])
 
-  return {}
+  const handleSendMessage = useCallback((message: string) => {
+    userMapRef.current.forEach(({ peer }) => {
+      peer.sendMessageToChat(message)
+    })
+  }, [])
+
+  const handleSendFile = useCallback((blob: Blob, name?: string) => {
+    userMapRef.current.forEach(({ peer }) => {
+      peer.sendFileToChat(blob, name)
+    })
+  }, [])
+
+  return { handleSendMessage, handleSendFile }
 }
 

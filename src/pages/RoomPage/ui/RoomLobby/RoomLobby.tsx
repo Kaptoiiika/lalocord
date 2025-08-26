@@ -17,15 +17,7 @@ type RoomLobbyProps = {
 
 export const RoomLobby = (props: RoomLobbyProps) => {
   const { isFull } = props
-  useWebRTCRoom()
-
-  const handleSendMessage = useCallback((message: string) => {
-    console.log('not implemented', message)
-  }, [])
-
-  const handleSendFile = useCallback((blob: Blob, name?: string) => {
-    console.log('not implemented', blob, name)
-  }, [])
+  const { handleSendMessage, handleSendFile } = useWebRTCRoom()
 
   if (isFull) {
     return <RoomIsFull />

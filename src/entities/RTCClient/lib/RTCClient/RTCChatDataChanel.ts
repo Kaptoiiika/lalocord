@@ -1,5 +1,5 @@
 import { logger } from 'src/shared/lib/logger/Logger';
-import Emitter from 'src/shared/lib/utils/Emitter/Emitter';
+import { Emitter } from 'src/shared/lib/utils';
 
 import type { IRTCChatDataChanel, RTCChatDataChanelEvents } from './types/RTCChatDataChanel';
 

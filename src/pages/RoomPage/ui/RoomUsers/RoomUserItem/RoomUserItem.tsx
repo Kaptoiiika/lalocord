@@ -36,11 +36,11 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   const changeVolumeHandle = useAudioEffectStore((state) => state.changeUserVolume)
   const microphoneStream = user.peer.remoteStreams.mic
   const userVolume = audioUserSettings[user.user.username]?.mic ?? 1
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const audioRef = useRef<HTMLAudioElement | null>(new Audio())
   const username = user.user.username ?? user.id
+  const [, update] = useState(0)
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
@@ -50,6 +50,19 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   const handleClose = () => {
     setAnchorEl(null)
   }
+
+  useEffect(() => {
+    const updateFn = () => {
+      update((prev) => prev + 1)  
+    }
+    user.peer.on('onStreamStart', updateFn)
+    user.peer.on('onStreamStop', updateFn)
+
+    return () => {
+      user.peer.off('onStreamStart', updateFn)
+      user.peer.off('onStreamStop', updateFn)
+    }
+  }, [user.peer])
 
   useEffect(() => {
     const fn = () => {

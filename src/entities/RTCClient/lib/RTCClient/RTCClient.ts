@@ -1,6 +1,6 @@
 import { socketClient } from 'src/shared/api'
 import { logger } from 'src/shared/lib/logger/Logger'
-import Emitter from 'src/shared/lib/utils/Emitter/Emitter'
+import { Emitter } from 'src/shared/lib/utils'
 
 import type { UserModel } from 'src/entities/User'
 

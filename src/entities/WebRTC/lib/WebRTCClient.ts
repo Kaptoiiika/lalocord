@@ -1,4 +1,5 @@
 import { socketClient } from 'src/shared/api'
+import { Emitter } from 'src/shared/lib/utils'
 
 import { useWebRTCStore } from '../model/WebRTCStore'
 import type { StreamType } from '../types'
@@ -6,19 +7,28 @@ import { createBlackVideoTrack, createSilentAudioTrack, getIceServers, pauseSend
 
 type WebRTCClientConfig = { id: number }
 
-type EventMessageToPeer = 'new_answer' | 'new_offer' | 'new_ice'
+type EventMessageToSocket = 'new_answer' | 'new_offer' | 'new_ice'
 
+type EventMessageToPeer = 'stream_start' | 'stream_stop' | 'stream_status'
 
-export class WebRTCClient {
+type WebRTCClientEvents = {
+  onStreamStart: StreamType
+  onStreamStop: StreamType
+  onChatMessage: string
+}
+
+export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   id: number
   private peer: RTCPeerConnection
   private channelInfo: RTCDataChannel
-  channelChat: RTCDataChannel
-  remoteStreams: Record<StreamType, MediaStream | null> = {
+  private remoteSenderStreams: Record<StreamType, MediaStream | null> = {
     screen: null,
     webCam: null,
     mic: null,
   }
+  private channelChat: RTCDataChannel
+
+  remoteStreams: Partial<Record<StreamType, MediaStream | null>> = {}
   senders: {
     screenVideo: RTCRtpSender
     screenAudio: RTCRtpSender
@@ -27,6 +37,7 @@ export class WebRTCClient {
   }
 
   constructor(config: WebRTCClientConfig) {
+    super()
     this.id = config.id
     this.peer = new RTCPeerConnection({
       iceServers: getIceServers(),
@@ -66,6 +77,7 @@ export class WebRTCClient {
       protocol: 'json',
       negotiated: true,
     })
+    this.channelChat.onmessage = this.onChatMessage.bind(this)
 
     this.channelInfo = this.peer.createDataChannel('info', {
       id: 1,
@@ -78,14 +90,14 @@ export class WebRTCClient {
   async createOffer(): Promise<RTCSessionDescriptionInit> {
     const offer = await this.peer.createOffer()
     await this.peer.setLocalDescription(offer)
-    this.sendMessageToPeer('new_offer', { offer })
+    this.sendMessageToSocket('new_offer', { offer })
     return offer
   }
 
   async createAnswer(): Promise<RTCSessionDescriptionInit> {
     const answer = await this.peer.createAnswer()
     await this.peer.setLocalDescription(answer)
-    this.sendMessageToPeer('new_answer', { answer })
+    this.sendMessageToSocket('new_answer', { answer })
     return answer
   }
 
@@ -112,6 +124,7 @@ export class WebRTCClient {
       this.senders.mic.replaceTrack(audioTrack)
       resumeSender(this.senders.mic)
     }
+    this.sendMessageToPeer('stream_start', type)
   }
 
   stopStream(type: StreamType) {
@@ -127,9 +140,10 @@ export class WebRTCClient {
       this.senders.mic.replaceTrack(null)
       pauseSender(this.senders.mic)
     }
+    this.sendMessageToPeer('stream_stop', type)
   }
 
-  private sendMessageToPeer(event: EventMessageToPeer, message: Record<string, unknown>) {
+  private sendMessageToSocket(event: EventMessageToSocket, message: Record<string, unknown>) {
     const resp = {
       id: this.id,
       ...message,
@@ -139,7 +153,7 @@ export class WebRTCClient {
 
   private onIceCandidate(event: RTCPeerConnectionIceEvent) {
     if (event.candidate) {
-      this.sendMessageToPeer('new_ice', { ice: event.candidate })
+      this.sendMessageToSocket('new_ice', { ice: event.candidate })
     }
   }
 
@@ -148,13 +162,56 @@ export class WebRTCClient {
     const tracks = stream?.getTracks() || []
 
     if (tracks.length === 0) return
-    else if (tracks.length === 2) this.remoteStreams.screen = stream
-    else if (tracks[0].kind === 'video') this.remoteStreams.webCam = stream
-    else if (tracks[0].kind === 'audio') this.remoteStreams.mic = stream
+    else if (tracks.length === 2) this.remoteSenderStreams.screen = stream
+    else if (tracks[0].kind === 'video') this.remoteSenderStreams.webCam = stream
+    else if (tracks[0].kind === 'audio') this.remoteSenderStreams.mic = stream
+  }
+
+  private sendMessageToPeer(event: EventMessageToPeer, message: unknown) {
+    try {
+      this.channelInfo.send(JSON.stringify({ event, message }))
+    } catch (error) {
+      console.log('error', error)
+    }
   }
 
   private onInfoMessage(event: MessageEvent) {
-    console.log('onInfoMessage', event)
+    const data = JSON.parse(event.data)
+
+    switch (data.event) {
+      case 'stream_start':
+        this.remoteStreams[data.message as StreamType] = this.remoteSenderStreams[data.message as StreamType]
+        this.emit('onStreamStart', data.message as StreamType)
+        break
+      case 'stream_stop':
+        this.remoteStreams[data.message as StreamType] = undefined
+        this.emit('onStreamStop', data.message as StreamType)
+        break
+    }
+    console.log('onInfoMessage', data)
+  }
+
+  sendMessageToChat(message: string) {
+    try {
+      this.channelChat.send(JSON.stringify({ message, type: 'text' }))
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
+
+  sendFileToChat(blob: Blob, name?: string) {
+    console.log('not implemented', blob, name)
+    // this.channelChat.send(JSON.stringify({ type: 'file', blob, name }))
+  }
+
+  private onChatMessage(event: MessageEvent) {
+    const { message, type } = JSON.parse(event.data)
+
+    if (type === 'text') {
+      return this.emit('onChatMessage', message)
+    }
+
+    return console.log('unknown message', message)
   }
 
   get connectionState(): RTCPeerConnectionState {

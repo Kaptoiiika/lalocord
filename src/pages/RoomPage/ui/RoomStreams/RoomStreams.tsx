@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 
 import { useAudioEffectStore } from 'src/entities/AudioEffect'
 import { getLocalUser, useLocalUserStore } from 'src/entities/User'
@@ -9,7 +9,7 @@ import { useThrottle } from 'src/shared/lib/hooks/useThrottle/useThrottle'
 import { StreamViewer } from 'src/widgets/StreamViewer/ui/StreamViewer'
 
 import type { UserModel } from 'src/entities/User'
-import type { StreamType} from 'src/entities/WebRTC';
+import type { StreamType } from 'src/entities/WebRTC'
 
 import { RoomStream } from './RoomStream/RoomStream'
 
@@ -29,27 +29,29 @@ export const RoomStreams = memo(function RoomStreams() {
   const streamVolumeList = useAudioEffectStore((state) => state.usersAuidoSettings)
   const changeVolumeHandle = useAudioEffectStore((state) => state.changeUserVolume)
   const [hiddenStream, setHiddenStream] = useState<Set<string>>(new Set())
+  const [, update] = useState(0)
 
-  const changeUserStreamVolume = useThrottle((userWithStream: UserWithStream, volume: number) => {
-    // userWithStream.stream.volume = volume
-    changeVolumeHandle(userWithStream.user.username, userWithStream.type, volume)
+  const changeUserStreamVolume = useThrottle((user: UserModel, type: StreamType, volume: number) => {
+    changeVolumeHandle(user.username, type, volume)
   }, 500)
 
-  // useEffect(() => {
-  //   console.log("mediaStream")
-  //   if (!screenStream) return
-  //   setHiddenStream((prev) => {
-  //     prev.add(screenStream.id)
-  //     return new Set(prev)
-  //   })
+  useEffect(() => {
+    const updateFn = () => {
+      update((prev) => prev + 1)
+    }
 
-  //   return () => {
-  //     setHiddenStream((prev) => {
-  //       prev.delete(screenStream.id)
-  //       return new Set(prev)
-  //     })
-  //   }
-  // }, [screenStream])
+    users.forEach((user) => {
+      user.peer.on('onStreamStart', updateFn)
+      user.peer.on('onStreamStop', updateFn)
+    })
+
+    return () => {
+      users.forEach((user) => {
+        user.peer.off('onStreamStart', updateFn)
+        user.peer.off('onStreamStop', updateFn)
+      })
+    }
+  }, [update, users])
 
   const streams = Object.values(users).reduce<UserWithStream[]>((prev, curent) => {
     Object.entries(curent.peer.remoteStreams).forEach(([type, stream]) => {
@@ -57,7 +59,7 @@ export const RoomStreams = memo(function RoomStreams() {
       if (type === 'mic') return
       prev.push({
         user: curent.user,
-        stream, 
+        stream,
         type: type as StreamType,
       })
     })
