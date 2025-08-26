@@ -14,10 +14,10 @@ import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen';
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect';
 import { clamp } from 'src/shared/lib/utils/Numbers';
 
-import { ErrorBoundary } from '../ErrorBoundary';
 import { VideoPlayerActions } from './VideoPlayerActions/VideoPlayerActions';
 import { VideoPlayerDebugInfo } from './VideoPlayerDebugInfo/VideoPlayerDebugInfo';
 import { VideoPlayerTooltip } from './VideoPlayerTooltip/VideoPlayerTooltip';
+import { ErrorBoundary } from '../ErrorBoundary';
 
 import styles from './VideoPlayer.module.scss';
 

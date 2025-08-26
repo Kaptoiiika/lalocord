@@ -1,54 +1,52 @@
-import { useEffect, useState } from 'react';
+import { useCallback } from 'react'
 
-import { Stack } from '@mui/material';
-import { WaitUserClick } from 'src/features/WaitUserClick';
-import { socketClient } from 'src/shared/api/socket/socket';
-import { Chat } from 'src/widgets/Chat';
+import { Stack } from '@mui/material'
+import { useWebRTCRoom } from 'src/features/WebRTCRoom'
+import { Chat } from 'src/widgets/Chat'
 
-import { useWebRTCRoom } from '../../lib/useWebRTCRoom/useWebRTCRoom';
-import { RoomActions } from '../RoomActions/RoomActions';
-import { RoomIsFull } from '../RoomIsFull/RoomIsFull';
-import { RoomStreams } from '../RoomStreams/RoomStreams';
-import { RoomUsers } from '../RoomUsers/RoomUsers';
+import { RoomActions } from '../RoomActions/RoomActions'
+import { RoomIsFull } from '../RoomIsFull/RoomIsFull'
+import { RoomStreams } from '../RoomStreams/RoomStreams'
+import { RoomUsers } from '../RoomUsers/RoomUsers'
 
-import styles from './RoomLobby.module.scss';
+import styles from './RoomLobby.module.scss'
 
+type RoomLobbyProps = {
+  isFull?: boolean
+}
 
-export const RoomLobby = () => {
-  const { handleSendMessage, handleSendBlob } = useWebRTCRoom();
-  const [roomisFull, setRoomIsfull] = useState(false);
+export const RoomLobby = (props: RoomLobbyProps) => {
+  const { isFull } = props
+  useWebRTCRoom()
 
-  useEffect(() => {
-    const fn = () => {
-      setRoomIsfull(true);
-    };
+  const handleSendMessage = useCallback((message: string) => {
+    console.log('not implemented', message)
+  }, [])
 
-    socketClient.on('room_is_full', fn);
+  const handleSendFile = useCallback((blob: Blob, name?: string) => {
+    console.log('not implemented', blob, name)
+  }, [])
 
-    return () => {
-      socketClient.off('room_is_full', fn);
-    };
-  }, []);
-
-  if (roomisFull) {
-    return <RoomIsFull />;
+  if (isFull) {
+    return <RoomIsFull />
   }
 
   return (
-    <WaitUserClick>
-      <Stack
-        className={styles.lobby}
-        justifyContent="space-between"
-        height="100%"
-      >
-        <div className={styles.mainScreen}>
-          <RoomUsers />
-          <RoomStreams />
-          <RoomActions />
-        </div>
+    <Stack
+      className={styles.lobby}
+      justifyContent="space-between"
+      height="100%"
+    >
+      <div className={styles.mainScreen}>
+        <RoomUsers />
+        <RoomStreams />
+        <RoomActions />
+      </div>
 
-        <Chat onSendMessage={handleSendMessage} onSendFile={handleSendBlob} />
-      </Stack>
-    </WaitUserClick>
-  );
-};
+      <Chat
+        onSendMessage={handleSendMessage}
+        onSendFile={handleSendFile}
+      />
+    </Stack>
+  )
+}

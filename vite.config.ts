@@ -13,26 +13,15 @@ export default ({ mode }) => {
     plugins: [react(), eslint(), viteTsconfigPaths(), svgr()],
     server: {
       port: 3000,
-      host: true,
     },
     resolve: {
       alias: {
         '@': resolve(__dirname, './src'),
       },
     },
-    css: {
-      preprocessorOptions: {
-        scss: {},
-      },
-    },
     define: {
-      process: {
-        env,
-      },
-    },
-    build: {
-      outDir: 'build',
-      assetsDir: 'static',
+      __BUILD_VERSION__: JSON.stringify(process.env.npm_package_version),
+      __BUILD_DATE_VERSION__: JSON.stringify(new Date().toLocaleDateString()),
     },
     base: env.PUBLIC_URL,
   })

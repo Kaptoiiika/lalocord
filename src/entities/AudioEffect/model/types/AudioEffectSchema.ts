@@ -1,4 +1,4 @@
-import type { MediaStreamTypes } from 'src/shared/types';
+import type { StreamType } from 'src/entities/WebRTC';
 
 export const enum AudioName {
   notification = 'notification',
@@ -15,7 +15,7 @@ type AudioSettings = {
 export type AudioSettingsList = Record<string, AudioSettings>;
 export type AudioUserSettingsList = Record<
   string,
-  Partial<Record<MediaStreamTypes, number>>
+  Partial<Record<StreamType, number>>
 >;
 
 export interface AudioEffectSchema {
@@ -26,7 +26,7 @@ export interface AudioEffectSchema {
   changeVolume: (audioName: AudioNames, volume: number) => void;
   changeUserVolume: (
     username: string,
-    type: MediaStreamTypes,
+    type: StreamType,
     volume: number
   ) => void;
   changeMuted: (audioName: AudioNames, mute: boolean) => void;

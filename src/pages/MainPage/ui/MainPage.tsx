@@ -1,6 +1,6 @@
 import { Link as MuiLink, Stack, TextField, Typography } from '@mui/material'
 import { RoomList } from 'src/entities/Room'
-import { UserCardById, UserChangeAvatar, useLocalUserStore } from 'src/entities/User'
+import { UserChangeAvatar, useLocalUserStore } from 'src/entities/User'
 import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { AppFooter } from 'src/widgets/Footer'
 import { PageWrapper } from 'src/widgets/Page'

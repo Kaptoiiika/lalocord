@@ -1,35 +1,32 @@
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, memo, useRef } from 'react'
 
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import SendIcon from '@mui/icons-material/Send';
-import { FilledInput, IconButton, Stack, Tooltip } from '@mui/material';
-import { useLocalUserStore, getLocalUser } from 'src/entities/User';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
+import SendIcon from '@mui/icons-material/Send'
+import { FilledInput, IconButton, Stack, Tooltip } from '@mui/material'
+import { useLocalUserStore, getLocalUser } from 'src/entities/User'
 
-import { useChatStore } from '../../model/store/ChatStore';
+import { useChatStore } from '../../model/store/ChatStore'
 
-import styles from './ChatInput.module.scss';
-
+import styles from './ChatInput.module.scss'
 
 type ChatInputProps = {
-  onSendMessage?: (msg: string) => void;
-  onSendFile?: (blob: Blob, name?: string) => void;
-};
+  onSendMessage?: (msg: string) => void
+  onSendFile?: (blob: Blob, name?: string) => void
+}
 
 export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
-  const { onSendMessage, onSendFile } = props;
-  const addMessage = useChatStore((state) => state.addNewMessage);
-  const localUser = useLocalUserStore(getLocalUser);
-  const [text, setText] = useState('');
+  const { onSendMessage, onSendFile } = props
+  const addMessage = useChatStore((state) => state.addNewMessage)
+  const localUser = useLocalUserStore(getLocalUser)
+  const [text, setText] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleChangeText = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setText(e.currentTarget.value);
-    },
-    []
-  );
+  const handleChangeText = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setText(e.currentTarget.value)
+  }, [])
 
   const handleSendFile = async (blob: Blob, name?: string) => {
-    onSendFile?.(blob, name);
+    onSendFile?.(blob, name)
     addMessage(
       {
         id: crypto.randomUUID(),
@@ -37,37 +34,37 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
         type: 'file',
       },
       localUser
-    );
-  };
+    )
+  }
 
   const handlePasteFile = (e: React.ClipboardEvent) => {
-    const items = Array.from(e.clipboardData.items);
-    const item = items.find((item) => !!item.getAsFile());
-    const blob = item?.getAsFile();
+    const items = Array.from(e.clipboardData.items)
+    const item = items.find((item) => !!item.getAsFile())
+    const blob = item?.getAsFile()
 
-    if (blob) handleSendFile(blob);
-  };
+    if (blob) handleSendFile(blob)
+  }
 
   const handleDropFile = (e: React.DragEvent) => {
-    e.preventDefault();
-    const items = Array.from(e.dataTransfer.items);
-    const item = items.find((item) => !!item.getAsFile());
-    const blob = item?.getAsFile();
+    e.preventDefault()
+    const items = Array.from(e.dataTransfer.items)
+    const item = items.find((item) => !!item.getAsFile())
+    const blob = item?.getAsFile()
 
-    if (blob) handleSendFile(blob, blob.name);
-  };
+    if (blob) handleSendFile(blob, blob.name)
+  }
 
   const handleSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
 
     if (file) {
-      handleSendFile(file, file.name);
+      handleSendFile(file, file.name)
     }
-  };
+  }
 
   const handleSendMessage = () => {
-    if (text === '') return;
-    const message = text.trim();
+    if (text === '') return
+    const message = text.trim()
 
     addMessage(
       {
@@ -76,19 +73,19 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
         message,
       },
       localUser
-    );
-    onSendMessage?.(message);
-    setText('');
-  };
+    )
+    onSendMessage?.(message)
+    setText('')
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.shiftKey || e.altKey || e.ctrlKey) return;
+    if (e.shiftKey || e.altKey || e.ctrlKey) return
 
     if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSendMessage();
+      e.preventDefault()
+      handleSendMessage()
     }
-  };
+  }
 
   return (
     <div className={styles.form}>
@@ -122,15 +119,27 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
         justifyContent="end"
         gap={1}
       >
-        <IconButton onClick={handleSendMessage} aria-label="send button">
+        <IconButton
+          onClick={handleSendMessage}
+          aria-label="send button"
+        >
           <SendIcon />
         </IconButton>
-        <Tooltip title="send file" placement="top">
-          <IconButton>
-            <label className={styles.selectInputFile}>
+        <Tooltip
+          title="send file"
+          placement="top"
+        >
+          <IconButton
+            aria-label="send file"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <label
+              inert
+              className={styles.selectInputFile}
+            >
               <InsertDriveFileIcon />
               <input
-                value=""
+                ref={fileInputRef}
                 onChange={handleSelectFile}
                 hidden
                 type="file"
@@ -140,5 +149,5 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
         </Tooltip>
       </Stack>
     </div>
-  );
-});
+  )
+})

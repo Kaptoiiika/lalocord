@@ -8,7 +8,7 @@ import styles from './AvatarUser.module.scss'
 export type AvatarSize = 'small' | 'medium' | 'large'
 export type AvatarBorderColor = 'grey' | 'green' | 'red'
 
-export type AvatarProps = {
+export type AvatarUserProps = {
   username: string
   avatarUrl?: string
   size?: AvatarSize
@@ -27,7 +27,7 @@ const borderColorClassMap: Record<AvatarBorderColor, string> = {
   red: styles.borderRed,
 }
 
-export const AvatarUser = (props: AvatarProps) => {
+export const AvatarUser = (props: AvatarUserProps) => {
   const { username, avatarUrl, size = 'medium', borderColor = 'grey' } = props
   const [imgError, setImgError] = useState(false)
   const [imgLoaded, setImgLoaded] = useState(false)

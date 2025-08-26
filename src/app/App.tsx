@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 
 import { Stack } from '@mui/material';
 import LoadingBars from 'src/shared/assets/icons/LoaderBars.svg?react';
-import { __BUILD_VERSION__ } from 'src/shared/const/config';
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect';
 import { Navbar } from 'src/widgets/Navbar';
 

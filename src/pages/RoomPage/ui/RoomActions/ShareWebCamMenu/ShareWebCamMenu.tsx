@@ -3,35 +3,26 @@ import { useCallback } from 'react'
 import VideocamIcon from '@mui/icons-material/Videocam'
 import VideocamOffIcon from '@mui/icons-material/VideocamOff'
 import { IconButton, Tooltip, Menu } from '@mui/material'
-import { useRoomRTCStore } from 'src/entities/RTCClient'
-import {
-  getActionStartWebCamStream,
-  getActionStopWebCamStream,
-  getWebCamStream,
-} from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors'
+import { useWebRTCStore } from 'src/entities/WebRTC'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition'
 
 import { SelectCamera } from './SelectCamera/SelectCamera'
 
 export const ShareWebCamMenu = () => {
-  const startStream = useRoomRTCStore(getActionStartWebCamStream)
-  const stopStream = useRoomRTCStore(getActionStopWebCamStream)
-  const webCamStream = useRoomRTCStore(getWebCamStream)
+  const webCamStream = useWebRTCStore((state) => state.streams.webCam)
+  const createStream = useWebRTCStore((state) => state.createStream)
+  const stopStream = useWebRTCStore((state) => state.stopStream)
   const { handleClick, handleClose, anchorEl, open } = usePopup()
 
   const handleStartWebCamStream = async () => {
-    try {
-      await startViewTransition()
-      startStream()
-    } catch (error: unknown) {
-      console.log(error)
-    }
+    await startViewTransition()
+    await createStream('webCam')
   }
 
   const handleStopStream = useCallback(async () => {
     await startViewTransition()
-    stopStream()
+    stopStream('webCam')
   }, [stopStream])
 
   return (
@@ -79,4 +70,3 @@ export const ShareWebCamMenu = () => {
     </>
   )
 }
-

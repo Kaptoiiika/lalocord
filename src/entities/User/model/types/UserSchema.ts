@@ -1,7 +1,7 @@
 export type UserStatus = 'idle' | 'online' | 'offline';
 
 export interface UserModel {
-  id: string;
+  id: number;
   username: string;
   avatarSrc?: string;
   

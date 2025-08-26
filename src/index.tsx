@@ -1,4 +1,3 @@
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { AppRouterProvider } from 'src/app/providers/Router';
@@ -20,7 +19,7 @@ if (!container) {
 const root = createRoot(container);
 
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <ErrorBoundary errorText="App is down">
       <AppRouterProvider>
         <ThemeProvider>
@@ -30,7 +29,7 @@ root.render(
         </ThemeProvider>
       </AppRouterProvider>
     </ErrorBoundary>
-  </React.StrictMode>
+  // </React.StrictMode>
 );
 
 if (__IS_ELECTRON__ === false) {

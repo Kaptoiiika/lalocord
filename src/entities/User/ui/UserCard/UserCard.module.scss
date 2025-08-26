@@ -1,6 +1,7 @@
 .root {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   padding: 16px;
   border: var(--box-border);
   border-radius: 8px;
@@ -8,6 +9,17 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   max-width: 350px;
   gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.children {
+  border-top: var(--box-border);
+  padding-top: 16px;
 }
 
 .info {

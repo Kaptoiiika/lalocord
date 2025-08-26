@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
 import { Link as MUILink, Typography, useMediaQuery } from '@mui/material'
-import { __BUILD_DATE_VERSION__, __BUILD_VERSION__ } from 'src/shared/const/config'
 
 import styles from './AppFooter.module.scss'
 

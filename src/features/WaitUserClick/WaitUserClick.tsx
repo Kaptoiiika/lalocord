@@ -2,7 +2,6 @@ import type { PropsWithChildren } from 'react'
 import { useState } from 'react'
 
 import { Typography } from '@mui/material'
-import { __IS_DEV__ } from 'src/shared/const/config'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 
 import styles from './WaitUserClick.module.scss'
@@ -37,14 +36,10 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
     }
   })
 
-  if (__IS_DEV__) {
-    return <>{children}</>
-  }
-
   if (navigator.userActivation && !navigator.userActivation?.hasBeenActive) {
     return (
       <div className={styles.WaitUserClick}>
-        <Typography variant="h4">Сlick anywhere to continue</Typography>
+        <Typography variant="h4">Click anywhere to continue</Typography>
       </div>
     )
   }

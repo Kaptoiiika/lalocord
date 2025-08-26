@@ -1,3 +1,5 @@
+import type { PropsWithChildren } from 'react'
+
 import { AvatarUser } from 'src/shared/ui/Avatar/AvatarUser/AvatarUser'
 import { SkeletonText } from 'src/shared/ui/Skeleton'
 
@@ -9,10 +11,10 @@ type UserCardProps = {
   description?: string
   placeholder?: boolean
   errorText?: string
-}
+} & PropsWithChildren
 
 export const UserCard = (props: UserCardProps) => {
-  const { username, avatarUrl, description, placeholder, errorText } = props
+  const { username, avatarUrl, description, placeholder, errorText, children } = props
 
   if (placeholder) {
     return (
@@ -42,15 +44,19 @@ export const UserCard = (props: UserCardProps) => {
 
   return (
     <div className={styles.root}>
-      <AvatarUser
-        username={username || ''}
-        avatarUrl={avatarUrl}
-        size="large"
-      />
-      <div className={styles.info}>
-        <div className={styles.username}>{username}</div>
-        {description && <div className={styles.description}>{description}</div>}
+      <div className={styles.header}>
+        <AvatarUser
+          username={username || ''}
+          avatarUrl={avatarUrl}
+          size="large"
+        />
+        <div className={styles.info}>
+          <div className={styles.username}>{username}</div>
+          {description && <div className={styles.description}>{description}</div>}
+        </div>
       </div>
+
+      <div className={styles.children}>{children}</div>
     </div>
   )
 }

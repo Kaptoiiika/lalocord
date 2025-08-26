@@ -4,38 +4,30 @@ import MicIcon from '@mui/icons-material/Mic'
 import MicOffIcon from '@mui/icons-material/MicOff'
 import { Tooltip, IconButton, FormControlLabel, Switch, Stack, Menu } from '@mui/material'
 import { useRoomRTCStore } from 'src/entities/RTCClient'
-import {
-  getMicrophoneStream,
-  getActionStartMicrophoneStream,
-  getActionStopMicrophoneStream,
-  getUserStreamSettings,
-} from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors'
+import { getUserStreamSettings } from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors'
+import { useWebRTCStore } from 'src/entities/WebRTC'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 
 import { SelectMicrophone } from './SelectMicrophone'
-// import styles from "./ShareMicrophoneMenu.module.scss"
 
 export const ShareMicrophoneMenu = () => {
-  const startStream = useRoomRTCStore(getActionStartMicrophoneStream)
-  const stopStream = useRoomRTCStore(getActionStopMicrophoneStream)
   const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
   const setStreamingSettings = useRoomRTCStore((state) => state.setStreamSettings)
-  const microphoneStream = useRoomRTCStore(getMicrophoneStream)
   const { handleClick, handleClose, anchorEl, open } = usePopup()
   const autoOn = userStreamSettings.audio.autoOn
 
-  const handleStartMicStream = async () => {
-    try {
-      startStream()
-    } catch (error: unknown) {
-      console.log(error)
-    }
-  }
+  const micStream = useWebRTCStore((state) => state.streams.mic)
+  const createStream = useWebRTCStore((state) => state.createStream)
+  const stopStream = useWebRTCStore((state) => state.stopStream)
 
-  const handleStopStream = useCallback(() => {
-    stopStream()
+  const handleStopStream = useCallback(async () => {
+    stopStream('mic')
   }, [stopStream])
+
+  const handleStartStream = useCallback(async () => {
+    await createStream('mic')
+  }, [createStream])
 
   const handleChangeAutoOn = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
@@ -51,12 +43,12 @@ export const ShareMicrophoneMenu = () => {
   )
 
   useMountedEffect(() => {
-    if (autoOn) handleStartMicStream()
+    if (autoOn) handleStartStream()
   })
 
   return (
     <>
-      {microphoneStream ? (
+      {micStream ? (
         <Tooltip
           title="Turn off microphone"
           arrow
@@ -74,7 +66,7 @@ export const ShareMicrophoneMenu = () => {
           arrow
         >
           <IconButton
-            onClick={handleStartMicStream}
+            onClick={handleStartStream}
             onContextMenu={handleClick}
           >
             <MicOffIcon />
@@ -112,4 +104,3 @@ export const ShareMicrophoneMenu = () => {
     </>
   )
 }
-

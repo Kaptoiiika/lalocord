@@ -9,7 +9,7 @@ import {
   TextField,
 } from '@mui/material';
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen';
-import { UserAvatar } from 'src/shared/ui/UserAvatar/UserAvatar';
+import { AvatarUser } from 'src/shared/ui/Avatar';
 
 import { useLocalUserStore } from '../../model/store/LocalUserStore';
 
@@ -57,7 +57,11 @@ export const UserChangeAvatar = () => {
         onClick={handleOpen}
         aria-label="change avatar"
       >
-        <UserAvatar alt="avatar" src={localUser.avatarSrc} />
+        <AvatarUser
+          username={localUser.username}
+          avatarUrl={localUser.avatarSrc}
+          size="medium"
+        />
       </IconButton>
 
       <Dialog open={open} onClose={handleClose}>
@@ -72,7 +76,11 @@ export const UserChangeAvatar = () => {
               gap={1}
               alignItems="center"
             >
-              <UserAvatar alt="" src={testSrc} />
+              <AvatarUser
+                username={localUser.username}
+                avatarUrl={testSrc}
+                size="medium"
+              />
               <TextField
                 placeholder="image src"
                 value={tempSrc}
