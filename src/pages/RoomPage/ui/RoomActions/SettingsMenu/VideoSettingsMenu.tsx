@@ -3,27 +3,17 @@ import { useState } from 'react'
 
 import SettingsIcon from '@mui/icons-material/Settings'
 import { Menu, Stack, Typography, Slider, IconButton, Tooltip } from '@mui/material'
-import { useRoomRTCStore, bitrateToShortValue, bitrateValueText } from 'src/entities/RTCClient'
-import {
-  getUserStreamSettings,
-  getEncodingSettings,
-  getActionSetEncodingSettings,
-} from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors'
+import { bitrateToShortValue, bitrateValueText } from 'src/entities/RTCClient'
+import { useWebRTCStore } from 'src/entities/WebRTC'
 import { InlineSelectPrimitive } from 'src/shared/ui/InlineSelect/InlineSelectPrimitive'
 
 import styles from './VideoSettingsMenu.module.scss'
 
 export const VideoSettingsMenu = () => {
-  const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
-  // const experementalVideo = useRoomRTCStore(
-  //   (state) => state.experementalEncdoing
-  // )
-  // const setExperementalVideo = useRoomRTCStore(
-  //   (state) => state.setExperementalEncdoing
-  // )
-  const encodingSettings = useRoomRTCStore(getEncodingSettings)
-  const setEncodingSettings = useRoomRTCStore(getActionSetEncodingSettings)
-  const setStreamingSettings = useRoomRTCStore((state) => state.setStreamSettings)
+  const bitrate = useWebRTCStore((state) => state.bitrate)
+  const setBitrate = useWebRTCStore((state) => state.setBitrate)
+  const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
+  const setStreamConstraints = useWebRTCStore((state) => state.setStreamConstraints)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleOpen = (event: MouseEvent<HTMLButtonElement>) => {
@@ -35,22 +25,19 @@ export const VideoSettingsMenu = () => {
   }
   const handleBitrateChange = (event: React.SyntheticEvent | Event, newValue: number | Array<number>) => {
     if (Array.isArray(newValue)) return
-    const settings = encodingSettings
-
-    settings.maxBitrate = newValue * 1024 * 1024
-    setEncodingSettings(settings)
+    setBitrate(newValue * 1024 * 1024)
   }
 
   const handleChangeFrameRate = (value: string) => {
     const numValue = Number(value)
 
     if (!numValue) return
-    setStreamingSettings({
+    setStreamConstraints({
       video: {
-        ...userStreamSettings.video,
+        ...streamConstraints.video,
         frameRate: numValue,
       },
-      audio: userStreamSettings.audio,
+      audio: streamConstraints.audio,
     })
   }
 
@@ -58,25 +45,21 @@ export const VideoSettingsMenu = () => {
     const numValue = Number(value)
 
     if (!numValue) return
-    setStreamingSettings({
+    setStreamConstraints({
       video: {
-        ...userStreamSettings.video,
+        ...streamConstraints.video,
         height: numValue,
       },
-      audio: userStreamSettings.audio,
+      audio: streamConstraints.audio,
     })
   }
 
-  // const handleSetExpVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setExperementalVideo(e.currentTarget.checked)
-  // }
-
-  const currentFrameRate = userStreamSettings.video.frameRate
+  const currentFrameRate = streamConstraints.video.frameRate
 
   const frameRateList = ['5', '30', '60']
   const isCustomFrameRate = frameRateList.includes(String(currentFrameRate)) ? '90' : `${currentFrameRate}`
 
-  const currentResolution = userStreamSettings.video.height
+  const currentResolution = streamConstraints.video?.height
   const resolutionList = ['144', '720', '1080']
   const isCustomResolution = resolutionList.includes(String(currentResolution)) ? '1440' : `${currentResolution}`
 
@@ -131,10 +114,10 @@ export const VideoSettingsMenu = () => {
 
           <div className={styles.slider}>
             <Typography className={styles.sliderLabel}>
-              Max bitrate: <span>{bitrateToShortValue(encodingSettings.maxBitrate || 0)} Mb/s</span>
+              Max bitrate: <span>{bitrateToShortValue(bitrate || 0)} Mb/s</span>
             </Typography>
             <Slider
-              defaultValue={bitrateToShortValue(encodingSettings.maxBitrate || 0)}
+              defaultValue={bitrateToShortValue(bitrate || 0)}
               onChangeCommitted={handleBitrateChange}
               aria-label="bitrate"
               valueLabelDisplay="auto"
@@ -145,16 +128,6 @@ export const VideoSettingsMenu = () => {
               max={50}
             />
           </div>
-          {/* <FormControlLabel
-            control={
-              <Switch
-                color="primary"
-                checked={!!experementalVideo}
-                onChange={handleSetExpVideo}
-              />
-            }
-            label="experemental Encoding"
-          /> */}
         </Stack>
       </Menu>
     </>

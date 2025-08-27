@@ -16,6 +16,7 @@ type WebRTCRoomStore = {
 
   addUser: (user: RoomUser) => void
   removeUser: (userId: number) => void
+
   joinRoom: (room: string) => void
   leaveRoom: () => void
 }
@@ -33,7 +34,7 @@ const store: StateCreator<WebRTCRoomStore> = (set) => ({
     set(() => ({ roomId: room }))
   },
   leaveRoom: () => {
-    set(() => ({ roomId: undefined }))
+    set(() => ({ roomId: undefined, users: [] }))
   },
 })
 

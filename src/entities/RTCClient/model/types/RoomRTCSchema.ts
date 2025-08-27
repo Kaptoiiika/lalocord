@@ -1,6 +1,5 @@
 export interface RoomRTCSchema {
   streamSettings: MediaStreamConstraints
-  userStreamSettings: UserStreamSettings
   encodingSettings: RTCRtpEncodingParameters
 
   setEncodingSettings: (settings: RTCRtpEncodingParameters) => void
@@ -16,7 +15,6 @@ export type UserStreamSettings = {
     deviceId?: string
   }
   audio: {
-    autoOn?: boolean
     deviceId?: string
     noiseSuppression: boolean
     echoCancellation: boolean

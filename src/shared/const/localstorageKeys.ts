@@ -1,15 +1,17 @@
-export enum localstorageKeys {
+export enum   localstorageKeys {
   TOKEN = 'token',
   ENCODINGSETTINGS = 'encoding',
   CHATCOLLAPSED = 'chatcollapsed',
   USERINFO = 'userinfo',
   THEME = 'theme',
   AUTOPLAY = 'autoplay',
-  STREAMSETTINGS = 'StreamSettings',
+  STREAM_CONSTRAINTS = 'StreamConstraints',
   CHATSILENT = 'chatsilent',
   DESKTOPAUDIO = 'DESKTOPAUDIO',
   AUDIO = 'audio',
   DEBUG = 'debug',
   CURSOR = 'cursor',
   experementalEncoding = 'experementalEncoding',
+  AUTO_ON_MIC = 'autoOnMic',
+  STREAM_BITRATE = 'streamBitrate',
 }

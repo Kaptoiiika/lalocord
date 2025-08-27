@@ -16,10 +16,16 @@ type UserConnectModel = UserModel
 
 export const useWebRTCRoom = () => {
   const { users, addUser, removeUser } = useWebRTCRoomStore()
-  const { streams } = useWebRTCStore()
+  const { streams, bitrate } = useWebRTCStore()
   const { mic, screen, webCam } = streams
   const userMapRef = useRef(users)
   userMapRef.current = users
+
+  useEffect(() => {
+    userMapRef.current.forEach(({ peer }) => {
+      peer.setVideoBitrate(bitrate)
+    })
+  }, [bitrate])
 
   const handleGetUserPeer = useCallback(
     (userId: number) => userMapRef.current.find((user) => user.id === userId)?.peer,
@@ -73,15 +79,19 @@ export const useWebRTCRoom = () => {
   }, [mic])
 
   useEffect(() => {
+    const chatMessageListeners = new Map<number, () => void>()
+
     const addUser = (user: UserConnectModel, waitOffer = false) => {
       const webRTCClient = new WebRTCClient({ id: user.id })
       handleAddUser(user, webRTCClient)
-
-      webRTCClient.on('onChatMessage', (message) => {
-        useChatStore.getState().addNewMessage({ type: 'text', id: crypto.randomUUID(), message }, user)
-      })
-
       if (!waitOffer) webRTCClient.createOffer()
+
+      const onChatMessage = (message: string) => {
+        useChatStore.getState().addNewMessage({ type: 'text', id: crypto.randomUUID(), message }, user)
+      }
+      webRTCClient.on('onChatMessage', onChatMessage)
+
+      chatMessageListeners.set(user.id, () => webRTCClient.off('onChatMessage', onChatMessage))
     }
 
     const initClients = (users: UserConnectModel[]) => {
@@ -110,6 +120,7 @@ export const useWebRTCRoom = () => {
     const userDisconnect = (user: ClientId) => {
       const webRTCClient = handleGetUserPeer(user.id)
       webRTCClient?.close()
+      chatMessageListeners.get(user.id)?.()
       removeUser(user.id)
     }
 
@@ -127,6 +138,8 @@ export const useWebRTCRoom = () => {
     socketClient.on('reconnect', reconnect)
 
     return () => {
+      chatMessageListeners.forEach((unsubscribe) => unsubscribe())
+      chatMessageListeners.clear()
       socketClient.off('new_answer', saveAnswer)
       socketClient.off('new_offer', createAnswer)
       socketClient.off('new_ice', saveIce)

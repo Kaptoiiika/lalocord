@@ -1,18 +1,16 @@
 import { create } from 'zustand'
 
-import type { RoomRTCSchema } from '../../../../entities/RTCClient/model/types/RoomRTCSchema'
+import type { RoomRTCSchema } from '../types/RoomRTCSchema'
 import type { StateCreator } from 'zustand'
 
 import {
   getEncodingSettingsFromLocalStorage,
-  getStreamSettingsfromLocalStorage,
   saveEncodingSettingsToLocalStorage,
 } from './RoomRTCLocalStorage'
 import { ConvertUserSettingsToMediaSettings } from '../../utils/ConvertUserSettingsToMediaSettings'
 
 const store: StateCreator<RoomRTCSchema> = (set) => ({
-  streamSettings: ConvertUserSettingsToMediaSettings(getStreamSettingsfromLocalStorage()),
-  userStreamSettings: getStreamSettingsfromLocalStorage(),
+  streamSettings: {},
   encodingSettings: getEncodingSettingsFromLocalStorage(),
 
   setEncodingSettings: (settings) => {

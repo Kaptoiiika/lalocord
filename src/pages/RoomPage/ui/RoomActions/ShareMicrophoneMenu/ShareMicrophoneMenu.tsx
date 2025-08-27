@@ -3,8 +3,6 @@ import { useCallback } from 'react'
 import MicIcon from '@mui/icons-material/Mic'
 import MicOffIcon from '@mui/icons-material/MicOff'
 import { Tooltip, IconButton, FormControlLabel, Switch, Stack, Menu } from '@mui/material'
-import { useRoomRTCStore } from 'src/entities/RTCClient'
-import { getUserStreamSettings } from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
@@ -12,14 +10,13 @@ import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { SelectMicrophone } from './SelectMicrophone'
 
 export const ShareMicrophoneMenu = () => {
-  const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
-  const setStreamingSettings = useRoomRTCStore((state) => state.setStreamSettings)
   const { handleClick, handleClose, anchorEl, open } = usePopup()
-  const autoOn = userStreamSettings.audio.autoOn
+  const autoOn = useWebRTCStore((state) => state.autoOnMic)
 
   const micStream = useWebRTCStore((state) => state.streams.mic)
   const createStream = useWebRTCStore((state) => state.createStream)
   const stopStream = useWebRTCStore((state) => state.stopStream)
+  const setAutoOnMic = useWebRTCStore((state) => state.setAutoOnMic)
 
   const handleStopStream = useCallback(async () => {
     stopStream('mic')
@@ -31,15 +28,9 @@ export const ShareMicrophoneMenu = () => {
 
   const handleChangeAutoOn = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-      setStreamingSettings({
-        ...userStreamSettings,
-        audio: {
-          ...userStreamSettings.audio,
-          autoOn: checked,
-        },
-      })
+      setAutoOnMic(checked)
     },
-    [setStreamingSettings, userStreamSettings]
+    [setAutoOnMic]
   )
 
   useMountedEffect(() => {
@@ -92,7 +83,7 @@ export const ShareMicrophoneMenu = () => {
             control={
               <Switch
                 color="primary"
-                checked={userStreamSettings.audio.autoOn}
+                checked={autoOn}
                 onChange={handleChangeAutoOn}
               />
             }

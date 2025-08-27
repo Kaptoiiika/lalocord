@@ -43,7 +43,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       iceServers: getIceServers(),
     })
 
-    const storeStreams = useWebRTCStore.getState().streams
+    const { streams: storeStreams, bitrate: storeBitrate } = useWebRTCStore.getState()
     const screenVideoTrack = storeStreams?.screen?.getVideoTracks()[0] ?? createBlackVideoTrack()
     const screenAudioTrack = storeStreams?.screen?.getAudioTracks()[0] ?? createSilentAudioTrack()
     const webCamVideoTrack = storeStreams?.webCam?.getVideoTracks()[0] ?? createBlackVideoTrack()
@@ -85,6 +85,22 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       negotiated: true,
     })
     this.channelInfo.onmessage = this.onInfoMessage.bind(this)
+    this.channelInfo.onopen = () => {
+      this.setVideoBitrate(storeBitrate)
+      if (storeStreams?.screen) {
+        resumeSender(this.senders.screenVideo)
+        resumeSender(this.senders.screenAudio)
+        this.sendMessageToPeer('stream_start', 'screen')
+      }
+      if (storeStreams?.webCam) {
+        resumeSender(this.senders.webCam)
+        this.sendMessageToPeer('stream_start', 'webCam')
+      }
+      if (storeStreams?.mic) {
+        resumeSender(this.senders.mic)
+        this.sendMessageToPeer('stream_start', 'mic')
+      }
+    }
   }
 
   async createOffer(): Promise<RTCSessionDescriptionInit> {
@@ -155,6 +171,15 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     if (event.candidate) {
       this.sendMessageToSocket('new_ice', { ice: event.candidate })
     }
+  }
+
+  setVideoBitrate(bitrate: number) {
+    const screenVideoParams = { ...this.senders.screenVideo.getParameters() }
+    const webCamParams = { ...this.senders.webCam.getParameters() }
+    screenVideoParams.encodings = screenVideoParams.encodings.map((encoding) => ({ ...encoding, maxBitrate: bitrate }))
+    webCamParams.encodings = webCamParams.encodings.map((encoding) => ({ ...encoding, maxBitrate: bitrate }))
+    this.senders.screenVideo.setParameters(screenVideoParams)
+    this.senders.webCam.setParameters(webCamParams)
   }
 
   private onTrack(event: RTCTrackEvent) {
