@@ -93,7 +93,6 @@ export const Message = (props: MessageProps) => {
       >
         {data.message.message}
       </Linkify>
-      {/* type guard don't work with this :( */}
       {!!data.message.blob && (
         <MessageFile
           data={data.message as RequireOnlyOne<RTCChatMessage, 'blob'>}

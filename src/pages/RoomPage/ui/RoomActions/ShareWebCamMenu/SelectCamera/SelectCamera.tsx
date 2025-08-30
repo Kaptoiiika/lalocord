@@ -2,17 +2,15 @@ import { useState } from 'react';
 
 import type { SelectChangeEvent } from '@mui/material';
 import { Select, MenuItem,InputLabel ,FormControl,Typography } from '@mui/material';
-import { useRoomRTCStore } from 'src/entities/RTCClient';
-import { getUserStreamSettings } from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors';
+import { useWebRTCStore } from 'src/entities/WebRTC';
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect';
 
-import type { UserStreamSettings } from 'src/entities/RTCClient/model/types/RoomRTCSchema';
+import type { ObjectStreamConstraints } from 'src/entities/WebRTC/utils/streamConstraints'
+
 
 export const SelectCamera = () => {
-  const userStreamSettings = useRoomRTCStore(getUserStreamSettings);
-  const setStreamingSettings = useRoomRTCStore(
-    (state) => state.setStreamSettings
-  );
+  const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
+  const setStreamConstraints = useWebRTCStore((state) => state.setStreamConstraints)
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [error, setError] = useState('');
 
@@ -30,21 +28,18 @@ export const SelectCamera = () => {
   });
 
   const handleChange = (event: SelectChangeEvent) => {
-    const newstreamSettings: UserStreamSettings = {
-      ...userStreamSettings,
+    const newstreamSettings: ObjectStreamConstraints = {
+      ...streamConstraints,
       video: {
-        ...userStreamSettings.video,
+        ...streamConstraints.video,
         deviceId: event.target.value,
       },
     };
 
-    setStreamingSettings(newstreamSettings);
+    setStreamConstraints(newstreamSettings);
   };
 
-  const selectedCamera = cameras.find((camera) => {
-    if (typeof userStreamSettings.video === 'object')
-      return camera.deviceId === userStreamSettings.video.deviceId;
-  });
+  const selectedCamera = cameras.find((camera) => camera.deviceId === streamConstraints.video.deviceId);
 
   if (error) {
     return (

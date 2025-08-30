@@ -1,7 +1,11 @@
+import { Buffer } from 'buffer'
+
 import { socketClient } from 'src/shared/api'
+import { logger } from 'src/shared/lib/logger/Logger'
 import { Emitter } from 'src/shared/lib/utils'
 
 import { useWebRTCStore } from '../model/WebRTCStore'
+import { MessageCodec } from './Codec/MessageCodec'
 import type { StreamType } from '../types'
 import { createBlackVideoTrack, createSilentAudioTrack, getIceServers, pauseSender, resumeSender } from '../utils'
 
@@ -11,23 +15,55 @@ type EventMessageToSocket = 'new_answer' | 'new_offer' | 'new_ice'
 
 type EventMessageToPeer = 'stream_start' | 'stream_stop' | 'stream_status'
 
+type FileHeader = {
+  id: Uint8Array
+  length: number
+  type?: string
+  name?: string
+}
+type ChunkFileHeader = Omit<FileHeader, 'id'>
+
+export type WebRTCChatMessage = {
+  id: string
+  message?: string
+  blob?: Blob
+  blobParams?: {
+    length: number
+    loaded: number
+    type?: string
+    name?: string
+  }
+  isSystemMessage?: boolean
+}
+
+export type WebRTCTransmissionMessage = Pick<WebRTCChatMessage, 'id' | 'isSystemMessage' | 'blobParams'> & {
+  transmission: {
+    length: number
+    loaded: number
+  }
+}
+
 type WebRTCClientEvents = {
   onStreamStart: StreamType
   onStreamStop: StreamType
   onChatMessage: string
+  onChatMessageFile: WebRTCChatMessage
+  onChatMessageLoadFile: WebRTCTransmissionMessage
 }
 
 export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   id: number
   private peer: RTCPeerConnection
-  private channelInfo: RTCDataChannel
+  private codec: MessageCodec
+  private chatFileTempData: Map<string, Uint8Array> = new Map()
   private remoteSenderStreams: Record<StreamType, MediaStream | null> = {
     screen: null,
     webCam: null,
     mic: null,
   }
+  private channelInfo: RTCDataChannel
   private channelChat: RTCDataChannel
-
+  private channelFile: RTCDataChannel
   remoteStreams: Partial<Record<StreamType, MediaStream | null>> = {}
   senders: {
     screenVideo: RTCRtpSender
@@ -78,9 +114,26 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       negotiated: true,
     })
     this.channelChat.onmessage = this.onChatMessage.bind(this)
+    this.channelFile = this.peer.createDataChannel('file', {
+      id: 1,
+      protocol: 'arrayBuffer',
+      negotiated: true,
+    })
+    this.codec = new MessageCodec({
+      headerName: 'lalohead',
+      maxChunkSize: 250000,
+    })
+    this.channelFile.binaryType = 'arraybuffer'
+    this.channelFile.bufferedAmountLowThreshold = 1024 * 64 - 1
+    this.channelFile.onopen = () => {
+      if (this.peer.sctp?.maxMessageSize) {
+        this.channelFile.bufferedAmountLowThreshold = this.peer.sctp.maxMessageSize
+      }
+    }
+    this.channelFile.onmessage = this.onFileMessage.bind(this)
 
     this.channelInfo = this.peer.createDataChannel('info', {
-      id: 1,
+      id: 2,
       protocol: 'json',
       negotiated: true,
     })
@@ -213,7 +266,6 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
         this.emit('onStreamStop', data.message as StreamType)
         break
     }
-    console.log('onInfoMessage', data)
   }
 
   sendMessageToChat(message: string) {
@@ -223,20 +275,146 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       console.log('error', error)
     }
   }
+  private sendToFileChat(data: ArrayBuffer, params: FileHeader, startWith: number = 0) {
+    const dataid = params.id
+    let chunknumber = startWith
 
-  sendFileToChat(blob: Blob, name?: string) {
-    console.log('not implemented', blob, name)
-    // this.channelChat.send(JSON.stringify({ type: 'file', blob, name }))
+    while (params.length > chunknumber * this.codec.chunkSize) {
+      if (this.channelFile.bufferedAmount > this.channelFile.bufferedAmountLowThreshold) {
+        this.channelFile.onbufferedamountlow = () => {
+          this.channelFile.onbufferedamountlow = null
+          this.sendToFileChat(data, params, chunknumber)
+        }
+
+        return
+      }
+      const ChunkParams: ChunkFileHeader = {
+        length: params.length,
+        type: params.type,
+        name: params.name,
+      }
+      const chunk = this.codec.createChunk(data, dataid, chunknumber, ChunkParams)
+
+      logger(
+        `Send chunk ${dataid}, №${chunknumber}, with chunk.byteLength ${chunk.byteLength} of total length ${params.length}`,
+        chunk
+      )
+      chunknumber++
+      this.emit('onChatMessageLoadFile', {
+        id: dataid.join(''),
+        transmission: {
+          length: params.length,
+          loaded: chunknumber * this.codec.chunkSize,
+        },
+        isSystemMessage: true,
+      })
+      try {
+        this.channelFile.send(chunk)
+      } catch (error) {
+        console.log('error', error)
+      }
+    }
+  }
+
+  async sendFileToChat(blob: Blob | ArrayBuffer, name?: string) {
+    const id = this.codec.createNewId()
+    const splitedName = name?.slice(-32)
+
+    if (blob instanceof Blob) {
+      const data = await blob.arrayBuffer()
+      const headerData: FileHeader = {
+        id,
+        type: blob.type,
+        length: data.byteLength,
+        name: splitedName,
+      }
+
+      return this.sendToFileChat(data, headerData)
+    }
+
+    return this.sendToFileChat(blob, {
+      length: blob.byteLength,
+      id,
+      name: splitedName,
+    })
+  }
+
+  private onFileMessage(event: MessageEvent) {
+    const message = event.data
+
+    if (typeof message === 'object') {
+      const chunk = this.codec.parseChunk(message)
+
+      if (chunk) {
+        logger(`recived chunkId ${chunk.chunkid} for data ${chunk.dataid}`, chunk)
+
+        const stringId = chunk.dataid.join('')
+        const temp = this.chatFileTempData.get(stringId)
+        const dataLength = Number(chunk.params.length)
+        const chunkType = String(chunk.params?.type)
+        const chunkSize = Number(chunk.params?.chunkSize ?? this.codec.chunkSize)
+        const fileName = String(chunk.params?.name)
+        const params = {
+          length: dataLength,
+          loaded: this.codec.chunkSize * chunk.chunkid,
+          type: chunkType,
+          name: fileName,
+        }
+
+        this.emit('onChatMessageLoadFile', {
+          id: stringId,
+          blobParams: params,
+          transmission: {
+            length: params.length,
+            loaded: this.codec.chunkSize * chunk.chunkid,
+          },
+        })
+
+        if (temp) {
+          temp.set(new Uint8Array(chunk.data), chunkSize * chunk.chunkid)
+          logger(`recived chunk data №${chunk.chunkid} size ${chunk.data.byteLength}`)
+        } else {
+          const head = new Uint8Array(dataLength)
+
+          head.set(new Uint8Array(chunk.data), chunkSize * chunk.chunkid)
+          logger(`recived head data №${chunk.chunkid} size ${chunk.data.byteLength}`)
+          this.chatFileTempData.set(stringId, head)
+        }
+        if (chunkSize * (chunk.chunkid + 1) >= dataLength) {
+          const blobPart: BlobPart = temp ? Buffer.from(temp) : chunk.data
+
+          const file = new Blob([blobPart], {
+            type: chunkType,
+          })
+
+          logger('recived all data for create blob', file)
+          this.emit('onChatMessageFile', {
+            id: stringId,
+            blob: file,
+            blobParams: {
+              ...params,
+              length: 0,
+              loaded: 0,
+            },
+          })
+          this.chatFileTempData.delete(stringId)
+        }
+      }
+    }
   }
 
   private onChatMessage(event: MessageEvent) {
-    const { message, type } = JSON.parse(event.data)
+    try {
+      const { message, type } = JSON.parse(event.data)
 
-    if (type === 'text') {
-      return this.emit('onChatMessage', message)
+      if (type === 'text') {
+        return this.emit('onChatMessage', message)
+      }
+    } catch (error) {
+      return console.log('error', error)
     }
 
-    return console.log('unknown message', message)
+    return console.log('unknown message', event.data)
   }
 
   get connectionState(): RTCPeerConnectionState {

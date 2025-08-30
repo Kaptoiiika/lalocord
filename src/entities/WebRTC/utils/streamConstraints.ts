@@ -32,6 +32,9 @@ export const getStreamSettingsfromLocalStorage = (): ObjectStreamConstraints => 
       deviceId: data?.audio?.deviceId || undefined,
     },
     video: {
+      ...defaultStreamConstraints.video,
+      ...data?.video,
+      frameRate: Number(data?.video?.frameRate) || defaultStreamConstraints.video?.frameRate,
       height: Number(data?.video?.height) || defaultStreamConstraints.video?.height,
       deviceId: data?.video?.deviceId || undefined,
     },

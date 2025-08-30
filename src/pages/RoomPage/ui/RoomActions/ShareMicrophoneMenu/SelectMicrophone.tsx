@@ -2,15 +2,14 @@ import { useState } from 'react'
 
 import type { SelectChangeEvent } from '@mui/material'
 import { FormControl, InputLabel, Typography, Select, MenuItem } from '@mui/material'
-import { useRoomRTCStore } from 'src/entities/RTCClient'
-import { getUserStreamSettings } from 'src/entities/RTCClient/model/selectors/RoomRTCSelectors'
+import { useWebRTCStore } from 'src/entities/WebRTC'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 
-import type { UserStreamSettings } from 'src/entities/RTCClient/model/types/RoomRTCSchema'
+import type { ObjectStreamConstraints } from 'src/entities/WebRTC/utils/streamConstraints'
 
 export const SelectMicrophone = () => {
-  const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
-  const setStreamingSettings = useRoomRTCStore((state) => state.setStreamSettings)
+  const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
+  const setStreamConstraints = useWebRTCStore((state) => state.setStreamConstraints)
   const [microphones, setmicrophones] = useState<MediaDeviceInfo[]>([])
   const [error, setError] = useState('')
 
@@ -28,20 +27,18 @@ export const SelectMicrophone = () => {
   })
 
   const handleChange = (event: SelectChangeEvent) => {
-    const newstreamSettings: UserStreamSettings = {
-      ...userStreamSettings,
+    const newstreamSettings: ObjectStreamConstraints = {
+      ...streamConstraints,
       audio: {
-        ...userStreamSettings.audio,
+        ...streamConstraints.audio,
         deviceId: event.target.value,
       },
     }
 
-    setStreamingSettings(newstreamSettings)
+    setStreamConstraints(newstreamSettings)
   }
 
-  const selectedMicrophone = microphones.find((microphone) => {
-    if (typeof userStreamSettings.video === 'object') return microphone.deviceId === userStreamSettings.audio.deviceId
-  })
+  const selectedMicrophone = microphones.find((microphone) => microphone.deviceId === streamConstraints.audio.deviceId)
 
   if (error) {
     return (

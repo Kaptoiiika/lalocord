@@ -5,6 +5,7 @@ import { socketClient } from 'src/shared/api'
 import { useChatStore } from 'src/widgets/Chat/model/store/ChatStore'
 
 import type { UserModel } from 'src/entities/User'
+import type { WebRTCTransmissionMessage, WebRTCChatMessage } from 'src/entities/WebRTC/lib/WebRTCClient'
 
 import { useWebRTCRoomStore } from '../model/WebRTCRoomStore'
 
@@ -86,12 +87,26 @@ export const useWebRTCRoom = () => {
       handleAddUser(user, webRTCClient)
       if (!waitOffer) webRTCClient.createOffer()
 
-      const onChatMessage = (message: string) => {
+      const onChatMessage = (message: string) =>
         useChatStore.getState().addNewMessage({ type: 'text', id: crypto.randomUUID(), message }, user)
-      }
-      webRTCClient.on('onChatMessage', onChatMessage)
 
-      chatMessageListeners.set(user.id, () => webRTCClient.off('onChatMessage', onChatMessage))
+      const onChatMessageLoadFile = (message: WebRTCTransmissionMessage) => {
+        useChatStore.getState().addNewMessage({ type: 'transmission', ...message }, user)
+      }
+
+      const onChatMessageFile = (message: WebRTCChatMessage) => {
+        useChatStore.getState().addNewMessage({ type: 'file', ...message }, user)
+      }
+
+      webRTCClient.on('onChatMessage', onChatMessage)
+      webRTCClient.on('onChatMessageLoadFile', onChatMessageLoadFile)
+      webRTCClient.on('onChatMessageFile', onChatMessageFile)
+
+      chatMessageListeners.set(user.id, () => {
+        webRTCClient.off('onChatMessage', onChatMessage)
+        webRTCClient.off('onChatMessageLoadFile', onChatMessageLoadFile)
+        webRTCClient.off('onChatMessageFile', onChatMessageFile)
+      })
     }
 
     const initClients = (users: UserConnectModel[]) => {

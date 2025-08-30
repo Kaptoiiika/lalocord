@@ -25,7 +25,7 @@ export const ShareMicrophoneMenu = () => {
   const handleStartStream = useCallback(async () => {
     await createStream('mic')
   }, [createStream])
-
+  
   const handleChangeAutoOn = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
       setAutoOnMic(checked)

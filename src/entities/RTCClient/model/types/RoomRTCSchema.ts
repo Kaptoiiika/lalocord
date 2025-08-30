@@ -1,9 +1,7 @@
 export interface RoomRTCSchema {
-  streamSettings: MediaStreamConstraints
   encodingSettings: RTCRtpEncodingParameters
 
   setEncodingSettings: (settings: RTCRtpEncodingParameters) => void
-  setStreamSettings: (streamSettings: UserStreamSettings) => void
 }
 
 export type VideoStreamSettingsHint = 'detail' | 'motion' | 'default'

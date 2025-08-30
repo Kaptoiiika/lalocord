@@ -32,9 +32,11 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
         id: crypto.randomUUID(),
         blob,
         type: 'file',
+        blobParams: { name, length: blob.size, loaded: 0, type: blob.type },
       },
       localUser
     )
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handlePasteFile = (e: React.ClipboardEvent) => {

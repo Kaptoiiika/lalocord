@@ -7,10 +7,8 @@ import {
   getEncodingSettingsFromLocalStorage,
   saveEncodingSettingsToLocalStorage,
 } from './RoomRTCLocalStorage'
-import { ConvertUserSettingsToMediaSettings } from '../../utils/ConvertUserSettingsToMediaSettings'
 
 const store: StateCreator<RoomRTCSchema> = (set) => ({
-  streamSettings: {},
   encodingSettings: getEncodingSettingsFromLocalStorage(),
 
   setEncodingSettings: (settings) => {
@@ -20,12 +18,6 @@ const store: StateCreator<RoomRTCSchema> = (set) => ({
       encodingSettings: {
         ...settings,
       },
-    }))
-  },
-  setStreamSettings(streamSettings) {
-    set((state) => ({
-      ...state,
-      streamSettings: ConvertUserSettingsToMediaSettings(streamSettings),
     }))
   },
 })
