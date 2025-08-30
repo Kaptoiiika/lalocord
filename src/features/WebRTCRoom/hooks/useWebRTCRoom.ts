@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 
+import { useAudioEffectStore, AudioName } from 'src/entities/AudioEffect'
 import { useWebRTCStore, WebRTCClient } from 'src/entities/WebRTC'
 import { socketClient } from 'src/shared/api'
 import { useChatStore } from 'src/widgets/Chat/model/store/ChatStore'
@@ -18,6 +19,7 @@ type UserConnectModel = UserModel
 export const useWebRTCRoom = () => {
   const { users, addUser, removeUser } = useWebRTCRoomStore()
   const { streams, bitrate } = useWebRTCStore()
+  const playAudio = useAudioEffectStore((state) => state.play)
   const { mic, screen, webCam } = streams
   const userMapRef = useRef(users)
   userMapRef.current = users
@@ -85,16 +87,20 @@ export const useWebRTCRoom = () => {
     const addUser = (user: UserConnectModel, waitOffer = false) => {
       const webRTCClient = new WebRTCClient({ id: user.id })
       handleAddUser(user, webRTCClient)
+      playAudio(AudioName.joinToRoom)
       if (!waitOffer) webRTCClient.createOffer()
 
-      const onChatMessage = (message: string) =>
+      const onChatMessage = (message: string) => {
+        playAudio(AudioName.notification)
         useChatStore.getState().addNewMessage({ type: 'text', id: crypto.randomUUID(), message }, user)
+      }
 
       const onChatMessageLoadFile = (message: WebRTCTransmissionMessage) => {
         useChatStore.getState().addNewMessage({ type: 'transmission', ...message }, user)
       }
 
       const onChatMessageFile = (message: WebRTCChatMessage) => {
+        playAudio(AudioName.notification)
         useChatStore.getState().addNewMessage({ type: 'file', ...message }, user)
       }
 
@@ -137,6 +143,7 @@ export const useWebRTCRoom = () => {
       webRTCClient?.close()
       chatMessageListeners.get(user.id)?.()
       removeUser(user.id)
+      playAudio(AudioName.exitFromRoom)
     }
 
     const reconnect = (user: UserConnectModel) => {
@@ -163,7 +170,7 @@ export const useWebRTCRoom = () => {
       socketClient.off('user_leave', userDisconnect)
       socketClient.off('reconnect', reconnect)
     }
-  }, [handleAddUser, handleGetUserPeer, removeUser])
+  }, [handleAddUser, handleGetUserPeer, playAudio, removeUser])
 
   const handleSendMessage = useCallback((message: string) => {
     userMapRef.current.forEach(({ peer }) => {
@@ -179,4 +186,3 @@ export const useWebRTCRoom = () => {
 
   return { handleSendMessage, handleSendFile }
 }
-
