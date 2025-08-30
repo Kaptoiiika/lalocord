@@ -1,10 +1,10 @@
 import { LinearProgress } from '@mui/material'
 import { readablizeBytes } from 'src/shared/lib/utils/Numbers'
 
-import type { RTCChatMessage } from 'src/entities/RTCClient'
+import type { WebRTCChatMessage } from 'src/entities/WebRTC'
 
 type MessageFileProps = {
-  data: RTCChatMessage
+  data: WebRTCChatMessage
 }
 
 export const MessageLoadingFile = (props: MessageFileProps) => {

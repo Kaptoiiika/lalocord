@@ -3,8 +3,8 @@ import { useState } from 'react'
 
 import SettingsIcon from '@mui/icons-material/Settings'
 import { Menu, Stack, Typography, Slider, IconButton, Tooltip } from '@mui/material'
-import { bitrateToShortValue, bitrateValueText } from 'src/entities/RTCClient'
 import { useWebRTCStore } from 'src/entities/WebRTC'
+import { bitrateToShortValue, bitrateValueText } from 'src/shared/lib/utils/Numbers'
 import { InlineSelectPrimitive } from 'src/shared/ui/InlineSelect/InlineSelectPrimitive'
 
 import styles from './VideoSettingsMenu.module.scss'

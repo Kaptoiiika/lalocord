@@ -4,7 +4,7 @@ import type { SelectChangeEvent } from '@mui/material'
 import { Button, Dialog, MenuItem, Select } from '@mui/material'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom'
 
-import type { RTCClient } from 'src/entities/RTCClient'
+import type { WebRTCClient } from 'src/entities/WebRTC'
 
 import styles from './TicTacToeSelectOpponent.module.scss'
 
@@ -16,9 +16,9 @@ type TicTacToeSelectOpponentProps = {
 
 export const TicTacToeSelectOpponent = (props: TicTacToeSelectOpponentProps) => {
   const { onClose, onSelect, open } = props
-  const [selectedUser, setUser] = useState<RTCClient>()
+  const [selectedUser, setUser] = useState<WebRTCClient>()
 
-  const handleChangeUser = (event: SelectChangeEvent<RTCClient>) => {
+  const handleChangeUser = (event: SelectChangeEvent<WebRTCClient>) => {
     if (typeof event.target.value === 'string') return setUser(undefined)
     setUser(event.target.value)
   }
