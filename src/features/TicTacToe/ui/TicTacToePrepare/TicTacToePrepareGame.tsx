@@ -5,7 +5,6 @@ import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen';
 
 import { TicTacToeSelectOpponent } from '../TicTacToeSelectOpponent/TicTacToeSelectOpponent';
 
-
 type TicTacToePrepareGameProps = { onStart?: () => void } & PropsWithChildren;
 
 export const TicTacToePrepareGame = (props: TicTacToePrepareGameProps) => {

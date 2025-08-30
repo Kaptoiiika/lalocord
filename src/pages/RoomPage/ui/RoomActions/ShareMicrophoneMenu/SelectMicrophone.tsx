@@ -26,7 +26,7 @@ export const SelectMicrophone = () => {
       })
   })
 
-  const handleChange = (event: SelectChangeEvent) => {
+  const handleChangeMicorphone = (event: SelectChangeEvent) => {
     const newstreamSettings: ObjectStreamConstraints = {
       ...streamConstraints,
       audio: {
@@ -64,7 +64,7 @@ export const SelectMicrophone = () => {
       <Select
         fullWidth
         value={selectedMicrophone?.deviceId || ''}
-        onChange={handleChange}
+        onChange={handleChangeMicorphone}
       >
         {microphones.map((microphone) => (
           <MenuItem

@@ -1,8 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import { Children } from 'react';
 
-
-import { classNames } from 'src/shared/lib/classNames/classNames';
+import { classNames } from 'src/shared/lib/classNames';
 import { sliceIntoTotalChunks } from 'src/shared/lib/utils/Arrays';
 
 import styles from './StreamViewer.module.scss';

@@ -1,7 +1,7 @@
 import { localstorageKeys } from 'src/shared/const/localstorageKeys'
 import { create } from 'zustand'
 
-import type { ObjectStreamConstraints} from '../utils/streamConstraints';
+import type { ObjectStreamConstraints } from '../utils/streamConstraints'
 import type { StateCreator } from 'zustand'
 
 import { getStreamSettingsfromLocalStorage, saveStreamConstraintsToLocalStorage } from '../utils/streamConstraints'
@@ -61,6 +61,19 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
     }
 
     stream?.getTracks().forEach((track) => {
+      try {
+        if (type === 'mic') {
+          track.contentHint = 'speech'
+        } else if (type === 'screen') {
+          track.contentHint = 'motion'
+        } else if (type === 'webCam') {
+          track.contentHint = 'motion'
+        }
+      } catch (error) {
+        // firefox not support contentHint
+        console.error('error set contentHint', error)
+      }
+
       track.onended = () => {
         set((state) => ({
           streams: { ...state.streams, [type]: null },

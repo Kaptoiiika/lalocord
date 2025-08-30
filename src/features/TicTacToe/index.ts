@@ -1,2 +1,2 @@
-export { TicTacToe } from './ui/TicTacToe';
+export { TicTacToeLazy as TicTacToe } from './ui/TicTacToeLazy'
 export { TicTacToePrepareGame } from './ui/TicTacToePrepare/TicTacToePrepareGame';

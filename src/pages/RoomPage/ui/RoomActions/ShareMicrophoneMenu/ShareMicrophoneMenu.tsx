@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import MicIcon from '@mui/icons-material/Mic'
 import MicOffIcon from '@mui/icons-material/MicOff'
-import { Tooltip, IconButton, FormControlLabel, Switch, Stack, Menu } from '@mui/material'
+import { Tooltip, IconButton, FormControlLabel, Switch, Stack, Menu, Typography } from '@mui/material'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
@@ -12,11 +12,15 @@ import { SelectMicrophone } from './SelectMicrophone'
 export const ShareMicrophoneMenu = () => {
   const { handleClick, handleClose, anchorEl, open } = usePopup()
   const autoOn = useWebRTCStore((state) => state.autoOnMic)
-
   const micStream = useWebRTCStore((state) => state.streams.mic)
   const createStream = useWebRTCStore((state) => state.createStream)
   const stopStream = useWebRTCStore((state) => state.stopStream)
   const setAutoOnMic = useWebRTCStore((state) => state.setAutoOnMic)
+  const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
+  const noiseSuppression = useWebRTCStore((state) => state.streamConstraints.audio.noiseSuppression)
+  const echoCancellation = useWebRTCStore((state) => state.streamConstraints.audio.echoCancellation)
+  const autoGainControl = useWebRTCStore((state) => state.streamConstraints.audio.autoGainControl)
+  const setStreamConstraints = useWebRTCStore((state) => state.setStreamConstraints)
 
   const handleStopStream = useCallback(async () => {
     stopStream('mic')
@@ -25,12 +29,25 @@ export const ShareMicrophoneMenu = () => {
   const handleStartStream = useCallback(async () => {
     await createStream('mic')
   }, [createStream])
-  
+
   const handleChangeAutoOn = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
       setAutoOnMic(checked)
     },
     [setAutoOnMic]
+  )
+
+  const handleChangeAudioSettings = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setStreamConstraints({
+        ...streamConstraints,
+        audio: {
+          ...streamConstraints.audio,
+          [event.target.name]: event.target.checked,
+        },
+      })
+    },
+    [setStreamConstraints, streamConstraints]
   )
 
   useMountedEffect(() => {
@@ -78,17 +95,53 @@ export const ShareMicrophoneMenu = () => {
           horizontal: 'center',
         }}
       >
-        <Stack gap={1}>
-          <FormControlLabel
-            control={
-              <Switch
-                color="primary"
-                checked={autoOn}
-                onChange={handleChangeAutoOn}
-              />
-            }
-            label="Auto on"
-          />
+        <Stack >
+          <Stack gap={1} padding={1}>
+            <Typography>Audio settings</Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  color="primary"
+                  checked={autoOn}
+                  onChange={handleChangeAutoOn}
+                />
+              }
+              label="Auto on microphone"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  color="primary"
+                  name="noiseSuppression"
+                  checked={Boolean(noiseSuppression)}
+                  onChange={handleChangeAudioSettings}
+                />
+              }
+              label="Noise suppression"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  color="primary"
+                  name="echoCancellation"
+                  checked={Boolean(echoCancellation)}
+                  onChange={handleChangeAudioSettings}
+                />
+              }
+              label="Echo cancellation"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  color="primary"
+                  name="autoGainControl"
+                  checked={Boolean(autoGainControl)}
+                  onChange={handleChangeAudioSettings}
+                />
+              }
+              label="Auto gain control"
+            />
+          </Stack>
           <SelectMicrophone />
         </Stack>
       </Menu>

@@ -3,7 +3,7 @@ import { sliceIntoChunks } from 'src/shared/lib/utils/Arrays';
 
 import type { TicTacToeFieldType } from '../../model/types/TicTacToe';
 
-import { TicTacToeCeil } from '../TicTacToe/TicTacToeCeil';
+import { TicTacToeCeil } from '../TicTacToeCell/TicTacToeCeil';
 
 import styles from './TicTacToeField.module.scss';
 
