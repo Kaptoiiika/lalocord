@@ -11,12 +11,13 @@ $animationTime: 0.3s;
   flex-direction: column;
   flex-shrink: 0;
   width: $chatWidth;
-  height: min(50%, 350px);
+  height: 100%;
   transition: width $animationTime, height $animationTime;
   background: var(--bg-app);
 
   @media (max-width: 625px) {
     flex-shrink: 0;
+    height: min(50%, 350px);
     overflow: auto;
   }
 
