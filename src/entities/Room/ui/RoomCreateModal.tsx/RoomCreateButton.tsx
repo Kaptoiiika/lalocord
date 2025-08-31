@@ -34,4 +34,3 @@ export const RoomCreateButton = (props: RoomCreateButtonProps) => {
     </>
   )
 }
-

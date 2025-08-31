@@ -1,52 +1,45 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
-import {
-  Button,
-  Dialog,
-  IconButton,
-  Paper,
-  Stack,
-  TextField,
-} from '@mui/material';
-import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen';
-import { AvatarUser } from 'src/shared/ui/Avatar';
+import { Button, Dialog, IconButton, Paper, Stack, TextField } from '@mui/material'
+import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
+import { AvatarUser } from 'src/shared/ui/Avatar'
 
-import { useLocalUserStore } from '../../model/store/LocalUserStore';
+import { useLocalUserStore } from '../../model/store/LocalUserStore'
 
 export const UserChangeAvatar = () => {
-  const { setLocalAvatar, localUser } = useLocalUserStore();
-  const srcAvatar = localUser.avatar ?? '';
-  const [testSrc, setTestSrc] = useState(srcAvatar);
-  const [tempSrc, setTempSrc] = useState(srcAvatar);
-  const { open, handleOpen, handleClose: handleCloseModal } = useIsOpen();
+  const { setLocalAvatar, localUser } = useLocalUserStore()
+  const srcAvatar = localUser.avatar ?? ''
+  const [testSrc, setTestSrc] = useState(srcAvatar)
+  const [tempSrc, setTempSrc] = useState(srcAvatar)
+  const { open, handleOpen, handleClose: handleCloseModal } = useIsOpen()
 
   useEffect(() => {
-    setTestSrc(srcAvatar);
-    setTempSrc(srcAvatar);
-  }, [srcAvatar]);
+    setTestSrc(srcAvatar)
+    setTempSrc(srcAvatar)
+  }, [srcAvatar])
 
   const handleChangeAvatar = (src: string) => {
-    setLocalAvatar(src);
-  };
+    setLocalAvatar(src)
+  }
 
   const handleChangeSrc = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTempSrc(e.currentTarget.value);
-  };
+    setTempSrc(e.currentTarget.value)
+  }
 
   const handleTest = () => {
-    setTestSrc(tempSrc);
-  };
+    setTestSrc(tempSrc)
+  }
 
   const handleClose = () => {
-    setTestSrc(srcAvatar);
-    setTempSrc(srcAvatar);
-    handleCloseModal();
-  };
+    setTestSrc(srcAvatar)
+    setTempSrc(srcAvatar)
+    handleCloseModal()
+  }
 
   const handleAccept = () => {
-    handleChangeAvatar(tempSrc);
-    handleCloseModal();
-  };
+    handleChangeAvatar(tempSrc)
+    handleCloseModal()
+  }
 
   return (
     <>
@@ -64,7 +57,10 @@ export const UserChangeAvatar = () => {
         />
       </IconButton>
 
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+      >
         <Paper
           sx={{
             p: 1,
@@ -88,14 +84,26 @@ export const UserChangeAvatar = () => {
               />
             </Stack>
 
-            <Stack direction="row" gap={1}>
-              <Button variant="outlined" onClick={handleTest}>
+            <Stack
+              direction="row"
+              gap={1}
+            >
+              <Button
+                variant="outlined"
+                onClick={handleTest}
+              >
                 Test
               </Button>
-              <Button variant="outlined" onClick={handleClose}>
+              <Button
+                variant="outlined"
+                onClick={handleClose}
+              >
                 Cancel
               </Button>
-              <Button variant="contained" onClick={handleAccept}>
+              <Button
+                variant="contained"
+                onClick={handleAccept}
+              >
                 Accept
               </Button>
             </Stack>
@@ -103,5 +111,5 @@ export const UserChangeAvatar = () => {
         </Paper>
       </Dialog>
     </>
-  );
-};
+  )
+}

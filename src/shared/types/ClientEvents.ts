@@ -1,18 +1,18 @@
 export interface ClientKeyPressEvent {
-  key: ClientKeys;
-  state: 'down' | 'up';
-  clear?: boolean;
+  key: ClientKeys
+  state: 'down' | 'up'
+  clear?: boolean
 }
 
 export interface ClientMouseEvent {
-  clientX: number;
-  clientY: number;
-  offsetX: number;
-  offsetY: number;
-  pageX: number;
-  pageY: number;
-  movementX: number;
-  movementY: number;
+  clientX: number
+  clientY: number
+  offsetX: number
+  offsetY: number
+  pageX: number
+  pageY: number
+  movementX: number
+  movementY: number
 }
 
 export type ClientKeys =
@@ -117,4 +117,4 @@ export type ClientKeys =
   | 'NumpadDecimal'
   | 'MetaLeft'
   | 'Space'
-  | 'AltRight';
+  | 'AltRight'

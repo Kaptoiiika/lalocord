@@ -39,4 +39,3 @@ const store: StateCreator<WebRTCRoomStore> = (set) => ({
 })
 
 export const useWebRTCRoomStore = create<WebRTCRoomStore>()(store)
-

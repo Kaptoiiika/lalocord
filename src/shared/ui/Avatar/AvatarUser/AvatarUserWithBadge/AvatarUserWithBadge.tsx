@@ -27,4 +27,3 @@ export const AvatarUserWithBadge = (props: AvatarUserWithBadgeProps) => {
     </Badge>
   )
 }
-

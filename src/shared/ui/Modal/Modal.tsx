@@ -24,4 +24,3 @@ export const Modal = (props: ModalProps) => {
     </MuiModal>
   )
 }
-

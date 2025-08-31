@@ -46,4 +46,3 @@ export const getStreamSettingsfromLocalStorage = (): ObjectStreamConstraints => 
 export const saveStreamConstraintsToLocalStorage = (streamConstraints: ObjectStreamConstraints) => {
   localStorage.setItem(localstorageKeys.STREAM_CONSTRAINTS, JSON.stringify(streamConstraints))
 }
-

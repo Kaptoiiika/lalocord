@@ -5,4 +5,3 @@ export const TicTacToeLazy = lazy(() =>
     default: module.TicTacToe,
   }))
 )
-

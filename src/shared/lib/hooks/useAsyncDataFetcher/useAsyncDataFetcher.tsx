@@ -35,4 +35,3 @@ export const useAsyncDataFetcher = <T, P>(
 
   return { data, error, isLoading, textError }
 }
-

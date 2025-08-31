@@ -19,4 +19,3 @@ export const createBlackVideoTrack = () => {
   const stream = canvas.captureStream()
   return stream.getVideoTracks()[0]
 }
-

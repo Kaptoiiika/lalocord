@@ -1,26 +1,23 @@
-import { classNames } from 'src/shared/lib/classNames/classNames';
-import { sliceIntoChunks } from 'src/shared/lib/utils/Arrays';
+import { classNames } from 'src/shared/lib/classNames/classNames'
+import { sliceIntoChunks } from 'src/shared/lib/utils/Arrays'
 
-import type { TicTacToeFieldType } from '../../model/types/TicTacToe';
+import type { TicTacToeFieldType } from '../../model/types/TicTacToe'
 
-import { TicTacToeCeil } from '../TicTacToeCell/TicTacToeCeil';
+import { TicTacToeCeil } from '../TicTacToeCell/TicTacToeCeil'
 
-import styles from './TicTacToeField.module.scss';
-
+import styles from './TicTacToeField.module.scss'
 
 type TicTacToeFieldProps = {
-  fields: TicTacToeFieldType;
-  onCeilClick?: (id: number) => void;
-};
+  fields: TicTacToeFieldType
+  onCeilClick?: (id: number) => void
+}
 
 export const TicTacToeField = (props: TicTacToeFieldProps) => {
-  const { fields, onCeilClick } = props;
+  const { fields, onCeilClick } = props
 
-  const winnerPlayer = fields[9];
+  const winnerPlayer = fields[9]
 
-  const splitedFields = sliceIntoChunks(fields, 3).filter(
-    (chunk) => chunk.length === 3
-  );
+  const splitedFields = sliceIntoChunks(fields, 3).filter((chunk) => chunk.length === 3)
 
   return (
     <tbody
@@ -42,5 +39,5 @@ export const TicTacToeField = (props: TicTacToeFieldProps) => {
         </tr>
       ))}
     </tbody>
-  );
-};
+  )
+}

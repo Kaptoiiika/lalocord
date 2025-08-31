@@ -1,4 +1,4 @@
-export { FormateAtributedRoom } from './model/service/formateRoom';
+export { FormateAtributedRoom } from './model/service/formateRoom'
 
-export { RoomList } from './ui/RoomList/RoomList';
-export type { RoomModel } from './model/types/RoomSchema';
+export { RoomList } from './ui/RoomList/RoomList'
+export type { RoomModel } from './model/types/RoomSchema'

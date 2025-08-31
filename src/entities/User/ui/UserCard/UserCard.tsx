@@ -60,4 +60,3 @@ export const UserCard = (props: UserCardProps) => {
     </div>
   )
 }
-

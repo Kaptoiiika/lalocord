@@ -14,18 +14,16 @@ export const getIceServers = (): RTCIceServer[] => {
       ]
     : []
 
-  const turnServers = VITE_ICE_SERVER && VITE_ICE_USERNAME && VITE_ICE_PASSWORD
-    ? [
-        {
-          urls: [`turn:${VITE_ICE_SERVER}:5349`, `turn:${VITE_ICE_SERVER}:3478`],
-          username: VITE_ICE_USERNAME,
-          credential: VITE_ICE_PASSWORD,
-        },
-      ]
-    : []
+  const turnServers =
+    VITE_ICE_SERVER && VITE_ICE_USERNAME && VITE_ICE_PASSWORD
+      ? [
+          {
+            urls: [`turn:${VITE_ICE_SERVER}:5349`, `turn:${VITE_ICE_SERVER}:3478`],
+            username: VITE_ICE_USERNAME,
+            credential: VITE_ICE_PASSWORD,
+          },
+        ]
+      : []
 
-  return [
-    ...stunServers,
-    ...turnServers,
-  ]
+  return [...stunServers, ...turnServers]
 }

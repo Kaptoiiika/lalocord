@@ -44,4 +44,3 @@ export const InlineSelect = <T,>(props: InlineSelectProps<T>) => {
     </div>
   )
 }
-

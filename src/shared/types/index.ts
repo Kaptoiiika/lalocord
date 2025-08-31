@@ -3,4 +3,4 @@ export enum SortOrder {
   DESC = 'desc',
 }
 
-export type MediaStreamTypes = 'webCam' | 'media' | 'microphone';
+export type MediaStreamTypes = 'webCam' | 'media' | 'microphone'

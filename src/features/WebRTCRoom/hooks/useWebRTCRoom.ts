@@ -84,12 +84,7 @@ export const useWebRTCRoom = () => {
   useEffect(() => {
     const chatMessageListeners = new Map<number, () => void>()
 
-    const addUser = (user: UserConnectModel, waitOffer = false) => {
-      const webRTCClient = new WebRTCClient({ id: user.id })
-      handleAddUser(user, webRTCClient)
-      playAudio(AudioName.joinToRoom)
-      if (!waitOffer) webRTCClient.createOffer()
-
+    users.forEach(({ peer, user }) => {
       const onChatMessage = (message: string) => {
         playAudio(AudioName.notification)
         useChatStore.getState().addNewMessage({ type: 'text', id: crypto.randomUUID(), message }, user)
@@ -104,15 +99,29 @@ export const useWebRTCRoom = () => {
         useChatStore.getState().addNewMessage({ type: 'file', ...message }, user)
       }
 
-      webRTCClient.on('onChatMessage', onChatMessage)
-      webRTCClient.on('onChatMessageLoadFile', onChatMessageLoadFile)
-      webRTCClient.on('onChatMessageFile', onChatMessageFile)
+      peer.on('onChatMessage', onChatMessage)
+      peer.on('onChatMessageLoadFile', onChatMessageLoadFile)
+      peer.on('onChatMessageFile', onChatMessageFile)
 
-      chatMessageListeners.set(user.id, () => {
-        webRTCClient.off('onChatMessage', onChatMessage)
-        webRTCClient.off('onChatMessageLoadFile', onChatMessageLoadFile)
-        webRTCClient.off('onChatMessageFile', onChatMessageFile)
+      chatMessageListeners.set(peer.id, () => {
+        peer.off('onChatMessage', onChatMessage)
+        peer.off('onChatMessageLoadFile', onChatMessageLoadFile)
+        peer.off('onChatMessageFile', onChatMessageFile)
       })
+    })
+
+    return () => {
+      chatMessageListeners.forEach((unsubscribe) => unsubscribe())
+      chatMessageListeners.clear()
+    }
+  }, [users, playAudio])
+
+  useEffect(() => {
+    const addUser = (user: UserConnectModel, waitOffer = false) => {
+      const webRTCClient = new WebRTCClient({ id: user.id })
+      handleAddUser(user, webRTCClient)
+      playAudio(AudioName.joinToRoom)
+      if (!waitOffer) webRTCClient.createOffer()
     }
 
     const initClients = (users: UserConnectModel[]) => {
@@ -141,7 +150,6 @@ export const useWebRTCRoom = () => {
     const userDisconnect = (user: ClientId) => {
       const webRTCClient = handleGetUserPeer(user.id)
       webRTCClient?.close()
-      chatMessageListeners.get(user.id)?.()
       removeUser(user.id)
       playAudio(AudioName.exitFromRoom)
     }
@@ -160,8 +168,6 @@ export const useWebRTCRoom = () => {
     socketClient.on('reconnect', reconnect)
 
     return () => {
-      chatMessageListeners.forEach((unsubscribe) => unsubscribe())
-      chatMessageListeners.clear()
       socketClient.off('new_answer', saveAnswer)
       socketClient.off('new_offer', createAnswer)
       socketClient.off('new_ice', saveIce)

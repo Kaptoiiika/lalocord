@@ -1,4 +1,4 @@
-import type { StreamType } from 'src/entities/WebRTC';
+import type { StreamType } from 'src/entities/WebRTC'
 
 export const enum AudioName {
   notification = 'notification',
@@ -6,28 +6,21 @@ export const enum AudioName {
   exitFromRoom = 'exitFromRoom',
 }
 
-type AudioNames = keyof typeof AudioName | AudioName;
+type AudioNames = keyof typeof AudioName | AudioName
 type AudioSettings = {
-  muted?: boolean;
-  volume: number;
-};
+  muted?: boolean
+  volume: number
+}
 
-export type AudioSettingsList = Record<string, AudioSettings>;
-export type AudioUserSettingsList = Record<
-  string,
-  Partial<Record<StreamType, number>>
->;
+export type AudioSettingsList = Record<string, AudioSettings>
+export type AudioUserSettingsList = Record<string, Partial<Record<StreamType, number>>>
 
 export interface AudioEffectSchema {
-  audioSettings: AudioSettingsList;
-  usersAuidoSettings: AudioUserSettingsList;
+  audioSettings: AudioSettingsList
+  usersAuidoSettings: AudioUserSettingsList
 
-  play: (audioName: AudioNames) => Promise<void>;
-  changeVolume: (audioName: AudioNames, volume: number) => void;
-  changeUserVolume: (
-    username: string,
-    type: StreamType,
-    volume: number
-  ) => void;
-  changeMuted: (audioName: AudioNames, mute: boolean) => void;
+  play: (audioName: AudioNames) => Promise<void>
+  changeVolume: (audioName: AudioNames, volume: number) => void
+  changeUserVolume: (username: string, type: StreamType, volume: number) => void
+  changeMuted: (audioName: AudioNames, mute: boolean) => void
 }

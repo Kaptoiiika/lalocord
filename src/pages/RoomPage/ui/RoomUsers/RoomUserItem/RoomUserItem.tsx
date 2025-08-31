@@ -53,7 +53,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
 
   useEffect(() => {
     const updateFn = () => {
-      update((prev) => prev + 1)  
+      update((prev) => prev + 1)
     }
     user.peer.on('onStreamStart', updateFn)
     user.peer.on('onStreamStop', updateFn)

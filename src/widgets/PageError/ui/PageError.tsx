@@ -1,16 +1,15 @@
-import { classNames } from 'src/shared/lib/classNames/classNames';
+import { classNames } from 'src/shared/lib/classNames/classNames'
 
-import styles from './PageError.module.scss';
-
+import styles from './PageError.module.scss'
 
 type PageErrorProps = {
-  className?: string;
-  title?: string;
-  description?: string;
-};
+  className?: string
+  title?: string
+  description?: string
+}
 
 export const PageError = (props: PageErrorProps) => {
-  const { className, title = 'Unknow error', description } = props;
+  const { className, title = 'Unknow error', description } = props
 
   return (
     <div className={classNames(styles.PageError, className)}>
@@ -19,5 +18,5 @@ export const PageError = (props: PageErrorProps) => {
       <br />
       {description && <span>{description}</span>}
     </div>
-  );
-};
+  )
+}

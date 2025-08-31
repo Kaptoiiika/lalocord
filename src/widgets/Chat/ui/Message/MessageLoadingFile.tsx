@@ -28,4 +28,3 @@ export const MessageLoadingFile = (props: MessageFileProps) => {
     </i>
   )
 }
-

@@ -40,4 +40,3 @@ export const TicTacToeBoard = (props: TicTacToeBoardProps) => {
     </div>
   )
 }
-

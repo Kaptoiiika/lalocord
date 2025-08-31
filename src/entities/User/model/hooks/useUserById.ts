@@ -17,4 +17,3 @@ export const useUserById = (id: number): { user?: UserModel } & LoadingState => 
 
   return data
 }
-

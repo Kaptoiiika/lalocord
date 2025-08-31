@@ -1,14 +1,17 @@
-import { Stack } from '@mui/material';
+import { Stack } from '@mui/material'
 
-import { VideoSettingsMenu } from './SettingsMenu/VideoSettingsMenu';
-import { ShareMicrophoneMenu } from './ShareMicrophoneMenu/ShareMicrophoneMenu';
-import { ShareScreenMenu } from './ShareScreenMenu/ShareScreenMenu';
-import { ShareWebCamMenu } from './ShareWebCamMenu/ShareWebCamMenu';
+import { VideoSettingsMenu } from './SettingsMenu/VideoSettingsMenu'
+import { ShareMicrophoneMenu } from './ShareMicrophoneMenu/ShareMicrophoneMenu'
+import { ShareScreenMenu } from './ShareScreenMenu/ShareScreenMenu'
+import { ShareWebCamMenu } from './ShareWebCamMenu/ShareWebCamMenu'
 
-import styles from './RoomActions.module.scss';
+import styles from './RoomActions.module.scss'
 
 export const RoomActions = () => (
-  <Stack direction="row" alignItems="center">
+  <Stack
+    direction="row"
+    alignItems="center"
+  >
     <ShareMicrophoneMenu />
     <ShareWebCamMenu />
     <ShareScreenMenu />
@@ -21,4 +24,4 @@ export const RoomActions = () => (
       <VideoSettingsMenu />
     </Stack>
   </Stack>
-);
+)

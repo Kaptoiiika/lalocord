@@ -1,6 +1,6 @@
-import { createContext } from 'react';
+import { createContext } from 'react'
 
-import type { Theme } from '@mui/material';
+import type { Theme } from '@mui/material'
 
 export enum ThemeName {
   light = 'light',
@@ -8,13 +8,13 @@ export enum ThemeName {
 }
 
 export interface ThemeContextProps {
-  theme: ThemeName;
-  setTheme: (theme: ThemeName) => void;
-  MuiTheme: Theme | null;
+  theme: ThemeName
+  setTheme: (theme: ThemeName) => void
+  MuiTheme: Theme | null
 }
 
 export const ThemeContext = createContext<ThemeContextProps>({
   theme: ThemeName.dark,
   setTheme: () => undefined,
   MuiTheme: null,
-});
+})

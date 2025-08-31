@@ -70,7 +70,10 @@ export const MainPage = () => {
           <RoomList />
         </Stack>
 
-        <Stack gap={1} alignItems="end">
+        <Stack
+          gap={1}
+          alignItems="end"
+        >
           <MuiLink
             onClick={handleNavigateToGame}
             href={AppRoutes.GAME}

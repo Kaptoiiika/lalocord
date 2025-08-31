@@ -17,4 +17,3 @@ export const getInitials = (name: string): string => {
     .join('')
   return initials.toUpperCase()
 }
-

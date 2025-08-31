@@ -1,42 +1,34 @@
-import type { MouseEvent,
-  PropsWithChildren } from 'react';
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { MouseEvent, PropsWithChildren } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
-import { classNames } from 'src/shared/lib/classNames/classNames';
-import { useDebugMode } from 'src/shared/lib/hooks/useDebugMode/useDebugMode';
-import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen';
-import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect';
-import { clamp } from 'src/shared/lib/utils/Numbers';
+import { classNames } from 'src/shared/lib/classNames/classNames'
+import { useDebugMode } from 'src/shared/lib/hooks/useDebugMode/useDebugMode'
+import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+import { clamp } from 'src/shared/lib/utils/Numbers'
 
-import { VideoPlayerActions } from './VideoPlayerActions/VideoPlayerActions';
-import { VideoPlayerDebugInfo } from './VideoPlayerDebugInfo/VideoPlayerDebugInfo';
-import { VideoPlayerTooltip } from './VideoPlayerTooltip/VideoPlayerTooltip';
-import { ErrorBoundary } from '../ErrorBoundary';
+import { VideoPlayerActions } from './VideoPlayerActions/VideoPlayerActions'
+import { VideoPlayerDebugInfo } from './VideoPlayerDebugInfo/VideoPlayerDebugInfo'
+import { VideoPlayerTooltip } from './VideoPlayerTooltip/VideoPlayerTooltip'
+import { ErrorBoundary } from '../ErrorBoundary'
 
-import styles from './VideoPlayer.module.scss';
-
+import styles from './VideoPlayer.module.scss'
 
 type VideoPlayerProps = {
-  stream?: MediaStream | null;
-  played: boolean;
-  onPlay?: () => void;
-  onPause?: () => void;
-  onFullscreenEnter?: () => void;
-  onFullscreenExit?: () => void;
-  onVolumeChange?: (value: number) => void;
-  initVolume?: number;
-  className?: string;
-  mute?: boolean;
-  autoplay?: boolean;
-  fullScreen?: boolean;
-  controls?: boolean;
-} & PropsWithChildren;
+  stream?: MediaStream | null
+  played: boolean
+  onPlay?: () => void
+  onPause?: () => void
+  onFullscreenEnter?: () => void
+  onFullscreenExit?: () => void
+  onVolumeChange?: (value: number) => void
+  initVolume?: number
+  className?: string
+  mute?: boolean
+  autoplay?: boolean
+  fullScreen?: boolean
+  controls?: boolean
+} & PropsWithChildren
 
 export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const {
@@ -55,122 +47,122 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
     children,
     controls = true,
     ...other
-  } = props;
-  const debugMode = useDebugMode();
-  const [fullscreen, setFullscreen] = useState(false);
-  const [volume, setVolume] = useState(clamp(initVolume, 0, 1));
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const playerRef = useRef<HTMLDivElement | null>(null);
+  } = props
+  const debugMode = useDebugMode()
+  const [fullscreen, setFullscreen] = useState(false)
+  const [volume, setVolume] = useState(clamp(initVolume, 0, 1))
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const playerRef = useRef<HTMLDivElement | null>(null)
   const { handleClose, handleOpen, open } = useIsOpen({
     time: 3000,
-  });
+  })
 
   useEffect(() => {
-    if (played) videoRef.current?.play();
-    else videoRef.current?.pause();
-  }, [played]);
+    if (played) videoRef.current?.play()
+    else videoRef.current?.pause()
+  }, [played])
 
   const handlePause = useCallback(() => {
-    onPause?.();
-  }, [onPause]);
+    onPause?.()
+  }, [onPause])
 
   const handlePlay = useCallback(() => {
     try {
-      onPlay?.();
+      onPlay?.()
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-  }, [onPlay]);
+  }, [onPlay])
 
   useMountedEffect(() => {
     if (autoplay) {
-      handlePlay();
+      handlePlay()
     }
-  });
+  })
 
   const handlePlayPause = useCallback(() => {
-    if (played) handlePause();
-    else handlePlay();
-  }, [played, handlePlay, handlePause]);
+    if (played) handlePause()
+    else handlePlay()
+  }, [played, handlePlay, handlePause])
 
   const handleChangeVolume = useCallback(
     (event: Event, newValue: number | number[]) => {
       if (videoRef.current && !Array.isArray(newValue)) {
-        setVolume(newValue);
-        onVolumeChange?.(newValue);
+        setVolume(newValue)
+        onVolumeChange?.(newValue)
       }
     },
     [onVolumeChange]
-  );
+  )
 
   const handleEnterFullscreen = useCallback(() => {
     try {
-      playerRef.current?.requestFullscreen().catch(console.error);
-      setFullscreen(true);
-      onFullscreenEnter?.();
-      if (!played) handlePlay();
+      playerRef.current?.requestFullscreen().catch(console.error)
+      setFullscreen(true)
+      onFullscreenEnter?.()
+      if (!played) handlePlay()
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-  }, [onFullscreenEnter, played, handlePlay]);
+  }, [onFullscreenEnter, played, handlePlay])
 
   const handleExitFullscreen = useCallback(() => {
     try {
-      document.exitFullscreen().catch(console.error);
-      setFullscreen(false);
-      onFullscreenExit?.();
+      document.exitFullscreen().catch(console.error)
+      setFullscreen(false)
+      onFullscreenExit?.()
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-  }, [onFullscreenExit]);
+  }, [onFullscreenExit])
 
   const handleFullscreenToggle = useCallback(
     (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (document.fullscreenElement) handleExitFullscreen();
-      else handleEnterFullscreen();
+      e.preventDefault()
+      e.stopPropagation()
+      if (document.fullscreenElement) handleExitFullscreen()
+      else handleEnterFullscreen()
     },
     [handleExitFullscreen, handleEnterFullscreen]
-  );
+  )
 
   useEffect(() => {
     if (propsFullScreen === true && fullscreen === false) {
-      handleEnterFullscreen();
+      handleEnterFullscreen()
     } else if (propsFullScreen === false && fullscreen === true) {
-      handleExitFullscreen();
+      handleExitFullscreen()
     }
-    if (!playerRef.current) return;
+    if (!playerRef.current) return
     playerRef.current.onfullscreenchange = () => {
-      if (!document.fullscreenElement) handleExitFullscreen();
-    };
-  }, [propsFullScreen, fullscreen, handleEnterFullscreen, handleExitFullscreen]);
+      if (!document.fullscreenElement) handleExitFullscreen()
+    }
+  }, [propsFullScreen, fullscreen, handleEnterFullscreen, handleExitFullscreen])
 
   const handleRefVideo = useCallback(
     (node: HTMLVideoElement | null) => {
-      videoRef.current = node;
-      if (!node) return;
+      videoRef.current = node
+      if (!node) return
       if (node.srcObject !== stream) {
-        node.srcObject = stream;
+        node.srcObject = stream
       }
     },
     [stream]
-  );
+  )
 
   const handleRefPlayer = useCallback((node: HTMLDivElement | null) => {
-    playerRef.current = node;
-    if (!node) return;
-  }, []);
+    playerRef.current = node
+    if (!node) return
+  }, [])
 
   if (videoRef.current) {
-    videoRef.current.volume = volume;
+    videoRef.current.volume = volume
   }
 
-  const toolsIsClosed = played && !open;
+  const toolsIsClosed = played && !open
 
   const handleFocus = useCallback(() => {
-    handleOpen();
-  }, [handleOpen]);
+    handleOpen()
+  }, [handleOpen])
 
   return (
     <ErrorBoundary errorText="Video player is dead">
@@ -187,7 +179,10 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
         {debugMode && <VideoPlayerDebugInfo stream={stream} />}
         {controls && (
           <>
-            <VideoPlayerTooltip open={!toolsIsClosed} top>
+            <VideoPlayerTooltip
+              open={!toolsIsClosed}
+              top
+            >
               {children}
             </VideoPlayerTooltip>
             <VideoPlayerActions
@@ -215,5 +210,5 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
         />
       </div>
     </ErrorBoundary>
-  );
-});
+  )
+})

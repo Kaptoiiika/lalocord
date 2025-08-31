@@ -1,1 +1,1 @@
-export { ChatLazy as Chat } from './ui/Chat/Chat.lazy';
+export { ChatLazy as Chat } from './ui/Chat/Chat.lazy'

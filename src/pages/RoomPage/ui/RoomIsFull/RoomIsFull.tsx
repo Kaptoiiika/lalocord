@@ -1,3 +1,3 @@
-import { Typography } from '@mui/material';
+import { Typography } from '@mui/material'
 
-export const RoomIsFull = () => <Typography variant="h1">Room is full</Typography>;
+export const RoomIsFull = () => <Typography variant="h1">Room is full</Typography>

@@ -1,9 +1,9 @@
-import { create } from 'zustand';
+import { create } from 'zustand'
 
-import type { TicTacToeSchema } from '../types/TicTacToe';
-import type { StateCreator } from 'zustand';
+import type { TicTacToeSchema } from '../types/TicTacToe'
+import type { StateCreator } from 'zustand'
 
-import { checkFieldIsWinnig, createNewBoard } from '../utils/TicTacToeUtilts';
+import { checkFieldIsWinnig, createNewBoard } from '../utils/TicTacToeUtilts'
 
 const store: StateCreator<TicTacToeSchema> = (set, get) => ({
   board: createNewBoard(),
@@ -12,21 +12,21 @@ const store: StateCreator<TicTacToeSchema> = (set, get) => ({
   isMultiplayer: false,
 
   doPlayerMove(fieldId, ceilId, player) {
-    const { board, currentPlayer, isMultiplayer } = get();
+    const { board, currentPlayer, isMultiplayer } = get()
 
-    if (fieldId > 8 || ceilId > 8) return;
-    if (board[fieldId][ceilId] !== null) return;
+    if (fieldId > 8 || ceilId > 8) return
+    if (board[fieldId][ceilId] !== null) return
 
-    const newBoard = [...board];
+    const newBoard = [...board]
 
-    newBoard[fieldId][ceilId] = player;
-    const newActivePlayer = player === 'circle' ? 'cross' : 'circle';
+    newBoard[fieldId][ceilId] = player
+    const newActivePlayer = player === 'circle' ? 'cross' : 'circle'
 
     if (checkFieldIsWinnig(newBoard[fieldId])) {
-      newBoard[fieldId][9] = player;
+      newBoard[fieldId][9] = player
     }
 
-    const newActiveFieldId = newBoard[ceilId][9] ? undefined : ceilId;
+    const newActiveFieldId = newBoard[ceilId][9] ? undefined : ceilId
 
     set((state) => ({
       ...state,
@@ -34,7 +34,7 @@ const store: StateCreator<TicTacToeSchema> = (set, get) => ({
       activePlayer: newActivePlayer,
       activeFieldId: newActiveFieldId,
       currentPlayer: isMultiplayer ? currentPlayer : newActivePlayer,
-    }));
+    }))
   },
 
   startGame(isMultiplayer = false) {
@@ -44,8 +44,8 @@ const store: StateCreator<TicTacToeSchema> = (set, get) => ({
       currentPlayer: 'cross',
       activeFieldId: undefined,
       isMultiplayer,
-    }));
+    }))
   },
-});
+})
 
-export const useTicTacToeStore = create(store);
+export const useTicTacToeStore = create(store)

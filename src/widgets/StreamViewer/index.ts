@@ -1,1 +1,1 @@
-export { StreamViewer } from './ui/StreamViewer';
+export { StreamViewer } from './ui/StreamViewer'

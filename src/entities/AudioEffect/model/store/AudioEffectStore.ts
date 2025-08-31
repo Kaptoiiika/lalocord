@@ -1,65 +1,54 @@
-import exitFromRoomSound from 'src/shared/assets/audio/exitFromRoom.mp3';
-import joinToRoomSound from 'src/shared/assets/audio/joinToRoom.mp3';
-import notificationSound from 'src/shared/assets/audio/notification.mp3';
-import { localstorageKeys } from 'src/shared/const/localstorageKeys';
-import { clamp } from 'src/shared/lib/utils/Numbers';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import exitFromRoomSound from 'src/shared/assets/audio/exitFromRoom.mp3'
+import joinToRoomSound from 'src/shared/assets/audio/joinToRoom.mp3'
+import notificationSound from 'src/shared/assets/audio/notification.mp3'
+import { localstorageKeys } from 'src/shared/const/localstorageKeys'
+import { clamp } from 'src/shared/lib/utils/Numbers'
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-import type { AudioEffectSchema,
-  AudioSettingsList } from '../types/AudioEffectSchema';
-import type { StateCreator } from 'zustand';
+import type { AudioEffectSchema, AudioSettingsList } from '../types/AudioEffectSchema'
+import type { StateCreator } from 'zustand'
 
-import {
-  AudioName,
-} from '../types/AudioEffectSchema';
+import { AudioName } from '../types/AudioEffectSchema'
 
-
-type AudioSrc = string;
+type AudioSrc = string
 const AudioSourceList: [AudioName, AudioSrc][] = [
   [AudioName.notification, notificationSound],
   [AudioName.joinToRoom, joinToRoomSound],
   [AudioName.exitFromRoom, exitFromRoomSound],
-];
+]
 
-const AudioInstance = AudioSourceList.reduce<Record<string, HTMLAudioElement>>(
-  (prev, [name, src]) => {
-    const audio = new Audio(src);
+const AudioInstance = AudioSourceList.reduce<Record<string, HTMLAudioElement>>((prev, [name, src]) => {
+  const audio = new Audio(src)
 
-    prev[name] = audio;
+  prev[name] = audio
 
-    return prev;
-  },
-  {}
-);
+  return prev
+}, {})
 
 const store: StateCreator<AudioEffectSchema> = (set, get) => ({
-  audioSettings: Object.entries(AudioInstance).reduce<AudioSettingsList>(
-    (prev, [name, audio]) => {
-      prev[name] = {
-        volume: audio.volume,
-        muted: audio.muted,
-      };
+  audioSettings: Object.entries(AudioInstance).reduce<AudioSettingsList>((prev, [name, audio]) => {
+    prev[name] = {
+      volume: audio.volume,
+      muted: audio.muted,
+    }
 
-      return prev;
-    },
-    {}
-  ),
+    return prev
+  }, {}),
   usersAuidoSettings: {},
 
   play(audioName) {
-    const state = get();
+    const state = get()
 
-    AudioInstance[audioName].currentTime = 0;
-    AudioInstance[audioName].volume = state.audioSettings[audioName].volume ?? 1;
-    AudioInstance[audioName].muted =
-      state.audioSettings[audioName].muted ?? false;
+    AudioInstance[audioName].currentTime = 0
+    AudioInstance[audioName].volume = state.audioSettings[audioName].volume ?? 1
+    AudioInstance[audioName].muted = state.audioSettings[audioName].muted ?? false
 
-    return AudioInstance[audioName].play();
+    return AudioInstance[audioName].play()
   },
 
   changeVolume(audioName, volume = 0) {
-    const clampedValue = clamp(volume, 0, 1);
+    const clampedValue = clamp(volume, 0, 1)
 
     set((state) => ({
       ...state,
@@ -69,7 +58,7 @@ const store: StateCreator<AudioEffectSchema> = (set, get) => ({
           volume: clampedValue,
         },
       },
-    }));
+    }))
   },
 
   changeUserVolume(username, type, volume) {
@@ -82,7 +71,7 @@ const store: StateCreator<AudioEffectSchema> = (set, get) => ({
           [type]: volume,
         },
       },
-    }));
+    }))
   },
 
   changeMuted(audioName, muted) {
@@ -95,12 +84,12 @@ const store: StateCreator<AudioEffectSchema> = (set, get) => ({
           muted,
         },
       },
-    }));
+    }))
   },
-});
+})
 
 export const useAudioEffectStore = create(
   persist(store, {
     name: localstorageKeys.AUDIO,
   })
-);
+)

@@ -429,4 +429,3 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     this.peer.close()
   }
 }
-
