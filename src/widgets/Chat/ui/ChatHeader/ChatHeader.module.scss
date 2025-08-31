@@ -10,6 +10,10 @@ $animationTime: 0.3s;
   height: var(--header-height);
   border-bottom: var(--box-border);
 
+  @media (max-width: 625px) {
+    width: 100%;
+  }
+
   &.collapsed {
     right: 0;
     width: 64px;

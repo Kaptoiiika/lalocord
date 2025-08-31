@@ -1,10 +1,6 @@
 $chatWidth: var(--chat-width);
 $animationTime: 0.3s;
 
-@media (max-width: 625px) {
-  $chatWidth: 100%;
-}
-
 .sidebar {
   position: relative;
   display: flex;
@@ -17,7 +13,8 @@ $animationTime: 0.3s;
 
   @media (max-width: 625px) {
     flex-shrink: 0;
-    height: min(50%, 350px);
+    height: min(50%, $chatWidth);
+    width: 100%;
     overflow: auto;
   }
 
