@@ -9,14 +9,14 @@ $animationTime: 0.3s;
   position: relative;
   display: flex;
   flex-direction: column;
-  flex: 0 0 auto;
+  flex-shrink: 0;
   width: $chatWidth;
-  height: 100%;
+  height: min(50%, 350px);
   transition: width $animationTime, height $animationTime;
   background: var(--bg-app);
 
   @media (max-width: 625px) {
-    flex: 0 1 auto;
+    flex-shrink: 0;
     overflow: auto;
   }
 
@@ -26,7 +26,6 @@ $animationTime: 0.3s;
     @media (max-width: 625px) {
       height: var(--header-height);
       width: 100%;
-      flex: 0 0 auto;
     }
 
     .chat {
