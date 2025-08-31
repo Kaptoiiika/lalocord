@@ -9,6 +9,7 @@ import styles from './RoomActions.module.scss'
 
 export const RoomActions = () => (
   <Stack
+    className={styles.root}
     direction="row"
     alignItems="center"
   >

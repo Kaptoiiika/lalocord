@@ -9,12 +9,21 @@
 }
 
 .app {
+  display: flex;
   scrollbar-width: none;
 
   min-height: 100vh;
   min-height: 100dvh;
   min-width: 100vw;
+  min-width: 100dvw;
   color: rgb(var(--primary-color));
+
+  flex-direction: row;
+
+  @media (max-width: 625px) {
+    height: 100dvh;
+    flex-direction: column;
+  }
 }
 
 body {

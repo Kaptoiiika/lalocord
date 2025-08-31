@@ -72,7 +72,7 @@ export const RoomUsers = () => {
         className={styles.roomName}
         justifyContent="center"
       >
-        <Typography variant="h6">{roomName}</Typography>
+        <Typography variant="h6" fontWeight={600}>{roomName}</Typography>
       </Stack>
 
       <Popover

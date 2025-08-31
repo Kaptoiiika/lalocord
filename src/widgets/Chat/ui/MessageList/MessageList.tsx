@@ -13,12 +13,11 @@ import styles from './MessageList.module.scss'
 
 type MessageItemProps = {
   message: MessageModelNew
-  index: number
-  arr: MessageModelNew[]
+  prevMessage: MessageModelNew
 }
 
-const MessageItem = (props: MessageItemProps) => {
-  const { arr, index, message } = props
+const MessageItemComponent = (props: MessageItemProps) => {
+  const { prevMessage, message } = props
 
   if (message.message.isSystemMessage) {
     return (
@@ -29,8 +28,6 @@ const MessageItem = (props: MessageItemProps) => {
       />
     )
   }
-
-  const prevMessage = index ? arr[index - 1] : undefined
 
   if (prevMessage?.user === message.user) {
     return (
@@ -65,6 +62,8 @@ const MessageItem = (props: MessageItemProps) => {
   )
 }
 
+export const MessageItem = memo(MessageItemComponent)
+
 export const MessageList = memo(function MessageList() {
   const [messageList] = useChatStore(getMessages)
 
@@ -81,8 +80,7 @@ export const MessageList = memo(function MessageList() {
       {messages.map((value, index, arr) => (
         <MessageItem
           key={value.message.id}
-          arr={arr}
-          index={index}
+          prevMessage={arr[index - 1]}
           message={value}
         />
       ))}

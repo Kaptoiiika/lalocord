@@ -1,5 +1,3 @@
-$HeaderHeight: var(--header-height);
-
 .lobby {
   flex-direction: row !important;
 
@@ -9,24 +7,11 @@ $HeaderHeight: var(--header-height);
 }
 
 .mainScreen {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   position: relative;
   width: 100%;
-  grid-template-rows:
-    $HeaderHeight calc(100% - $HeaderHeight - $HeaderHeight) $HeaderHeight;
   height: 100%;
-
-  &>* {
-    position: relative;
-  }
-
-  &>::after {
-    position: absolute;
-    bottom: 0;
-    content: '';
-    width: 100%;
-    border-bottom: var(--box-border);
-  }
 
   @media (max-width: 625px) {
     height: 100%;

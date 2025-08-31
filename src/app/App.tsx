@@ -14,13 +14,10 @@ const App = () => {
 
   return (
     <Suspense fallback={<LoadingBars />}>
-      <Stack
-        className="app"
-        direction="row"
-      >
+      <div className="app">
         <Navbar />
         <AppRouter />
-      </Stack>
+      </div>
     </Suspense>
   )
 }
