@@ -21,10 +21,13 @@ type WebRTCRoomStore = {
   leaveRoom: () => void
 }
 
-const store: StateCreator<WebRTCRoomStore> = (set) => ({
+const store: StateCreator<WebRTCRoomStore> = (set, get) => ({
   roomId: undefined,
   users: [],
   addUser: (user: RoomUser) => {
+    const users = get().users
+    const existingUser = users.find((u) => u.id === user.id)
+    if (existingUser) return console.log(`User #${user.id} already exists`)
     set((state) => ({ users: [...state.users, user] }))
   },
   removeUser: (userId: number) => {

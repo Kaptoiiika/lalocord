@@ -41,7 +41,6 @@ export const MainPage = () => {
         direction="column"
       >
         <Stack
-          className={styles.list}
           direction="column"
           alignItems="start"
           gap={1}
@@ -51,7 +50,6 @@ export const MainPage = () => {
             direction="row"
           >
             <TextField
-              className={styles.mobileWideContainer}
               variant="outlined"
               value={localUser.username}
               label="Username"

@@ -4,20 +4,4 @@
   justify-content: space-between;
   width: 100%;
   overflow: auto;
-
-  main {
-    overflow: auto;
-    margin-top: 0;
-  }
-}
-
-.list {
-  margin-top: 8px;
-  margin-bottom: 24px;
-}
-
-.mobileWideContainer {
-  @media (max-width: 625px) {
-    width: 100%;
-  }
-}
+} 
