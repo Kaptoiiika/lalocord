@@ -1,9 +1,10 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import MicIcon from '@mui/icons-material/Mic'
 import MicOffIcon from '@mui/icons-material/MicOff'
 import { Tooltip, IconButton, FormControlLabel, Switch, Stack, Menu, Typography } from '@mui/material'
 import { useWebRTCStore } from 'src/entities/WebRTC'
+import { FormateError } from 'src/shared/api'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 
@@ -21,6 +22,7 @@ export const ShareMicrophoneMenu = () => {
   const echoCancellation = useWebRTCStore((state) => state.streamConstraints.audio.echoCancellation)
   const autoGainControl = useWebRTCStore((state) => state.streamConstraints.audio.autoGainControl)
   const setStreamConstraints = useWebRTCStore((state) => state.setStreamConstraints)
+  const [error, setError] = useState<React.ReactNode>('')
 
   const handleStopStream = useCallback(async () => {
     stopStream('mic')
@@ -28,6 +30,18 @@ export const ShareMicrophoneMenu = () => {
 
   const handleStartStream = useCallback(async () => {
     await createStream('mic')
+      .then(() => {
+        setError('')
+      })
+      .catch((err) => {
+        setError(
+          <>
+            Error starting microphone stream
+            <br />
+            {FormateError(err)}
+          </>
+        )
+      })
   }, [createStream])
 
   const handleChangeAutoOn = useCallback(
@@ -58,10 +72,11 @@ export const ShareMicrophoneMenu = () => {
     <>
       {micStream ? (
         <Tooltip
-          title="Turn off microphone"
+          title={error || 'Turn off microphone'}
           arrow
         >
           <IconButton
+            color={error ? 'error' : 'default'}
             onClick={handleStopStream}
             onContextMenu={handleClick}
           >
@@ -70,10 +85,11 @@ export const ShareMicrophoneMenu = () => {
         </Tooltip>
       ) : (
         <Tooltip
-          title="Turn on microphone"
+          title={error || 'Turn on microphone'}
           arrow
         >
           <IconButton
+            color={error ? 'error' : 'default'}
             onClick={handleStartStream}
             onContextMenu={handleClick}
           >
@@ -95,8 +111,11 @@ export const ShareMicrophoneMenu = () => {
           horizontal: 'center',
         }}
       >
-        <Stack >
-          <Stack gap={1} padding={1}>
+        <Stack>
+          <Stack
+            gap={1}
+            padding={1}
+          >
             <Typography>Audio settings</Typography>
             <FormControlLabel
               control={

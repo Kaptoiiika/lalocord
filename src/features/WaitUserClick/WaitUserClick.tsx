@@ -14,6 +14,10 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
   const [, update] = useState(0)
 
   useMountedEffect(() => {
+    if (navigator.userActivation?.hasBeenActive) {
+      return
+    }
+
     const fn = (e: MouseEvent) => {
       if (e.isTrusted || navigator.userActivation?.hasBeenActive === true) {
         update((prev) => prev + 1)
@@ -46,4 +50,3 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
 
   return <>{children}</>
 }
-

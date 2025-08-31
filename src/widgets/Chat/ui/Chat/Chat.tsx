@@ -12,7 +12,6 @@ import { MessageList } from '../MessageList/MessageList';
 
 import styles from './Chat.module.scss';
 
-
 const getChatCollapsedFromLocalStorage = (): boolean => {
   const json = localStorage.getItem(localstorageKeys.CHATCOLLAPSED);
 

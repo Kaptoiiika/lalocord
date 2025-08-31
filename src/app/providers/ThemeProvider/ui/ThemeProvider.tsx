@@ -47,6 +47,9 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
       createTheme({
         palette: {
           mode: theme,
+          background: {
+            paper: 'var(--bg-app)',
+          },
           text: {
             primary: 'rgb(var(--primary-color))',
           },

@@ -1,9 +1,10 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import VideocamIcon from '@mui/icons-material/Videocam'
 import VideocamOffIcon from '@mui/icons-material/VideocamOff'
 import { IconButton, Tooltip, Menu } from '@mui/material'
 import { useWebRTCStore } from 'src/entities/WebRTC'
+import { FormateError } from 'src/shared/api'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition'
 
@@ -14,10 +15,23 @@ export const ShareWebCamMenu = () => {
   const createStream = useWebRTCStore((state) => state.createStream)
   const stopStream = useWebRTCStore((state) => state.stopStream)
   const { handleClick, handleClose, anchorEl, open } = usePopup()
+  const [error, setError] = useState<React.ReactNode>('')
 
   const handleStartWebCamStream = async () => {
     await startViewTransition()
     await createStream('webCam')
+      .then(() => {
+        setError('')
+      })
+      .catch((err) => {
+        setError(
+          <>
+            Error starting web cam stream
+            <br />
+            {FormateError(err)}
+          </>
+        )
+      })
   }
 
   const handleStopStream = useCallback(async () => {
@@ -29,10 +43,11 @@ export const ShareWebCamMenu = () => {
     <>
       {webCamStream ? (
         <Tooltip
-          title="Turn off camera"
+          title={error || 'Turn off camera'}
           arrow
         >
           <IconButton
+            color={error ? 'error' : 'default'}
             onClick={handleStopStream}
             onContextMenu={handleClick}
           >
@@ -41,10 +56,11 @@ export const ShareWebCamMenu = () => {
         </Tooltip>
       ) : (
         <Tooltip
-          title="Turn on camera"
+          title={error || 'Turn on camera'}
           arrow
         >
           <IconButton
+            color={error ? 'error' : 'default'}
             onClick={handleStartWebCamStream}
             onContextMenu={handleClick}
           >

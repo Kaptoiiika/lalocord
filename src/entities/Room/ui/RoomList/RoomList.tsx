@@ -1,11 +1,9 @@
-import type React from 'react'
-import { memo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { memo } from 'react'
 
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt'
-import { Button, Divider, Skeleton, Stack, Typography, TextField } from '@mui/material'
+import { Divider, Skeleton, Stack, Typography } from '@mui/material'
 import { apiClient } from 'src/shared/api/apiClient'
-import { AppRoutes } from 'src/shared/config/routeConfig/routeConfig'
+import { AppRoutes } from 'src/shared/config'
 import { Link } from 'src/shared/ui/Link/Link'
 import useSWR from 'swr'
 
@@ -20,21 +18,11 @@ const fetcher = async (url: string) => {
 }
 
 export const RoomList = memo(function RoomList() {
-  const navigate = useNavigate()
   const { data, isLoading } = useSWR<RoomModel[]>('/room', fetcher, {
     refreshInterval: 5000,
   })
-  const [roomName, setRoomName] = useState('')
 
   const roomList = Array.isArray(data) ? data : []
-
-  const handleCreateRoom = () => {
-    navigate(AppRoutes.ROOM_ID.replace(':id', roomName))
-  }
-
-  const handleChangeRoomName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRoomName(e.currentTarget.value)
-  }
 
   const roomListIsEmpty = roomList?.length === 0 && !isLoading
 
@@ -44,24 +32,6 @@ export const RoomList = memo(function RoomList() {
       className={styles.mobileWideContainer}
       gap={1}
     >
-      <Stack
-        className={styles.form}
-        gap={1}
-      >
-        <TextField
-          label="Room name"
-          value={roomName}
-          onChange={handleChangeRoomName}
-        />
-        <Button
-          disabled={!roomName}
-          onClick={handleCreateRoom}
-          variant="contained"
-        >
-          Create Room
-        </Button>
-      </Stack>
-
       <Typography variant="h5">Open rooms</Typography>
       <Stack gap={1}>
         {roomList?.map((room) => (
@@ -116,4 +86,3 @@ export const RoomList = memo(function RoomList() {
     </Stack>
   )
 })
-

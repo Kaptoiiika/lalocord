@@ -16,13 +16,6 @@
   margin-bottom: 24px;
 }
 
-.releaseLink {
-  display: flex;
-  justify-content: flex-end;
-  position: sticky;
-  bottom: 0;
-}
-
 .mobileWideContainer {
   @media (max-width: 625px) {
     width: 100%;

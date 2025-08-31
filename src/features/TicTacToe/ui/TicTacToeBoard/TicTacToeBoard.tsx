@@ -22,7 +22,7 @@ export const TicTacToeBoard = (props: TicTacToeBoardProps) => {
 
         return (
           <table
-            inert
+            inert={isDisabled}
             className={classNames(styles.field, {
               [styles.disable]: isDisabled,
             })}

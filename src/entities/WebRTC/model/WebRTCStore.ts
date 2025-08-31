@@ -29,7 +29,7 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
     mic: null,
   },
   streamConstraints: getStreamSettingsfromLocalStorage(),
-  autoOnMic: Boolean(localStorage.getItem(localstorageKeys.AUTO_ON_MIC) ?? true),
+  autoOnMic: Boolean(JSON.parse(localStorage.getItem(localstorageKeys.AUTO_ON_MIC) ?? 'true')),
   bitrate: Number(localStorage.getItem(localstorageKeys.STREAM_BITRATE)) || 1024 * 1024 * 10,
 
   setAutoOnMic(autoOnMic) {
@@ -102,13 +102,22 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
 
   setStreamConstraints(streamConstraints) {
     saveStreamConstraintsToLocalStorage(streamConstraints)
+    const currentStreamConstraints = get().streamConstraints
+    const currentStreams = get().streams
+    const createStream = get().createStream
     set((state) => ({
       ...state,
       streamConstraints,
     }))
 
-    const streams = get().streams
-    Object.values(streams).forEach((stream) => {
+    if (streamConstraints.video.deviceId !== currentStreamConstraints.video.deviceId && currentStreams.webCam) {
+      createStream('webCam')
+    }
+    if (streamConstraints.audio.deviceId !== currentStreamConstraints.audio.deviceId && currentStreams.mic) {
+      createStream('mic')
+    }
+
+    Object.values(currentStreams).forEach((stream) => {
       if (stream) {
         stream.getTracks().forEach((track) => {
           const trackConstraints = track.getConstraints()

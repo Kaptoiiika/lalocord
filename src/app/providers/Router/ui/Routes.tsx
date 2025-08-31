@@ -12,6 +12,7 @@ import type { AppRouteProps } from 'src/shared/config/routeConfig/routeConfig';
 
 export const RoutesConfig: Record<string, AppRouteProps> = {
   '*': {
+    index: true,
     element: <Navigate to={AppRoutes.MAIN_PAGE} />,
   },
 

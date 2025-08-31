@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import type { SelectChangeEvent } from '@mui/material'
-import { FormControl, InputLabel, Typography, Select, MenuItem } from '@mui/material'
+import { FormControl, Typography, Select, MenuItem } from '@mui/material'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 
@@ -18,6 +18,10 @@ export const SelectMicrophone = () => {
       ?.enumerateDevices()
       .then((devices) => {
         const microphones = devices.filter((device) => device.kind === 'audioinput')
+
+        if (microphones.length === 0) {
+          return setError('No microphones found')
+        }
 
         setmicrophones(microphones)
       })
@@ -40,28 +44,17 @@ export const SelectMicrophone = () => {
 
   const selectedMicrophone = microphones.find((microphone) => microphone.deviceId === streamConstraints.audio.deviceId)
 
-  if (error) {
-    return (
-      <FormControl
-        sx={{
-          m: 1,
-          width: 200,
-        }}
-      >
-        <InputLabel>{error}</InputLabel>
-      </FormControl>
-    )
-  }
-
   return (
     <FormControl
       sx={{
-        m: 1,
+        p: 1,
         width: 200,
       }}
     >
       <Typography>Microphone</Typography>
+      {error && <Typography color="error">{error}</Typography>}
       <Select
+        disabled={!!error}
         fullWidth
         value={selectedMicrophone?.deviceId || ''}
         onChange={handleChangeMicorphone}

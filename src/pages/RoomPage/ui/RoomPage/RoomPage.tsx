@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useLocalUserStore } from 'src/entities/User'
+import { useWebRTCStore } from 'src/entities/WebRTC'
 import { WaitUserClick } from 'src/features/WaitUserClick'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom'
 import { socketClient } from 'src/shared/api'
@@ -29,7 +30,7 @@ const emitToJoinRoom = (id: string) => {
 const RoomPageWrapper = () => {
   const { id = '' } = useParams()
   const { joinRoom, leaveRoom } = useWebRTCRoomStore()
-  const [roomIsFull, setRoomIsFull] = useState(false)
+
   useEffect(() => {
     joinRoom(id)
     const fn = emitToJoinRoom(id)
@@ -40,7 +41,9 @@ const RoomPageWrapper = () => {
     return () => {
       document.title = prevName
       leaveRoom()
-      socketClient.off('room_is_full')
+      useWebRTCStore.getState().stopStream('mic')
+      useWebRTCStore.getState().stopStream('screen')
+      useWebRTCStore.getState().stopStream('webCam')
       fn()
     }
   }, [id, joinRoom, leaveRoom])
@@ -75,19 +78,7 @@ const RoomPageWrapper = () => {
     }
   }, [id])
 
-  useEffect(() => {
-    const fn = () => {
-      setRoomIsFull(true)
-    }
-
-    socketClient.on('room_is_full', fn)
-
-    return () => {
-      socketClient.off('room_is_full', fn)
-    }
-  }, [])
-
-  return <RoomLobby isFull={roomIsFull} />
+  return <RoomLobby />
 }
 
 export const RoomPage = () => (
