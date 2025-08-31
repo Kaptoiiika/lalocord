@@ -35,7 +35,7 @@ export const getUserFromLocalStorage = (): UserModel => {
   const res: UserModel = {
     id: defaultUser.id,
     username: data?.username ? `${data?.username}` : genName(),
-    avatarSrc: data?.avatarSrc,
+    avatar: data?.avatar,
   }
 
   if (!data?.username) saveUserToLocalStorage(res)

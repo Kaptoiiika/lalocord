@@ -15,7 +15,7 @@ const emitToJoinRoom = (id: string) => {
   socketClient.emit('join', {
     name: id,
     username: localUser.username,
-    avatarSrc: localUser.avatarSrc,
+    avatar: localUser.avatar,
   })
 
   return () => {
@@ -55,7 +55,7 @@ const RoomPageWrapper = () => {
         socketClient.emit('join', {
           name: id,
           username: localUser.username,
-          avatarSrc: localUser.avatarSrc,
+          avatar: localUser.avatar,
           reconnect: true,
         })
       }

@@ -15,7 +15,7 @@ import { useLocalUserStore } from '../../model/store/LocalUserStore';
 
 export const UserChangeAvatar = () => {
   const { setLocalAvatar, localUser } = useLocalUserStore();
-  const srcAvatar = localUser.avatarSrc ?? '';
+  const srcAvatar = localUser.avatar ?? '';
   const [testSrc, setTestSrc] = useState(srcAvatar);
   const [tempSrc, setTempSrc] = useState(srcAvatar);
   const { open, handleOpen, handleClose: handleCloseModal } = useIsOpen();
@@ -59,7 +59,7 @@ export const UserChangeAvatar = () => {
       >
         <AvatarUser
           username={localUser.username}
-          avatarUrl={localUser.avatarSrc}
+          avatarUrl={localUser.avatar}
           size="medium"
         />
       </IconButton>

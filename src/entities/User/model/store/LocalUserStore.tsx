@@ -33,7 +33,7 @@ const store: StateCreator<LocalUserSchema> = (set, get) => ({
   setLocalAvatar(value) {
     const user = get().localUser
 
-    user.avatarSrc = value
+    user.avatar = value
 
     set((state) => ({
       ...state,

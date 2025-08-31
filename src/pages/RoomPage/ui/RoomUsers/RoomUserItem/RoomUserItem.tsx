@@ -114,7 +114,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
         >
           <AvatarUserWithBadge
             username={username}
-            avatarUrl={user.user.avatarSrc}
+            avatarUrl={user.user.avatar}
             borderColor={microphoneStream?.active ? 'green' : 'grey'}
             status={status}
             size="small"
@@ -142,7 +142,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
       >
         <UserCard
           username={username}
-          avatarUrl={user.user.avatarSrc}
+          avatarUrl={user.user.avatar}
         >
           <Stack className={styles.menu}>
             <Typography>Volume: {formatedMicroVolume}</Typography>

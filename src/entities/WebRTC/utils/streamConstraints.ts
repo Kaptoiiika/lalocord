@@ -7,8 +7,8 @@ export type ObjectStreamConstraints = {
 
 export const defaultStreamConstraints: ObjectStreamConstraints = {
   audio: {
-    noiseSuppression: false,
-    echoCancellation: false,
+    noiseSuppression: true,
+    echoCancellation: true,
     autoGainControl: false,
     channelCount: { ideal: 2 },
   },

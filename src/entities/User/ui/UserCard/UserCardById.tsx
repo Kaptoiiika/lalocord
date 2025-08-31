@@ -25,7 +25,7 @@ export const UserCardById = (props: UserCardByIdProps) => {
   return (
     <UserCard
       username={user.username}
-      avatarUrl={user.avatarSrc}
+      avatarUrl={user.avatar}
       description={user.status}
     />
   )

@@ -29,7 +29,7 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
     mic: null,
   },
   streamConstraints: getStreamSettingsfromLocalStorage(),
-  autoOnMic: localStorage.getItem(localstorageKeys.AUTO_ON_MIC) === 'true',
+  autoOnMic: Boolean(localStorage.getItem(localstorageKeys.AUTO_ON_MIC) ?? true),
   bitrate: Number(localStorage.getItem(localstorageKeys.STREAM_BITRATE)) || 1024 * 1024 * 10,
 
   setAutoOnMic(autoOnMic) {
