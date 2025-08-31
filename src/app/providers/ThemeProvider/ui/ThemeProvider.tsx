@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
 import { useMemo, useState } from 'react'
 
-import { createTheme, ThemeProvider as ThemeProviderMUI } from '@mui/material'
+import { createTheme, StyledEngineProvider, ThemeProvider as ThemeProviderMUI } from '@mui/material'
 import { blue, pink } from '@mui/material/colors'
 import { localstorageKeys } from 'src/shared/const/localstorageKeys'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
@@ -78,8 +78,10 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
   )
 
   return (
-    <ThemeContext.Provider value={defaultProps}>
-      <ThemeProviderMUI theme={MuiTheme}>{children}</ThemeProviderMUI>
-    </ThemeContext.Provider>
+    <StyledEngineProvider injectFirst>
+      <ThemeContext.Provider value={defaultProps}>
+        <ThemeProviderMUI theme={MuiTheme}>{children}</ThemeProviderMUI>
+      </ThemeContext.Provider>
+    </StyledEngineProvider>
   )
 }
