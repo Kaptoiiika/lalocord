@@ -4,12 +4,14 @@ import { socketClient } from 'src/shared/api'
 import { logger } from 'src/shared/lib/logger/Logger'
 import { Emitter } from 'src/shared/lib/utils'
 
+import type { GameType } from 'src/entities/Game'
+
 import { useWebRTCStore } from '../model/WebRTCStore'
 import { MessageCodec } from './Codec/MessageCodec'
 import type { StreamType } from '../types'
 import { createBlackVideoTrack, createSilentAudioTrack, getIceServers, pauseSender, resumeSender } from '../utils'
 
-type WebRTCClientConfig = { id: number }
+type WebRTCClientConfig = { id: string }
 
 type EventMessageToSocket = 'new_answer' | 'new_offer' | 'new_ice'
 
@@ -43,16 +45,25 @@ export type WebRTCTransmissionMessage = Pick<WebRTCChatMessage, 'id' | 'isSystem
   }
 }
 
+export type WebRTCMiniGameMessage = {
+  message?: string
+  action: 'request' | 'accept' | 'decline' | 'waiting'
+  gameId: string
+  gameType: GameType
+}
+
 type WebRTCClientEvents = {
   onStreamStart: StreamType
   onStreamStop: StreamType
   onChatMessage: string
   onChatMessageFile: WebRTCChatMessage
   onChatMessageLoadFile: WebRTCTransmissionMessage
+  onMiniGameMessage: unknown
+  onMiniGameRequsest: WebRTCMiniGameMessage
 }
 
 export class WebRTCClient extends Emitter<WebRTCClientEvents> {
-  id: number
+  id: string
   private peer: RTCPeerConnection
   private codec: MessageCodec
   private chatFileTempData: Map<string, Uint8Array> = new Map()
@@ -64,6 +75,8 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   private channelInfo: RTCDataChannel
   private channelChat: RTCDataChannel
   private channelFile: RTCDataChannel
+  channelMiniGame: RTCDataChannel
+
   remoteStreams: Partial<Record<StreamType, MediaStream | null>> = {}
   senders: {
     screenVideo: RTCRtpSender
@@ -119,6 +132,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       protocol: 'arrayBuffer',
       negotiated: true,
     })
+
     this.codec = new MessageCodec({
       headerName: 'lalohead',
       maxChunkSize: 250000,
@@ -154,6 +168,12 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
         this.sendMessageToPeer('stream_start', 'mic')
       }
     }
+    this.channelMiniGame = this.peer.createDataChannel('miniGame', {
+      id: 3,
+      protocol: 'json',
+      negotiated: true,
+    })
+    this.channelMiniGame.onmessage = this.onMiniGameMessage.bind(this)
   }
 
   async createOffer(): Promise<RTCSessionDescriptionInit> {
@@ -265,6 +285,30 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
         this.remoteStreams[data.message as StreamType] = undefined
         this.emit('onStreamStop', data.message as StreamType)
         break
+      case 'miniGameRequsest':
+        this.emit('onMiniGameRequsest', data.message)
+        break
+    }
+  }
+
+  private onMiniGameMessage(event: MessageEvent) {
+    const data = JSON.parse(event.data)
+    this.emit('onMiniGameMessage', data)
+  }
+
+  sendMiniGameMessage(message: unknown) {
+    try {
+      this.channelMiniGame.send(JSON.stringify(message))
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
+
+  sendMiniGameRequsest(message: WebRTCMiniGameMessage) {
+    try {
+      this.channelInfo.send(JSON.stringify({ event: 'miniGameRequsest', message }))
+    } catch (error) {
+      console.log('error', error)
     }
   }
 

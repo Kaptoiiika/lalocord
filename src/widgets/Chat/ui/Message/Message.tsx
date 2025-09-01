@@ -9,6 +9,7 @@ import type { WebRTCChatMessage } from 'src/entities/WebRTC'
 
 import { MessageFile } from './MessageFile'
 import { MessageLoadingFile } from './MessageLoadingFile'
+import { MessageMiniGameRequest } from './MessageMiniGameRequest'
 import { MessageTransmission } from './MessageTransmission'
 import { useChatStore } from '../../model/store/ChatStore'
 
@@ -92,6 +93,7 @@ export const Message = (props: MessageProps) => {
       {!!data.message.blob && <MessageFile data={data.message as RequireOnlyOne<WebRTCChatMessage, 'blob'>} />}
       {!!data.message.blobParams && <MessageLoadingFile data={data.message} />}
       {!!data.message.transmission && <MessageTransmission data={data} />}
+      {!!data.message.gameType && <MessageMiniGameRequest data={data} />}
     </Typography>
   )
 }

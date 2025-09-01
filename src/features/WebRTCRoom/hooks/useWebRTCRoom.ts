@@ -2,22 +2,27 @@ import { useCallback, useEffect, useRef } from 'react'
 
 import { useAudioEffectStore, AudioName } from 'src/entities/AudioEffect'
 import { useWebRTCStore, WebRTCClient } from 'src/entities/WebRTC'
+import { TicTacToeGame } from 'src/features/TicTacToe'
 import { socketClient } from 'src/shared/api'
 import { useChatStore } from 'src/widgets/Chat/model/store/ChatStore'
 
 import type { UserModel } from 'src/entities/User'
-import type { WebRTCTransmissionMessage, WebRTCChatMessage } from 'src/entities/WebRTC/lib/WebRTCClient'
+import type {
+  WebRTCTransmissionMessage,
+  WebRTCChatMessage,
+  WebRTCMiniGameMessage,
+} from 'src/entities/WebRTC/lib/WebRTCClient'
 
 import { useWebRTCRoomStore } from '../model/WebRTCRoomStore'
 
 type Answer = { answer: RTCSessionDescription }
 type Offer = { offer: RTCSessionDescription }
 type Ice = { ice: RTCIceCandidateInit }
-type ClientId = { id: number }
+type ClientId = { id: string }
 type UserConnectModel = UserModel
 
 export const useWebRTCRoom = () => {
-  const { users, addUser, removeUser } = useWebRTCRoomStore()
+  const { users, addUser, addMiniGame, removeUser } = useWebRTCRoomStore()
   const { streams, bitrate } = useWebRTCStore()
   const playAudio = useAudioEffectStore((state) => state.play)
   const { mic, screen, webCam } = streams
@@ -31,7 +36,7 @@ export const useWebRTCRoom = () => {
   }, [bitrate])
 
   const handleGetUserPeer = useCallback(
-    (userId: number) => userMapRef.current.find((user) => user.id === userId)?.peer,
+    (userId: string) => userMapRef.current.find((user) => user.id === userId)?.peer,
     []
   )
 
@@ -82,7 +87,7 @@ export const useWebRTCRoom = () => {
   }, [mic])
 
   useEffect(() => {
-    const chatMessageListeners = new Map<number, () => void>()
+    const chatMessageListeners = new Map<string, () => void>()
 
     users.forEach(({ peer, user }) => {
       const onChatMessage = (message: string) => {
@@ -99,14 +104,30 @@ export const useWebRTCRoom = () => {
         useChatStore.getState().addNewMessage({ type: 'file', ...message }, user)
       }
 
+      const onMiniGameRequsest = (message: WebRTCMiniGameMessage) => {
+        if (message.action === 'request') playAudio(AudioName.notification)
+
+        if (message.action === 'accept')
+          addMiniGame({
+            id: message.gameId,
+            userId: user.id,
+            type: message.gameType,
+            engine: new TicTacToeGame({ id: message.gameId, type: message.gameType, peer, isCross: false }),
+          })
+
+        useChatStore.getState().addNewMessage({ type: 'miniGameRequest', id: message.gameId, ...message }, user)
+      }
+
       peer.on('onChatMessage', onChatMessage)
       peer.on('onChatMessageLoadFile', onChatMessageLoadFile)
       peer.on('onChatMessageFile', onChatMessageFile)
+      peer.on('onMiniGameRequsest', onMiniGameRequsest)
 
       chatMessageListeners.set(peer.id, () => {
         peer.off('onChatMessage', onChatMessage)
         peer.off('onChatMessageLoadFile', onChatMessageLoadFile)
         peer.off('onChatMessageFile', onChatMessageFile)
+        peer.off('onMiniGameRequsest', onMiniGameRequsest)
       })
     })
 
@@ -114,7 +135,7 @@ export const useWebRTCRoom = () => {
       chatMessageListeners.forEach((unsubscribe) => unsubscribe())
       chatMessageListeners.clear()
     }
-  }, [users, playAudio])
+  }, [users, playAudio, addMiniGame])
 
   useEffect(() => {
     const addUser = (user: UserConnectModel, waitOffer = false) => {

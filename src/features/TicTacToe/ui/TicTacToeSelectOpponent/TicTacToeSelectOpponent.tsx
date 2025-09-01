@@ -1,45 +1,46 @@
 import { useState } from 'react'
 
 import type { SelectChangeEvent } from '@mui/material'
-import { Button, Dialog, MenuItem, Select } from '@mui/material'
+import { Button, MenuItem, Select, Stack } from '@mui/material'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom'
-
-import type { WebRTCClient } from 'src/entities/WebRTC'
-
-import styles from './TicTacToeSelectOpponent.module.scss'
+import { Modal } from 'src/shared/ui'
 
 type TicTacToeSelectOpponentProps = {
   open: boolean
   onClose: () => void
-  onSelect?: () => void
+  onSelect?: (userId: string) => void
 }
 
 export const TicTacToeSelectOpponent = (props: TicTacToeSelectOpponentProps) => {
   const { onClose, onSelect, open } = props
-  const [selectedUser, setUser] = useState<WebRTCClient>()
+  const { users } = useWebRTCRoomStore()
+  const [selectedUserId, setUserId] = useState<string>()
 
-  const handleChangeUser = (event: SelectChangeEvent<WebRTCClient>) => {
-    if (typeof event.target.value === 'string') return setUser(undefined)
-    setUser(event.target.value)
+  const handleChangeUser = (event: SelectChangeEvent<string>) => {
+    setUserId(event.target.value)
   }
 
-  const { users } = useWebRTCRoomStore()
+  const handleSelect = () => {
+    if (!selectedUserId) return
+    onSelect?.(selectedUserId)
+    onClose()
+  }
 
   return (
-    <Dialog
+    <Modal
       open={open}
       onClose={onClose}
       className="TicTacToeSelectOpponent"
     >
-      <div className={styles.TicTacToeSelectOpponent}>
+      <Stack gap={1}>
         <Select
           fullWidth
-          value={selectedUser || ''}
+          value={selectedUserId || ''}
           displayEmpty
           onChange={handleChangeUser}
         >
           <MenuItem value="">
-            <i>On one table</i>
+            <i>Select opponent</i>
           </MenuItem>
 
           {Object.values(users).map((client) => (
@@ -51,9 +52,27 @@ export const TicTacToeSelectOpponent = (props: TicTacToeSelectOpponentProps) => 
             </MenuItem>
           ))}
         </Select>
-        <Button onClick={onSelect}>Select opponent</Button>
-        <Button onClick={onClose}>Cancel</Button>
-      </div>
-    </Dialog>
+        <Stack
+          gap={1}
+          direction="row"
+          justifyContent="flex-end"
+        >
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={!selectedUserId}
+            variant="contained"
+            onClick={handleSelect}
+          >
+            Start
+          </Button>
+        </Stack>
+      </Stack>
+    </Modal>
   )
 }

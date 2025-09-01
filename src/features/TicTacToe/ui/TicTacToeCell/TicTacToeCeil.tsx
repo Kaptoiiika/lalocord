@@ -1,19 +1,17 @@
 import { classNames } from 'src/shared/lib/classNames/classNames'
 
-import type { TicTacToeCeilType } from '../../model/types/TicTacToe'
-
-import { useTicTacToeStore } from '../../model/store/TicTacToeStore'
+import type { TicTacToeCeilType, TicTacToePlayerType } from '../../model/types/TicTacToe'
 
 import styles from './TicTacToeCeil.module.scss'
 
 type TicTacToeCeilProps = {
   onClick?: () => void
   active?: TicTacToeCeilType
+  player: TicTacToePlayerType
 }
 
 export const TicTacToeCeil = (props: TicTacToeCeilProps) => {
-  const { onClick, active } = props
-  const player = useTicTacToeStore((state) => state.currentPlayer)
+  const { onClick, active, player } = props
 
   return (
     <td

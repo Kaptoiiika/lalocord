@@ -1,5 +1,6 @@
 import type { UserModel } from 'src/entities/User'
 import type { WebRTCChatMessage, WebRTCTransmissionMessage } from 'src/entities/WebRTC'
+import type { WebRTCMiniGameMessage } from 'src/entities/WebRTC/lib/WebRTCClient'
 
 export interface ChatSchema {
   messageList: [Map<string, MessageModelNew>]
@@ -15,6 +16,7 @@ export interface MessageModelNew {
 }
 
 export type ChatMessageType = {
-  type: 'text' | 'file' | 'transmission'
+  type: 'text' | 'file' | 'transmission' | 'miniGameRequest'
 } & WebRTCChatMessage &
-  Partial<WebRTCTransmissionMessage>
+  Partial<WebRTCTransmissionMessage> &
+  Partial<WebRTCMiniGameMessage>

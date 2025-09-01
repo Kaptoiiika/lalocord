@@ -1,6 +1,6 @@
 import { classNames } from 'src/shared/lib/classNames/classNames'
 
-import type { TicTacToeBoardType } from '../../model/types/TicTacToe'
+import type { TicTacToeBoardType, TicTacToePlayerType } from '../../model/types/TicTacToe'
 
 import { TicTacToeField } from '../TicTacToeField/TicTacToeField'
 
@@ -9,11 +9,12 @@ import styles from './TicTacToeBoard.module.scss'
 type TicTacToeBoardProps = {
   board: TicTacToeBoardType
   activefield?: number
+  player: TicTacToePlayerType
   onCeilClick?: (fieldId: number, ceilId: number) => void
 }
 
 export const TicTacToeBoard = (props: TicTacToeBoardProps) => {
-  const { board, activefield, onCeilClick } = props
+  const { board, activefield, onCeilClick, player } = props
 
   return (
     <div className={styles['TicTacToeBoard']}>
@@ -33,6 +34,7 @@ export const TicTacToeBoard = (props: TicTacToeBoardProps) => {
                 onCeilClick?.(index, ceilId)
               }}
               fields={field}
+              player={player}
             />
           </table>
         )

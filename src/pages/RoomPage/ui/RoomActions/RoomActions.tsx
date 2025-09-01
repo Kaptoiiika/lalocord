@@ -4,6 +4,7 @@ import { VideoSettingsMenu } from './SettingsMenu/VideoSettingsMenu'
 import { ShareMicrophoneMenu } from './ShareMicrophoneMenu/ShareMicrophoneMenu'
 import { ShareScreenMenu } from './ShareScreenMenu/ShareScreenMenu'
 import { ShareWebCamMenu } from './ShareWebCamMenu/ShareWebCamMenu'
+import { StartMiniGame } from './StartMiniGame/StartMiniGame'
 
 import styles from './RoomActions.module.scss'
 
@@ -16,7 +17,7 @@ export const RoomActions = () => (
     <ShareMicrophoneMenu />
     <ShareWebCamMenu />
     <ShareScreenMenu />
-    {/* <StartMiniGame /> */}
+    <StartMiniGame />
     <Stack
       className={styles.group}
       direction="row"

@@ -3,7 +3,7 @@ import { localstorageKeys } from 'src/shared/const/localstorageKeys'
 import type { UserModel } from '../types/UserSchema'
 
 const defaultUser: UserModel = {
-  id: 0,
+  id: '0',
   username: 'You',
 }
 

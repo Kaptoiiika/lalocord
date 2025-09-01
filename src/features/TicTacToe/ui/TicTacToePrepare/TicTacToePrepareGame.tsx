@@ -5,16 +5,16 @@ import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
 
 import { TicTacToeSelectOpponent } from '../TicTacToeSelectOpponent/TicTacToeSelectOpponent'
 
-type TicTacToePrepareGameProps = { onStart?: () => void } & PropsWithChildren
+type TicTacToePrepareGameProps = { onStart?: (userId: string) => void } & PropsWithChildren
 
 export const TicTacToePrepareGame = (props: TicTacToePrepareGameProps) => {
   const { onStart } = props
 
   const { handleOpen, open, handleClose } = useIsOpen()
 
-  const handleStartGame = () => {
+  const handleStartGame = (userId: string) => {
     handleClose()
-    onStart?.()
+    onStart?.(userId)
   }
 
   return (
