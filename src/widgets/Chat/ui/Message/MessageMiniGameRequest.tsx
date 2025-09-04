@@ -1,5 +1,4 @@
 import { Button, Stack } from '@mui/material'
-import { TicTacToeGame } from 'src/features/TicTacToe'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 
 import type { MessageModelNew } from '../../model/types/ChatSchema'
@@ -28,12 +27,7 @@ export const MessageMiniGameRequest = (props: MessageMiniGameRequestProps) => {
     })
     useChatStore.getState().addNewMessage({ ...data.message, action: 'accept' }, data.user)
 
-    addMiniGame({
-      id: gameId,
-      userId: data.user.id,
-      type: gameType,
-      engine: new TicTacToeGame({ id: gameId, type: gameType, peer: user?.peer, isCross: true }),
-    })
+    addMiniGame(gameType, user?.peer)
   }
 
   const handleDecline = () => {

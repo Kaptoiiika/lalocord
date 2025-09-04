@@ -13,6 +13,13 @@ export type GameEngineConfig = Game & {
   peer: WebRTCClient
 }
 
+export type MiniGame = {
+  id: string
+  userId: string
+  type: GameType
+  engine: GameEngine
+}
+
 export type GameEngineEvents = {
   onClose: void
   onMessage: unknown

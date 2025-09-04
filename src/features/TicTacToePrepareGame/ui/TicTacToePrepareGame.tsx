@@ -1,9 +1,9 @@
 import type { PropsWithChildren } from 'react'
 
 import { Button } from '@mui/material'
-import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
+import { useIsOpen } from 'src/shared/lib/hooks'
 
-import { TicTacToeSelectOpponent } from '../TicTacToeSelectOpponent/TicTacToeSelectOpponent'
+import { TicTacToeSelectOpponent } from './TicTacToeSelectOpponent/TicTacToeSelectOpponent'
 
 type TicTacToePrepareGameProps = { onStart?: (userId: string) => void } & PropsWithChildren
 

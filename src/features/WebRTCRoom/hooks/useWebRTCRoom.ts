@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef } from 'react'
 
 import { useAudioEffectStore, AudioName } from 'src/entities/AudioEffect'
 import { useWebRTCStore, WebRTCClient } from 'src/entities/WebRTC'
-import { TicTacToeGame } from 'src/features/TicTacToe'
 import { socketClient } from 'src/shared/api'
 import { useChatStore } from 'src/widgets/Chat/model/store/ChatStore'
 
@@ -107,13 +106,7 @@ export const useWebRTCRoom = () => {
       const onMiniGameRequsest = (message: WebRTCMiniGameMessage) => {
         if (message.action === 'request') playAudio(AudioName.notification)
 
-        if (message.action === 'accept')
-          addMiniGame({
-            id: message.gameId,
-            userId: user.id,
-            type: message.gameType,
-            engine: new TicTacToeGame({ id: message.gameId, peer, isCross: false }),
-          })
+        if (message.action === 'accept') addMiniGame(message.gameType, peer)
 
         useChatStore.getState().addNewMessage({ type: 'miniGameRequest', id: message.gameId, ...message }, user)
       }

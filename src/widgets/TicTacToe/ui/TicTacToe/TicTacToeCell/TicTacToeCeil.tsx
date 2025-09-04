@@ -1,9 +1,9 @@
-import { TicTacToePlayer } from 'src/features/TicTacToe/model/types/TicTacToe'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 
-import type { TicTacToeCeilType } from 'src/features/TicTacToe/model/types/TicTacToe'
+import type { TicTacToeCeilType } from '../../../model/types/TicTacToe'
 
 import { useTicTacToeContext } from '../../../model/store/TicTacToeContext'
+import { TicTacToePlayer } from '../../../model/types/TicTacToe'
 
 import styles from './TicTacToeCeil.module.scss'
 

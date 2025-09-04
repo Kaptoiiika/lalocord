@@ -5,7 +5,7 @@ import { Tooltip } from '@mui/material'
 import { useLocalUserStore, UserCard } from 'src/entities/User'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { VolumeMeter } from 'src/features/VolumeMetter/ui/VolumeMeter'
-import { useWebRTCRoomStore } from 'src/features/WebRTCRoom'
+import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import { AvatarUser } from 'src/shared/ui/Avatar'
 
 import { RoomUserItem } from './RoomUserItem/RoomUserItem'

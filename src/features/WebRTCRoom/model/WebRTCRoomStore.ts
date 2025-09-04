@@ -1,3 +1,4 @@
+import { createGame } from 'src/entities/Game'
 import { create } from 'zustand'
 
 import type { GameEngine, GameType } from 'src/entities/Game'
@@ -11,20 +12,13 @@ export type RoomUser = {
   peer: WebRTCClient
 }
 
-export type MiniGame = {
-  id: string
-  userId: string
-  type: GameType
-  engine: GameEngine
-}
-
 type WebRTCRoomStore = {
   roomId?: string
   users: RoomUser[]
 
-  miniGame: MiniGame[]
-  addMiniGame: (miniGame: MiniGame) => void
-  removeMiniGame: (miniGameId: string) => void
+  miniGame: GameEngine[]
+  addMiniGame: (gameType: GameType, peer: WebRTCClient) => void
+  removeMiniGame: (gameId: string) => void
 
   addUser: (user: RoomUser) => void
   removeUser: (userId: string) => void
@@ -38,14 +32,13 @@ const store: StateCreator<WebRTCRoomStore> = (set, get) => ({
   users: [],
   miniGame: [],
 
-  addMiniGame: (miniGame: MiniGame) => {
-    set((state) => ({ miniGame: [...state.miniGame, miniGame] }))
+  addMiniGame: (gameType: GameType, peer: WebRTCClient) => {
+    const game = createGame(gameType, peer)
+    set((state) => ({ miniGame: [...state.miniGame, game] }))
   },
 
-  removeMiniGame: (miniGameId: string) => {
-    const miniGame = get().miniGame.find((miniGame) => miniGame.id === miniGameId)
-    miniGame?.engine.closeEngine()
-    set((state) => ({ miniGame: state.miniGame.filter((miniGame) => miniGame.id !== miniGameId) }))
+  removeMiniGame: (gameId: string) => {
+    set((state) => ({ miniGame: state.miniGame.filter((miniGame) => miniGame.id !== gameId) }))
   },
 
   addUser: (user: RoomUser) => {

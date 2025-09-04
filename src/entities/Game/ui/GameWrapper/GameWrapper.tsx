@@ -2,7 +2,7 @@ import type { PropsWithChildren } from 'react'
 import { useCallback, useEffect } from 'react'
 
 import { Button } from '@mui/material'
-import { useWebRTCRoomStore } from 'src/features/WebRTCRoom'
+import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 
 import type { GameEngine } from '../../model/GameEngine/GameEngine'

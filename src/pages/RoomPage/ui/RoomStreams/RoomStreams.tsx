@@ -3,15 +3,15 @@ import { memo, useEffect, useState } from 'react'
 import { useAudioEffectStore } from 'src/entities/AudioEffect'
 import { getLocalUser, useLocalUserStore } from 'src/entities/User'
 import { useWebRTCStore } from 'src/entities/WebRTC'
-import { TicTacToeMultiplayer } from 'src/features/TicTacToe/ui/TicTacToe'
-import { useWebRTCRoomStore } from 'src/features/WebRTCRoom'
+import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 import { useThrottle } from 'src/shared/lib/hooks/useThrottle/useThrottle'
 import { StreamViewer } from 'src/widgets/StreamViewer/ui/StreamViewer'
+import { TicTacToeMultiplayer } from 'src/widgets/TicTacToe/ui/TicTacToe'
 
 import type { UserModel } from 'src/entities/User'
 import type { StreamType } from 'src/entities/WebRTC'
-import type { TicTacToeGame } from 'src/features/TicTacToe'
+import type { TicTacToeGame } from 'src/widgets/TicTacToe'
 
 import { RoomStream } from './RoomStream/RoomStream'
 
@@ -93,8 +93,10 @@ export const RoomStreams = memo(function RoomStreams() {
         [styles.RoomStreamsWithHiddenStream]: !!someStreamIsHide,
       })}
     >
-      {miniGame.map(({ id, type, engine }) => (
-        <div key={id}>{type === 'TicTacToe' && <TicTacToeMultiplayer game={engine as TicTacToeGame} />}</div>
+      {miniGame.map((engine) => (
+        <div key={engine.id}>
+          {engine.type === 'TicTacToe' && <TicTacToeMultiplayer game={engine as TicTacToeGame} />}
+        </div>
       ))}
 
       {localStreams.map(({ stream, name, autoplay }) => (

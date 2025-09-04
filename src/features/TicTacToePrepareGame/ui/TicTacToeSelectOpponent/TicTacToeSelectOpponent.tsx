@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import type { SelectChangeEvent } from '@mui/material'
 import { Button, MenuItem, Select, Stack } from '@mui/material'
-import { useWebRTCRoomStore } from 'src/features/WebRTCRoom'
+import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import { Modal } from 'src/shared/ui'
 
 type TicTacToeSelectOpponentProps = {

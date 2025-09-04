@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Typography, IconButton, Slider, Stack, Tooltip, Popover } from '@mui/material'
 import { useAudioEffectStore } from 'src/entities/AudioEffect'
 import { UserCard } from 'src/entities/User'
-import { VolumeMeter } from 'src/features/VolumeMetter/ui/VolumeMeter'
+import { VolumeMeter } from 'src/features/VolumeMetter'
 import { AvatarUserWithBadge } from 'src/shared/ui/Avatar'
 
 import type { RoomUser } from 'src/features/WebRTCRoom'

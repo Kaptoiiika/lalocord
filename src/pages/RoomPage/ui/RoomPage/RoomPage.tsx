@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import { useLocalUserStore } from 'src/entities/User'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { WaitUserClick } from 'src/features/WaitUserClick'
-import { useWebRTCRoomStore } from 'src/features/WebRTCRoom'
+import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import { socketClient } from 'src/shared/api'
 import { PageWrapper } from 'src/widgets/Page'
 

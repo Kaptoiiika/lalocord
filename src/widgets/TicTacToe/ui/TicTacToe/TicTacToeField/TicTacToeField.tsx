@@ -1,9 +1,9 @@
-import { useTicTacToeContext } from 'src/features/TicTacToe/model/store/TicTacToeContext'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 import { sliceIntoChunks } from 'src/shared/lib/utils/Arrays'
 
 import type { TicTacToeFieldType } from '../../../model/types/TicTacToe'
 
+import { useTicTacToeContext } from '../../../model/store/TicTacToeContext'
 import { TicTacToePlayer } from '../../../model/types/TicTacToe'
 import { TicTacToeCeil } from '../TicTacToeCell/TicTacToeCeil'
 

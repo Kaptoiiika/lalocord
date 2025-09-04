@@ -1,6 +1,6 @@
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset'
 import { IconButton, Menu, Stack, Tooltip } from '@mui/material'
-import { TicTacToePrepareGame } from 'src/features/TicTacToe'
+import { TicTacToePrepareGame } from 'src/features/TicTacToePrepareGame'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
 import { useChatStore } from 'src/widgets/Chat/model/store/ChatStore'
