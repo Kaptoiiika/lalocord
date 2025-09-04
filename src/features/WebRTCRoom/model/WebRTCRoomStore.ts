@@ -1,7 +1,7 @@
 import { createGame } from 'src/entities/Game'
 import { create } from 'zustand'
 
-import type { GameEngine, GameType } from 'src/entities/Game'
+import type { createGameConfig, GameEngine } from 'src/entities/Game'
 import type { UserModel } from 'src/entities/User'
 import type { WebRTCClient } from 'src/entities/WebRTC'
 import type { StateCreator } from 'zustand'
@@ -17,7 +17,7 @@ type WebRTCRoomStore = {
   users: RoomUser[]
 
   miniGame: GameEngine[]
-  addMiniGame: (gameType: GameType, peer: WebRTCClient) => void
+  addMiniGame: (gameConfig: createGameConfig) => void
   removeMiniGame: (gameId: string) => void
 
   addUser: (user: RoomUser) => void
@@ -32,8 +32,8 @@ const store: StateCreator<WebRTCRoomStore> = (set, get) => ({
   users: [],
   miniGame: [],
 
-  addMiniGame: (gameType: GameType, peer: WebRTCClient) => {
-    const game = createGame(gameType, peer)
+  addMiniGame: (gameConfig: createGameConfig) => {
+    const game = createGame(gameConfig)
     set((state) => ({ miniGame: [...state.miniGame, game] }))
   },
 

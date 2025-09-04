@@ -106,7 +106,8 @@ export const useWebRTCRoom = () => {
       const onMiniGameRequsest = (message: WebRTCMiniGameMessage) => {
         if (message.action === 'request') playAudio(AudioName.notification)
 
-        if (message.action === 'accept') addMiniGame(message.gameType, peer)
+        if (message.action === 'accept')
+          addMiniGame({ gameType: message.gameType, peer, id: message.gameId, isHost: true })
 
         useChatStore.getState().addNewMessage({ type: 'miniGameRequest', id: message.gameId, ...message }, user)
       }

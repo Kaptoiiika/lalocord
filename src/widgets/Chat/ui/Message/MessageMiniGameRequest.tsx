@@ -27,7 +27,7 @@ export const MessageMiniGameRequest = (props: MessageMiniGameRequestProps) => {
     })
     useChatStore.getState().addNewMessage({ ...data.message, action: 'accept' }, data.user)
 
-    addMiniGame(gameType, user?.peer)
+    addMiniGame({ gameType, peer: user?.peer, id: gameId, isHost: false })
   }
 
   const handleDecline = () => {

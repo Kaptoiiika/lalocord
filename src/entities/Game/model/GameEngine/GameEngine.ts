@@ -94,7 +94,7 @@ export class GameEngine extends Emitter<GameEngineEvents> {
   }
 
   sendMessage(payload: unknown) {
-    if (this.isClosed) return
+    console.log('sendMessage', payload)
     try {
       this.peerChat.send(JSON.stringify({ id: this.id, type: 'message', payload }))
     } catch (error) {
