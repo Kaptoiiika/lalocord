@@ -1,11 +1,14 @@
 .TicTacToe {
-  display: grid;
-  width: 100%;
-  justify-items: center;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
 
-  .wrapper {
-    padding: 16px;
-    border: 4px solid goldenrod;
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
   }
 }

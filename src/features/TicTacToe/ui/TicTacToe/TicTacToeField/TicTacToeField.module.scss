@@ -1,0 +1,88 @@
+// $symbolHeight: 96px;
+// $symbolStroke: 24px;
+
+$symbolHeight: max(6vh, 6vw);
+$symbolStroke: max(1.5vh, 1.5vw);
+
+.TicTacToeField {
+  border-collapse: collapse;
+
+  table,
+  tbody,
+  tr,
+  td {
+    display: flex;
+  }
+
+  >tr {
+    >td {
+      border: 2px solid var(--box-border-color);
+    }
+
+    >td:first-child {
+      border-left: none;
+    }
+
+    >td:last-child {
+      border-right: none;
+    }
+
+    &:first-child td {
+      border-top: none;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+.fieldWinner {
+  position: relative;
+
+  &.lastPlaced {
+    background-color: rgba(var(--secondary-color), 0.25);
+  }
+
+  tr {
+    visibility: hidden;
+  }
+
+  &.circle {
+    &::after {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      content: '';
+      position: absolute;
+      height: $symbolHeight;
+      border: $symbolStroke solid;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border-color: var(--color-pink);
+    }
+  }
+
+  &.cross {
+
+    &::after,
+    &::before {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      content: '';
+      position: absolute;
+      height: calc($symbolHeight*sqrt(4));
+      width: $symbolStroke;
+      background: var(--color-teal);
+    }
+
+    &::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    &::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+  }
+}

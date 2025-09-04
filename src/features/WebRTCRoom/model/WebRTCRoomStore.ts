@@ -43,6 +43,8 @@ const store: StateCreator<WebRTCRoomStore> = (set, get) => ({
   },
 
   removeMiniGame: (miniGameId: string) => {
+    const miniGame = get().miniGame.find((miniGame) => miniGame.id === miniGameId)
+    miniGame?.engine.closeEngine()
     set((state) => ({ miniGame: state.miniGame.filter((miniGame) => miniGame.id !== miniGameId) }))
   },
 

@@ -1,43 +1,71 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
-import { Button } from '@mui/material'
+import { Button, Typography } from '@mui/material'
+import { GameWrapper, useGameEngine } from 'src/entities/Game'
 
-import type { TicTacToeGame } from '../model/lib/TicTacToeGame'
+import type { WebRTCClient } from 'src/entities/WebRTC'
 
-import { TicTacToeBoard } from './TicTacToeBoard/TicTacToeBoard'
-import { useTicTacToeStore } from '../model/store/TicTacToeStore'
+import { TicTacToeBoard } from './TicTacToe/TicTacToeBoard/TicTacToeBoard'
+import { TicTacToeGame } from '../model/lib/TicTacToeGame'
+import { TicTacToeContext } from '../model/store/TicTacToeContext'
+import { TicTacToePlayer } from '../model/types/TicTacToe'
 
 import styles from './TicTacToe.module.scss'
 
 export const TicTacToe = () => {
-  const board = useTicTacToeStore((state) => state.board)
-  const handlePlayerMove = useTicTacToeStore((state) => state.doPlayerMove)
-  const restartGame = useTicTacToeStore((state) => state.startGame)
-  const currentPlayer = useTicTacToeStore((state) => state.currentPlayer)
-  const activeFieldId = useTicTacToeStore((state) => state.activeFieldId)
+  const [game, setGame] = useState<TicTacToeGame>(
+    new TicTacToeGame({
+      id: '0',
+      isCross: true,
+      peer: {
+        channelMiniGame: {
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          send: () => {},
+        },
+      } as unknown as WebRTCClient,
+    })
+  )
+  const board = game?.board
+  const currentPlayer = game?.currentPlayer
+  useGameEngine(game)
 
   const handleCeilClick = (fieldId: number, ceilId: number) => {
-    handlePlayerMove(fieldId, ceilId, currentPlayer)
+    game?.sendMove?.(fieldId, ceilId)
+    game?.changeCurrentPlayer?.(currentPlayer === TicTacToePlayer.O ? TicTacToePlayer.X : TicTacToePlayer.O)
   }
 
   const handleRestartGame = () => {
-    restartGame()
+    setGame(
+      new TicTacToeGame({
+        id: '0',
+        isCross: true,
+        peer: {
+          channelMiniGame: {
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            send: () => {},
+          },
+        } as unknown as WebRTCClient,
+      })
+    )
   }
 
   return (
-    <div className={styles.TicTacToe}>
-      <div className={styles.wrapper}>
-        <Button onClick={handleRestartGame}>restart</Button>
-        {board ? (
-          <TicTacToeBoard
-            onCeilClick={handleCeilClick}
-            activefield={activeFieldId}
-            board={board}
-            player={currentPlayer}
-          />
-        ) : null}
+    <TicTacToeContext.Provider value={{ game, onMove: handleCeilClick }}>
+      <div className={styles.TicTacToe}>
+        <div className={styles.header}>
+          <Button
+            variant="contained"
+            onClick={handleRestartGame}
+          >
+            restart
+          </Button>
+          <Typography variant="h4">Turn: {currentPlayer}</Typography>
+        </div>
+        {board ? <TicTacToeBoard /> : null}
       </div>
-    </div>
+    </TicTacToeContext.Provider>
   )
 }
 
@@ -47,43 +75,29 @@ type TicTacToeMultiplayerProps = {
 
 export const TicTacToeMultiplayer = (props: TicTacToeMultiplayerProps) => {
   const { game } = props
-  const board = game.board
-  const activePlayer = game.activePlayer
-  const currentPlayer = game.currentPlayer
-  const activeFieldId = game.activeFieldId
-  const [, update] = useState(0)
+  const { isClosed, board, activePlayer, currentPlayer } = useGameEngine(game)
 
+  const handleCeilClick = useCallback(
+    (fieldId: number, ceilId: number) => {
+      game.sendMove(fieldId, ceilId)
+    },
+    [game]
+  )
 
-  console.log(board, currentPlayer, activeFieldId )
-  useEffect(() => {
-    const updateFn = () => {
-      console.log('update')
-      update((prev) => prev + 1)
-    }
-
-    game.on('update', updateFn)
-
-    return () => {
-      game.off('update', updateFn)
-    }
-  }, [game])
-
-  const handleCeilClick = (fieldId: number, ceilId: number) => {
-    game.sendMove(fieldId, ceilId)
-  }
+  const contextValue = useMemo(() => ({ game, onMove: handleCeilClick }), [game, handleCeilClick])
 
   return (
-    <div className={styles.TicTacToe}>
-      <div className={styles.wrapper} inert={activePlayer !== currentPlayer}>
-        {board ? (
-          <TicTacToeBoard
-            onCeilClick={handleCeilClick}
-            activefield={activeFieldId}
-            board={board}
-            player={currentPlayer}
-          />
-        ) : null}
-      </div>
-    </div>
+    <TicTacToeContext.Provider value={contextValue}>
+      <GameWrapper gameEngine={game}>
+        <div
+          className={styles.TicTacToe}
+          inert={activePlayer !== currentPlayer || isClosed}
+        >
+          <div className={styles.header}>Turn: {activePlayer}</div>
+
+          {board ? <TicTacToeBoard /> : null}
+        </div>
+      </GameWrapper>
+    </TicTacToeContext.Provider>
   )
 }

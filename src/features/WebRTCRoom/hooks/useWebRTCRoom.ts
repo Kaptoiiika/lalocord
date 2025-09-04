@@ -112,7 +112,7 @@ export const useWebRTCRoom = () => {
             id: message.gameId,
             userId: user.id,
             type: message.gameType,
-            engine: new TicTacToeGame({ id: message.gameId, type: message.gameType, peer, isCross: false }),
+            engine: new TicTacToeGame({ id: message.gameId, peer, isCross: false }),
           })
 
         useChatStore.getState().addNewMessage({ type: 'miniGameRequest', id: message.gameId, ...message }, user)
@@ -141,7 +141,7 @@ export const useWebRTCRoom = () => {
     const addUser = (user: UserConnectModel, waitOffer = false) => {
       const webRTCClient = new WebRTCClient({ id: user.id })
       handleAddUser(user, webRTCClient)
-      playAudio(AudioName.joinToRoom)
+      if (!waitOffer) playAudio(AudioName.joinToRoom)
       if (!waitOffer) webRTCClient.createOffer()
     }
 

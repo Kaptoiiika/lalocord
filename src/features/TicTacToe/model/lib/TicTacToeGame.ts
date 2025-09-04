@@ -1,50 +1,61 @@
 import { GameEngine } from 'src/entities/Game'
 
-import type { TicTacToeBoardType, TicTacToePlayerType } from '../types/TicTacToe'
+import type { TicTacToeBoardType } from '../types/TicTacToe'
 import type { GameEngineConfig } from 'src/entities/Game'
 
-import { checkFieldIsWinnig, createNewBoard } from '../utils/TicTacToeUtilts'
+import { TicTacToePlayer } from '../types/TicTacToe'
+import { checkBoardIsWinnig, checkFieldIsWinnig, createNewBoard } from '../utils/TicTacToeUtilts'
 
 type TicTacToeMovePayload = {
   action: 'move'
   fieldId: number
   ceilId: number
-  player: TicTacToePlayerType
+  player: TicTacToePlayer
 }
 
-export type TicTacToeGameConfig = GameEngineConfig & {
+export type TicTacToeGameConfig = Omit<GameEngineConfig, 'type'> & {
   isCross: boolean
 }
 
 export class TicTacToeGame extends GameEngine {
+  isEnded = false
+  winner: TicTacToePlayer | null = null
   board: TicTacToeBoardType
-  activePlayer: TicTacToePlayerType
+  activePlayer: TicTacToePlayer
   activeFieldId: number | undefined
-  readonly currentPlayer: TicTacToePlayerType
+  currentPlayer: TicTacToePlayer
 
-  constructor(game: TicTacToeGameConfig) {
-    super(game)
+  constructor(config: TicTacToeGameConfig) {
+    super({ ...config, type: 'TicTacToe' })
     this.board = createNewBoard()
-    this.currentPlayer = game.isCross ? 'cross' : 'circle'
-    this.activePlayer = 'cross'
+    this.currentPlayer = config.isCross ? TicTacToePlayer.X : TicTacToePlayer.O
+    this.activePlayer = TicTacToePlayer.X
   }
 
-  private doPlayerMove(fieldId: number, ceilId: number, player: TicTacToePlayerType) {
-    if (fieldId > 8 || ceilId > 8) return
-    if (this.board[fieldId][ceilId] !== null) return
+  private doPlayerMove(fieldId: number, ceilId: number, player: TicTacToePlayer) {
+    if (fieldId > 8 || ceilId > 8) throw new Error('Field or ceil id is out of range')
+    if (this.board.fields[fieldId].cells[ceilId].player !== TicTacToePlayer.EMPTY)
+      throw new Error('Field or ceil is already taken')
+    if (player !== this.activePlayer) throw new Error('Player is not the active player')
 
-    const newBoard = [...this.board]
+    const newBoard = this.board
+    newBoard.lastMove = [fieldId, ceilId, player]
 
-    newBoard[fieldId][ceilId] = player
-    const newActivePlayer = player === 'circle' ? 'cross' : 'circle'
+    newBoard.fields[fieldId].cells[ceilId].player = player
+    const newActivePlayer = player === TicTacToePlayer.O ? TicTacToePlayer.X : TicTacToePlayer.O
 
-    if (checkFieldIsWinnig(newBoard[fieldId])) {
-      newBoard[fieldId][9] = player
+    if (checkFieldIsWinnig(newBoard.fields[fieldId])) {
+      newBoard.fields[fieldId].winner = player
+
+      if (checkBoardIsWinnig(newBoard)) {
+        this.winner = player
+        this.isEnded = true
+      }
     }
 
     this.board = newBoard
     this.activePlayer = newActivePlayer
-    this.activeFieldId = newBoard[ceilId][9] ? undefined : ceilId
+    this.activeFieldId = newBoard.fields[ceilId].winner === TicTacToePlayer.EMPTY ? ceilId : undefined
   }
 
   onMessage(payload: unknown) {
@@ -60,5 +71,8 @@ export class TicTacToeGame extends GameEngine {
     this.sendMessage(payload)
     this.emit('update', undefined)
   }
-}
 
+  changeCurrentPlayer(player: TicTacToePlayer) {
+    this.currentPlayer = player
+  }
+}

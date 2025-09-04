@@ -1,18 +1,26 @@
-export interface TicTacToeSchema {
-  currentPlayer: TicTacToePlayerType
-  activePlayer: TicTacToePlayerType
-
-  board: TicTacToeBoardType
-  activeFieldId?: number
-
-  isMultiplayer: boolean
-
-  doPlayerMove: (fieldId: number, ceilId: number, player: TicTacToePlayerType) => void
-
-  startGame: (isMultiplayer?: boolean) => void
+export enum TicTacToePlayer {
+  X = 'cross',
+  O = 'circle',
+  EMPTY = '',
 }
 
-export type TicTacToePlayerType = 'circle' | 'cross'
-export type TicTacToeCeilType = TicTacToePlayerType | null
-export type TicTacToeFieldType = Array<TicTacToeCeilType>
-export type TicTacToeBoardType = Array<TicTacToeFieldType>
+export type TicTacToeCeilType = {
+  id: number
+  player: TicTacToePlayer
+}
+
+export type TicTacToeFieldType = {
+  id: number
+  cells: Array<TicTacToeCeilType>
+  winner: TicTacToePlayer
+}
+
+export type TicTacToeBoardType = {
+  fields: Array<TicTacToeFieldType>
+  /**
+   * [fieldId, ceilId, player]
+   *
+   * @type {[number, number, TicTacToePlayer]}
+   */
+  lastMove?: [number, number, TicTacToePlayer]
+}

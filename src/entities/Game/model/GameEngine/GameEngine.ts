@@ -14,20 +14,25 @@ export type GameEngineConfig = Game & {
 }
 
 export type GameEngineEvents = {
+  onClose: void
   onMessage: unknown
   update: void
 }
 
 export type GameMessageAction<T> = {
   id: string
-  type: 'message' | 'ready'
+  type: 'message' | 'close'
   payload: T
 }
 
 export class GameEngine extends Emitter<GameEngineEvents> {
   id: string
   type: GameType
+  isClosed = false
   private peerChat: RTCDataChannel
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private subscribedEvents: Record<string, (...args: any) => void> = {}
 
   constructor(game: GameEngineConfig) {
     super()
@@ -35,7 +40,13 @@ export class GameEngine extends Emitter<GameEngineEvents> {
     this.type = game.type
     this.peerChat = game.peer.channelMiniGame
 
-    this.peerChat.addEventListener('message', this.onChanelMessage.bind(this))
+    const bindedOnChanelMessage = this.onChanelMessage.bind(this)
+    this.subscribedEvents['message'] = bindedOnChanelMessage
+    this.peerChat.addEventListener('message', bindedOnChanelMessage)
+
+    const bindedOnClose = this.onEngineClose.bind(this)
+    this.subscribedEvents['close'] = bindedOnClose
+    this.peerChat.addEventListener('close', bindedOnClose)
   }
 
   private onChanelMessage(event: MessageEvent) {
@@ -47,7 +58,28 @@ export class GameEngine extends Emitter<GameEngineEvents> {
     if (type === 'message') {
       this.emit('onMessage', payload)
       this.onMessage(payload)
+    } else if (type === 'close') {
+      this.onEngineClose()
     }
+  }
+
+  private onEngineClose() {
+    if (this.isClosed) return console.log(`Engine ${this.id} is already closed`)
+
+    Object.entries(this.subscribedEvents).forEach(([event, callback]) => {
+      this.peerChat.removeEventListener(event, callback)
+    })
+    this.isClosed = true
+    this.emit('onClose', undefined)
+  }
+
+  closeEngine() {
+    try {
+      this.peerChat.send(JSON.stringify({ id: this.id, type: 'close' }))
+    } catch (error) {
+      console.log('error', error)
+    }
+    this.onEngineClose()
   }
 
   onMessage(payload: unknown) {
@@ -55,6 +87,7 @@ export class GameEngine extends Emitter<GameEngineEvents> {
   }
 
   sendMessage(payload: unknown) {
+    if (this.isClosed) return
     try {
       this.peerChat.send(JSON.stringify({ id: this.id, type: 'message', payload }))
     } catch (error) {
@@ -62,4 +95,3 @@ export class GameEngine extends Emitter<GameEngineEvents> {
     }
   }
 }
-
