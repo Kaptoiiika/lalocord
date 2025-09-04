@@ -1,2 +1,1 @@
-export { WaitUserClick } from "./WaitUserClick";
-
+export { WaitUserClick } from './WaitUserClick'

@@ -3,4 +3,8 @@
   max-height: 100vh;
   max-height: 100dvh;
   overflow: auto;
+
+  @media (max-width: 625px) {
+    height: 100%;
+  }
 }

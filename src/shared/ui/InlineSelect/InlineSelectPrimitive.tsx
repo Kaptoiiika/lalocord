@@ -1,8 +1,10 @@
-import { Input } from "@mui/material"
-import Typography from "@mui/material/Typography"
-import { ChangeEvent, ReactNode, useState, useEffect } from "react"
-import styles from "./InlineSelect.module.scss"
-import { useTheme } from "@/shared/lib/hooks/useTheme/useTheme"
+import type { ChangeEvent, ReactNode } from 'react'
+import { useState, useEffect } from 'react'
+
+import { Input, Typography } from '@mui/material'
+import { useTheme } from 'src/shared/lib/hooks/useTheme/useTheme'
+
+import styles from './InlineSelect.module.scss'
 
 type AllowType = string
 
@@ -17,15 +19,7 @@ type InlineSelectProps = {
 }
 
 export const InlineSelectPrimitive = (props: InlineSelectProps) => {
-  const {
-    title,
-    list,
-    value,
-    onSelect,
-    onCustomValueChange,
-    allowCustomValue,
-    customValue: propsCustomValue,
-  } = props
+  const { title, list, value, onSelect, onCustomValueChange, allowCustomValue, customValue: propsCustomValue } = props
   const { MuiTheme } = useTheme()
   const [selectedValue, setSelectedValue] = useState(value)
   const [customValue, setCustomValue] = useState<AllowType>()
@@ -41,12 +35,11 @@ export const InlineSelectPrimitive = (props: InlineSelectProps) => {
 
   const isCurrentValue = (item: AllowType) => {
     if (value) return item === value
+
     return item === selectedValue
   }
 
-  const handleCustomValueChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleCustomValueChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     onCustomValueChange?.(e.currentTarget.value)
     setCustomValue(e.currentTarget.value)
   }
@@ -66,12 +59,8 @@ export const InlineSelectPrimitive = (props: InlineSelectProps) => {
         {list.map((item, index) => (
           <button
             style={{
-              background: isCurrentValue(item)
-                ? MuiTheme?.palette.primary.main
-                : "none",
-              color: isCurrentValue(item)
-                ? MuiTheme?.palette.primary.contrastText
-                : MuiTheme?.palette.primary.main,
+              background: isCurrentValue(item) ? MuiTheme?.palette.primary.main : 'none',
+              color: isCurrentValue(item) ? MuiTheme?.palette.primary.contrastText : MuiTheme?.palette.primary.main,
               ...MuiTheme?.typography.button,
             }}
             key={index}
@@ -84,12 +73,8 @@ export const InlineSelectPrimitive = (props: InlineSelectProps) => {
         {allowCustomValue && (
           <Input
             sx={{
-              background: customValueIsActive
-                ? MuiTheme?.palette.primary.main
-                : undefined,
-              color: customValueIsActive
-                ? MuiTheme?.palette.primary.contrastText
-                : MuiTheme?.palette.primary.main,
+              background: customValueIsActive ? MuiTheme?.palette.primary.main : undefined,
+              color: customValueIsActive ? MuiTheme?.palette.primary.contrastText : MuiTheme?.palette.primary.main,
             }}
             className={styles.input}
             value={customValue}

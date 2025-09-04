@@ -1,54 +1,64 @@
-import { PageWrapper } from "@/widgets/Page"
-import { useParams } from "react-router-dom"
-import { useEffect } from "react"
-import { socketClient } from "@/shared/api/socket/socket"
-import { RoomLobby } from "../RoomLobby/RoomLobby"
-import { useUserStore } from "@/entities/User"
-import { useRoomRTCStore } from "@/entities/RTCClient"
+import { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+
+import { useLocalUserStore } from 'src/entities/User'
+import { useWebRTCStore } from 'src/entities/WebRTC'
+import { WaitUserClick } from 'src/features/WaitUserClick'
+import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
+import { socketClient } from 'src/shared/api'
+import { PageWrapper } from 'src/widgets/Page'
+
+import { RoomLobby } from '../RoomLobby/RoomLobby'
 
 const emitToJoinRoom = (id: string) => {
-  const localUser = useUserStore.getState().localUser
-  socketClient.emit("join", {
+  const localUser = useLocalUserStore.getState().localUser
+
+  socketClient.emit('join', {
     name: id,
     username: localUser.username,
-    avatarSrc: localUser.avatarSrc,
+    avatar: localUser.avatar,
   })
 
   return () => {
-    useRoomRTCStore.getState().leaveRoom()
-    socketClient.emit("leave", { name: id })
+    useWebRTCRoomStore.getState().leaveRoom()
+    socketClient.emit('leave', {
+      name: id,
+    })
   }
 }
 
-export const RoomPage = () => {
-  const { id = "" } = useParams()
-  const joinToRoom = useRoomRTCStore((state) => state.joinRoom)
-  const leaveRoom = useRoomRTCStore((state) => state.leaveRoom)
+const RoomPageWrapper = () => {
+  const { id = '' } = useParams()
+  const { joinRoom, leaveRoom } = useWebRTCRoomStore()
 
   useEffect(() => {
-    joinToRoom(id)
+    joinRoom(id)
     const fn = emitToJoinRoom(id)
     const prevName = document.title
+
     document.title = `${document.title} - ${id}`
 
     return () => {
       document.title = prevName
       leaveRoom()
-      socketClient.off("room_is_full", () => {})
+      useWebRTCStore.getState().stopStream('mic')
+      useWebRTCStore.getState().stopStream('screen')
+      useWebRTCStore.getState().stopStream('webCam')
       fn()
     }
-  }, [id, joinToRoom, leaveRoom])
+  }, [id, joinRoom, leaveRoom])
 
   useEffect(() => {
     let isConnected = socketClient.active
 
     const handleConnect = () => {
       if (isConnected === false) {
-        const localUser = useUserStore.getState().localUser
-        socketClient.emit("join", {
+        const localUser = useLocalUserStore.getState().localUser
+
+        socketClient.emit('join', {
           name: id,
           username: localUser.username,
-          avatarSrc: localUser.avatarSrc,
+          avatar: localUser.avatar,
           reconnect: true,
         })
       }
@@ -59,17 +69,22 @@ export const RoomPage = () => {
       isConnected = false
     }
 
-    socketClient.on("connect", handleConnect)
-    socketClient.on("disconnect", handleDisconnect)
+    socketClient.on('connect', handleConnect)
+    socketClient.on('disconnect', handleDisconnect)
+
     return () => {
-      socketClient.off("connect", handleConnect)
-      socketClient.off("disconnect", handleDisconnect)
+      socketClient.off('connect', handleConnect)
+      socketClient.off('disconnect', handleDisconnect)
     }
   }, [id])
 
-  return (
-    <PageWrapper>
-      <RoomLobby />
-    </PageWrapper>
-  )
+  return <RoomLobby />
 }
+
+export const RoomPage = () => (
+  <PageWrapper>
+    <WaitUserClick>
+      <RoomPageWrapper />
+    </WaitUserClick>
+  </PageWrapper>
+)

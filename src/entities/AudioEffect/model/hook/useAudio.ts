@@ -1,6 +1,8 @@
-import { useAudioEffectStore } from "../store/AudioEffectStore"
-import { AudioName } from "../types/AudioEffectSchema"
-import { useCallback } from "react"
+import { useCallback } from 'react'
+
+import type { AudioName } from '../types/AudioEffectSchema'
+
+import { useAudioEffectStore } from '../store/AudioEffectStore'
 
 export const useAudio = (audioName: AudioName) => {
   const storePlayFn = useAudioEffectStore((state) => state.play)

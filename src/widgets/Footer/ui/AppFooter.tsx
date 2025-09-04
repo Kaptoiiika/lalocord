@@ -1,15 +1,12 @@
-import styles from "./AppFooter.module.scss"
-import MUILink from "@mui/material/Link/Link"
-import Typography from "@mui/material/Typography"
-import useMediaQuery from '@mui/material/useMediaQuery'
-import { useState } from "react"
+import { useState } from 'react'
 
-type AppFooterProps = {}
+import { Link as MUILink, Typography, useMediaQuery } from '@mui/material'
 
-export const AppFooter = (props: AppFooterProps) => {
-  const {} = props
+import styles from './AppFooter.module.scss'
+
+export const AppFooter = () => {
   const [buildVersionIsDate, setBuildVersion] = useState(false)
-  const isSmallScreen = useMediaQuery('(max-width:385px)');
+  const isSmallScreen = useMediaQuery('(max-width:385px)')
 
   const handleChangeVersion = () => {
     setBuildVersion((prev) => !prev)
@@ -20,9 +17,7 @@ export const AppFooter = (props: AppFooterProps) => {
       <div>
         <Typography variant="h6">Contact</Typography>
         <ul>
-          <MUILink href="mailto:nikita.ozhegov8@mail.ru">
-            nikita.ozhegov8@mail.ru
-          </MUILink>
+          <MUILink href="mailto:nikita.ozhegov8@mail.ru">nikita.ozhegov8@mail.ru</MUILink>
         </ul>
       </div>
       <div onClick={handleChangeVersion}>

@@ -1,9 +1,13 @@
-import { Button, Checkbox, FormControlLabel, Stack } from "@mui/material"
-import { IpcChannels } from "../../main/types/ipcChannels"
-import { createRoot } from "react-dom/client"
-import styles from "./displayMediaSelector.module.scss"
 import { useState } from "react"
-import { localstorageKeys } from "@/shared/const/localstorageKeys"
+import { createRoot } from "react-dom/client"
+
+import { Button, Checkbox, FormControlLabel, Stack } from "@mui/material"
+import { localstorageKeys } from "src/shared/const/localstorageKeys"
+
+import type { IpcChannels } from "../../main/types/ipcChannels"
+
+import styles from "./displayMediaSelector.module.scss"
+
 
 type SourceType = Awaited<
   ReturnType<typeof window.electron.ipcRenderer.invoke<IpcChannels.getMediaSource>>
@@ -41,7 +45,7 @@ export const displayMediaSelector = (): Promise<{
     const main = createRoot(modalContainer)
 
     const accept = (node?: SourceType, allowAudio?: boolean) => {
-      res({ source: node, allowAudio: allowAudio })
+      res({ source: node, allowAudio })
       main.unmount()
     }
     const cancel = () => {

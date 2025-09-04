@@ -1,11 +1,14 @@
-import { Button, Badge, Menu, Stack } from "@mui/material"
-import styles from "./ChatHeader.module.scss"
-import ChatIcon from "@mui/icons-material/Chat"
-import { classNames } from "@/shared/lib/classNames/classNames"
-import { memo, useState } from "react"
-import { useAudioEffectStore } from "@/entities/AudioEffect"
-import { AudioName } from "@/entities/AudioEffect/model/types/AudioEffectSchema"
-import { useChatStore } from "../../model/store/ChatStore"
+import { memo, useState } from 'react'
+
+import ChatIcon from '@mui/icons-material/Chat'
+import { Button, Badge, Menu, Stack } from '@mui/material'
+import { useAudioEffectStore } from 'src/entities/AudioEffect'
+import { AudioName } from 'src/entities/AudioEffect/model/types/AudioEffectSchema'
+import { classNames } from 'src/shared/lib/classNames/classNames'
+
+import { useChatStore } from '../../model/store/ChatStore'
+
+import styles from './ChatHeader.module.scss'
 
 type ChatHeaderProps = {
   handleCollapse: () => void
@@ -44,13 +47,18 @@ export const ChatHeader = memo(function ChatHeader(props: ChatHeaderProps) {
         onContextMenu={handleOpenContextMenu}
       >
         <Button
-          sx={{ borderRadius: 0 }}
+          sx={{
+            borderRadius: 0,
+          }}
           className={styles.headerButton}
           onClick={handleCollapse}
-          aria-label={collapsed ? "Open chat" : "Hide chat"}
+          aria-label={collapsed ? 'Open chat' : 'Hide chat'}
         >
-          <Badge color="secondary" badgeContent={unreadedMessage}>
-            <ChatIcon color={isSilent ? "disabled" : "primary"} />
+          <Badge
+            color="secondary"
+            badgeContent={unreadedMessage}
+          >
+            <ChatIcon color={isSilent ? 'disabled' : 'primary'} />
           </Badge>
         </Button>
       </header>
@@ -62,9 +70,7 @@ export const ChatHeader = memo(function ChatHeader(props: ChatHeaderProps) {
         disablePortal
       >
         <Stack className={styles.contextMenu}>
-          <Button onClick={handleChangeSilentMode}>
-            {isSilent ? "unmute" : "mute"}
-          </Button>
+          <Button onClick={handleChangeSilentMode}>{isSilent ? 'unmute' : 'mute'}</Button>
           <Button onClick={handleClearChat}>Clear chat history</Button>
         </Stack>
       </Menu>

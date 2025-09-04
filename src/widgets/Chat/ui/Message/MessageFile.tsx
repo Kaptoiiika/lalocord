@@ -1,13 +1,15 @@
-import { getActionSeletFileToImagePreview } from "@/features/ImagePreview"
-import { useImagePreviewStore } from "@/features/ImagePreview/model/store/ImagePreviewStore"
-import { Link } from "@mui/material"
-import { useState } from "react"
-import { RTCChatMessage } from "@/entities/RTCClient"
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { readablizeBytes } from "@/shared/lib/utils/Numbers/readablizeBytes/ReadablizeBytes"
+import { useState } from 'react'
+
+import { Link } from '@mui/material'
+import { getActionSeletFileToImagePreview } from 'src/features/ImagePreview'
+import { useImagePreviewStore } from 'src/features/ImagePreview/model/store/ImagePreviewStore'
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+import { readablizeBytes } from 'src/shared/lib/utils/Numbers/readablizeBytes/ReadablizeBytes'
+
+import type { WebRTCChatMessage } from 'src/entities/WebRTC'
 
 type MessageFileProps = {
-  data: RequireOnlyOne<RTCChatMessage, "blob">
+  data: RequireOnlyOne<WebRTCChatMessage, 'blob'>
 }
 
 export const MessageFile = (props: MessageFileProps) => {
@@ -26,7 +28,9 @@ export const MessageFile = (props: MessageFileProps) => {
 
   useMountedEffect(() => {
     const url = URL.createObjectURL(data.blob)
+
     setBlobUrl(url)
+
     return () => {
       URL.revokeObjectURL(url)
     }
@@ -43,8 +47,7 @@ export const MessageFile = (props: MessageFileProps) => {
         target="_blank"
         rel="noreferrer"
       >
-        {data.blobParams?.name || data.blob.type || "unknown file"} -{" "}
-        {readablizeBytes(data.blob.size)}
+        {data.blobParams?.name || data.blob.type || 'unknown file'} - {readablizeBytes(data.blob.size)}
       </Link>
     )
   }
@@ -55,7 +58,10 @@ export const MessageFile = (props: MessageFileProps) => {
       onClick={handleClick}
       alt=""
       src={blobUrl}
-      style={{ width: "100%", objectFit: "contain" }}
+      style={{
+        width: '100%',
+        objectFit: 'contain',
+      }}
     />
   )
 }

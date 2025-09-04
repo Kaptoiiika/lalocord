@@ -1,3 +1,12 @@
+.root {
+  flex-shrink: 0;
+  border-top: var(--box-border);
+
+  @media (max-width: 625px) {
+    border-bottom: var(--box-border);
+  }
+}
+
 .group {
   border-left: var(--box-border);
   height: 100%;

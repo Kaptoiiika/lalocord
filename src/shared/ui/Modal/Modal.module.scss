@@ -1,0 +1,8 @@
+.root {
+  border: var(--box-border);
+  padding: 16px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

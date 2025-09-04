@@ -1,11 +1,12 @@
-import { AppRoutes } from "@/shared/config/routeConfig/routeConfig"
-import { IconButton } from "@mui/material"
-import { Stack } from "@mui/material"
-import HomeIcon from "@mui/icons-material/Home"
-import styles from "./Navbar.module.scss"
-import { ThemeSwitcher } from "@/features/ThemeSwitcher"
-import { Link } from "@/shared/ui/Link/Link"
-// import { UserSettingsModal } from "@/entities/UserSettings"
+import HomeIcon from '@mui/icons-material/Home'
+import { IconButton } from '@mui/material'
+import { Stack } from '@mui/material'
+import { ThemeSwitcher } from 'src/features/ThemeSwitcher'
+import { AppRoutes } from 'src/shared/config/routeConfig/routeConfig'
+import { Link } from 'src/shared/ui/Link/Link'
+
+import styles from './Navbar.module.scss'
+// import { UserSettingsModal } from "src/entities/UserSettings"
 
 // const links = [
 //   {
@@ -15,28 +16,32 @@ import { Link } from "@/shared/ui/Link/Link"
 //   },
 // ]
 
-export const Navbar = () => {
-  return (
-    <nav className={styles.NavbarContainer}>
+export const Navbar = () => (
+  <nav className={styles.NavbarContainer}>
+    <Stack
+      className={styles.stack}
+      justifyContent="space-between"
+      alignItems="center"
+      gap={4}
+    >
       <Stack
-        className={styles.stack}
-        justifyContent="space-between"
         alignItems="center"
-        gap={4}
+        gap={1}
       >
-        <Stack alignItems="center" gap={1}>
-          <Link className={styles.headerLink} to={AppRoutes.MAIN_PAGE}>
-            <IconButton aria-label="home page">
-              <HomeIcon />
-            </IconButton>
-          </Link>
-        </Stack>
-
-        <Stack>
-          {/* <UserSettingsModal /> */}
-          <ThemeSwitcher />
-        </Stack>
+        <Link
+          className={styles.headerLink}
+          to={AppRoutes.MAIN_PAGE}
+        >
+          <IconButton aria-label="home page">
+            <HomeIcon />
+          </IconButton>
+        </Link>
       </Stack>
-    </nav>
-  )
-}
+
+      <Stack>
+        {/* <UserSettingsModal /> */}
+        <ThemeSwitcher />
+      </Stack>
+    </Stack>
+  </nav>
+)

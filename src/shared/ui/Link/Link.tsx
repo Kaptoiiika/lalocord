@@ -1,8 +1,9 @@
-import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
-import { ComponentProps } from "react"
-import { useNavigate } from "react-router-dom"
+import type { ComponentProps } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-type LinkProps = { to: string } & Omit<ComponentProps<"a">, "href">
+import { startViewTransition } from 'src/shared/lib/utils'
+
+type LinkProps = { to: string } & Omit<ComponentProps<'a'>, 'href'>
 
 export const Link = (props: LinkProps) => {
   const { to, ...linkProps } = props
@@ -14,5 +15,11 @@ export const Link = (props: LinkProps) => {
     navigate(to)
   }
 
-  return <a href={to} onClick={handleNavigate} {...linkProps} />
+  return (
+    <a
+      href={to}
+      onClick={handleNavigate}
+      {...linkProps}
+    />
+  )
 }

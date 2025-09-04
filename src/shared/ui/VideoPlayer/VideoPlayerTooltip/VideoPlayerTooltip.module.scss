@@ -8,6 +8,7 @@
 
   &.tooltipTop {
     top: 0;
+
     .shadowTooltip {
       top: 0;
     }
@@ -15,6 +16,7 @@
 
   &.tooltipBottom {
     bottom: 0;
+
     .shadowTooltip {
       bottom: 0;
     }
@@ -26,8 +28,9 @@
   right: 0;
   left: 0;
   z-index: -1;
+
   .shadow {
-    box-shadow: 0em 0em 2em 4em rgba(0, 0, 0, 0.5);
+    box-shadow: 0em 0em 1em 2em rgba(0, 0, 0, 0.24);
   }
 }
 

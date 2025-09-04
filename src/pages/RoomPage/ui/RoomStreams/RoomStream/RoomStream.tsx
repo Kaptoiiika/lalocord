@@ -1,12 +1,14 @@
-import { VideoPlayer } from "@/shared/ui/VideoPlayer/VideoPlayer"
-import { Button, Stack, Tooltip, Typography } from "@mui/material"
-import styles from "./RoomStream.module.scss"
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { memo, useId, useRef, useState } from "react"
-import RemoveIcon from "@mui/icons-material/Remove"
-import { classNames } from "@/shared/lib/classNames/classNames"
-import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
-import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
+import { memo, useId, useRef, useState } from 'react'
+
+import RemoveIcon from '@mui/icons-material/Remove'
+import { Button, Stack, Tooltip, Typography } from '@mui/material'
+import { classNames } from 'src/shared/lib/classNames/classNames'
+import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition'
+import { VideoPlayer } from 'src/shared/ui/VideoPlayer/VideoPlayer'
+
+import styles from './RoomStream.module.scss'
 
 type RoomStreamProps = {
   stream: MediaStream
@@ -44,24 +46,22 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     onPlay,
     onUnHide,
   } = props
-  const componentId = useId().split(":").join("")
+  const componentId = useId().split(':').join('')
   const [autoplay, setAutoplay] = useState(!document.hidden)
   const [played, setPlayed] = useState(false)
   const [hide, setHide] = useState(false)
-  const {
-    handleOpen: handleOpenfullscreen,
-    handleClose: handleClosefullscreen,
-    open: fullScreen,
-  } = useIsOpen()
+  const { handleOpen: handleOpenfullscreen, handleClose: handleClosefullscreen, open: fullScreen } = useIsOpen()
 
   useMountedEffect(() => {
     const fn = () => {
       if (document.hidden) setAutoplay(false)
       else setAutoplay(true)
     }
-    document.addEventListener("visibilitychange", fn)
+
+    document.addEventListener('visibilitychange', fn)
+
     return () => {
-      document.removeEventListener("visibilitychange", fn)
+      document.removeEventListener('visibilitychange', fn)
     }
   })
 
@@ -90,9 +90,11 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   }
 
   const onUnHideRef = useRef(onUnHide)
+
   onUnHideRef.current = onUnHide
   useMountedEffect(() => {
     const getOnUnHideRef = () => onUnHideRef.current
+
     return () => {
       getOnUnHideRef()?.()
     }
@@ -106,7 +108,9 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         viewTransitionName: componentId,
         left: (hideId ?? 0) * 100,
       }}
-      className={classNames(styles.stream, { [styles.hideStream]: isHidden })}
+      className={classNames(styles.stream, {
+        [styles.hideStream]: isHidden,
+      })}
     >
       <VideoPlayer
         played={played}
@@ -130,7 +134,10 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
           <Typography>{title}</Typography>
 
           <Tooltip title="Hide stream">
-            <Button aria-label="Hide stream" onClick={handleHide}>
+            <Button
+              aria-label="Hide stream"
+              onClick={handleHide}
+            >
               <RemoveIcon />
             </Button>
           </Tooltip>
@@ -140,7 +147,10 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
       {isHidden && (
         <div className={styles.unhide}>
           <Tooltip title="Unhide stream">
-            <Button aria-label="Unhide stream" onClick={handleUnHide}>
+            <Button
+              aria-label="Unhide stream"
+              onClick={handleUnHide}
+            >
               <RemoveIcon />
             </Button>
           </Tooltip>

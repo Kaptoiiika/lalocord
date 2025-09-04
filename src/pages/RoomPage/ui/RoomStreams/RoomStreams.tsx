@@ -1,103 +1,81 @@
-import {
-  RTCClient,
-  useRoomRTCStore,
-  RTCClientMediaStream,
-} from "@/entities/RTCClient"
-import { getLocalUser, useUserStore } from "@/entities/User"
-import { StreamViewer } from "@/widgets/StreamViewer/ui/StreamViewer"
-import { memo, useEffect, useState } from "react"
-import {
-  getDisplayMediaStream,
-  getRoomUsers,
-  getWebCamStream,
-} from "../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
-import styles from "./RoomStreams.module.scss"
-import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
-import { RoomStream } from "./RoomStream/RoomStream"
-import { classNames } from "@/shared/lib/classNames/classNames"
-import { useAudioEffectStore } from "@/entities/AudioEffect"
-import { useThrottle } from "@/shared/lib/hooks/useThrottle/useThrottle"
+import { memo, useEffect, useState } from 'react'
+
+import { useAudioEffectStore } from 'src/entities/AudioEffect'
+import { getLocalUser, useLocalUserStore } from 'src/entities/User'
+import { useWebRTCStore } from 'src/entities/WebRTC'
+import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
+import { classNames } from 'src/shared/lib/classNames/classNames'
+import { useThrottle } from 'src/shared/lib/hooks/useThrottle/useThrottle'
+import { StreamViewer } from 'src/widgets/StreamViewer/ui/StreamViewer'
+import { TicTacToeMultiplayer } from 'src/widgets/TicTacToe/ui/TicTacToe'
+
+import type { UserModel } from 'src/entities/User'
+import type { StreamType } from 'src/entities/WebRTC'
+import type { TicTacToeGame } from 'src/widgets/TicTacToe'
+
+import { RoomStream } from './RoomStream/RoomStream'
+
+import styles from './RoomStreams.module.scss'
 
 type UserWithStream = {
-  client: RTCClient
-  clientStream: RTCClientMediaStream
+  user: UserModel
+  stream: MediaStream
+  type: StreamType
 }
 
 export const RoomStreams = memo(function RoomStreams() {
-  const users = useRoomRTCStore(getRoomUsers)
-  const localUser = useUserStore(getLocalUser)
-  const mediaStream = useRoomRTCStore(getDisplayMediaStream)
-  const webCamStream = useRoomRTCStore(getWebCamStream)
-  const streamVolumeList = useAudioEffectStore(
-    (state) => state.usersAuidoSettings
-  )
-  const changeVolumeHandle = useAudioEffectStore(
-    (state) => state.changeUserVolume
-  )
+  const { users, miniGame } = useWebRTCRoomStore()
+  const localUser = useLocalUserStore(getLocalUser)
+  const screenStream = useWebRTCStore((state) => state.streams.screen)
+  const webCamStream = useWebRTCStore((state) => state.streams.webCam)
+  const streamVolumeList = useAudioEffectStore((state) => state.usersAuidoSettings)
+  const changeVolumeHandle = useAudioEffectStore((state) => state.changeUserVolume)
   const [hiddenStream, setHiddenStream] = useState<Set<string>>(new Set())
   const [, update] = useState(0)
 
-  const changeUserStreamVolume = useThrottle(
-    (user: UserWithStream, volume: number) => {
-      user.clientStream.volume = volume
-      changeVolumeHandle(
-        user.client.user.username,
-        user.clientStream.type,
-        volume
-      )
-    },
-    500
-  )
+  const changeUserStreamVolume = useThrottle((user: UserModel, type: StreamType, volume: number) => {
+    changeVolumeHandle(user.username, type, volume)
+  }, 500)
 
   useEffect(() => {
-    const listeners = Object.values(users).map((user) => {
-      const fn = async () => {
-        await startViewTransition()
-        update((prev) => prev + 1)
-      }
-      user.media.on("newstream", fn)
-      return { user, fn }
+    const updateFn = () => {
+      update((prev) => prev + 1)
+    }
+
+    users.forEach((user) => {
+      user.peer.on('onStreamStart', updateFn)
+      user.peer.on('onStreamStop', updateFn)
     })
 
     return () => {
-      listeners.forEach(({ user, fn }) => {
-        user.media.off("newstream", fn)
+      users.forEach((user) => {
+        user.peer.off('onStreamStart', updateFn)
+        user.peer.off('onStreamStop', updateFn)
       })
     }
-  }, [users])
+  }, [update, users])
 
-  // useEffect(() => {
-  //   console.log("mediaStream")
-  //   if (!mediaStream) return
-  //   setHiddenStream((prev) => {
-  //     prev.add(mediaStream.id)
-  //     return new Set(prev)
-  //   })
-
-  //   return () => {
-  //     setHiddenStream((prev) => {
-  //       prev.delete(mediaStream.id)
-  //       return new Set(prev)
-  //     })
-  //   }
-  // }, [mediaStream])
-
-  const streams = Object.values(users).reduce<UserWithStream[]>(
-    (prev, curent) => {
-      curent.media.availableStreamList.forEach((stream) => {
-        prev.push({ client: curent, clientStream: stream })
+  const streams = Object.values(users).reduce<UserWithStream[]>((prev, curent) => {
+    Object.entries(curent.peer.remoteStreams).forEach(([type, stream]) => {
+      if (!stream) return
+      if (type === 'mic') return
+      prev.push({
+        user: curent.user,
+        stream,
+        type: type as StreamType,
       })
-      return prev
-    },
-    []
-  )
+    })
+
+    return prev
+  }, [])
 
   const localStreams = []
-  if (mediaStream)
+
+  if (screenStream)
     localStreams.push({
-      stream: mediaStream,
+      stream: screenStream,
       name: localUser.username,
-      autoplay: false,
+      autoplay: true,
     })
   if (webCamStream)
     localStreams.push({
@@ -115,6 +93,12 @@ export const RoomStreams = memo(function RoomStreams() {
         [styles.RoomStreamsWithHiddenStream]: !!someStreamIsHide,
       })}
     >
+      {miniGame.map((engine) => (
+        <div key={engine.id}>
+          {engine.type === 'TicTacToe' && <TicTacToeMultiplayer game={engine as TicTacToeGame} />}
+        </div>
+      ))}
+
       {localStreams.map(({ stream, name, autoplay }) => (
         <RoomStream
           key={stream.id}
@@ -136,37 +120,31 @@ export const RoomStreams = memo(function RoomStreams() {
         />
       ))}
 
-      {streams.map((user) => (
+      {streams.map(({ stream, user, type }) => (
         <RoomStream
-          key={user.clientStream.stream.id}
-          stream={user.clientStream.stream}
-          title={user.client?.user?.username ?? user.client?.user?.id}
-          hide={hiddenStream.has(user.clientStream.stream.id)}
-          hideId={hiddenStreamIds.findIndex(
-            (id) => id === user.clientStream.stream.id
-          )}
+          key={stream.id}
+          stream={stream}
+          title={user?.username ?? user?.id}
+          hide={hiddenStream.has(stream.id)}
+          hideId={hiddenStreamIds.findIndex((id) => id === stream.id)}
           onHide={() => {
-            hiddenStream.add(user.clientStream.stream.id)
+            hiddenStream.add(stream.id)
             setHiddenStream(new Set(hiddenStream))
           }}
           onUnHide={() => {
-            hiddenStream.delete(user.clientStream.stream.id)
+            hiddenStream.delete(stream.id)
             setHiddenStream(new Set(hiddenStream))
           }}
           onPlay={() => {
-            user.client.channel.sendData("resumeStream", user.clientStream.type)
+            // user.client.channel.sendData('resumeStream', user.clientStream.type)
           }}
           onPause={() => {
-            user.client.channel.sendData("pauseStream", user.clientStream.type)
+            // user.client.channel.sendData('pauseStream', user.clientStream.type)
           }}
           onVolumeChange={(value) => {
             changeUserStreamVolume(user, value)
           }}
-          volume={
-            streamVolumeList[user.client.user.username]?.[
-              user.clientStream.type
-            ] ?? user.clientStream.volume
-          }
+          volume={streamVolumeList[user.username]?.[type] ?? 0}
           autoplay
         />
       ))}

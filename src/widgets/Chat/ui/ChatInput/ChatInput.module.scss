@@ -1,21 +1,23 @@
-.inputWrapper {
-  width: 100%;
-}
-.input {
-  position: absolute;
-  background-color: rgb(var(--bg-primary-color));
-  width: 100%;
-  bottom: 0;
-}
-
 .form {
   position: relative;
-}
 
-.selectInputFile {
-  display: flex;
+  .inputWrapper {
+    width: 100%;
+  }
 
-  &:hover {
-    cursor: pointer;
+  .input {
+    position: absolute;
+    background-color: rgb(var(--bg-primary-color));
+    width: 100%;
+    bottom: 0;
+  }
+
+
+  .selectInputFile {
+    display: flex;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 }

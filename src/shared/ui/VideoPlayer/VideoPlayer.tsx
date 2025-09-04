@@ -1,22 +1,18 @@
-import { classNames } from "@/shared/lib/classNames/classNames"
-import {
-  memo,
-  MouseEvent,
-  PropsWithChildren,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
-import styles from "./VideoPlayer.module.scss"
-import { VideoPlayerDebugInfo } from "./VideoPlayerDebugInfo/VideoPlayerDebugInfo"
-import { useIsOpen } from "@/shared/lib/hooks/useIsOpen/useIsOpen"
-import { VideoPlayerActions } from "./VideoPlayerActions/VideoPlayerActions"
-import { VideoPlayerTooltip } from "./VideoPlayerTooltip/VideoPlayerTooltip"
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { clamp } from "@/shared/lib/utils/Numbers"
-import { ErrorBoundary } from "../ErrorBoundary"
-import { useDebugMode } from "@/shared/lib/hooks/useDebugMode/useDebugMode"
+import type { MouseEvent, PropsWithChildren } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
+
+import { classNames } from 'src/shared/lib/classNames/classNames'
+import { useDebugMode } from 'src/shared/lib/hooks/useDebugMode/useDebugMode'
+import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+import { clamp } from 'src/shared/lib/utils/Numbers'
+
+import { VideoPlayerActions } from './VideoPlayerActions/VideoPlayerActions'
+import { VideoPlayerDebugInfo } from './VideoPlayerDebugInfo/VideoPlayerDebugInfo'
+import { VideoPlayerTooltip } from './VideoPlayerTooltip/VideoPlayerTooltip'
+import { ErrorBoundary } from '../ErrorBoundary'
+
+import styles from './VideoPlayer.module.scss'
 
 type VideoPlayerProps = {
   stream?: MediaStream | null
@@ -57,7 +53,9 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
   const [volume, setVolume] = useState(clamp(initVolume, 0, 1))
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<HTMLDivElement | null>(null)
-  const { handleClose, handleOpen, open } = useIsOpen({ time: 3000 })
+  const { handleClose, handleOpen, open } = useIsOpen({
+    time: 3000,
+  })
 
   useEffect(() => {
     if (played) videoRef.current?.play()
@@ -181,7 +179,10 @@ export const VideoPlayer = memo(function VideoPlayer(props: VideoPlayerProps) {
         {debugMode && <VideoPlayerDebugInfo stream={stream} />}
         {controls && (
           <>
-            <VideoPlayerTooltip open={!toolsIsClosed} top>
+            <VideoPlayerTooltip
+              open={!toolsIsClosed}
+              top
+            >
               {children}
             </VideoPlayerTooltip>
             <VideoPlayerActions

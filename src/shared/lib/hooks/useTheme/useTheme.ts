@@ -1,11 +1,8 @@
-import { useContext } from "react"
-// eslint-disable-next-line boundaries/element-types
-import {
-  ThemeContext,
-  ThemeName,
-} from "@/app/providers/ThemeProvider/lib/ThemeContext"
-import { localstorageKeys } from "@/shared/const/localstorageKeys"
-import { Theme } from "@mui/material"
+import { useContext } from 'react'
+
+import type { Theme } from '@mui/material'
+import { ThemeContext, ThemeName } from 'src/app/providers/ThemeProvider/lib/ThemeContext'
+import { localstorageKeys } from 'src/shared/const/localstorageKeys'
 
 interface UseThemeResult {
   toggleTheme: () => void
@@ -18,6 +15,7 @@ export function useTheme(): UseThemeResult {
 
   const toggleTheme = () => {
     const newTheme = theme === ThemeName.dark ? ThemeName.light : ThemeName.dark
+
     setTheme(newTheme)
     localStorage.setItem(localstorageKeys.THEME, newTheme)
   }

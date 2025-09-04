@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react"
-import styles from "./VideoPlayerDebugInfo.module.scss"
+import { useEffect, useState } from 'react'
+
+import styles from './VideoPlayerDebugInfo.module.scss'
 
 type VideoPlayerDebugInfoProps = {
   stream: MediaStream | null
@@ -8,6 +9,7 @@ type VideoPlayerDebugInfoProps = {
 export const VideoPlayerDebugInfo = (props: VideoPlayerDebugInfoProps) => {
   const { stream } = props
   const [debugTime, setTime] = useState(0)
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTime((prev) => prev + 1)
@@ -23,6 +25,7 @@ export const VideoPlayerDebugInfo = (props: VideoPlayerDebugInfoProps) => {
       <pre>
         {stream?.getVideoTracks()?.map((track, index) => {
           const settings = track.getSettings()
+
           return (
             <h6 key={`${debugTime}-${index}`}>
               video:{settings.groupId}
@@ -38,6 +41,7 @@ export const VideoPlayerDebugInfo = (props: VideoPlayerDebugInfoProps) => {
       <pre>
         {stream?.getAudioTracks()?.map((track, index) => {
           const settings = track.getSettings()
+
           return (
             <h6 key={`${debugTime}-${index}`}>
               audio:{settings.groupId}

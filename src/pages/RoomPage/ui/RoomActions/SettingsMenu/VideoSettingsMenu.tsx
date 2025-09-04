@@ -1,37 +1,19 @@
-import { MouseEvent, useState } from "react"
-import {
-  useRoomRTCStore,
-  bitrateToShortValue,
-  bitrateValueText,
-} from "@/entities/RTCClient"
-import {
-  getUserStreamSettings,
-  getEncodingSettings,
-  getActionSetEncodingSettings,
-} from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
-import { Menu, Stack, Typography, Slider } from "@mui/material"
-import IconButton from "@mui/material/IconButton/IconButton"
-import Tooltip from "@mui/material/Tooltip"
-import styles from "./VideoSettingsMenu.module.scss"
-import SettingsIcon from "@mui/icons-material/Settings"
-import { InlineSelectPrimitive } from "@/shared/ui/InlineSelect/InlineSelectPrimitive"
+import type { MouseEvent } from 'react'
+import { useState } from 'react'
 
-type VideoSettingsMenuProps = {}
+import SettingsIcon from '@mui/icons-material/Settings'
+import { Menu, Stack, Typography, Slider, IconButton, Tooltip } from '@mui/material'
+import { useWebRTCStore } from 'src/entities/WebRTC'
+import { bitrateToShortValue, bitrateValueText } from 'src/shared/lib/utils/Numbers'
+import { InlineSelectPrimitive } from 'src/shared/ui/InlineSelect/InlineSelectPrimitive'
 
-export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
-  const {} = props
-  const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
-  // const experementalVideo = useRoomRTCStore(
-  //   (state) => state.experementalEncdoing
-  // )
-  // const setExperementalVideo = useRoomRTCStore(
-  //   (state) => state.setExperementalEncdoing
-  // )
-  const encodingSettings = useRoomRTCStore(getEncodingSettings)
-  const setEncodingSettings = useRoomRTCStore(getActionSetEncodingSettings)
-  const setStreamingSettings = useRoomRTCStore(
-    (state) => state.setStreamSettings
-  )
+import styles from './VideoSettingsMenu.module.scss'
+
+export const VideoSettingsMenu = () => {
+  const bitrate = useWebRTCStore((state) => state.bitrate)
+  const setBitrate = useWebRTCStore((state) => state.setBitrate)
+  const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
+  const setStreamConstraints = useWebRTCStore((state) => state.setStreamConstraints)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleOpen = (event: MouseEvent<HTMLButtonElement>) => {
@@ -41,55 +23,56 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
   const handleClose = () => {
     setAnchorEl(null)
   }
-  const handleBitrateChange = (
-    event: React.SyntheticEvent | Event,
-    newValue: number | Array<number>
-  ) => {
+  const handleBitrateChange = (event: React.SyntheticEvent | Event, newValue: number | Array<number>) => {
     if (Array.isArray(newValue)) return
-    const settings = encodingSettings
-    settings.maxBitrate = newValue * 1024 * 1024
-    setEncodingSettings(settings)
+    setBitrate(newValue * 1024 * 1024)
   }
 
   const handleChangeFrameRate = (value: string) => {
     const numValue = Number(value)
+
     if (!numValue) return
-    setStreamingSettings({
-      video: { ...userStreamSettings.video, frameRate: numValue },
-      audio: userStreamSettings.audio,
+    setStreamConstraints({
+      video: {
+        ...streamConstraints.video,
+        frameRate: numValue,
+      },
+      audio: streamConstraints.audio,
     })
   }
 
   const handleChangeResolution = (value: string) => {
     const numValue = Number(value)
+
     if (!numValue) return
-    setStreamingSettings({
-      video: { ...userStreamSettings.video, height: numValue },
-      audio: userStreamSettings.audio,
+    setStreamConstraints({
+      video: {
+        ...streamConstraints.video,
+        height: numValue,
+      },
+      audio: streamConstraints.audio,
     })
   }
 
-  // const handleSetExpVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setExperementalVideo(e.currentTarget.checked)
-  // }
+  const currentFrameRate = streamConstraints.video.frameRate
 
-  const currentFrameRate = userStreamSettings.video.frameRate
+  const frameRateList = ['5', '30', '60']
+  const isCustomFrameRate = frameRateList.includes(String(currentFrameRate)) ? '90' : `${currentFrameRate}`
 
-  const frameRateList = ["5", "30", "60"]
-  const isCustomFrameRate = frameRateList.includes(String(currentFrameRate))
-    ? "90"
-    : `${currentFrameRate}`
-
-  const currentResolution = userStreamSettings.video.height
-  const resolutionList = ["144", "720", "1080"]
-  const isCustomResolution = resolutionList.includes(String(currentResolution))
-    ? "1440"
-    : `${currentResolution}`
+  const currentResolution = streamConstraints.video?.height
+  const resolutionList = ['144', '720', '1080']
+  const isCustomResolution = resolutionList.includes(String(currentResolution)) ? '1440' : `${currentResolution}`
 
   return (
     <>
-      <Tooltip title="Settings" arrow>
-        <IconButton aria-label={"Settings"} onClick={handleOpen}>
+      <Tooltip
+        title="Settings"
+        arrow
+      >
+        <IconButton
+          aria-label="Settings"
+          onClick={handleOpen}
+        >
           <SettingsIcon />
         </IconButton>
       </Tooltip>
@@ -98,15 +81,18 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center',
         }}
         transformOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
+          vertical: 'bottom',
+          horizontal: 'center',
         }}
       >
-        <Stack gap={1} className={styles.Settingmenu}>
+        <Stack
+          gap={1}
+          className={styles.Settingmenu}
+        >
           <InlineSelectPrimitive
             title={`Frame Rate ${currentFrameRate}`}
             value={`${currentFrameRate}`}
@@ -119,7 +105,7 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
           <InlineSelectPrimitive
             title={`Resolution ${currentResolution}p`}
             value={`${currentResolution}`}
-            list={["144", "720", "1080"]}
+            list={['144', '720', '1080']}
             onSelect={handleChangeResolution}
             allowCustomValue
             customValue={isCustomResolution}
@@ -128,15 +114,10 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
 
           <div className={styles.slider}>
             <Typography className={styles.sliderLabel}>
-              Max bitrate:{" "}
-              <span>
-                {bitrateToShortValue(encodingSettings.maxBitrate || 0)} Mb/s
-              </span>
+              Max bitrate: <span>{bitrateToShortValue(bitrate || 0)} Mb/s</span>
             </Typography>
             <Slider
-              defaultValue={bitrateToShortValue(
-                encodingSettings.maxBitrate || 0
-              )}
+              defaultValue={bitrateToShortValue(bitrate || 0)}
               onChangeCommitted={handleBitrateChange}
               aria-label="bitrate"
               valueLabelDisplay="auto"
@@ -147,16 +128,6 @@ export const VideoSettingsMenu = (props: VideoSettingsMenuProps) => {
               max={50}
             />
           </div>
-          {/* <FormControlLabel
-            control={
-              <Switch
-                color="primary"
-                checked={!!experementalVideo}
-                onChange={handleSetExpVideo}
-              />
-            }
-            label="experemental Encoding"
-          /> */}
         </Stack>
       </Menu>
     </>

@@ -1,4 +1,5 @@
-import { MouseEvent, useState } from "react"
+import type { MouseEvent } from 'react'
+import { useState } from 'react'
 
 export const usePopup = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -12,5 +13,10 @@ export const usePopup = () => {
     setAnchorEl(null)
   }
 
-  return { anchorEl, open, handleClick, handleClose }
+  return {
+    anchorEl,
+    open,
+    handleClick,
+    handleClose,
+  }
 }

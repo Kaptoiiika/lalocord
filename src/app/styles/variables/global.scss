@@ -1,12 +1,11 @@
 :root {
   --header-height: 44px;
-  --navbar-width: 50px;
+  --navbar-size: 40px;
   --footer-height: 60px;
   --chat-width: 300px;
 
   --box-border-width: 1px;
 
-  @media (max-width: 625px) {
-    --chat-width: 100%;
-  }
+  --mobile-width: 625px;
+
 }

@@ -1,30 +1,28 @@
-import { UserConfig } from "vite"
-import react from "@vitejs/plugin-react"
-import svgr from "vite-plugin-svgr"
-import { buildDefinePlugins } from "./config/build/plugins/buildDefinePlugins"
-import { getEnv } from "./config/build/utils/getEnv"
+import { resolve } from 'path'
 
-export default function defineConfig(): UserConfig {
-  const env = getEnv(__dirname)
+import react from '@vitejs/plugin-react'
+import { defineConfig, loadEnv } from 'vite'
+import eslint from 'vite-plugin-eslint'
+import svgr from 'vite-plugin-svgr'
+import viteTsconfigPaths from 'vite-tsconfig-paths'
 
-  return {
-    publicDir: env.paths.public,
+export default ({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+
+  return defineConfig({
+    plugins: [react(), eslint(), viteTsconfigPaths(), svgr()],
     server: {
-      port: env.port,
+      port: 3000,
     },
     resolve: {
-      alias: { "@": env.paths.src },
-    },
-    build: {
-      sourcemap: "hidden",
-      outDir: env.paths.build,
-      rollupOptions: {
-        input: {
-          app: env.paths.html,
-        },
+      alias: {
+        '@': resolve(__dirname, './src'),
       },
     },
-    plugins: [react(), svgr({ exportAsDefault: true })],
-    define: buildDefinePlugins({ ...env, isElectron: false }),
-  }
+    define: {
+      __BUILD_VERSION__: JSON.stringify(process.env.npm_package_version),
+      __BUILD_DATE_VERSION__: JSON.stringify(new Date().toLocaleDateString()),
+    },
+    base: env.PUBLIC_URL,
+  })
 }

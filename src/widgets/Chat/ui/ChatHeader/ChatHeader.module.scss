@@ -8,15 +8,18 @@ $animationTime: 0.3s;
   width: $chatWidth;
   min-width: 64px;
   height: var(--header-height);
+  border-bottom: var(--box-border);
+
+  @media (max-width: 625px) {
+    width: 100%;
+  }
 
   &.collapsed {
     right: 0;
     width: 64px;
     height: calc(var(--header-height) - var(--box-border-width));
 
-    .headerButton {
-      border-bottom: none;
-    }
+    border-bottom: none;
 
     @media (max-width: 625px) {
       width: 100%;
@@ -25,11 +28,10 @@ $animationTime: 0.3s;
 }
 
 .headerButton {
-  height: 100%;
+  height: var(--header-height);
   width: 100%;
   border-radius: 0;
   border-left: var(--box-border);
-  border-bottom: var(--box-border);
 
   @media (max-width: 625px) {
     border-left: none;

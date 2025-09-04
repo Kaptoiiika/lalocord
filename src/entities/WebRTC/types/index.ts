@@ -1,0 +1,1 @@
+export type StreamType = 'screen' | 'webCam' | 'mic'

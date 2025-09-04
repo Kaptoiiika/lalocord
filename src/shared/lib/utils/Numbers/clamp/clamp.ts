@@ -1,5 +1,6 @@
 export const clamp = (value: number, min = -Infinity, max = Infinity) => {
   const minIsRealMin = min <= max
+
   if (!minIsRealMin) {
     return Math.max(max, Math.min(min, value))
   }
