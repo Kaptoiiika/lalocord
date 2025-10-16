@@ -5,7 +5,6 @@ import { RoomList } from 'src/entities/Room'
 import { RoomCreateButton } from 'src/entities/Room/ui/RoomCreateModal.tsx/RoomCreateButton'
 import { useLocalUserStore } from 'src/entities/User'
 import { AppRoutes } from 'src/shared/config'
-import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { AppFooter } from 'src/widgets/Footer'
 import { PageWrapper } from 'src/widgets/Page'
 
@@ -78,7 +77,7 @@ export const MainPage = () => {
           >
             Tic Tac Toe
           </MuiLink>
-          {!__IS_ELECTRON__ && (
+          {/* {!__IS_ELECTRON__ && (
             <MuiLink
               href="https://github.com/Kaptoiiika/lalocord/releases/latest"
               target="_blank"
@@ -86,7 +85,7 @@ export const MainPage = () => {
             >
               Download windows app
             </MuiLink>
-          )}
+          )} */}
         </Stack>
       </Stack>
 
