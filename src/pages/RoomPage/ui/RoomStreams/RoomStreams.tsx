@@ -33,8 +33,8 @@ export const RoomStreams = memo(function RoomStreams() {
   const [hiddenStream, setHiddenStream] = useState<Set<string>>(new Set())
   const [, update] = useState(0)
 
-  const changeUserStreamVolume = useThrottle((user: UserModel, type: StreamType, volume: number) => {
-    changeVolumeHandle(user.username, type, volume)
+  const changeUserStreamVolume = useThrottle((user: UserModel, volume: number) => {
+    changeVolumeHandle(user.username, 'screen', volume)
   }, 500)
 
   useEffect(() => {
