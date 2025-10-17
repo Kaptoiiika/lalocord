@@ -1,3 +1,4 @@
+import { logger } from 'src/shared/lib/logger/Logger'
 import { Emitter } from 'src/shared/lib/utils'
 
 import type { WebRTCClient } from 'src/entities/WebRTC'
@@ -71,7 +72,7 @@ export class GameEngine extends Emitter<GameEngineEvents> {
   }
 
   private onEngineClose() {
-    if (this.isClosed) return console.log(`Engine ${this.id} is already closed`)
+    if (this.isClosed) return logger(`Engine ${this.id} is already closed`)
 
     Object.entries(this.subscribedEvents).forEach(([event, callback]) => {
       this.peerChat.removeEventListener(event, callback)
@@ -90,11 +91,11 @@ export class GameEngine extends Emitter<GameEngineEvents> {
   }
 
   onMessage(payload: unknown) {
-    console.log(payload)
+    logger('onMessage', payload)
   }
 
   sendMessage(payload: unknown) {
-    console.log('sendMessage', payload)
+    logger('sendMessage', payload)
     try {
       this.peerChat.send(JSON.stringify({ id: this.id, type: 'message', payload }))
     } catch (error) {

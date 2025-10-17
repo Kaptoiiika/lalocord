@@ -1,3 +1,5 @@
+import { logger } from "src/shared/lib/logger/Logger"
+
 type MessageCodecConsturcorParams = {
   headerName: string
   headerSize?: number
@@ -33,7 +35,7 @@ export class MessageCodec implements Required<MessageCodecConsturcorParams> {
     this.chunkSize = Math.max(this.headerSize, value - this.headerSize)
     this.maxChunkSize = value
 
-    console.log(this.chunkSize, this.maxChunkSize, this.headerSize)
+    logger('changeChunkSize', this.chunkSize, this.maxChunkSize, this.headerSize)
   }
 
   createNewId() {
