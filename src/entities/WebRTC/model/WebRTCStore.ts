@@ -6,11 +6,13 @@ import type { StateCreator } from 'zustand'
 
 import { getStreamSettingsfromLocalStorage, saveStreamConstraintsToLocalStorage } from '../utils/streamConstraints'
 import type { StreamType } from '../types'
+import { createMediaStream } from '../utils'
 
 type WebRTCStore = {
   streams: Record<StreamType, MediaStream | null>
   createStream: (type: StreamType) => Promise<void>
   stopStream: (type: StreamType) => void
+  restartStream: (type: StreamType) => void
 
   streamConstraints: ObjectStreamConstraints
   setStreamConstraints: (streamConstraints: ObjectStreamConstraints) => void
@@ -50,14 +52,12 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
 
   async createStream(type) {
     const streamConstraints = get().streamConstraints
-    let stream: MediaStream | null = null
+    const stream = await createMediaStream(type, streamConstraints)
+    const currentStream = get().streams[type]
 
-    if (type === 'screen') {
-      stream = await navigator.mediaDevices.getDisplayMedia(streamConstraints)
-    } else if (type === 'webCam') {
-      stream = await navigator.mediaDevices.getUserMedia({ video: streamConstraints.video })
-    } else if (type === 'mic') {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: streamConstraints.audio })
+    if (currentStream) {
+      get().restartStream(type)
+      return
     }
 
     stream?.getTracks().forEach((track) => {
@@ -65,7 +65,7 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
         if (type === 'mic') {
           track.contentHint = 'speech'
         } else if (type === 'screen') {
-          track.contentHint = 'motion'
+          // track.contentHint = 'detail'
         } else if (type === 'webCam') {
           track.contentHint = 'motion'
         }
@@ -81,6 +81,23 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
       }
     })
 
+    if (stream) {
+      set((state) => ({
+        streams: { ...state.streams, [type]: stream },
+      }))
+    }
+  },
+
+  async restartStream(type) {
+    const currentStream = get().streams[type]
+
+    currentStream?.getTracks().forEach((track) => {
+      track.onended = null
+      track.stop()
+    })
+
+    const streamConstraints = get().streamConstraints
+    const stream = await createMediaStream(type, streamConstraints)
     if (stream) {
       set((state) => ({
         streams: { ...state.streams, [type]: stream },
@@ -104,17 +121,17 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
     saveStreamConstraintsToLocalStorage(streamConstraints)
     const currentStreamConstraints = get().streamConstraints
     const currentStreams = get().streams
-    const createStream = get().createStream
+    const restartStream = get().restartStream
     set((state) => ({
       ...state,
       streamConstraints,
     }))
 
     if (streamConstraints.video.deviceId !== currentStreamConstraints.video.deviceId && currentStreams.webCam) {
-      createStream('webCam')
+      restartStream('webCam')
     }
-    if (streamConstraints.audio.deviceId !== currentStreamConstraints.audio.deviceId && currentStreams.mic) {
-      createStream('mic')
+    if (currentStreams.mic) {
+      restartStream('mic')
     }
 
     Object.values(currentStreams).forEach((stream) => {

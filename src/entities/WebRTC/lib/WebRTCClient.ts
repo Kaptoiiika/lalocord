@@ -9,7 +9,14 @@ import type { GameType } from 'src/entities/Game'
 import { useWebRTCStore } from '../model/WebRTCStore'
 import { MessageCodec } from './Codec/MessageCodec'
 import type { StreamType } from '../types'
-import { createBlackVideoTrack, createSilentAudioTrack, getIceServers, pauseSender, resumeSender } from '../utils'
+import {
+  changeVideoCodecs,
+  createBlackVideoTrack,
+  createSilentAudioTrack,
+  getIceServers,
+  pauseSender,
+  resumeSender,
+} from '../utils'
 
 type WebRTCClientConfig = { id: string }
 
@@ -107,6 +114,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       webCam: this.peer.addTrack(webCamVideoTrack, webCamStream),
       mic: this.peer.addTrack(micAudioTrack, micStream),
     }
+
     if (!storeStreams?.screen) {
       pauseSender(this.senders.screenVideo)
       pauseSender(this.senders.screenAudio)
@@ -177,6 +185,9 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   }
 
   async createOffer(): Promise<RTCSessionDescriptionInit> {
+    this.peer.getTransceivers().forEach((tr) => {
+      changeVideoCodecs(tr, 'H264')
+    })
     const offer = await this.peer.createOffer()
     await this.peer.setLocalDescription(offer)
     this.sendMessageToSocket('new_offer', { offer })

@@ -3,7 +3,7 @@ export const preferCodec = (codecs: RTCRtpCodec[] = [], mimeType: string) => {
   const sortedCodecs: RTCRtpCodec[] = []
 
   codecs.forEach((codec) => {
-    if (codec.mimeType === mimeType) {
+    if (codec.mimeType.includes(mimeType)) {
       sortedCodecs.push(codec)
     } else {
       otherCodecs.push(codec)

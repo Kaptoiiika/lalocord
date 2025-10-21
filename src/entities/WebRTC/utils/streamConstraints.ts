@@ -9,12 +9,14 @@ export const defaultStreamConstraints: ObjectStreamConstraints = {
   audio: {
     noiseSuppression: true,
     echoCancellation: true,
+    channelCount: {
+      ideal: 2,
+    },
     autoGainControl: false,
-    channelCount: { ideal: 2 },
   },
   video: {
     frameRate: 30,
-    height: 720,
+    height: 1080,
     displaySurface: 'monitor',
   },
 } as const

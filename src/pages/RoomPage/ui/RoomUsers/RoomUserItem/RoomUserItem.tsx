@@ -38,8 +38,9 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   const userVolume = audioUserSettings[user.user.username]?.mic ?? 1
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
-  const audioRef = useRef<HTMLAudioElement | null>(new Audio())
   const username = user.user.username ?? user.id
+  const audioRef = useRef<HTMLAudioElement>(new Audio())
+  const [gainNode, setGainNode] = useState<GainNode>()
   const [, update] = useState(0)
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -78,17 +79,29 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   }, [user.peer])
 
   useEffect(() => {
-    if (microphoneStream && audioRef.current) {
-      audioRef.current.srcObject = microphoneStream
-      audioRef.current.play()
+    if (!microphoneStream) return
+    const context = new AudioContext()
+    const source = context.createMediaStreamSource(microphoneStream)
+    const gainNode = context.createGain()
+    source.connect(gainNode)
+    gainNode.connect(context.destination)
+
+    setGainNode(gainNode)
+    context.resume()
+
+    audioRef.current.srcObject = microphoneStream
+
+    return () => {
+      setGainNode(undefined)
+      context.close()
     }
   }, [microphoneStream])
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = userVolume
+    if (gainNode) {
+      gainNode.gain.value = userVolume
     }
-  }, [userVolume])
+  }, [userVolume, gainNode])
 
   const handleChangeVolume = (event: Event, value: number | number[]) => {
     if (typeof value === 'number') {
@@ -119,9 +132,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
             status={status}
             size="small"
           />
-          {!!audioRef.current && !!microphoneStream && microphoneStream.active && (
-            <VolumeMeter stream={microphoneStream} />
-          )}
+          {!!microphoneStream && microphoneStream.active && <VolumeMeter stream={microphoneStream} />}
         </IconButton>
       </Tooltip>
       <Popover
@@ -152,7 +163,7 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
               onChange={handleChangeVolume}
               step={0.01}
               min={0}
-              max={1}
+              max={3}
             />
           </Stack>
         </UserCard>
