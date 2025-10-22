@@ -8,6 +8,7 @@ import type { GameType } from 'src/entities/Game'
 
 import { useWebRTCStore } from '../model/WebRTCStore'
 import { MessageCodec } from './Codec/MessageCodec'
+import { DataChannel } from './DataChannel'
 import type { StreamType } from '../types'
 import {
   changeVideoCodecs,
@@ -79,10 +80,10 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     webCam: null,
     mic: null,
   }
-  private channelInfo: RTCDataChannel
-  private channelChat: RTCDataChannel
-  private channelFile: RTCDataChannel
-  channelMiniGame: RTCDataChannel
+  private channelInfo: DataChannel
+  private channelChat: DataChannel
+  private channelFile: DataChannel
+  channelMiniGame: DataChannel
 
   remoteStreams: Partial<Record<StreamType, MediaStream | null>> = {}
   senders: {
@@ -129,13 +130,14 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     this.peer.onicecandidate = this.onIceCandidate.bind(this)
     this.peer.ontrack = this.onTrack.bind(this)
 
-    this.channelChat = this.peer.createDataChannel('chat', {
+    this.channelChat = new DataChannel(this.peer, 'chat', {
       id: 0,
       protocol: 'json',
       negotiated: true,
     })
-    this.channelChat.onmessage = this.onChatMessage.bind(this)
-    this.channelFile = this.peer.createDataChannel('file', {
+    this.channelChat.onMessage = this.onChatMessage.bind(this)
+
+    this.channelFile = new DataChannel(this.peer, 'file', {
       id: 1,
       protocol: 'arrayBuffer',
       negotiated: true,
@@ -145,22 +147,22 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       headerName: 'lalohead',
       maxChunkSize: 250000,
     })
-    this.channelFile.binaryType = 'arraybuffer'
-    this.channelFile.bufferedAmountLowThreshold = 1024 * 64 - 1
-    this.channelFile.onopen = () => {
+    this.channelFile.channel.binaryType = 'arraybuffer'
+    this.channelFile.channel.bufferedAmountLowThreshold = 1024 * 64 - 1
+    this.channelFile.onOpen = () => {
       if (this.peer.sctp?.maxMessageSize) {
-        this.channelFile.bufferedAmountLowThreshold = this.peer.sctp.maxMessageSize
+        this.channelFile.channel.bufferedAmountLowThreshold = this.peer.sctp.maxMessageSize
       }
     }
-    this.channelFile.onmessage = this.onFileMessage.bind(this)
+    this.channelFile.onMessage = this.onFileMessage.bind(this)
 
-    this.channelInfo = this.peer.createDataChannel('info', {
+    this.channelInfo = new DataChannel(this.peer, 'info', {
       id: 2,
       protocol: 'json',
       negotiated: true,
     })
-    this.channelInfo.onmessage = this.onInfoMessage.bind(this)
-    this.channelInfo.onopen = () => {
+    this.channelInfo.onMessage = this.onInfoMessage.bind(this)
+    this.channelInfo.onOpen = () => {
       this.setVideoBitrate(storeBitrate)
       if (storeStreams?.screen) {
         resumeSender(this.senders.screenVideo)
@@ -176,12 +178,12 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
         this.sendMessageToPeer('stream_start', 'mic')
       }
     }
-    this.channelMiniGame = this.peer.createDataChannel('miniGame', {
+    this.channelMiniGame = new DataChannel(this.peer, 'miniGame', {
       id: 3,
       protocol: 'json',
       negotiated: true,
     })
-    this.channelMiniGame.onmessage = this.onMiniGameMessage.bind(this)
+    this.channelMiniGame.onMessage = this.onMiniGameMessage.bind(this)
   }
 
   async createOffer(): Promise<RTCSessionDescriptionInit> {
@@ -277,11 +279,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   }
 
   private sendMessageToPeer(event: EventMessageToPeer, message: unknown) {
-    try {
-      this.channelInfo.send(JSON.stringify({ event, message }))
-    } catch (error) {
-      console.log('error', error)
-    }
+    this.channelInfo.send(JSON.stringify({ event, message }))
   }
 
   private onInfoMessage(event: MessageEvent) {
@@ -308,39 +306,27 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   }
 
   sendMiniGameMessage(message: unknown) {
-    try {
-      this.channelMiniGame.send(JSON.stringify(message))
-    } catch (error) {
-      console.log('error', error)
-    }
+    this.channelMiniGame.send(JSON.stringify(message))
   }
 
   sendMiniGameRequsest(message: WebRTCMiniGameMessage) {
-    try {
-      this.channelInfo.send(JSON.stringify({ event: 'miniGameRequsest', message }))
-    } catch (error) {
-      console.log('error', error)
-    }
+    this.channelInfo.send(JSON.stringify({ event: 'miniGameRequsest', message }))
   }
 
   sendMessageToChat(message: string) {
-    try {
-      this.channelChat.send(JSON.stringify({ message, type: 'text' }))
-    } catch (error) {
-      console.log('error', error)
-    }
+    this.channelChat.send(JSON.stringify({ message, type: 'text' }))
   }
+
   private sendToFileChat(data: ArrayBuffer, params: FileHeader, startWith: number = 0) {
     const dataid = params.id
     let chunknumber = startWith
 
     while (params.length > chunknumber * this.codec.chunkSize) {
-      if (this.channelFile.bufferedAmount > this.channelFile.bufferedAmountLowThreshold) {
-        this.channelFile.onbufferedamountlow = () => {
-          this.channelFile.onbufferedamountlow = null
+      if (this.channelFile.channel.bufferedAmount > this.channelFile.channel.bufferedAmountLowThreshold) {
+        this.channelFile.channel.onbufferedamountlow = () => {
+          this.channelFile.channel.onbufferedamountlow = null
           this.sendToFileChat(data, params, chunknumber)
         }
-
         return
       }
       const ChunkParams: ChunkFileHeader = {
@@ -463,6 +449,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       const { message, type } = JSON.parse(event.data)
 
       if (type === 'text') {
+        console.log(this)
         return this.emit('onChatMessage', message)
       }
     } catch (error) {

@@ -46,7 +46,7 @@ export class GameEngine extends Emitter<GameEngineEvents> {
     super()
     this.id = game.id
     this.type = game.type
-    this.peerChat = game.peer.channelMiniGame
+    this.peerChat = game.peer.channelMiniGame.channel
 
     const bindedOnChanelMessage = this.onChanelMessage.bind(this)
     this.subscribedEvents['message'] = bindedOnChanelMessage
