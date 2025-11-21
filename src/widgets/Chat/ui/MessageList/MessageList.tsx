@@ -29,7 +29,7 @@ const MessageItemComponent = (props: MessageItemProps) => {
     )
   }
 
-  if (prevMessage?.user === message.user) {
+  if (prevMessage?.user.id === message.user.id) {
     return (
       <li
         className={classNames(styles.message, styles.messageGroup)}

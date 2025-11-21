@@ -50,6 +50,7 @@ export type WebRTCTransmissionMessage = Pick<WebRTCChatMessage, 'id' | 'isSystem
   transmission: {
     length: number
     loaded: number
+    isSender: boolean
   }
 }
 
@@ -344,6 +345,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       this.emit('onChatMessageLoadFile', {
         id: dataid.join(''),
         transmission: {
+          isSender: true,
           length: params.length,
           loaded: chunknumber * this.codec.chunkSize,
         },
@@ -408,6 +410,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
           transmission: {
             length: params.length,
             loaded: this.codec.chunkSize * chunk.chunkid,
+            isSender: false,
           },
         })
 

@@ -1,5 +1,6 @@
 import { memo, useId, useRef, useState } from 'react'
 
+import { PictureInPictureOutlined } from '@mui/icons-material'
 import RemoveIcon from '@mui/icons-material/Remove'
 import { Button, Stack, Tooltip, Typography } from '@mui/material'
 import { classNames } from 'src/shared/lib/classNames/classNames'
@@ -51,6 +52,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   const [played, setPlayed] = useState(false)
   const [hide, setHide] = useState(false)
   const { handleOpen: handleOpenfullscreen, handleClose: handleClosefullscreen, open: fullScreen } = useIsOpen()
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   useMountedEffect(() => {
     const fn = () => {
@@ -69,6 +71,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     setPlayed(false)
     onPause?.()
   }
+
   const handlePlay = () => {
     setPlayed(true)
     onPlay?.()
@@ -87,6 +90,10 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     await startViewTransition()
     setHide(false)
     onUnHide?.()
+  }
+
+  const handlePictureInPictureEnter = () => {
+    videoRef.current?.requestPictureInPicture?.()
   }
 
   const onUnHideRef = useRef(onUnHide)
@@ -113,6 +120,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
       })}
     >
       <VideoPlayer
+        ref={videoRef}
         played={played}
         stream={stream}
         initVolume={volume}
@@ -133,14 +141,25 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         >
           <Typography>{title}</Typography>
 
-          <Tooltip title="Hide stream">
-            <Button
-              aria-label="Hide stream"
-              onClick={handleHide}
-            >
-              <RemoveIcon />
-            </Button>
-          </Tooltip>
+          <Stack direction="row">
+            <Tooltip title="Picture in picture">
+              <Button
+                aria-label="Picture in picture"
+                onClick={handlePictureInPictureEnter}
+              >
+                <PictureInPictureOutlined />
+              </Button>
+            </Tooltip>
+
+            <Tooltip title="Hide stream">
+              <Button
+                aria-label="Hide stream"
+                onClick={handleHide}
+              >
+                <RemoveIcon />
+              </Button>
+            </Tooltip>
+          </Stack>
         </Stack>
       </VideoPlayer>
 

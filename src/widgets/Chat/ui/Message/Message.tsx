@@ -36,10 +36,10 @@ export const Message = (props: MessageProps) => {
     deleteMessageAction(data.message.id)
   }
 
-  const handleOpenContextMenu = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault()
-    setAnchorEl(e.currentTarget)
-  }
+  // const handleOpenContextMenu = (e: React.MouseEvent<HTMLElement>) => {
+  //   e.preventDefault()
+  //   setAnchorEl(e.currentTarget)
+  // }
 
   const handleCloseContextMenu = () => {
     setAnchorEl(null)
@@ -47,7 +47,7 @@ export const Message = (props: MessageProps) => {
 
   return (
     <Typography
-      onContextMenu={handleOpenContextMenu}
+      // onContextMenu={handleOpenContextMenu}
       component="pre"
       className={className}
     >

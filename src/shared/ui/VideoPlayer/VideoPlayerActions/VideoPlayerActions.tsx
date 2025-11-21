@@ -39,6 +39,7 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
     stream,
   } = props
 
+  const hasAudio = hasAudioOnStream(stream)
   return (
     <VideoPlayerTooltip
       className={styles.actions}
@@ -56,7 +57,7 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
           {played ? <PauseIcon color="primary" /> : <PlayArrowIcon color="primary" />}
         </IconButton>
       </Stack>
-      {!mute ? (
+      {!mute && hasAudio ? (
         <Stack
           className={styles.volume}
           direction="row"
@@ -92,7 +93,7 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
           </IconButton>
         ) : (
           <IconButton
-            aria-label="enter video to fullscreen"
+            aria-label="Enter fullscreen"
             onClick={handleFullscreen}
           >
             <FullscreenIcon color="primary" />

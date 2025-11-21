@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { useAudioEffectStore, AudioName } from 'src/entities/AudioEffect'
+import { useLocalUserStore, type UserModel } from 'src/entities/User'
 import { useWebRTCStore, WebRTCClient } from 'src/entities/WebRTC'
 import { socketClient } from 'src/shared/api'
 import { useChatStore } from 'src/widgets/Chat/model/store/ChatStore'
 
-import type { UserModel } from 'src/entities/User'
 import type {
   WebRTCTransmissionMessage,
   WebRTCChatMessage,
@@ -95,8 +95,8 @@ export const useWebRTCRoom = () => {
       }
 
       const onChatMessageLoadFile = (message: WebRTCTransmissionMessage) => {
-        if (message.isSystemMessage) return
-        useChatStore.getState().addNewMessage({ type: 'transmission', ...message }, user)
+        const localUser = message?.transmission?.isSender ? useLocalUserStore.getState().localUser : user
+        useChatStore.getState().addNewMessage({ type: 'transmission', ...message }, { ...user, id: localUser.id })
       }
 
       const onChatMessageFile = (message: WebRTCChatMessage) => {
