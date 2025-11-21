@@ -1,6 +1,6 @@
 const VITE_ICE_SERVER = import.meta.env.VITE_ICE_SERVER
-const VITE_ICE_USERNAME = import.meta.env.VITE_ICE_USERNAME
-const VITE_ICE_PASSWORD = import.meta.env.VITE_ICE_PASSWORD
+const VITE_ICE_SERVER_USER = import.meta.env.VITE_ICE_SERVER_USER
+const VITE_ICE_SERVER_PASSWORD = import.meta.env.VITE_ICE_SERVER_PASSWORD
 
 export const getIceServers = (): RTCIceServer[] => {
   const stunServers = VITE_ICE_SERVER
@@ -15,12 +15,12 @@ export const getIceServers = (): RTCIceServer[] => {
     : []
 
   const turnServers =
-    VITE_ICE_SERVER && VITE_ICE_USERNAME && VITE_ICE_PASSWORD
+    VITE_ICE_SERVER && VITE_ICE_SERVER_USER && VITE_ICE_SERVER_PASSWORD
       ? [
           {
             urls: [`turn:${VITE_ICE_SERVER}:5349`, `turn:${VITE_ICE_SERVER}:3478`],
-            username: VITE_ICE_USERNAME,
-            credential: VITE_ICE_PASSWORD,
+            username: VITE_ICE_SERVER_USER,
+            credential: VITE_ICE_SERVER_PASSWORD,
           },
         ]
       : []

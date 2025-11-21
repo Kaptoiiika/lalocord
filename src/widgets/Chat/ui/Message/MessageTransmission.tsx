@@ -9,7 +9,7 @@ type MessageFileProps = {
 export const MessageTransmission = (props: MessageFileProps) => {
   const { data } = props
 
-  if (!data.message.transmission || !data.message.transmission) {
+  if (!data.message.transmission) {
     return null
   }
 

@@ -90,8 +90,6 @@ export class MessageCodec implements Required<MessageCodecConsturcorParams> {
     try {
       jsonParams = JSON.parse(params)
     } catch (error) {
-      console.log(params)
-      console.log(error)
       jsonParams = {
         length: chunkHeader.byteLength,
       }

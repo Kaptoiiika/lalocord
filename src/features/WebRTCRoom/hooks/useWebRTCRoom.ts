@@ -95,6 +95,7 @@ export const useWebRTCRoom = () => {
       }
 
       const onChatMessageLoadFile = (message: WebRTCTransmissionMessage) => {
+        if (message.isSystemMessage) return
         useChatStore.getState().addNewMessage({ type: 'transmission', ...message }, user)
       }
 

@@ -449,7 +449,6 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       const { message, type } = JSON.parse(event.data)
 
       if (type === 'text') {
-        console.log(this)
         return this.emit('onChatMessage', message)
       }
     } catch (error) {

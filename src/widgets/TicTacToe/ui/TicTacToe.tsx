@@ -19,9 +19,11 @@ export const TicTacToe = () => {
       isCross: true,
       peer: {
         channelMiniGame: {
-          addEventListener: () => {},
-          removeEventListener: () => {},
-          send: () => {},
+          channel: {
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            send: () => {},
+          },
         },
       } as unknown as WebRTCClient,
     })
@@ -42,9 +44,11 @@ export const TicTacToe = () => {
         isCross: true,
         peer: {
           channelMiniGame: {
-            addEventListener: () => {},
-            removeEventListener: () => {},
-            send: () => {},
+            channel: {
+              addEventListener: () => {},
+              removeEventListener: () => {},
+              send: () => {},
+            },
           },
         } as unknown as WebRTCClient,
       })
