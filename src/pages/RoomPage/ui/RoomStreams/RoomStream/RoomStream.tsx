@@ -1,17 +1,23 @@
 import { memo, useId, useRef, useState } from 'react'
 
-import { PictureInPictureOutlined } from '@mui/icons-material'
+import { DrawOutlined, PictureInPictureOutlined } from '@mui/icons-material'
 import RemoveIcon from '@mui/icons-material/Remove'
-import { Button, Stack, Tooltip, Typography } from '@mui/material'
+import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition'
 import { VideoPlayer } from 'src/shared/ui/VideoPlayer/VideoPlayer'
 
+import type { StreamType } from 'src/entities/WebRTC'
+import type { RoomUser } from 'src/features/WebRTCRoom'
+
+import { CanvasPainter } from './CanvasPainter'
+
 import styles from './RoomStream.module.scss'
 
 type RoomStreamProps = {
+  user?: RoomUser
   stream: MediaStream
   /**
    * default auto
@@ -30,11 +36,14 @@ type RoomStreamProps = {
   onVolumeChange?: (volume: number) => void
   onPlay?: () => void
   onPause?: () => void
+  type?: StreamType
 }
 
 export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   const {
+    type,
     stream,
+    user,
     title,
     volume = 0,
     mute,
@@ -51,19 +60,19 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   const [autoplay, setAutoplay] = useState(!document.hidden)
   const [played, setPlayed] = useState(false)
   const [hide, setHide] = useState(false)
+  const [drawLine, setDrawLine] = useState(false)
   const { handleOpen: handleOpenfullscreen, handleClose: handleClosefullscreen, open: fullScreen } = useIsOpen()
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useMountedEffect(() => {
-    const fn = () => {
+    const handleAutoplay = () => {
       if (document.hidden) setAutoplay(false)
       else setAutoplay(true)
     }
 
-    document.addEventListener('visibilitychange', fn)
-
+    document.addEventListener('visibilitychange', handleAutoplay)
     return () => {
-      document.removeEventListener('visibilitychange', fn)
+      document.removeEventListener('visibilitychange', handleAutoplay)
     }
   })
 
@@ -96,6 +105,10 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     videoRef.current?.requestPictureInPicture?.()
   }
 
+  const handleDrawLine = () => {
+    setDrawLine((prev) => !prev)
+  }
+
   const onUnHideRef = useRef(onUnHide)
 
   onUnHideRef.current = onUnHide
@@ -111,14 +124,25 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
 
   return (
     <div
+      id={componentId}
       style={{
         viewTransitionName: componentId,
-        left: (hideId ?? 0) * 100,
+        left: hide ? (hideId ?? 0) * 100 : 0,
+        position: hide ? 'absolute' : 'relative',
       }}
       className={classNames(styles.stream, {
         [styles.hideStream]: isHidden,
+        [styles.drawLine]: drawLine,
       })}
+      draggable="false"
     >
+      {type === 'screen' && (
+        <CanvasPainter
+          id={componentId}
+          user={user}
+          needCtrlKey={!drawLine}
+        />
+      )}
       <VideoPlayer
         ref={videoRef}
         played={played}
@@ -137,27 +161,51 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         <Stack
           direction="row"
           justifyContent="space-between"
+          alignItems="center"
           className={styles.streamTooltip}
         >
-          <Typography>{title}</Typography>
+          <Typography
+            variant="h6"
+            fontWeight={600}
+            color="primary"
+          >
+            {title}
+          </Typography>
 
-          <Stack direction="row">
+          <Stack
+            direction="row"
+            gap={2}
+          >
+            {type === 'screen' && (
+              <Tooltip title="Draw a line">
+                <IconButton
+                  color="primary"
+                  aria-label="Draw a line"
+                  onClick={handleDrawLine}
+                >
+                  {drawLine ? <DrawOutlined /> : <DrawOutlined color="disabled" />}
+                </IconButton>
+              </Tooltip>
+            )}
+
             <Tooltip title="Picture in picture">
-              <Button
+              <IconButton
+                color="primary"
                 aria-label="Picture in picture"
                 onClick={handlePictureInPictureEnter}
               >
                 <PictureInPictureOutlined />
-              </Button>
+              </IconButton>
             </Tooltip>
 
             <Tooltip title="Hide stream">
-              <Button
+              <IconButton
+                color="primary"
                 aria-label="Hide stream"
                 onClick={handleHide}
               >
                 <RemoveIcon />
-              </Button>
+              </IconButton>
             </Tooltip>
           </Stack>
         </Stack>
@@ -166,12 +214,13 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
       {isHidden && (
         <div className={styles.unhide}>
           <Tooltip title="Unhide stream">
-            <Button
+            <IconButton
+              color="primary"
               aria-label="Unhide stream"
               onClick={handleUnHide}
             >
               <RemoveIcon />
-            </Button>
+            </IconButton>
           </Tooltip>
         </div>
       )}

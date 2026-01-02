@@ -9,8 +9,8 @@ import { useThrottle } from 'src/shared/lib/hooks/useThrottle/useThrottle'
 import { StreamViewer } from 'src/widgets/StreamViewer/ui/StreamViewer'
 import { TicTacToeMultiplayer } from 'src/widgets/TicTacToe/ui/TicTacToe'
 
-import type { UserModel } from 'src/entities/User'
 import type { StreamType } from 'src/entities/WebRTC'
+import type { RoomUser } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import type { TicTacToeGame } from 'src/widgets/TicTacToe'
 
 import { RoomStream } from './RoomStream/RoomStream'
@@ -18,7 +18,7 @@ import { RoomStream } from './RoomStream/RoomStream'
 import styles from './RoomStreams.module.scss'
 
 type UserWithStream = {
-  user: UserModel
+  user: RoomUser
   stream: MediaStream
   type: StreamType
 }
@@ -33,8 +33,8 @@ export const RoomStreams = memo(function RoomStreams() {
   const [hiddenStream, setHiddenStream] = useState<Set<string>>(new Set())
   const [, update] = useState(0)
 
-  const changeUserStreamVolume = useThrottle((user: UserModel, volume: number) => {
-    changeVolumeHandle(user.username, 'screen', volume)
+  const changeUserStreamVolume = useThrottle((user: RoomUser, volume: number) => {
+    changeVolumeHandle(user.user.username, 'screen', volume)
   }, 500)
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export const RoomStreams = memo(function RoomStreams() {
       if (!stream) return
       if (type === 'mic') return
       prev.push({
-        user: curent.user,
+        user: curent,
         stream,
         type: type as StreamType,
       })
@@ -76,12 +76,14 @@ export const RoomStreams = memo(function RoomStreams() {
       stream: screenStream,
       name: localUser.username,
       autoplay: true,
+      type: 'screen' as StreamType,
     })
   if (webCamStream)
     localStreams.push({
       stream: webCamStream,
       name: localUser.username,
       autoplay: true,
+      type: 'webCam' as StreamType,
     })
 
   const someStreamIsHide = hiddenStream.size
@@ -99,8 +101,9 @@ export const RoomStreams = memo(function RoomStreams() {
         </div>
       ))}
 
-      {localStreams.map(({ stream, name, autoplay }) => (
+      {localStreams.map(({ stream, name, autoplay, type }) => (
         <RoomStream
+          type={type}
           key={stream.id}
           stream={stream}
           title={name}
@@ -123,8 +126,10 @@ export const RoomStreams = memo(function RoomStreams() {
       {streams.map(({ stream, user, type }) => (
         <RoomStream
           key={stream.id}
+          type={type}
+          user={user}
           stream={stream}
-          title={user?.username ?? user?.id}
+          title={user?.user.username ?? user?.id}
           hide={hiddenStream.has(stream.id)}
           hideId={hiddenStreamIds.findIndex((id) => id === stream.id)}
           onHide={() => {
@@ -144,7 +149,7 @@ export const RoomStreams = memo(function RoomStreams() {
           onVolumeChange={(value) => {
             changeUserStreamVolume(user, value)
           }}
-          volume={streamVolumeList[user.username]?.[type] ?? 0}
+          volume={streamVolumeList[user.user.username]?.[type] ?? 0}
           autoplay
         />
       ))}

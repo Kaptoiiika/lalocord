@@ -81,9 +81,9 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     webCam: null,
     mic: null,
   }
-  private channelInfo: DataChannel
   private channelChat: DataChannel
   private channelFile: DataChannel
+  channelInfo: DataChannel
   channelMiniGame: DataChannel
 
   remoteStreams: Partial<Record<StreamType, MediaStream | null>> = {}

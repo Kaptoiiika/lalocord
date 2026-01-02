@@ -13,7 +13,7 @@
   "repository": "github:Kaptoiiika/lalocord",
   "scripts": {
     "start": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",

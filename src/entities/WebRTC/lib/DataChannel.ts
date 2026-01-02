@@ -56,6 +56,7 @@ export class DataChannel extends Emitter<DataChannelEvents> {
   }
 
   send(data: SupportMessage): void {
+    logger('send', data)
     if (!this.isOpen) {
       this.messageQueue.push(data)
 
