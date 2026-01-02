@@ -4,10 +4,7 @@ import type { StreamType } from '../types'
 
 export const createSilentAudioTrack = () => {
   const ctx = new AudioContext()
-  const oscillator = ctx.createOscillator()
   const dst = ctx.createMediaStreamDestination()
-  oscillator.connect(dst)
-  oscillator.start()
   return dst.stream.getAudioTracks()[0]
 }
 

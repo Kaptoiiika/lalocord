@@ -120,6 +120,7 @@ export const RoomStreams = memo(function RoomStreams() {
             hiddenStream.delete(stream.id)
             setHiddenStream(new Set(hiddenStream))
           }}
+          isLocal
         />
       ))}
 

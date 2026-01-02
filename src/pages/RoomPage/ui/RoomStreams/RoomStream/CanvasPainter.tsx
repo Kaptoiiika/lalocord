@@ -14,6 +14,7 @@ export type CanvasPainterProps = {
   strokeWidth?: number
   needCtrlKey?: boolean
   user?: RoomUser
+  isLocal?: boolean
 }
 
 type ExternalLinePoint = { x: number; y: number } // проценты [0..100]
@@ -21,6 +22,7 @@ type ExternalLinePayload = {
   points: ExternalLinePoint[]
   color: string
   width: number
+  userId: string
 }
 
 export type CanvasPainterHandle = {
@@ -43,11 +45,12 @@ export const CanvasPainter = (props: CanvasPainterProps) => {
     user,
     width = 2560,
     height = 1440,
-    fadeDelayMs = 1500,
+    fadeDelayMs = 2500,
     fadeDurationMs = 550,
     strokeColor = '#f00',
     strokeWidth = 8,
     needCtrlKey = false,
+    isLocal = false,
   } = props
   const roomUsers = useWebRTCRoomStore((state) => state.users)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -172,11 +175,9 @@ export const CanvasPainter = (props: CanvasPainterProps) => {
         points: normalizedPoints,
         color,
         width: widthPx,
+        userId: user?.id,
       }
-      // TODO: заменить на реальную отправку в шину/сокет
-      // Например: onSendLine?.(payload)
-      // Временно логируем:
-      console.log('CanvasPainter sendLine', payload)
+
       if (!user) return
       user.peer.channelInfo.send(
         JSON.stringify({
@@ -189,12 +190,10 @@ export const CanvasPainter = (props: CanvasPainterProps) => {
   )
 
   useEffect(() => {
-    if (!roomUsers) return
+    if (!roomUsers || !isLocal) return
     const onChatMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data)
-      console.log(data)
       if (data.event === 'drawLine') {
-        console.log('drawLine', data)
         drawExternalLine(data.message)
       }
     }
@@ -203,7 +202,6 @@ export const CanvasPainter = (props: CanvasPainterProps) => {
       user.peer.channelInfo.on('onChatMessage', (event: MessageEvent) => {
         const data = JSON.parse(event.data)
         if (data.event === 'drawLine') {
-          console.log('drawLine', data)
           drawExternalLine(data.message)
         }
       })
@@ -214,9 +212,10 @@ export const CanvasPainter = (props: CanvasPainterProps) => {
         user.peer.channelInfo.off('onChatMessage', onChatMessage)
       })
     }
-  }, [roomUsers, drawExternalLine])
+  }, [roomUsers, drawExternalLine, isLocal])
 
   useEffect(() => {
+    if (isLocal) return
     const cleanupStrokes = strokesRef.current.slice()
     const handleMouseDown = (event: MouseEvent) => {
       if (needCtrlKey && !event.ctrlKey) return
@@ -280,7 +279,7 @@ export const CanvasPainter = (props: CanvasPainterProps) => {
         }
       }
     }
-  }, [id, fadeDelayMs, fadeDurationMs, strokeColor, strokeWidth, draw, startFade, needCtrlKey, sendLine])
+  }, [id, fadeDelayMs, fadeDurationMs, strokeColor, strokeWidth, draw, startFade, needCtrlKey, sendLine, isLocal])
 
   return (
     <canvas

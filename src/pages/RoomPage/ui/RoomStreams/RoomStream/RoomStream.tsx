@@ -37,6 +37,7 @@ type RoomStreamProps = {
   onPlay?: () => void
   onPause?: () => void
   type?: StreamType
+  isLocal?: boolean
 }
 
 export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
@@ -55,6 +56,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     onPause,
     onPlay,
     onUnHide,
+    isLocal = false,
   } = props
   const componentId = useId().split(':').join('')
   const [autoplay, setAutoplay] = useState(!document.hidden)
@@ -135,12 +137,14 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         [styles.drawLine]: drawLine,
       })}
       draggable="false"
+      onDragStart={(e) => e.preventDefault()}
     >
       {type === 'screen' && (
         <CanvasPainter
           id={componentId}
           user={user}
           needCtrlKey={!drawLine}
+          isLocal={isLocal}
         />
       )}
       <VideoPlayer
