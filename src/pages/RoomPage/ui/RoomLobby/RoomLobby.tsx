@@ -1,10 +1,10 @@
 import { Stack } from '@mui/material'
 import { useWebRTCRoom } from 'src/features/WebRTCRoom'
 import { Chat } from 'src/widgets/Chat'
+import { RoomStreams } from 'src/widgets/RoomStream'
 
 import { RoomActions } from '../RoomActions/RoomActions'
 import { RoomIsFull } from '../RoomIsFull/RoomIsFull'
-import { RoomStreams } from '../RoomStreams/RoomStreams'
 import { RoomUsers } from '../RoomUsers/RoomUsers'
 
 import styles from './RoomLobby.module.scss'

@@ -23,7 +23,12 @@ type WebRTCClientConfig = { id: string }
 
 type EventMessageToSocket = 'new_answer' | 'new_offer' | 'new_ice'
 
-type EventMessageToPeer = 'stream_start' | 'stream_stop' | 'stream_status'
+type EventMessageToPeer =
+  | 'stream_start'
+  | 'stream_stop'
+  | 'stream_status'
+  | 'stream_track_pause'
+  | 'stream_track_resume'
 
 type FileHeader = {
   id: Uint8Array
@@ -64,6 +69,8 @@ export type WebRTCMiniGameMessage = {
 type WebRTCClientEvents = {
   onStreamStart: StreamType
   onStreamStop: StreamType
+  onStreamTrackPause: StreamType
+  onStreamTrackResume: StreamType
   onChatMessage: string
   onChatMessageFile: WebRTCChatMessage
   onChatMessageLoadFile: WebRTCTransmissionMessage
@@ -279,7 +286,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     else if (tracks[0].kind === 'audio') this.remoteSenderStreams.mic = stream
   }
 
-  private sendMessageToPeer(event: EventMessageToPeer, message: unknown) {
+  sendMessageToPeer(event: EventMessageToPeer, message: unknown) {
     this.channelInfo.send(JSON.stringify({ event, message }))
   }
 
@@ -294,6 +301,28 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       case 'stream_stop':
         this.remoteStreams[data.message as StreamType] = undefined
         this.emit('onStreamStop', data.message as StreamType)
+        break
+      case 'stream_track_pause':
+        if (data.message === 'screen') {
+          pauseSender(this.senders.screenVideo)
+          pauseSender(this.senders.screenAudio)
+        } else if (data.message === 'webCam') {
+          pauseSender(this.senders.webCam)
+        } else if (data.message === 'mic') {
+          pauseSender(this.senders.mic)
+        }
+        this.emit('onStreamTrackPause', data.message as StreamType)
+        break
+      case 'stream_track_resume':
+        if (data.message === 'screen') {
+          resumeSender(this.senders.screenVideo)
+          resumeSender(this.senders.screenAudio)
+        } else if (data.message === 'webCam') {
+          resumeSender(this.senders.webCam)
+        } else if (data.message === 'mic') {
+          resumeSender(this.senders.mic)
+        }
+        this.emit('onStreamTrackResume', data.message as StreamType)
         break
       case 'miniGameRequsest':
         this.emit('onMiniGameRequsest', data.message)

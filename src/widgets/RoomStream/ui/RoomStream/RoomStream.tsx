@@ -12,27 +12,18 @@ import { VideoPlayer } from 'src/shared/ui/VideoPlayer/VideoPlayer'
 import type { StreamType } from 'src/entities/WebRTC'
 import type { RoomUser } from 'src/features/WebRTCRoom'
 
-import { CanvasPainter } from './CanvasPainter'
+import { useRoomStreamStore } from '../../model/store/RoomStreamStore'
+import { CanvasPainter } from '../CanvasPainter/CanvasPainter'
 
 import styles from './RoomStream.module.scss'
 
 type RoomStreamProps = {
   user?: RoomUser
   stream: MediaStream
-  /**
-   * default auto
-   * if (document.hidden === true) autoplay = true
-   * else autoplay = false
-   * @type {string}
-   */
   autoplay?: boolean
-  hide?: boolean
-  hideId?: number
   title?: string
   volume?: number
   mute?: boolean
-  onHide?: () => void
-  onUnHide?: () => void
   onVolumeChange?: (volume: number) => void
   onPlay?: () => void
   onPause?: () => void
@@ -49,22 +40,19 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     volume = 0,
     mute,
     autoplay: propsAutoPlay,
-    hide: propsHide,
-    hideId,
     onVolumeChange,
-    onHide,
     onPause,
     onPlay,
-    onUnHide,
     isLocal = false,
   } = props
+  const { hiddenStreams, hideStreams, unHideStreams } = useRoomStreamStore()
   const componentId = useId().split(':').join('')
   const [autoplay, setAutoplay] = useState(!document.hidden)
   const [played, setPlayed] = useState(false)
-  const [hide, setHide] = useState(false)
   const [drawLine, setDrawLine] = useState(false)
   const { handleOpen: handleOpenfullscreen, handleClose: handleClosefullscreen, open: fullScreen } = useIsOpen()
   const videoRef = useRef<HTMLVideoElement>(null)
+  const hide = hiddenStreams.includes(stream.id)
 
   useMountedEffect(() => {
     const handleAutoplay = () => {
@@ -92,15 +80,13 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     if (played) handlePause()
     handleClosefullscreen()
     await startViewTransition()
-    setHide(true)
-    onHide?.()
+    hideStreams(stream.id)
   }
 
   const handleUnHide = async () => {
     if (!played) handlePlay()
     await startViewTransition()
-    setHide(false)
-    onUnHide?.()
+    unHideStreams(stream.id)
   }
 
   const handlePictureInPictureEnter = () => {
@@ -111,29 +97,18 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     setDrawLine((prev) => !prev)
   }
 
-  const onUnHideRef = useRef(onUnHide)
-
-  onUnHideRef.current = onUnHide
-  useMountedEffect(() => {
-    const getOnUnHideRef = () => onUnHideRef.current
-
-    return () => {
-      getOnUnHideRef()?.()
-    }
-  })
-
-  const isHidden = propsHide ?? hide
+  const hideIndex = Math.max(hiddenStreams.indexOf(stream.id), 0)
 
   return (
     <div
       id={componentId}
       style={{
         viewTransitionName: componentId,
-        left: hide ? (hideId ?? 0) * 100 : 0,
+        left: hideIndex * 100,
         position: hide ? 'absolute' : 'relative',
       }}
       className={classNames(styles.stream, {
-        [styles.hideStream]: isHidden,
+        [styles.hideStream]: hide,
         [styles.drawLine]: drawLine,
       })}
       draggable="false"
@@ -159,7 +134,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         onFullscreenEnter={handleOpenfullscreen}
         onFullscreenExit={handleClosefullscreen}
         autoplay={autoplay ? propsAutoPlay : false}
-        controls={!isHidden}
+        controls={!hide}
         mute={mute}
       >
         <Stack
@@ -215,7 +190,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         </Stack>
       </VideoPlayer>
 
-      {isHidden && (
+      {!hide && (
         <div className={styles.unhide}>
           <Tooltip title="Unhide stream">
             <IconButton

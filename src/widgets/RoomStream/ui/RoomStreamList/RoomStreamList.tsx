@@ -13,9 +13,10 @@ import type { StreamType } from 'src/entities/WebRTC'
 import type { RoomUser } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import type { TicTacToeGame } from 'src/widgets/TicTacToe'
 
-import { RoomStream } from './RoomStream/RoomStream'
+import { useRoomStreamStore } from '../../model/store/RoomStreamStore'
+import { RoomStream } from '../RoomStream/RoomStream'
 
-import styles from './RoomStreams.module.scss'
+import styles from './RoomStreamList.module.scss'
 
 type UserWithStream = {
   user: RoomUser
@@ -30,7 +31,7 @@ export const RoomStreams = memo(function RoomStreams() {
   const webCamStream = useWebRTCStore((state) => state.streams.webCam)
   const streamVolumeList = useAudioEffectStore((state) => state.usersAuidoSettings)
   const changeVolumeHandle = useAudioEffectStore((state) => state.changeUserVolume)
-  const [hiddenStream, setHiddenStream] = useState<Set<string>>(new Set())
+  const hiddenStreams = useRoomStreamStore((state) => state.hiddenStreams)
   const [, update] = useState(0)
 
   const changeUserStreamVolume = useThrottle((user: RoomUser, volume: number) => {
@@ -86,8 +87,7 @@ export const RoomStreams = memo(function RoomStreams() {
       type: 'webCam' as StreamType,
     })
 
-  const someStreamIsHide = hiddenStream.size
-  const hiddenStreamIds = [...hiddenStream]
+  const someStreamIsHide = hiddenStreams.length > 0
 
   return (
     <StreamViewer
@@ -110,16 +110,6 @@ export const RoomStreams = memo(function RoomStreams() {
           autoplay={autoplay}
           mute
           volume={0}
-          hide={hiddenStream.has(stream.id)}
-          hideId={hiddenStreamIds.findIndex((id) => id === stream.id)}
-          onHide={() => {
-            hiddenStream.add(stream.id)
-            setHiddenStream(new Set(hiddenStream))
-          }}
-          onUnHide={() => {
-            hiddenStream.delete(stream.id)
-            setHiddenStream(new Set(hiddenStream))
-          }}
           isLocal
         />
       ))}
@@ -131,21 +121,11 @@ export const RoomStreams = memo(function RoomStreams() {
           user={user}
           stream={stream}
           title={user?.user.username ?? user?.id}
-          hide={hiddenStream.has(stream.id)}
-          hideId={hiddenStreamIds.findIndex((id) => id === stream.id)}
-          onHide={() => {
-            hiddenStream.add(stream.id)
-            setHiddenStream(new Set(hiddenStream))
-          }}
-          onUnHide={() => {
-            hiddenStream.delete(stream.id)
-            setHiddenStream(new Set(hiddenStream))
-          }}
           onPlay={() => {
-            // user.client.channel.sendData('resumeStream', user.clientStream.type)
+            user.peer.sendMessageToPeer('stream_track_resume', type)
           }}
           onPause={() => {
-            // user.client.channel.sendData('pauseStream', user.clientStream.type)
+            user.peer.sendMessageToPeer('stream_track_pause', type)
           }}
           onVolumeChange={(value) => {
             changeUserStreamVolume(user, value)
@@ -157,3 +137,4 @@ export const RoomStreams = memo(function RoomStreams() {
     </StreamViewer>
   )
 })
+

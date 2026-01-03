@@ -5,7 +5,6 @@ import { AppRouterProvider } from 'src/app/providers/Router'
 import { ThemeProvider } from 'src/app/providers/ThemeProvider'
 
 import App from './app/App'
-import { __IS_ELECTRON__ } from './shared/const/config'
 import { DebugModeProvider } from './shared/lib/hooks/useDebugMode/useDebugModeProvider'
 import { ErrorBoundary } from './shared/ui/ErrorBoundary'
 
@@ -32,7 +31,3 @@ root.render(
     </ErrorBoundary>
   </React.StrictMode>
 )
-
-if (__IS_ELECTRON__ === false) {
-  navigator.serviceWorker?.register('/service-worker.js')
-}

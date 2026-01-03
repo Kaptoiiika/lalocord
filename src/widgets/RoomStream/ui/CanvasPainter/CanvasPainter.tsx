@@ -4,6 +4,7 @@ import { useWebRTCRoomStore, type RoomUser } from 'src/features/WebRTCRoom'
 
 import styles from './CanvasPainter.module.scss'
 
+// Это чудо файл написал ИИ
 export type CanvasPainterProps = {
   id: string
   width?: number
@@ -17,7 +18,7 @@ export type CanvasPainterProps = {
   isLocal?: boolean
 }
 
-type ExternalLinePoint = { x: number; y: number } // проценты [0..100]
+type ExternalLinePoint = { x: number; y: number }
 type ExternalLinePayload = {
   points: ExternalLinePoint[]
   color: string
