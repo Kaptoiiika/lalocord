@@ -10,6 +10,12 @@ import { ErrorBoundary } from './shared/ui/ErrorBoundary'
 
 import 'src/app/styles/index.scss'
 
+if (window.electron) {
+  import('electron/renderer/electronInit').then(({ initElectron }) => {
+    initElectron()
+  })
+}
+
 const container = document.getElementById('root')
 
 if (!container) {
@@ -31,3 +37,4 @@ root.render(
     </ErrorBoundary>
   </React.StrictMode>
 )
+

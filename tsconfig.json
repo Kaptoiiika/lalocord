@@ -19,10 +19,10 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "rootDir": ".",
-    "rootDirs": ["src"],
+    "rootDirs": ["src", "electron"],
     "baseUrl": ".",
     "allowJs": true
   },
-  "include": ["src/**/**/*"],
-  "exclude": []
+  "include": ["src/**/**/*", "electron/**/*"],
+  "exclude": ["node_modules", "dist", "dist-electron", "release"]
 }

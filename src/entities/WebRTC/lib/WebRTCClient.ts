@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer'
-
 import { socketClient } from 'src/shared/api'
 import { logger } from 'src/shared/lib/logger/Logger'
 import { Emitter } from 'src/shared/lib/utils'

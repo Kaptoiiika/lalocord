@@ -7,3 +7,9 @@ interface ImportMeta {
 
 declare const __BUILD_VERSION__: string
 declare const __BUILD_DATE_VERSION__: string
+
+declare global {
+  interface Window {
+    electron: ElectronHandler
+  }
+}

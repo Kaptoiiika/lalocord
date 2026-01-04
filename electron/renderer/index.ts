@@ -1,1 +1,1 @@
-export { getDisplayMedia } from "./getDisplayMedia/getDisplayMedia"
+export { initElectron } from './electronInit'

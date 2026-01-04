@@ -1,32 +1,28 @@
-import {
-  ClientKeyPressEvent,
-  ClientMouseEvent,
-} from "../../../src/shared/types/ClientEvents"
+import type { ClientKeyPressEvent } from 'src/shared/types/ClientEvents'
+import type { ExternalLinePayload } from 'src/widgets/RoomStream/ui/CanvasPainter'
+
 
 export const enum IpcChannels {
-  getMediaSource = "getMediaSource",
-  desktopstream = "desktopstream",
-  keypress = "keypress",
-  keyRelease = "keyRelease",
-  mousemove = "mousemove",
+  getMediaSource = 'getMediaSource',
+  keypress = 'keypress',
+  keyRelease = 'keyRelease',
+  drawOverlayLine = 'drawOverlayLine',
 }
 
-export type IpcEventMap<T = any> = Record<IpcChannels, T>
+export type IpcEventMap<T> = Record<IpcChannels, T>
 
 //main on(key, (value)=>{})
 export interface IpcToMainEventMap {
-  getMediaSource: any
-  desktopstream: any
-  keyRelease: any
+  getMediaSource: void
+  keyRelease: void
   keypress: ClientKeyPressEvent
-  mousemove: ClientMouseEvent
+  drawOverlayLine: ExternalLinePayload
 }
 
 //renderer sendMessage(key, (value)=>{})
 export interface IpcToRendererEventMap {
   getMediaSource: Electron.DesktopCapturerSource[]
-  desktopstream: any
-  keyRelease: any
+  keyRelease: void
   keypress: void
-  mousemove: void
+  drawOverlayLine: ExternalLinePayload
 }

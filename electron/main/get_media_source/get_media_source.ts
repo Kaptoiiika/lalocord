@@ -1,9 +1,12 @@
-import { desktopCapturer, ipcMain } from "electron"
-import { IpcChannels, IpcToMainEventMap } from "../types/ipcChannels"
+import { desktopCapturer, ipcMain } from 'electron'
 
-ipcMain.on(IpcChannels.getMediaSource, async (event, arg: IpcToMainEventMap[IpcChannels.getMediaSource]) => {
+import { IpcChannels } from '../types/ipcChannels'
+
+ipcMain.on(IpcChannels.getMediaSource, async (event, arg: Electron.SourcesOptions) => {
   const sources = await desktopCapturer.getSources({
-    types: ["window", "screen", "audio"],
+    ...arg,
+    types: ['window', 'screen'],
+    fetchWindowIcons: true,
   })
 
   event.reply(IpcChannels.getMediaSource, sources)

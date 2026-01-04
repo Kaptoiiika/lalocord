@@ -1,24 +1,18 @@
-import { useState } from "react"
-import { createRoot } from "react-dom/client"
+import { useState } from 'react'
+import { createRoot } from 'react-dom/client'
 
-import { Button, Checkbox, FormControlLabel, Stack } from "@mui/material"
-import { localstorageKeys } from "src/shared/const/localstorageKeys"
+import { Button, Checkbox, FormControlLabel, Stack } from '@mui/material'
 
-import type { IpcChannels } from "../../main/types/ipcChannels"
+import { localstorageKeys } from '../../../src/shared/const/localstorageKeys'
 
-import styles from "./displayMediaSelector.module.scss"
+import styles from './displayMediaSelector.module.scss'
 
-
-type SourceType = Awaited<
-  ReturnType<typeof window.electron.ipcRenderer.invoke<IpcChannels.getMediaSource>>
->[0]
-
-const getMediaSource = async (): Promise<SourceType[]> => {
-  const data = await new Promise<SourceType[]>((res, rej) => {
-    window.electron.ipcRenderer.once("getMediaSource", (source) => {
+const getMediaSource = async () => {
+  const data = await new Promise<Electron.DesktopCapturerSource[]>((res) => {
+    window.electron?.ipcRenderer.once('getMediaSource', (source) => {
       res(source)
     })
-    window.electron.ipcRenderer.sendMessage("getMediaSource", undefined)
+    window.electron?.ipcRenderer.sendMessage('getMediaSource', undefined)
   })
 
   return data
@@ -28,28 +22,29 @@ const getDesktopAudio = () => {
   const item = Boolean(localStorage.getItem(localstorageKeys.DESKTOPAUDIO))
   return item
 }
+
 const setDesktopAudio = (value: boolean) => {
-  if (value)
-    localStorage.setItem(localstorageKeys.DESKTOPAUDIO, JSON.stringify(value))
+  if (value) localStorage.setItem(localstorageKeys.DESKTOPAUDIO, JSON.stringify(value))
   else localStorage.removeItem(localstorageKeys.DESKTOPAUDIO)
 }
 
 export const displayMediaSelector = (): Promise<{
-  source?: SourceType
+  source?: Electron.DesktopCapturerSource
   allowAudio?: boolean
 }> =>
+  // eslint-disable-next-line no-async-promise-executor
   new Promise(async (res, rej) => {
     const sources = await getMediaSource()
-    const modalContainer = document.createElement("div")
+    const modalContainer = document.createElement('div')
     document.body.appendChild(modalContainer)
     const main = createRoot(modalContainer)
 
-    const accept = (node?: SourceType, allowAudio?: boolean) => {
+    const accept = (node?: Electron.DesktopCapturerSource, allowAudio?: boolean) => {
       res({ source: node, allowAudio })
       main.unmount()
     }
     const cancel = () => {
-      rej("Permission denied")
+      rej('Permission denied')
       main.unmount()
     }
 
@@ -83,16 +78,20 @@ export const displayMediaSelector = (): Promise<{
               ))}
             </div>
 
-            <Stack direction='row' gap={4}>
+            <Stack
+              direction="row"
+              gap={4}
+            >
               <FormControlLabel
                 className={styles.allowAudioCheckbox}
                 checked={allowAudio}
                 label="Allow audio"
-                control={
-                  <Checkbox  onChange={handleChangeAudio} />
-                }
+                control={<Checkbox onChange={handleChangeAudio} />}
               />
-              <Button variant="contained" onClick={cancel}>
+              <Button
+                variant="contained"
+                onClick={cancel}
+              >
                 cancel
               </Button>
             </Stack>
@@ -102,3 +101,4 @@ export const displayMediaSelector = (): Promise<{
     }
     main.render(<Selector />)
   })
+
