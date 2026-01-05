@@ -37,7 +37,6 @@
     "@typescript-eslint/eslint-plugin": "^8.7.0",
     "@typescript-eslint/parser": "^8.7.0",
     "axios": "^1.11.0",
-    "buffer": "^6.0.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-linkify": "^1.0.0-alpha",

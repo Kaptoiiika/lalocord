@@ -24,16 +24,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build and publish
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run electron:build -- --publish always
+      - name: Build app
+        run: npm run electron:build
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: release-windows
-          path: |
+          files: |
             release/*.exe
-            release/*.yml
-          if-no-files-found: ignore
+            release/*.exe.blockmap
+            release/latest.yml
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

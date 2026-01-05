@@ -8,7 +8,7 @@ import eslint from 'vite-plugin-eslint'
 import svgr from 'vite-plugin-svgr'
 import viteTsconfigPaths from 'vite-tsconfig-paths'
 
-import type { PluginOption } from 'vite';
+import type { PluginOption } from 'vite'
 
 export default ({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -62,6 +62,7 @@ export default ({ mode }: { mode: string }) => {
   return defineConfig({
     plugins: [react(), eslint(), viteTsconfigPaths(), svgr(), ...electronPlugins],
     build: {
+      sourcemap: true,
       rollupOptions: {
         input: {
           ...electronHtml,
@@ -69,6 +70,7 @@ export default ({ mode }: { mode: string }) => {
         },
       },
     },
+
     server: {
       port: 3000,
     },

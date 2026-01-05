@@ -135,7 +135,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
 
     this.peer.onicecandidate = this.onIceCandidate.bind(this)
     this.peer.ontrack = this.onTrack.bind(this)
-
+    this.peer.ondatachannel = console.log
     this.channelChat = new DataChannel(this.peer, 'chat', {
       id: 0,
       protocol: 'json',
@@ -196,6 +196,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     this.peer.getTransceivers().forEach((tr) => {
       changeVideoCodecs(tr, 'H264')
     })
+
     const offer = await this.peer.createOffer()
     await this.peer.setLocalDescription(offer)
     this.sendMessageToSocket('new_offer', { offer })
@@ -453,9 +454,9 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
           this.chatFileTempData.set(stringId, head)
         }
         if (chunkSize * (chunk.chunkid + 1) >= dataLength) {
-          const blobPart: BlobPart = temp ? Buffer.from(temp) : chunk.data
+          const blobData = (temp?.buffer as ArrayBuffer) ?? chunk.data
 
-          const file = new Blob([blobPart], {
+          const file = new Blob([blobData], {
             type: chunkType,
           })
 
