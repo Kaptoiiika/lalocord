@@ -1,4 +1,5 @@
 export enum localstorageKeys {
+  SETTINGS = 'settings',
   TOKEN = 'token',
   ENCODINGSETTINGS = 'encoding',
   CHATCOLLAPSED = 'chatcollapsed',

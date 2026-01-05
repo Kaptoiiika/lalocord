@@ -7,6 +7,8 @@ export const enum IpcChannels {
   keypress = 'keypress',
   keyRelease = 'keyRelease',
   drawOverlayLine = 'drawOverlayLine',
+  openOverlay = 'openOverlay',
+  closeOverlay = 'closeOverlay',
 }
 
 export type IpcEventMap<T> = Record<IpcChannels, T>
@@ -17,6 +19,8 @@ export interface IpcToMainEventMap {
   keyRelease: void
   keypress: ClientKeyPressEvent
   drawOverlayLine: ExternalLinePayload
+  openOverlay: void
+  closeOverlay: void
 }
 
 //renderer sendMessage(key, (value)=>{})
@@ -25,4 +29,6 @@ export interface IpcToRendererEventMap {
   keyRelease: void
   keypress: void
   drawOverlayLine: ExternalLinePayload
+  openOverlay: void
+  closeOverlay: void
 }

@@ -289,6 +289,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   }
 
   private onInfoMessage(event: MessageEvent) {
+    logger('onInfoMessage', event.data)
     const data = JSON.parse(event.data)
 
     switch (data.event) {

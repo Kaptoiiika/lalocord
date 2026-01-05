@@ -31,11 +31,11 @@ export const StartMiniGame = () => {
   return (
     <>
       <Tooltip
-        title="Settings"
+        title="Start mini game"
         arrow
       >
         <IconButton
-          aria-label="Settings"
+          aria-label="Start mini game"
           onClick={handleOpen}
         >
           <VideogameAssetIcon />

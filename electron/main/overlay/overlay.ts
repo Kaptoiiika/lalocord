@@ -3,6 +3,8 @@ import path from 'path'
 import { ipcMain } from 'electron'
 import { BrowserWindow } from 'electron'
 
+import { IpcChannels } from '../types/ipcChannels'
+
 export type OverlayOpenArgs = {
   width: number
   height: number
@@ -13,7 +15,7 @@ export type OverlayOpenArgs = {
 
 let overlayWindow: BrowserWindow | null = null
 
-ipcMain.on('overlay_open', (event, args) => {
+ipcMain.on(IpcChannels.openOverlay, () => {
   if (overlayWindow) {
     return
   }
@@ -45,7 +47,7 @@ ipcMain.on('overlay_open', (event, args) => {
   }
 })
 
-ipcMain.on('overlay_close', (event, args) => {
+ipcMain.on(IpcChannels.closeOverlay, () => {
   overlayWindow?.close()
   overlayWindow = null
 })

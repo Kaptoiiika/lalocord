@@ -98,6 +98,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   }
 
   const hideIndex = Math.max(hiddenStreams.indexOf(stream.id), 0)
+  const canDrawLine = type === 'screen'
 
   return (
     <div
@@ -114,7 +115,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
       draggable="false"
       onDragStart={(e) => e.preventDefault()}
     >
-      {type === 'screen' && (
+      {canDrawLine && (
         <CanvasPainter
           id={componentId}
           user={user}
@@ -155,7 +156,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
             direction="row"
             gap={2}
           >
-            {type === 'screen' && (
+            {canDrawLine && (
               <Tooltip title="Draw a line">
                 <IconButton
                   color="primary"
@@ -190,7 +191,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         </Stack>
       </VideoPlayer>
 
-      {!hide && (
+      {hide && (
         <div className={styles.unhide}>
           <Tooltip title="Unhide stream">
             <IconButton

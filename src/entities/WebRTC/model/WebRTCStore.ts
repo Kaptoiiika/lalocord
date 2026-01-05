@@ -10,7 +10,7 @@ import { createMediaStream } from '../utils'
 
 type WebRTCStore = {
   streams: Record<StreamType, MediaStream | null>
-  createStream: (type: StreamType) => Promise<void>
+  createStream: (type: StreamType) => Promise<MediaStream | null>
   stopStream: (type: StreamType) => void
   restartStream: (type: StreamType) => void
 
@@ -57,7 +57,7 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
 
     if (currentStream) {
       get().restartStream(type)
-      return
+      return currentStream
     }
 
     stream?.getTracks().forEach((track) => {
@@ -86,6 +86,8 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
         streams: { ...state.streams, [type]: stream },
       }))
     }
+
+    return stream || null
   },
 
   async restartStream(type) {

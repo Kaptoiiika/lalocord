@@ -1,0 +1,1 @@
+export { useSettingStore } from './model/store/SettingStore'

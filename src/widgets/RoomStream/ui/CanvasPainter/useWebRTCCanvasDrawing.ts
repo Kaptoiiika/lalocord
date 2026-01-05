@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react'
 
+import { useSettingStore } from 'src/entities/Settings'
 import { useWebRTCRoomStore, type RoomUser } from 'src/features/WebRTCRoom'
 import { __IS_ELECTRON__ } from 'src/shared/const/config'
 
@@ -21,6 +22,7 @@ type UseWebRTCCanvasDrawingOptions = {
 const drawLineChannel = new BroadcastChannel('draw_line_channel')
 
 export const useWebRTCCanvasDrawing = (options: UseWebRTCCanvasDrawingOptions) => {
+  const { allowDrawLine, overlayDrawEnabled } = useSettingStore()
   const { canvasRef, id, fadeDelayMs, fadeDurationMs, strokeColor, strokeWidth, needCtrlKey, user, isLocal } = options
 
   const roomUsers = useWebRTCRoomStore((state) => state.users)
@@ -58,11 +60,12 @@ export const useWebRTCCanvasDrawing = (options: UseWebRTCCanvasDrawingOptions) =
   const handleDrawLine = useCallback(
     (payload: ExternalLinePayload) => {
       drawExternalLineRef.current(payload)
-      if (__IS_ELECTRON__) {
+
+      if (__IS_ELECTRON__ && overlayDrawEnabled && allowDrawLine) {
         drawLineChannel.postMessage(payload)
       }
     },
-    [drawExternalLineRef]
+    [overlayDrawEnabled, allowDrawLine]
   )
 
   // Подписка на входящие линии от других пользователей

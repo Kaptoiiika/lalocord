@@ -7,6 +7,7 @@ import { getUserFromLocalStorage, saveUserToLocalStorage } from './UserStoreLoca
 
 export interface LocalUserSchema {
   localUser: UserModel
+  
   setLocalUsername: (value: string) => void
   setLocalAvatar: (src: string) => void
 }

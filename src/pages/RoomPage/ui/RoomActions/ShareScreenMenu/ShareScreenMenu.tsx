@@ -1,12 +1,25 @@
 import ScreenShareIcon from '@mui/icons-material/ScreenShare'
 import StopScreenShareIcon from '@mui/icons-material/StopScreenShare'
-import { IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material'
+import {
+  IconButton,
+  Tooltip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  FormControlLabel,
+  Switch,
+} from '@mui/material'
+import { IpcChannels } from 'electron/main/types/ipcChannels'
+import { useSettingStore } from 'src/entities/Settings'
 import { useWebRTCStore } from 'src/entities/WebRTC'
+import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { startViewTransition } from 'src/shared/lib/utils'
 
 export const ShareScreenMenu = () => {
   const { handleClick, handleClose, anchorEl, open } = usePopup()
+  const { overlayDrawEnabled, setOverlayDrawEnabled, allowDrawLine, setAllowDrawLine } = useSettingStore()
   const screenStream = useWebRTCStore((state) => state.streams.screen)
   const createStream = useWebRTCStore((state) => state.createStream)
   const stopStream = useWebRTCStore((state) => state.stopStream)
@@ -20,7 +33,16 @@ export const ShareScreenMenu = () => {
   const handleStartStream = async () => {
     handleClose()
     await startViewTransition()
-    await createStream('screen')
+    const stream = await createStream('screen')
+
+    if (stream && overlayDrawEnabled && __IS_ELECTRON__) {
+      window.electron?.ipcRenderer.sendMessage(IpcChannels.openOverlay, undefined)
+      stream.getVideoTracks().forEach((track) => {
+        track.addEventListener('ended', () => {
+          window.electron?.ipcRenderer.sendMessage(IpcChannels.closeOverlay, undefined)
+        })
+      })
+    }
   }
 
   return (
@@ -65,6 +87,33 @@ export const ShareScreenMenu = () => {
           horizontal: 'center',
         }}
       >
+        <MenuItem>
+          <FormControlLabel
+            control={
+              <Switch
+                color="primary"
+                checked={allowDrawLine}
+                onChange={() => setAllowDrawLine(!allowDrawLine)}
+              />
+            }
+            label="Allow draw line"
+          />
+        </MenuItem>
+        {__IS_ELECTRON__ && (
+          <MenuItem>
+            <FormControlLabel
+              control={
+                <Switch
+                  color="primary"
+                  checked={overlayDrawEnabled}
+                  onChange={() => setOverlayDrawEnabled(!overlayDrawEnabled)}
+                />
+              }
+              label="Overlay draw"
+            />
+          </MenuItem>
+        )}
+
         <MenuItem onClick={handleStartStream}>
           <ListItemIcon>
             <ScreenShareIcon fontSize="small" />
