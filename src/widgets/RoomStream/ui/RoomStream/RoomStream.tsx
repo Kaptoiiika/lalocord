@@ -115,14 +115,6 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
       draggable="false"
       onDragStart={(e) => e.preventDefault()}
     >
-      {canDrawLine && (
-        <CanvasPainter
-          id={componentId}
-          user={user}
-          needCtrlKey={!drawLine}
-          isLocal={isLocal}
-        />
-      )}
       <VideoPlayer
         ref={videoRef}
         played={played}
@@ -137,6 +129,16 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         autoplay={autoplay ? propsAutoPlay : false}
         controls={!hide}
         mute={mute}
+        overlay={
+          canDrawLine ? (
+            <CanvasPainter
+              id={componentId}
+              user={user}
+              needCtrlKey={!drawLine}
+              isLocal={isLocal}
+            />
+          ) : undefined
+        }
       >
         <Stack
           direction="row"

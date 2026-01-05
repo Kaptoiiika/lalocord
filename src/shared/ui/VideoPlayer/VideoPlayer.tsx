@@ -28,6 +28,7 @@ type VideoPlayerProps = {
   autoplay?: boolean
   fullScreen?: boolean
   controls?: boolean
+  overlay?: React.ReactNode
 } & PropsWithChildren
 
 export const VideoPlayer = memo(
@@ -47,6 +48,7 @@ export const VideoPlayer = memo(
       onFullscreenExit,
       children,
       controls = true,
+      overlay,
       ...other
     } = props
     const debugMode = useDebugMode()
@@ -184,6 +186,7 @@ export const VideoPlayer = memo(
           onBlur={handleClose}
           onMouseLeave={handleClose}
         >
+          {overlay}
           {debugMode && <VideoPlayerDebugInfo stream={stream} />}
           {controls && (
             <>
