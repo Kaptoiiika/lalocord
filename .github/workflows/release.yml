@@ -26,6 +26,11 @@ jobs:
 
       - name: Build app
         run: npm run electron:build -- --publish never
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_ICE_SERVER: ${{ secrets.VITE_ICE_SERVER }}
+          VITE_ICE_SERVER_USER: ${{ secrets.VITE_ICE_SERVER_USER }}
+          VITE_ICE_SERVER_PASSWORD: ${{ secrets.VITE_ICE_SERVER_PASSWORD }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
