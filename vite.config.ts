@@ -54,7 +54,7 @@ export default ({ mode }: { mode: string }) => {
               build: {
                 outDir: 'dist-electron',
                 rollupOptions: {
-                  external: ['electron', 'electron-overlay-window'],
+                  external: ['electron'],
                 },
               },
               define: {
@@ -84,7 +84,6 @@ export default ({ mode }: { mode: string }) => {
   return defineConfig({
     plugins: [react(), eslint(), viteTsconfigPaths(), svgr(), ...electronPlugins],
     build: {
-      sourcemap: true,
       rollupOptions: {
         input: {
           ...electronHtml,
