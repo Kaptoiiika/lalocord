@@ -22,7 +22,7 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: npm install
+        run: npm run install:electron
 
       - name: Build app
         run: npm run electron:build -- --publish never
