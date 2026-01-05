@@ -1,29 +1,52 @@
-import { create, StateCreator } from "zustand"
-import { UserSchema } from "../types/UserSchema"
-import {
-  getUserFromLocalStorage,
-  saveUserToLocalStorage,
-} from "./UserStoreLocalStorage"
+import { create } from 'zustand'
 
-const initUser = getUserFromLocalStorage()
+import type { UserModel } from '../types/UserSchema'
+import type { StateCreator } from 'zustand'
+
+export type UserSchema = {
+  userList: Map<number, UserModel>
+  addUser: (user: UserModel) => void
+  addUsers: (users: UserModel[]) => void
+  updateUser: (id: number, updatedFields: Partial<UserModel>) => void
+  getUser: (id: number) => UserModel | undefined
+}
 
 const store: StateCreator<UserSchema> = (set, get) => ({
-  localUser: initUser,
+  userList: new Map(),
 
-  setLocalUsername(value) {
-    const user = get().localUser
-    user.username = value
-
-    set((state) => ({ ...state, localUser: { ...user } }))
-    saveUserToLocalStorage(user)
+  addUser: (user) => {
+    set((state) => {
+      const newUserList = new Map(state.userList)
+      newUserList.set(Number(user.id), user)
+      return { ...state, userList: newUserList }
+    })
   },
 
-  setLocalAvatar(value) {
-    const user = get().localUser
-    user.avatarSrc = value
+  addUsers: (users) => {
+    set((state) => {
+      const newUserList = new Map(state.userList)
+      users.forEach((u) => {
+        newUserList.set(Number(u.id), u)
+      })
+      return { ...state, userList: newUserList }
+    })
+  },
 
-    set((state) => ({ ...state, localUser: { ...user } }))
-    saveUserToLocalStorage(user)
+  updateUser: (id, updatedFields) => {
+    set((state) => {
+      const newUserList = new Map(state.userList)
+      const user = newUserList.get(id)
+      if (user) {
+        const updatedUser = { ...user, ...updatedFields }
+        newUserList.set(id, updatedUser)
+      }
+      return { ...state, userList: newUserList }
+    })
+  },
+
+  getUser: (id) => {
+    const userList = get().userList
+    return userList.get(id)
   },
 })
 

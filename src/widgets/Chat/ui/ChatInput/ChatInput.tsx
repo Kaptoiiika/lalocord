@@ -1,10 +1,13 @@
-import { useUserStore, getLocalUser } from "@/entities/User"
-import { FilledInput, IconButton, Stack, Tooltip } from "@mui/material"
-import { useState, useCallback, memo } from "react"
-import { useChatStore } from "../../model/store/ChatStore"
-import styles from "./ChatInput.module.scss"
-import SendIcon from "@mui/icons-material/Send"
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
+import { useState, useCallback, memo, useRef } from 'react'
+
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
+import SendIcon from '@mui/icons-material/Send'
+import { FilledInput, IconButton, Stack, Tooltip } from '@mui/material'
+import { useLocalUserStore, getLocalUser } from 'src/entities/User'
+
+import { useChatStore } from '../../model/store/ChatStore'
+
+import styles from './ChatInput.module.scss'
 
 type ChatInputProps = {
   onSendMessage?: (msg: string) => void
@@ -14,32 +17,33 @@ type ChatInputProps = {
 export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   const { onSendMessage, onSendFile } = props
   const addMessage = useChatStore((state) => state.addNewMessage)
-  const localUser = useUserStore(getLocalUser)
-  const [text, setText] = useState("")
+  const localUser = useLocalUserStore(getLocalUser)
+  const [text, setText] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleChangeText = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setText(e.currentTarget.value)
-    },
-    []
-  )
+  const handleChangeText = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setText(e.currentTarget.value)
+  }, [])
 
   const handleSendFile = async (blob: Blob, name?: string) => {
     onSendFile?.(blob, name)
     addMessage(
       {
         id: crypto.randomUUID(),
-        blob: blob,
-        type: "file",
+        blob,
+        type: 'file',
+        blobParams: { name, length: blob.size, loaded: 0, type: blob.type },
       },
       localUser
     )
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handlePasteFile = (e: React.ClipboardEvent) => {
     const items = Array.from(e.clipboardData.items)
     const item = items.find((item) => !!item.getAsFile())
     const blob = item?.getAsFile()
+
     if (blob) handleSendFile(blob)
   }
 
@@ -48,31 +52,38 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
     const items = Array.from(e.dataTransfer.items)
     const item = items.find((item) => !!item.getAsFile())
     const blob = item?.getAsFile()
+
     if (blob) handleSendFile(blob, blob.name)
   }
 
   const handleSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+
     if (file) {
       handleSendFile(file, file.name)
     }
   }
 
   const handleSendMessage = () => {
-    if (text === "") return
+    if (text === '') return
     const message = text.trim()
+
     addMessage(
-      { id: crypto.randomUUID(), type: "text", message: message },
+      {
+        id: crypto.randomUUID(),
+        type: 'text',
+        message,
+      },
       localUser
     )
     onSendMessage?.(message)
-    setText("")
+    setText('')
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.shiftKey || e.altKey || e.ctrlKey) return
 
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault()
       handleSendMessage()
     }
@@ -98,7 +109,9 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
           maxRows={3}
           className={styles.input}
           type="text"
-          inputProps={{ "aria-label": "message from chat" }}
+          inputProps={{
+            'aria-label': 'message from chat',
+          }}
         />
       </div>
       <Stack
@@ -108,15 +121,27 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
         justifyContent="end"
         gap={1}
       >
-        <IconButton onClick={handleSendMessage} aria-label="send button">
+        <IconButton
+          onClick={handleSendMessage}
+          aria-label="send button"
+        >
           <SendIcon />
         </IconButton>
-        <Tooltip title={"send file"} placement="top">
-          <IconButton>
-            <label className={styles.selectInputFile}>
+        <Tooltip
+          title="send file"
+          placement="top"
+        >
+          <IconButton
+            aria-label="send file"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <label
+              inert
+              className={styles.selectInputFile}
+            >
               <InsertDriveFileIcon />
               <input
-                value={""}
+                ref={fileInputRef}
                 onChange={handleSelectFile}
                 hidden
                 type="file"

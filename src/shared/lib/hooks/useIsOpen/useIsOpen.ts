@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface UseIsOpenProps {
   time?: number
@@ -11,11 +11,9 @@ export const useIsOpen = (props: UseIsOpenProps = {}) => {
   const [top, setTop] = useState<number | undefined>()
   const [left, setLeft] = useState<number | undefined>()
   const [anchorEl, setAnchorEl] = useState<Element | undefined>()
-  const openRef = useRef<ReturnType<typeof setTimeout>>()
+  const openRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
-  useEffect(() => {
-    return () => clearTimeout(openRef.current)
-  }, [])
+  useEffect(() => () => clearTimeout(openRef.current), [])
 
   const handleClose = useCallback(() => {
     setOpen(false)

@@ -1,14 +1,17 @@
-import { Link as MuiLink, Typography, Button, Menu, Stack } from "@mui/material"
-import Linkify from "react-linkify"
-import { MessageModelNew } from "../../model/types/ChatSchema"
-import { useImagePreviewStore } from "@/features/ImagePreview/model/store/ImagePreviewStore"
-import { getActionSeletFileToImagePreview } from "@/features/ImagePreview"
-import { MessageFile } from "./MessageFile"
-import { RTCChatMessage } from "@/entities/RTCClient"
-import { MessageLoadingFile } from "./MessageLoadingFile"
-import { useState } from "react"
-import { useChatStore } from "../../model/store/ChatStore"
-import { MessageTransmission } from "./MessageTransmission"
+import { useState } from 'react'
+
+import { Link as MuiLink, Typography, Button, Menu, Stack } from '@mui/material'
+import Linkify from 'react-linkify'
+import { useImagePreviewStore, getActionSeletFileToImagePreview } from 'src/features/ImagePreview'
+
+import type { MessageModelNew } from '../../model/types/ChatSchema'
+import type { WebRTCChatMessage } from 'src/entities/WebRTC'
+
+import { MessageFile } from './MessageFile'
+import { MessageLoadingFile } from './MessageLoadingFile'
+import { MessageMiniGameRequest } from './MessageMiniGameRequest'
+import { MessageTransmission } from './MessageTransmission'
+import { useChatStore } from '../../model/store/ChatStore'
 
 type MessageProps = {
   data: MessageModelNew
@@ -16,9 +19,7 @@ type MessageProps = {
 }
 
 function checkURLisImageLink(url: string) {
-  return (
-    url.match(/^http[^\?]*.(jpg|jpeg|gif|png|tiff|bmp)(\?(.*))?$/gim) != null
-  )
+  return url.match(/^http[^?]*.(jpg|jpeg|gif|png|tiff|bmp)(\?(.*))?$/gim) != null
 }
 
 export const Message = (props: MessageProps) => {
@@ -35,10 +36,10 @@ export const Message = (props: MessageProps) => {
     deleteMessageAction(data.message.id)
   }
 
-  const handleOpenContextMenu = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault()
-    setAnchorEl(e.currentTarget)
-  }
+  // const handleOpenContextMenu = (e: React.MouseEvent<HTMLElement>) => {
+  //   e.preventDefault()
+  //   setAnchorEl(e.currentTarget)
+  // }
 
   const handleCloseContextMenu = () => {
     setAnchorEl(null)
@@ -46,13 +47,17 @@ export const Message = (props: MessageProps) => {
 
   return (
     <Typography
-      onContextMenu={handleOpenContextMenu}
+      // onContextMenu={handleOpenContextMenu}
       component="pre"
       className={className}
     >
-      <Menu anchorEl={anchorEl} open={open} onClose={handleCloseContextMenu}>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleCloseContextMenu}
+      >
         <Stack>
-          <Button onClick={handleDeleteMessage}>{"Delete message"}</Button>
+          <Button onClick={handleDeleteMessage}>Delete message</Button>
         </Stack>
       </Menu>
 
@@ -64,12 +69,20 @@ export const Message = (props: MessageProps) => {
                 onClick={handleClick}
                 alt=""
                 src={href}
-                style={{ width: "100%", objectFit: "contain" }}
+                style={{
+                  width: '100%',
+                  objectFit: 'contain',
+                }}
               />
             )
 
           return (
-            <MuiLink key={key} href={href} target="_blank" rel="noreferrer">
+            <MuiLink
+              key={key}
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+            >
               {text}
             </MuiLink>
           )
@@ -77,14 +90,10 @@ export const Message = (props: MessageProps) => {
       >
         {data.message.message}
       </Linkify>
-      {/* type guard don't work with this :( */}
-      {!!data.message.blob && (
-        <MessageFile
-          data={data.message as RequireOnlyOne<RTCChatMessage, "blob">}
-        />
-      )}
+      {!!data.message.blob && <MessageFile data={data.message as RequireOnlyOne<WebRTCChatMessage, 'blob'>} />}
       {!!data.message.blobParams && <MessageLoadingFile data={data.message} />}
       {!!data.message.transmission && <MessageTransmission data={data} />}
+      {!!data.message.gameType && <MessageMiniGameRequest data={data} />}
     </Typography>
   )
 }

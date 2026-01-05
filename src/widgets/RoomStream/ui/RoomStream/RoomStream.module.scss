@@ -1,0 +1,34 @@
+.streamTooltip {
+  color: rgb(var(--primary-color));
+}
+
+.hideStream {
+  position: absolute;
+  height: 50px;
+  left: 0;
+  width: 100px;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.stream {
+  overflow: hidden;
+  background-color: var(--bg-app);
+}
+
+.unhide {
+  position: absolute;
+  top: 0;
+  right: 0;
+  pointer-events: all;
+}
+
+.unhideRight {
+  left: inherit;
+  right: 0;
+}
+
+.drawLine{
+  cursor: crosshair;
+}

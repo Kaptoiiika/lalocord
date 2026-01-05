@@ -1,0 +1,94 @@
+// $symbolHeight: 32px;
+// $symbolStroke: 8px;
+
+$symbolHeight: max(2vh, 2vw);
+$symbolStroke: max(0.5vh, 0.5vw);
+
+.TicTacToeCeil {
+  width: calc(($symbolHeight + $symbolStroke) * 1.5);
+  height: calc(($symbolHeight + $symbolStroke) * 1.5);
+
+  .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: none;
+    outline: none;
+    border: none;
+    position: relative;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.lastPlaced {
+  background-color: rgba(var(--secondary-color), 0.25);
+}
+
+.symbolCircle::after {
+  content: '';
+  position: absolute;
+  height: $symbolHeight;
+  border: $symbolStroke solid;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border-color: var(--color-pink);
+}
+
+.symbolSquare::before,
+.symbolSquare::after {
+  content: '';
+  position: absolute;
+  height: calc($symbolHeight*sqrt(4));
+  width: $symbolStroke;
+  background: var(--color-teal);
+}
+
+.symbolSquare::before {
+  transform: rotate(45deg);
+}
+
+.symbolSquare::after {
+  transform: rotate(-45deg);
+}
+
+.playerCircle {
+  .button:hover::after {
+    opacity: .6;
+
+    content: '';
+    position: absolute;
+    height: $symbolHeight;
+    border: $symbolStroke solid;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border-color: rgb(var(--secondary-color));
+  }
+}
+
+.playerSquare {
+  .button:hover {
+    opacity: .6;
+
+    &::after,
+    &:before {
+      content: '';
+      position: absolute;
+      height: calc($symbolHeight*sqrt(4));
+      width: $symbolStroke;
+      background: rgb(var(--secondary-color));
+    }
+
+    &::before {
+      transform: rotate(45deg);
+    }
+
+    &::after {
+      transform: rotate(-45deg);
+    }
+  }
+}

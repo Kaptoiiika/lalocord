@@ -4,6 +4,10 @@
   justify-content: center;
   align-items: center;
   min-height: calc(100% - var(--navbar-height));
+
+  @media (max-width: 625px) {
+    height: 100%;
+  }
 }
 
 .icon {

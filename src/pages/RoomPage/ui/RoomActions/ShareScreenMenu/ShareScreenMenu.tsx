@@ -1,8 +1,5 @@
-import {
-  getActionSetDisaplyMediaStream,
-  getDisplayMediaStream,
-  getStreamSettings,
-} from "../../../../../entities/RTCClient/model/selectors/RoomRTCSelectors"
+import ScreenShareIcon from '@mui/icons-material/ScreenShare'
+import StopScreenShareIcon from '@mui/icons-material/StopScreenShare'
 import {
   IconButton,
   Tooltip,
@@ -10,79 +7,67 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-} from "@mui/material"
-import ScreenShareIcon from "@mui/icons-material/ScreenShare"
-import StopScreenShareIcon from "@mui/icons-material/StopScreenShare"
-import { useRoomRTCStore } from "@/entities/RTCClient"
-import { usePopup } from "@/shared/lib/hooks/usePopup/usePopup"
-import { startViewTransition } from "@/shared/lib/utils/ViewTransition/ViewTransition"
-// import KeyboardIcon from "@mui/icons-material/Keyboard"
+  FormControlLabel,
+  Switch,
+} from '@mui/material'
+import { IpcChannels } from 'electron/main/types/ipcChannels'
+import { useSettingStore } from 'src/entities/Settings'
+import { useWebRTCStore } from 'src/entities/WebRTC'
+import { __IS_ELECTRON__ } from 'src/shared/const/config'
+import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
+import { startViewTransition } from 'src/shared/lib/utils'
 
-type ShareScreenMenuProps = {}
-
-export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
-  const mediaStream = useRoomRTCStore(getDisplayMediaStream)
-  const streamSettings = useRoomRTCStore(getStreamSettings)
-  const setDisplayMediaStream = useRoomRTCStore(getActionSetDisaplyMediaStream)
+export const ShareScreenMenu = () => {
   const { handleClick, handleClose, anchorEl, open } = usePopup()
+  const { overlayDrawEnabled, setOverlayDrawEnabled, allowDrawLine, setAllowDrawLine } = useSettingStore()
+  const screenStream = useWebRTCStore((state) => state.streams.screen)
+  const createStream = useWebRTCStore((state) => state.createStream)
+  const stopStream = useWebRTCStore((state) => state.stopStream)
 
-  const handleStopDisplayMediaStream = async () => {
+  const handleStopStream = async () => {
     handleClose()
-    mediaStream?.getTracks().forEach((track) => {
-      track.stop()
-    })
     await startViewTransition()
-    setDisplayMediaStream(null)
+    stopStream('screen')
   }
 
-  const handleStartDisplayMediaStream = async () => {
+  const handleStartStream = async () => {
     handleClose()
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia(
-        streamSettings
-      )
-      mediaStream?.getTracks().forEach((tracks) => {
-        tracks.onended = null
-        tracks.stop()
-      })
-      await startViewTransition()
-      setDisplayMediaStream(stream)
+    await startViewTransition()
+    const stream = await createStream('screen')
+
+    if (stream && overlayDrawEnabled && __IS_ELECTRON__) {
+      window.electron?.ipcRenderer.sendMessage(IpcChannels.openOverlay, undefined)
       stream.getVideoTracks().forEach((track) => {
-        track.onended = () => {
-          setDisplayMediaStream(null)
-        }
+        track.addEventListener('ended', () => {
+          window.electron?.ipcRenderer.sendMessage(IpcChannels.closeOverlay, undefined)
+        })
       })
-    } catch (error: any) {
-      console.log(error)
     }
   }
-  // const handleStartDisplayWithControllMediaStream = async () => {
-  //   handleClose()
-  //   Object.values(useRoomRTCStore.getState().connectedUsers).forEach(
-  //     (client) => {
-  //       client.media.setAllowControl(true)
-  //     }
-  //   )
-  //   if (!mediaStream) await handleStartDisplayMediaStream()
-  // }
 
   return (
     <>
-      {!mediaStream ? (
-        <Tooltip title="Share your screen" arrow>
+      {!screenStream ? (
+        <Tooltip
+          title="Share your screen"
+          arrow
+        >
           <IconButton
-            aria-label={"Share your screen"}
-            onClick={handleStartDisplayMediaStream}
+            aria-label="Share your screen"
+            onClick={handleStartStream}
             onContextMenu={handleClick}
           >
             <StopScreenShareIcon />
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Stop share" arrow>
+        <Tooltip
+          title="Stop share"
+          arrow
+        >
           <IconButton
-            aria-label={"Stop share"}
-            onClick={handleStopDisplayMediaStream}
+            aria-label="Stop share"
+            onClick={handleStopStream}
             onContextMenu={handleClick}
           >
             <ScreenShareIcon color="success" />
@@ -94,32 +79,49 @@ export const ShareScreenMenu = (props: ShareScreenMenuProps) => {
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center',
         }}
         transformOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
+          vertical: 'bottom',
+          horizontal: 'center',
         }}
       >
-        <MenuItem onClick={handleStartDisplayMediaStream}>
+        <MenuItem>
+          <FormControlLabel
+            control={
+              <Switch
+                color="primary"
+                checked={allowDrawLine}
+                onChange={() => setAllowDrawLine(!allowDrawLine)}
+              />
+            }
+            label="Allow draw line"
+          />
+        </MenuItem>
+        {__IS_ELECTRON__ && (
+          <MenuItem>
+            <FormControlLabel
+              control={
+                <Switch
+                  color="primary"
+                  checked={overlayDrawEnabled}
+                  onChange={() => setOverlayDrawEnabled(!overlayDrawEnabled)}
+                />
+              }
+              label="Overlay draw"
+            />
+          </MenuItem>
+        )}
+
+        <MenuItem onClick={handleStartStream}>
           <ListItemIcon>
             <ScreenShareIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>
-            {mediaStream ? "Change screen" : "Share your screen"}
-          </ListItemText>
+          <ListItemText>{screenStream ? 'Change screen' : 'Share your screen'}</ListItemText>
         </MenuItem>
-        {/* {__IS_ELECTRON__ && (
-          <MenuItem onClick={handleStartDisplayWithControllMediaStream}>
-            <ListItemIcon>
-              <KeyboardIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>{"Share with control"}</ListItemText>
-          </MenuItem>
-        )} */}
-        {!!mediaStream && (
-          <MenuItem onClick={handleStopDisplayMediaStream}>
+        {!!screenStream && (
+          <MenuItem onClick={handleStopStream}>
             <ListItemIcon>
               <StopScreenShareIcon fontSize="small" />
             </ListItemIcon>

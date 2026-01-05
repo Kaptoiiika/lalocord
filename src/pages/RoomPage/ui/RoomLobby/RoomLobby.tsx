@@ -1,44 +1,42 @@
-import { socketClient } from "@/shared/api/socket/socket"
-import { Chat } from "@/widgets/Chat"
-import { Stack } from "@mui/material"
-import { useEffect, useState } from "react"
-import { useWebRTCRoom } from "../../lib/useWebRTCRoom/useWebRTCRoom"
-import { RoomActions } from "../RoomActions/RoomActions"
-import { RoomIsFull } from "../RoomIsFull/RoomIsFull"
-import { RoomStreams } from "../RoomStreams/RoomStreams"
-import { RoomUsers } from "../RoomUsers/RoomUsers"
-import { WaitUserClick } from "@/features/WaitUserClick"
-import styles from "./RoomLobby.module.scss"
+import { Stack } from '@mui/material'
+import { useWebRTCRoom } from 'src/features/WebRTCRoom'
+import { Chat } from 'src/widgets/Chat'
+import { RoomStreams } from 'src/widgets/RoomStream'
 
-export const RoomLobby = () => {
-  const { handleSendMessage, handleSendBlob } = useWebRTCRoom()
-  const [roomisFull, setRoomIsfull] = useState(false)
+import { RoomActions } from '../RoomActions/RoomActions'
+import { RoomIsFull } from '../RoomIsFull/RoomIsFull'
+import { RoomUsers } from '../RoomUsers/RoomUsers'
 
-  useEffect(() => {
-    const fn = () => {
-      setRoomIsfull(true)
-    }
-    socketClient.on("room_is_full", fn)
-    return () => {
-      socketClient.off("room_is_full", fn)
-    }
-  }, [])
+import styles from './RoomLobby.module.scss'
 
-  if (roomisFull) {
+type RoomLobbyProps = {
+  isFull?: boolean
+}
+
+export const RoomLobby = (props: RoomLobbyProps) => {
+  const { isFull } = props
+  const { handleSendMessage, handleSendFile } = useWebRTCRoom()
+
+  if (isFull) {
     return <RoomIsFull />
   }
 
   return (
-    <WaitUserClick>
-      <Stack className={styles.lobby} justifyContent="space-between" height="100%">
-        <div className={styles.mainScreen}>
-          <RoomUsers />
-          <RoomStreams />
-          <RoomActions />
-        </div>
+    <Stack
+      className={styles.lobby}
+      justifyContent="space-between"
+      height="100%"
+    >
+      <div className={styles.mainScreen}>
+        <RoomUsers />
+        <RoomStreams />
+        <RoomActions />
+      </div>
 
-        <Chat onSendMessage={handleSendMessage} onSendFile={handleSendBlob} />
-      </Stack>
-    </WaitUserClick>
+      <Chat
+        onSendMessage={handleSendMessage}
+        onSendFile={handleSendFile}
+      />
+    </Stack>
   )
 }

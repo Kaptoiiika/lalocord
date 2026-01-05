@@ -1,8 +1,20 @@
 .NavbarContainer {
-  width: var(--navbar-width);
+  width: var(--navbar-size);
   flex-shrink: 0;
   border-right: var(--box-border);
   background-color: rgb(var(--bg-primary-color));
+
+  @media (max-width: 625px) {
+    width: 100%;
+    height: var(--navbar-size);
+
+    border-right: none;
+    border-bottom: var(--box-border);
+
+    .stack {
+      flex-direction: row;
+    }
+  }
 }
 
 .stack {
@@ -13,11 +25,5 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: var(--header-height);
   width: 100%;
-}
-
-.settingsWrapper {
-  width: 100vw;
-  height: 100vh;
 }

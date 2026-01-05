@@ -1,8 +1,6 @@
-export const startViewTransition = async () => {
-  return new Promise((resolve) => {
-    //@ts-ignore
+export const startViewTransition = async () =>
+  new Promise((resolve) => {
     if (document.startViewTransition)
-      //@ts-ignore
       document.startViewTransition(() => {
         resolve(true)
       })
@@ -10,4 +8,3 @@ export const startViewTransition = async () => {
       resolve(true)
     }
   })
-}

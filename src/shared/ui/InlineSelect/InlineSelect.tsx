@@ -1,7 +1,9 @@
-import { Button } from "@mui/material"
-import Typography from "@mui/material/Typography"
-import { ReactNode, useState } from "react"
-import styles from "./InlineSelect.module.scss"
+import type { ReactNode } from 'react'
+import { useState } from 'react'
+
+import { Button, Typography } from '@mui/material'
+
+import styles from './InlineSelect.module.scss'
 
 type InlineSelectProps<T> = {
   list: T[]
@@ -21,6 +23,7 @@ export const InlineSelect = <T,>(props: InlineSelectProps<T>) => {
 
   const isCurrentValue = (item: T) => {
     if (value) return item === value
+
     return item === selectedValue
   }
 
@@ -31,7 +34,7 @@ export const InlineSelect = <T,>(props: InlineSelectProps<T>) => {
         {list.map((item, index) => (
           <Button
             key={index}
-            variant={isCurrentValue(item) ? "contained" : undefined}
+            variant={isCurrentValue(item) ? 'contained' : undefined}
             onClick={() => handleSelect(item)}
           >
             {itemTitle ? itemTitle(item) : String(item)}

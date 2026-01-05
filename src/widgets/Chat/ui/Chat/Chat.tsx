@@ -1,18 +1,23 @@
-import { classNames } from "@/shared/lib/classNames/classNames"
-import { useCallback, useEffect, useState } from "react"
-import styles from "./Chat.module.scss"
-import { localstorageKeys } from "@/shared/const/localstorageKeys"
-import { useChatStore } from "../../model/store/ChatStore"
-import { MessageList } from "../MessageList/MessageList"
-import { ErrorBoundary } from "@/shared/ui/ErrorBoundary"
-import { ImagePreview } from "@/features/ImagePreview"
-import { ChatInput } from "../ChatInput/ChatInput"
-import { ChatHeader } from "../ChatHeader/ChatHeader"
+import { useCallback, useEffect, useState } from 'react'
+
+import { ImagePreview } from 'src/features/ImagePreview'
+import { localstorageKeys } from 'src/shared/const/localstorageKeys'
+import { classNames } from 'src/shared/lib/classNames/classNames'
+import { ErrorBoundary } from 'src/shared/ui/ErrorBoundary'
+
+import { useChatStore } from '../../model/store/ChatStore'
+import { ChatHeader } from '../ChatHeader/ChatHeader'
+import { ChatInput } from '../ChatInput/ChatInput'
+import { MessageList } from '../MessageList/MessageList'
+
+import styles from './Chat.module.scss'
 
 const getChatCollapsedFromLocalStorage = (): boolean => {
   const json = localStorage.getItem(localstorageKeys.CHATCOLLAPSED)
+
   if (!json) return false
   const data = JSON.parse(json)
+
   return !!data
 }
 const saveChatCollapsedToLocalStorage = (state: boolean) => {
@@ -33,6 +38,7 @@ export const Chat = (props: ChatProps) => {
   const handleCollapse = useCallback(() => {
     setCollapsed((prev) => {
       saveChatCollapsedToLocalStorage(!prev)
+
       return !prev
     })
   }, [])
@@ -59,7 +65,10 @@ export const Chat = (props: ChatProps) => {
       <ErrorBoundary errorText="Chat is broken(">
         <div className={styles.chat}>
           <MessageList />
-          <ChatInput onSendMessage={onSendMessage} onSendFile={onSendFile} />
+          <ChatInput
+            onSendMessage={onSendMessage}
+            onSendFile={onSendFile}
+          />
         </div>
       </ErrorBoundary>
       <ImagePreview />

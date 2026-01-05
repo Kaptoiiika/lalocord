@@ -1,10 +1,11 @@
-import { RouteProps } from "react-router-dom"
+import type { RouteProps } from 'react-router-dom'
 
 export const enum AppRoutes {
-  NOT_FOUND = "not_found",
+  NOT_FOUND = 'not_found',
 
-  MAIN_PAGE = "/",
-  ROOM_ID = "/room/:id",
+  MAIN_PAGE = '/',
+  ROOM_ID = '/room/:id',
+  GAME = '/game',
 }
 
 export type AppRouteProps = {

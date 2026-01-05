@@ -1,5 +1,7 @@
-import { create, StateCreator } from "zustand"
-import { ChatSchema } from "../types/ChatSchema"
+import { create } from 'zustand'
+
+import type { ChatSchema } from '../types/ChatSchema'
+import type { StateCreator } from 'zustand'
 
 const store: StateCreator<ChatSchema> = (set, get) => ({
   messageList: [new Map()],
@@ -9,11 +11,21 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
     const { messageList, messageLength } = get()
 
     const map = messageList[0]
+
     if (map.has(message.id)) {
-      map.set(message.id, { message: message, user: user })
-      set((state) => ({ ...state, messageList: [map] }))
+      map.set(message.id, {
+        message,
+        user,
+      })
+      set((state) => ({
+        ...state,
+        messageList: [map],
+      }))
     } else {
-      map.set(message.id, { message: message, user: user })
+      map.set(message.id, {
+        message,
+        user,
+      })
       set((state) => ({
         ...state,
         messageList: [map],
@@ -25,6 +37,7 @@ const store: StateCreator<ChatSchema> = (set, get) => ({
   deleteMessage(id) {
     const { messageList, messageLength } = get()
     const isDeleted = messageList[0].delete(id)
+
     set((state) => ({
       ...state,
       messageList: [messageList[0]],

@@ -1,71 +1,67 @@
-import { useMountedEffect } from "@/shared/lib/hooks/useMountedEffect/useMountedEffect"
-import { useState } from "react"
-import { useRoomRTCStore } from "@/entities/RTCClient"
-import { Select, MenuItem } from "@mui/material"
-import InputLabel from "@mui/material/InputLabel"
-import FormControl from "@mui/material/FormControl"
-import Typography from "@mui/material/Typography"
-import { SelectChangeEvent } from "@mui/material/Select/SelectInput"
-import { UserStreamSettings } from "@/entities/RTCClient/model/types/RoomRTCSchema"
-import { getUserStreamSettings } from "@/entities/RTCClient/model/selectors/RoomRTCSelectors"
+import { useState } from 'react'
 
-type SelectCameraProps = {}
+import type { SelectChangeEvent } from '@mui/material'
+import { Select, MenuItem, FormControl, Typography } from '@mui/material'
+import { useWebRTCStore } from 'src/entities/WebRTC'
+import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 
-export const SelectCamera = (props: SelectCameraProps) => {
-  const {} = props
-  const userStreamSettings = useRoomRTCStore(getUserStreamSettings)
-  const setStreamingSettings = useRoomRTCStore(
-    (state) => state.setStreamSettings
-  )
+import type { ObjectStreamConstraints } from 'src/entities/WebRTC/utils/streamConstraints'
+
+export const SelectCamera = () => {
+  const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
+  const setStreamConstraints = useWebRTCStore((state) => state.setStreamConstraints)
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
-  const [error, setError] = useState("")
-  
+  const [error, setError] = useState('')
+
   useMountedEffect(() => {
     navigator.mediaDevices
       ?.enumerateDevices()
       .then((devices) => {
-        const cameras = devices.filter((device) => device.kind === "videoinput")
+        const cameras = devices.filter((device) => device.kind === 'videoinput')
+        if (cameras.length === 0) {
+          return setError('No cameras found')
+        }
         setCameras(cameras)
       })
       .catch(() => {
-        setError("No access")
+        setError('No access')
       })
   })
 
   const handleChange = (event: SelectChangeEvent) => {
-    const newstreamSettings: UserStreamSettings = {
-      ...userStreamSettings,
+    const newstreamSettings: ObjectStreamConstraints = {
+      ...streamConstraints,
       video: {
-        ...userStreamSettings.video,
+        ...streamConstraints.video,
         deviceId: event.target.value,
       },
     }
-    setStreamingSettings(newstreamSettings)
+
+    setStreamConstraints(newstreamSettings)
   }
 
-  const selectedCamera = cameras.find((camera) => {
-    if (typeof userStreamSettings.video === "object")
-      return camera.deviceId === userStreamSettings.video.deviceId
-  })
-
-  if (error) {
-    return (
-      <FormControl sx={{ m: 1, width: 200 }}>
-        <InputLabel>{error}</InputLabel>
-      </FormControl>
-    )
-  }
+  const selectedCamera = cameras.find((camera) => camera.deviceId === streamConstraints.video.deviceId)
 
   return (
-    <FormControl sx={{ m: 1, width: 200 }}>
+    <FormControl
+      sx={{
+        p: 1,
+        width: 200,
+      }}
+    >
       <Typography>Camera</Typography>
+      {error && <Typography color="error">{error}</Typography>}
       <Select
+        disabled={!!error}
         fullWidth
-        value={selectedCamera?.deviceId || ""}
+        value={selectedCamera?.deviceId || ''}
         onChange={handleChange}
       >
         {cameras.map((camera) => (
-          <MenuItem key={camera.deviceId} value={camera.deviceId}>
+          <MenuItem
+            key={camera.deviceId}
+            value={camera.deviceId}
+          >
             {camera.label}
           </MenuItem>
         ))}

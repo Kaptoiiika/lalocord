@@ -1,9 +1,3 @@
-import { Typography } from "@mui/material"
-import styles from "./RoomIsFull.module.scss"
+import { Typography } from '@mui/material'
 
-type RoomIsFullProps = {}
-
-export const RoomIsFull = (props: RoomIsFullProps) => {
-  const {} = props
-  return <Typography variant="h1">Room is full</Typography>
-}
+export const RoomIsFull = () => <Typography variant="h1">Room is full</Typography>

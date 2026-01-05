@@ -1,0 +1,44 @@
+.badgeStatus {
+  &::after {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    right: 1px;
+    bottom: 1px;
+    border-radius: 50%;
+    z-index: 3;
+    content: "";
+  }
+}
+
+.micOnline {
+  border: 2px #44b700 solid;
+}
+
+.micOffline {
+  border: 2px #757575 solid;
+}
+
+.red {
+  &::after {
+    border: var(--box-border);
+    background-color: #f44336;
+    color: #f44336;
+  }
+}
+
+.yellow {
+  &::after {
+    border: var(--box-border);
+    background-color: #ffef62;
+    color: #ffef62;
+  }
+}
+
+.green {
+  &::after {
+    border: var(--box-border);
+    background-color: #44b700;
+    color: #44b700;
+  }
+}

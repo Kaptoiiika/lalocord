@@ -1,1 +1,1 @@
-export { RoomPagelazy as RoomPage } from "./ui/RoomPage/RoomPage.lazy"
+export { RoomPagelazy as RoomPage } from './ui/RoomPage/RoomPage.lazy'

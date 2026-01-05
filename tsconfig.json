@@ -1,35 +1,28 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "types": ["node"],
-
-    /* Bundler mode */
-    "outDir": "./dist/",
+    "target": "es2022",
+    "module": "esnext",
     "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "dom", "dom.iterable"],
+    "strict": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "isolatedModules": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
-    "jsx": "react-jsx",
-
-    /* Linting */
-    "strict": true,
-    "noFallthroughCasesInSwitch": true
+    "isolatedModules": true,
+    "noEmit": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "rootDir": ".",
+    "rootDirs": ["src", "electron"],
+    "baseUrl": ".",
+    "allowJs": true
   },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  },
-  "include": ["src", "./electron/", "./config/jest/setupTest.ts"],
-  "exclude": []
+  "include": ["src/**/**/*", "electron/**/*"],
+  "exclude": ["node_modules", "dist", "dist-electron", "release"]
 }
