@@ -45,6 +45,16 @@ export const ShareScreenMenu = () => {
     }
   }
 
+  const handleOverlayDrawChange = (enabled: boolean) => {
+    setOverlayDrawEnabled(enabled)
+    if (!__IS_ELECTRON__ && !screenStream) return
+    if (enabled) {
+      window.electron?.ipcRenderer.sendMessage(IpcChannels.openOverlay, undefined)
+    } else {
+      window.electron?.ipcRenderer.sendMessage(IpcChannels.closeOverlay, undefined)
+    }
+  }
+
   return (
     <>
       {!screenStream ? (
@@ -106,7 +116,7 @@ export const ShareScreenMenu = () => {
                 <Switch
                   color="primary"
                   checked={overlayDrawEnabled}
-                  onChange={() => setOverlayDrawEnabled(!overlayDrawEnabled)}
+                  onChange={() => handleOverlayDrawChange(!overlayDrawEnabled)}
                 />
               }
               label="Overlay draw"

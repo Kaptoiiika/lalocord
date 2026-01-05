@@ -1,5 +1,6 @@
+import type { MediaSource } from '../get_media_source/get_media_source'
+import type { ExternalLinePayload } from 'src/features/CanvasPainter/ui/CanvasPainter'
 import type { ClientKeyPressEvent } from 'src/shared/types/ClientEvents'
-import type { ExternalLinePayload } from 'src/widgets/RoomStream/ui/CanvasPainter'
 
 
 export const enum IpcChannels {
@@ -25,7 +26,7 @@ export interface IpcToMainEventMap {
 
 //renderer sendMessage(key, (value)=>{})
 export interface IpcToRendererEventMap {
-  getMediaSource: Electron.DesktopCapturerSource[]
+  getMediaSource: MediaSource[]
   keyRelease: void
   keypress: void
   drawOverlayLine: ExternalLinePayload

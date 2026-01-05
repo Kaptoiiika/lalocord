@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import { useCanvasDrawing } from 'src/widgets/RoomStream/ui/CanvasPainter'
+import { useCanvasDrawing } from 'src/features/CanvasPainter/ui/CanvasPainter'
 
 import './overlay.scss'
 

@@ -10,8 +10,6 @@ const DEFAULT_WIDTH = 2560
 const DEFAULT_HEIGHT = 1440
 const DEFAULT_FADE_DELAY_MS = 2500
 const DEFAULT_FADE_DURATION_MS = 550
-const DEFAULT_STROKE_COLOR = '#f00'
-const DEFAULT_STROKE_WIDTH = 8
 
 export const CanvasPainter = (props: CanvasPainterProps) => {
   const {
@@ -21,8 +19,6 @@ export const CanvasPainter = (props: CanvasPainterProps) => {
     height = DEFAULT_HEIGHT,
     fadeDelayMs = DEFAULT_FADE_DELAY_MS,
     fadeDurationMs = DEFAULT_FADE_DURATION_MS,
-    strokeColor = DEFAULT_STROKE_COLOR,
-    strokeWidth = DEFAULT_STROKE_WIDTH,
     needCtrlKey = false,
     isLocal = false,
   } = props
@@ -34,8 +30,6 @@ export const CanvasPainter = (props: CanvasPainterProps) => {
     id,
     fadeDelayMs,
     fadeDurationMs,
-    strokeColor,
-    strokeWidth,
     needCtrlKey,
     user,
     isLocal,

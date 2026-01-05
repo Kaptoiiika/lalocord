@@ -17,7 +17,7 @@ export const createBlackVideoTrack = () => {
     ctx.fillStyle = 'black'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
   }
-  const stream = canvas.captureStream()
+  const stream = canvas.captureStream(0)
   return stream.getVideoTracks()[0]
 }
 

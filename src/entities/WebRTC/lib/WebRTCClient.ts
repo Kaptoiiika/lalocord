@@ -269,8 +269,20 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   setVideoBitrate(bitrate: number) {
     const screenVideoParams = { ...this.senders.screenVideo.getParameters() }
     const webCamParams = { ...this.senders.webCam.getParameters() }
-    screenVideoParams.encodings = screenVideoParams.encodings.map((encoding) => ({ ...encoding, maxBitrate: bitrate }))
-    webCamParams.encodings = webCamParams.encodings.map((encoding) => ({ ...encoding, maxBitrate: bitrate }))
+    screenVideoParams.encodings = screenVideoParams.encodings.map((encoding) => ({
+      ...encoding,
+      maxBitrate: bitrate,
+      priority: 'high' as RTCPriorityType,
+      networkPriority: 'high' as RTCPriorityType,
+    }))
+    screenVideoParams.degradationPreference = 'maintain-framerate'
+
+    webCamParams.encodings = webCamParams.encodings.map((encoding) => ({
+      ...encoding,
+      maxBitrate: bitrate,
+    }))
+    webCamParams.degradationPreference = 'maintain-framerate'
+
     this.senders.screenVideo.setParameters(screenVideoParams)
     this.senders.webCam.setParameters(webCamParams)
   }

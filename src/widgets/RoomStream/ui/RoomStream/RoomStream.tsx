@@ -3,6 +3,7 @@ import { memo, useId, useRef, useState } from 'react'
 import { DrawOutlined, PictureInPictureOutlined } from '@mui/icons-material'
 import RemoveIcon from '@mui/icons-material/Remove'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { CanvasPainter } from 'src/features/CanvasPainter'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
@@ -13,7 +14,6 @@ import type { StreamType } from 'src/entities/WebRTC'
 import type { RoomUser } from 'src/features/WebRTCRoom'
 
 import { useRoomStreamStore } from '../../model/store/RoomStreamStore'
-import { CanvasPainter } from '../CanvasPainter/CanvasPainter'
 
 import styles from './RoomStream.module.scss'
 

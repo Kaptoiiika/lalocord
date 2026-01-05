@@ -7,14 +7,13 @@ import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import type { ExternalLinePayload } from './types'
 
 import { useCanvasDrawing } from './useCanvasDrawing'
+import { useCanvasPainterStore } from '../../model/store/CanvasPainterStore'
 
 type UseWebRTCCanvasDrawingOptions = {
   canvasRef: React.RefObject<HTMLCanvasElement | null>
   id: string
   fadeDelayMs: number
   fadeDurationMs: number
-  strokeColor: string
-  strokeWidth: number
   needCtrlKey: boolean
   user?: RoomUser
   isLocal: boolean
@@ -23,8 +22,8 @@ const drawLineChannel = new BroadcastChannel('draw_line_channel')
 
 export const useWebRTCCanvasDrawing = (options: UseWebRTCCanvasDrawingOptions) => {
   const { allowDrawLine, overlayDrawEnabled } = useSettingStore()
-  const { canvasRef, id, fadeDelayMs, fadeDurationMs, strokeColor, strokeWidth, needCtrlKey, user, isLocal } = options
-
+  const { canvasRef, id, fadeDelayMs, fadeDurationMs, needCtrlKey, user, isLocal } = options
+  const { color, strokeWidth } = useCanvasPainterStore()
   const roomUsers = useWebRTCRoomStore((state) => state.users)
 
   const handleLineDraw = useCallback(
@@ -46,7 +45,7 @@ export const useWebRTCCanvasDrawing = (options: UseWebRTCCanvasDrawingOptions) =
     id,
     fadeDelayMs,
     fadeDurationMs,
-    strokeColor,
+    strokeColor: color,
     strokeWidth,
     needCtrlKey,
     enabled: !isLocal,
@@ -92,4 +91,3 @@ export const useWebRTCCanvasDrawing = (options: UseWebRTCCanvasDrawingOptions) =
 
   return { drawExternalLine, clearStrokes }
 }
-

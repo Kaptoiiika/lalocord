@@ -65,7 +65,7 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
         if (type === 'mic') {
           track.contentHint = 'speech'
         } else if (type === 'screen') {
-          // track.contentHint = 'detail'
+          track.contentHint = 'detail'
         } else if (type === 'webCam') {
           track.contentHint = 'motion'
         }

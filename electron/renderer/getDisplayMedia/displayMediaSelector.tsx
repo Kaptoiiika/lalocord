@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import { Button, Checkbox, FormControlLabel, Stack } from '@mui/material'
+import { Button, Checkbox, FormControlLabel } from '@mui/material'
+import { localstorageKeys } from 'src/shared/const/localstorageKeys'
 
-import { localstorageKeys } from '../../../src/shared/const/localstorageKeys'
+import type { MediaSource } from '../../main/get_media_source/get_media_source'
 
 import styles from './displayMediaSelector.module.scss'
 
 const getMediaSource = async () => {
-  const data = await new Promise<Electron.DesktopCapturerSource[]>((res) => {
+  const data = await new Promise<MediaSource[]>((res, rej) => {
+    if (!window.electron) return rej()
     window.electron?.ipcRenderer.once('getMediaSource', (source) => {
       res(source)
     })
@@ -29,7 +31,7 @@ const setDesktopAudio = (value: boolean) => {
 }
 
 export const displayMediaSelector = (): Promise<{
-  source?: Electron.DesktopCapturerSource
+  source?: MediaSource
   allowAudio?: boolean
 }> =>
   // eslint-disable-next-line no-async-promise-executor
@@ -39,8 +41,8 @@ export const displayMediaSelector = (): Promise<{
     document.body.appendChild(modalContainer)
     const main = createRoot(modalContainer)
 
-    const accept = (node?: Electron.DesktopCapturerSource, allowAudio?: boolean) => {
-      res({ source: node, allowAudio })
+    const accept = (source?: MediaSource, allowAudio?: boolean) => {
+      res({ source, allowAudio })
       main.unmount()
     }
     const cancel = () => {
@@ -58,47 +60,50 @@ export const displayMediaSelector = (): Promise<{
       return (
         <div className={styles.wrapper}>
           <div className={styles.container}>
+            <h2 className={styles.title}>Choose screen for translation</h2>
+
             <div className={styles.sourceList}>
-              <button
-                onClick={() => {
-                  accept()
-                }}
-              >
-                All screen
-              </button>
               {sources.map((source) => (
-                <button
-                  className={styles.sourceButton}
+                <div
+                  className={styles.sourceCard}
                   key={source.id}
                   onClick={() => accept(source, allowAudio)}
                 >
-                  {/* <img  className={styles.sourceButtonImg}  /> */}
-                  {source.name}
-                </button>
+                  <div className={styles.sourceCardImgWrapper}>
+                    <img
+                      className={styles.sourceCardImg}
+                      src={source.thumbnailDataUrl}
+                      alt={source.name}
+                    />
+                  </div>
+                  <div
+                    className={styles.sourceCardName}
+                    title={source.name}
+                  >
+                    {source.name}
+                  </div>
+                </div>
               ))}
             </div>
 
-            <Stack
-              direction="row"
-              gap={4}
-            >
+            <div className={styles.footer}>
               <FormControlLabel
                 className={styles.allowAudioCheckbox}
                 checked={allowAudio}
-                label="Allow audio"
+                label="Capture audio"
                 control={<Checkbox onChange={handleChangeAudio} />}
               />
               <Button
-                variant="contained"
+                variant="outlined"
+                className={styles.cancelButton}
                 onClick={cancel}
               >
-                cancel
+                Cancel
               </Button>
-            </Stack>
+            </div>
           </div>
         </div>
       )
     }
     main.render(<Selector />)
   })
-

@@ -1,5 +1,10 @@
 $border-width: 5px;
 
+body {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
 .overlay {
   overflow: hidden;
   position: absolute;
