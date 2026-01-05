@@ -158,7 +158,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
             direction="row"
             gap={2}
           >
-            {canDrawLine && (
+            {canDrawLine && !isLocal && (
               <Tooltip title="Draw a line">
                 <IconButton
                   color="primary"

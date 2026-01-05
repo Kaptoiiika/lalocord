@@ -33,13 +33,16 @@ const createWindow = () => {
     win.webContents.openDevTools()
   } else {
     win.loadFile(path.join(__dirname, '../dist/index.html'))
-    win.setMenu(null)
   }
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('blob:')) return { action: 'allow' as const }
     shell.openExternal(url)
     return { action: 'deny' as const }
+  })
+
+  win.on('closed', () => {
+    app.quit()
   })
 }
 

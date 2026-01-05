@@ -92,15 +92,14 @@
       "dist/**/*",
       "dist-electron/**/*"
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "Kaptoiiika",
+      "repo": "lalocord"
+    },
     "win": {
       "target": [
         "nsis"
-      ],
-      "icon": "public/logo512.png"
-    },
-    "mac": {
-      "target": [
-        "dmg"
       ],
       "icon": "public/logo512.png"
     },

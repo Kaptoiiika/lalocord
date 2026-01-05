@@ -29,11 +29,9 @@ const Overlay = () => {
   useEffect(() => {
     const drawLineChannel = new BroadcastChannel('draw_line_channel')
     drawLineChannel.onmessage = (event) => {
-      console.log('onmessage', event)
       drawExternalLine(event.data)
     }
 
-    console.log('drawLineChannel', drawLineChannel)
     return () => {
       drawLineChannel.close()
     }

@@ -42,7 +42,7 @@ ipcMain.on(IpcChannels.openOverlay, () => {
     overlayWindow.loadURL('http://localhost:3000/electron/renderer/overlay/overlay.html')
     overlayWindow.webContents.openDevTools()
   } else {
-    overlayWindow.loadFile(path.join(__dirname, '../../../dist/electron/renderer/overlay/overlay.html'))
+    overlayWindow.loadFile(path.join(__dirname, '../dist/electron/renderer/overlay/overlay.html'))
     overlayWindow.setMenu(null)
   }
 })
