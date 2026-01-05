@@ -2,17 +2,39 @@ import { resolve } from 'path'
 
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
-import electron from 'vite-plugin-electron'
-import electronRenderer from 'vite-plugin-electron-renderer'
 import eslint from 'vite-plugin-eslint'
 import svgr from 'vite-plugin-svgr'
 import viteTsconfigPaths from 'vite-tsconfig-paths'
 
 import type { PluginOption } from 'vite'
 
+// Опциональная загрузка electron-плагинов
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+type ElectronPlugin = typeof import('vite-plugin-electron').default
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+type ElectronRendererPlugin = typeof import('vite-plugin-electron-renderer').default
+
+let electron: ElectronPlugin | undefined
+let electronRenderer: ElectronRendererPlugin | undefined
+
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  electron = require('vite-plugin-electron').default
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  electronRenderer = require('vite-plugin-electron-renderer').default
+} catch {
+  // Electron-плагины не установлены
+}
+
 export default ({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const isElectron = mode === 'electron'
+
+  if (isElectron && (!electron || !electronRenderer)) {
+    throw new Error(
+      'Electron plugins are not installed. Run "npm run install:electron" to install them.'
+    )
+  }
 
   const electronHtml: Record<string, string> = isElectron
     ? {
@@ -20,7 +42,7 @@ export default ({ mode }: { mode: string }) => {
       }
     : {}
 
-  const electronPlugins: PluginOption[] = isElectron
+  const electronPlugins: PluginOption[] = isElectron && electron && electronRenderer
     ? [
         electron([
           {
