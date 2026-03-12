@@ -1,7 +1,9 @@
 import path from 'path'
 
-import { ipcMain } from 'electron'
+import { ipcMain, screen } from 'electron'
 import { BrowserWindow } from 'electron'
+
+import type { OpenOverlayParams } from '../types/ipcChannels';
 
 import { IpcChannels } from '../types/ipcChannels'
 
@@ -15,27 +17,47 @@ export type OverlayOpenArgs = {
 
 let overlayWindow: BrowserWindow | null = null
 
-ipcMain.on(IpcChannels.openOverlay, () => {
+ipcMain.on(IpcChannels.openOverlay, (_event, params?: OpenOverlayParams) => {
   if (overlayWindow) {
+    if (params?.bounds) {
+      overlayWindow.setFullScreen(false)
+      overlayWindow.setPosition(params.bounds.x, params.bounds.y)
+      overlayWindow.setFullScreen(true)
+    }
     return
   }
 
-  overlayWindow = new BrowserWindow({
+  const bounds = params?.bounds ?? screen.getPrimaryDisplay().bounds
+
+  const windowOptions: Electron.BrowserWindowConstructorOptions = {
+    x: bounds.x,
+    y: bounds.y,
+    width: bounds.width,
+    height: bounds.height,
     transparent: true,
     frame: false,
     focusable: false,
-    alwaysOnTop: true,
     hasShadow: false,
-    fullscreen: true,
-
+    skipTaskbar: true,
+    resizable: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       spellcheck: true,
       contextIsolation: true,
       nodeIntegration: false,
     },
-  })
+  }
 
+  overlayWindow = new BrowserWindow(windowOptions)
+
+  overlayWindow.setPosition(bounds.x, bounds.y)
+  overlayWindow.setFullScreen(true)
+  overlayWindow.setAlwaysOnTop(true, 'screen-saver', 1)
+  overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
   overlayWindow.setIgnoreMouseEvents(true, { forward: true })
 
   if (__IS_DEV__) {

@@ -8,6 +8,10 @@ import type { MediaSource } from '../../main/get_media_source/get_media_source'
 
 import styles from './displayMediaSelector.module.scss'
 
+let lastSelectedSource: MediaSource | null = null
+
+export const getLastSelectedSource = () => lastSelectedSource
+
 const getMediaSource = async () => {
   const data = await new Promise<MediaSource[]>((res, rej) => {
     if (!window.electron) return rej()
@@ -42,6 +46,7 @@ export const displayMediaSelector = (): Promise<{
     const main = createRoot(modalContainer)
 
     const accept = (source?: MediaSource, allowAudio?: boolean) => {
+      lastSelectedSource = source ?? null
       res({ source, allowAudio })
       main.unmount()
     }

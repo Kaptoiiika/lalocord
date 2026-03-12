@@ -1,7 +1,12 @@
-import type { MediaSource } from '../get_media_source/get_media_source'
+import type { MediaSource, MediaSourceBounds } from '../get_media_source/get_media_source'
 import type { ExternalLinePayload } from 'src/features/CanvasPainter/ui/CanvasPainter'
 import type { ClientKeyPressEvent } from 'src/shared/types/ClientEvents'
 
+export interface OpenOverlayParams {
+  bounds?: MediaSourceBounds
+  sourceId?: string
+  isScreen?: boolean
+}
 
 export const enum IpcChannels {
   getMediaSource = 'getMediaSource',
@@ -20,7 +25,7 @@ export interface IpcToMainEventMap {
   keyRelease: void
   keypress: ClientKeyPressEvent
   drawOverlayLine: ExternalLinePayload
-  openOverlay: void
+  openOverlay: OpenOverlayParams | void
   closeOverlay: void
 }
 

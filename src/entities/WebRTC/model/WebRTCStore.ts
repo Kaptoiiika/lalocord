@@ -112,6 +112,9 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
     if (stream) {
       stream.getTracks().forEach((track) => {
         track.stop()
+        // https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack/ended_event
+        // ** The only case where the track ends but the ended event is not fired is when calling MediaStreamTrack.stop.
+        track.dispatchEvent(new Event('ended'))
       })
     }
     set((state) => ({

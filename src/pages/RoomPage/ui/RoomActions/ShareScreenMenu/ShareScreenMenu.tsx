@@ -11,11 +11,25 @@ import {
   Switch,
 } from '@mui/material'
 import { IpcChannels } from 'electron/main/types/ipcChannels'
+import { getLastSelectedSource } from 'electron/renderer/getDisplayMedia/displayMediaSelector'
 import { useSettingStore } from 'src/entities/Settings'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { startViewTransition } from 'src/shared/lib/utils'
+
+import type { OpenOverlayParams } from 'electron/main/types/ipcChannels';
+
+const getOverlayParams = (): OpenOverlayParams | undefined => {
+  const source = getLastSelectedSource()
+  if (!source) return undefined
+
+  return {
+    bounds: source?.bounds,
+    sourceId: source?.id,
+    isScreen: source?.isScreen,
+  }
+}
 
 export const ShareScreenMenu = () => {
   const { handleClick, handleClose, anchorEl, open } = usePopup()
@@ -34,9 +48,10 @@ export const ShareScreenMenu = () => {
     handleClose()
     await startViewTransition()
     const stream = await createStream('screen')
+    const params = getOverlayParams()
 
-    if (stream && overlayDrawEnabled && __IS_ELECTRON__) {
-      window.electron?.ipcRenderer.sendMessage(IpcChannels.openOverlay, undefined)
+    if (stream && overlayDrawEnabled && __IS_ELECTRON__ && params?.isScreen) {
+      window.electron?.ipcRenderer.sendMessage(IpcChannels.openOverlay, params)
       stream.getVideoTracks().forEach((track) => {
         track.addEventListener('ended', () => {
           window.electron?.ipcRenderer.sendMessage(IpcChannels.closeOverlay, undefined)
@@ -47,9 +62,10 @@ export const ShareScreenMenu = () => {
 
   const handleOverlayDrawChange = (enabled: boolean) => {
     setOverlayDrawEnabled(enabled)
-    if (!__IS_ELECTRON__ && !screenStream) return
+    if (!__IS_ELECTRON__ || !screenStream) return
     if (enabled) {
-      window.electron?.ipcRenderer.sendMessage(IpcChannels.openOverlay, undefined)
+      const params = getOverlayParams()
+      window.electron?.ipcRenderer.sendMessage(IpcChannels.openOverlay, params)
     } else {
       window.electron?.ipcRenderer.sendMessage(IpcChannels.closeOverlay, undefined)
     }
