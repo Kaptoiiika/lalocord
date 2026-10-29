@@ -64,6 +64,8 @@ export default ({ mode }: { mode: string }) => {
                     '@nut-tree-fork/libnut-win32',
                     '@nut-tree-fork/libnut-linux',
                     '@nut-tree-fork/libnut-darwin',
+                    '@fails-components/webtransport',
+                    '@fails-components/webtransport-transport-http3-quiche',
                   ],
                 },
               },
@@ -103,7 +105,7 @@ export default ({ mode }: { mode: string }) => {
     },
 
     server: {
-      port: 3000,
+      port: 4000,
     },
     resolve: {
       alias: {

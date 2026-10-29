@@ -13,3 +13,4 @@ todo.md
 /.webpack
 /.vite
 /.hidden
+/vendor/ffmpeg

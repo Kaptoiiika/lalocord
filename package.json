@@ -27,11 +27,14 @@
     "prettier": "prettier src/**/*.{js,jsx,ts,tsx,css,md,json} --check",
     "prettier:fix": "prettier src/**/*.{js,jsx,ts,tsx} --write ",
     "prettier-lint": "npm run prettier && npm run lint",
-    "format": "npm run prettier:fix && npm run lint:fix"
+    "format": "npm run prettier:fix && npm run lint:fix",
+    "fetch:ffmpeg": "node scripts/fetch-ffmpeg.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@fails-components/webtransport": "^1.6.11",
+    "@fails-components/webtransport-transport-http3-quiche": "^1.6.11",
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
     "@nut-tree-fork/nut-js": "^4.2.6",
@@ -40,6 +43,7 @@
     "react-dom": "^19.1.1",
     "react-linkify": "^1.0.0-alpha",
     "react-router-dom": "^7.8.1",
+    "selfsigned": "^5.5.0",
     "socket.io-client": "^4.8.1",
     "swr": "^2.3.6",
     "web-vitals": "^5.1.0",
@@ -102,10 +106,24 @@
       "node_modules/@nut-tree-fork/libnut-linux/**/*",
       "node_modules/@nut-tree-fork/libnut-darwin/**/*",
       "node_modules/bindings/**/*",
-      "node_modules/file-uri-to-path/**/*"
+      "node_modules/file-uri-to-path/**/*",
+      "node_modules/@fails-components/webtransport/**/*",
+      "node_modules/@fails-components/webtransport-transport-http3-quiche/**/*",
+      "node_modules/debug/**/*",
+      "node_modules/ms/**/*"
     ],
     "asarUnpack": [
       "**/node_modules/**"
+    ],
+    "extraResources": [
+      {
+        "from": "vendor/ffmpeg/ffmpeg.exe",
+        "to": "ffmpeg/ffmpeg.exe"
+      },
+      {
+        "from": "electron/main/game_session/transport_host.mjs",
+        "to": "game-session/transport_host.mjs"
+      }
     ],
     "publish": {
       "provider": "github",

@@ -10,8 +10,8 @@ import { getWheelNotches } from '../../lib/getWheelNotches'
 
 import styles from './RemoteControlLayer.module.scss'
 
-type RemoteControlLayerProps = {
-  videoRef: RefObject<HTMLVideoElement | null>
+type RemoteControlLayerProps<T extends HTMLVideoElement | HTMLCanvasElement> = {
+  videoRef: RefObject<T | null>
   onControlEvent: (event: RemoteControlEvent) => void
   onExit: () => void
 }
@@ -35,7 +35,7 @@ const pointerButtonToRemote = (button: number): RemoteControlMouseButton | null 
   return null
 }
 
-export const RemoteControlLayer = (props: RemoteControlLayerProps) => {
+export const RemoteControlLayer = <T extends HTMLVideoElement | HTMLCanvasElement>(props: RemoteControlLayerProps<T>) => {
   const { videoRef, onControlEvent, onExit } = props
   const layerRef = useRef<HTMLDivElement>(null)
   const onControlEventRef = useRef(onControlEvent)

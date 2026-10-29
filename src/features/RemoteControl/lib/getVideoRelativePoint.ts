@@ -12,13 +12,13 @@ const getContentScale = (objectFit: string, scaleX: number, scaleY: number) => {
 }
 
 export const getVideoRelativePoint = (
-  video: HTMLVideoElement,
+  video: HTMLVideoElement | HTMLCanvasElement,
   clientX: number,
   clientY: number
 ): VideoPoint | null => {
   const rect = video.getBoundingClientRect()
-  const videoWidth = video.videoWidth
-  const videoHeight = video.videoHeight
+  const videoWidth = video instanceof HTMLCanvasElement ? video.width : video.videoWidth
+  const videoHeight = video instanceof HTMLCanvasElement ? video.height : video.videoHeight
 
   if (!rect.width || !rect.height || !videoWidth || !videoHeight) return null
 

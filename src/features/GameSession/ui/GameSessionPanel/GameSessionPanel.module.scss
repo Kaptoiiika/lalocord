@@ -1,0 +1,22 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  color: #fff;
+}
+
+.stat {
+  margin: 0;
+  font-size: 16px;
+}
+
+.stop {
+  width: fit-content;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #d32f2f;
+  color: #fff;
+  cursor: pointer;
+}

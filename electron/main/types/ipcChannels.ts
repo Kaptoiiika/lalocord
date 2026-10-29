@@ -1,6 +1,7 @@
 import type { MediaSource, MediaSourceBounds } from '../get_media_source/get_media_source'
 import type { ExternalLinePayload } from 'src/features/CanvasPainter/ui/CanvasPainter'
 import type { RemoteControlEvent } from 'src/shared/types/ClientEvents'
+import type { GameSessionOffer, GameSessionStats } from 'src/shared/types/GameSession'
 
 export interface OpenOverlayParams {
   bounds?: MediaSourceBounds
@@ -20,6 +21,15 @@ export const enum IpcChannels {
   remoteControlStart = 'remoteControlStart',
   remoteControlStop = 'remoteControlStop',
   remoteControlInput = 'remoteControlInput',
+  gameSessionStart = 'gameSessionStart',
+  gameSessionStop = 'gameSessionStop',
+  gameSessionReady = 'gameSessionReady',
+  gameSessionEnded = 'gameSessionEnded',
+  gameSessionStats = 'gameSessionStats',
+  gameSessionFailed = 'gameSessionFailed',
+  gameViewOpen = 'gameViewOpen',
+  gameViewOffer = 'gameViewOffer',
+  gameViewClose = 'gameViewClose',
 }
 
 export type IpcEventMap<T> = Record<IpcChannels, T>
@@ -33,6 +43,15 @@ export interface IpcToMainEventMap {
   remoteControlStart: RemoteControlStartParams
   remoteControlStop: void
   remoteControlInput: RemoteControlEvent
+  gameSessionStart: { bounds?: MediaSourceBounds }
+  gameSessionStop: void
+  gameSessionReady: void
+  gameSessionEnded: void
+  gameSessionStats: void
+  gameSessionFailed: void
+  gameViewOpen: GameSessionOffer
+  gameViewOffer: void
+  gameViewClose: void
 }
 
 //renderer sendMessage(key, (value)=>{})
@@ -44,4 +63,13 @@ export interface IpcToRendererEventMap {
   remoteControlStart: void
   remoteControlStop: void
   remoteControlInput: void
+  gameSessionStart: void
+  gameSessionStop: void
+  gameSessionReady: GameSessionOffer
+  gameSessionEnded: void
+  gameSessionStats: GameSessionStats
+  gameSessionFailed: string
+  gameViewOpen: void
+  gameViewOffer: GameSessionOffer
+  gameViewClose: void
 }

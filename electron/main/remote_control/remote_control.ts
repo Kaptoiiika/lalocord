@@ -42,6 +42,9 @@ const buttonByName: Record<RemoteControlMouseButton, string> = {
 }
 
 let screenBounds: MediaSourceBounds | null = null
+let gameInputBounds: MediaSourceBounds | null = null
+
+const activeBounds = () => gameInputBounds ?? screenBounds
 let wheelX = 0
 let wheelY = 0
 const pressedKeys = new Set<string>()
@@ -56,12 +59,13 @@ const limitSteps = (steps: number) => {
 
 // Electron display bounds are DIP. libnut addresses physical pixels.
 const toScreenPoint = (x: number, y: number) => {
-  if (!screenBounds) return null
+  const bounds = activeBounds()
+  if (!bounds) return null
   if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1) return null
 
   const dipPoint = {
-    x: Math.round(screenBounds.x + x * screenBounds.width),
-    y: Math.round(screenBounds.y + y * screenBounds.height),
+    x: Math.round(bounds.x + x * bounds.width),
+    y: Math.round(bounds.y + y * bounds.height),
   }
   let physicalPoint = dipPoint
 
@@ -85,7 +89,7 @@ const movePointer = (x: number, y: number) => {
 }
 
 const scrollBy = (stepsX: number, stepsY: number) => {
-  if (!screenBounds || (stepsX === 0 && stepsY === 0)) return
+  if (!activeBounds() || (stepsX === 0 && stepsY === 0)) return
 
   libnut.scrollMouse(stepsX, -stepsY)
 }
@@ -114,7 +118,7 @@ const releaseButton = (name: RemoteControlMouseButton) => {
 }
 
 const pressKey = (code: ClientKeys) => {
-  if (!screenBounds) return
+  if (!activeBounds()) return
   const key = keyHtmlToNut(code)
   if (!key || pressedKeys.has(key)) return
   pressedKeys.add(key)
@@ -163,7 +167,7 @@ const runInput = (action: () => void) => {
 
 const handleInput = (event: RemoteControlEvent) => {
   if (!isRemoteControlEvent(event)) return
-  if (!screenBounds && event.type !== 'release') return
+  if (!activeBounds() && event.type !== 'release') return
 
   switch (event.type) {
     case 'mousemove':
@@ -179,7 +183,7 @@ const handleInput = (event: RemoteControlEvent) => {
       break
     case 'mouseup':
       runInput(() => {
-        if (screenBounds) movePointer(event.x, event.y)
+        if (activeBounds()) movePointer(event.x, event.y)
         releaseButton(event.button)
       })
       break
@@ -206,7 +210,18 @@ const handleInput = (event: RemoteControlEvent) => {
 
 const stopControl = () => {
   screenBounds = null
+  if (gameInputBounds) return
+
   releasePressedInputs()
+}
+
+export const setGameInputBounds = (bounds: MediaSourceBounds | null) => {
+  gameInputBounds = bounds
+  if (!bounds) releasePressedInputs()
+}
+
+export const injectRemoteControlEvent = (event: RemoteControlEvent) => {
+  handleInput(event)
 }
 
 ipcMain.on(
@@ -230,5 +245,6 @@ ipcMain.on(
 
 app.on('before-quit', () => {
   screenBounds = null
+  gameInputBounds = null
   releasePressedInputs()
 })

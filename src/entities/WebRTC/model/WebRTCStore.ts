@@ -4,7 +4,12 @@ import { create } from 'zustand'
 import type { ObjectStreamConstraints } from '../utils/streamConstraints'
 import type { StateCreator } from 'zustand'
 
-import { getStreamSettingsfromLocalStorage, saveStreamConstraintsToLocalStorage } from '../utils/streamConstraints'
+import {
+  getScreenAudioConstraints,
+  getScreenVideoConstraints,
+  getStreamSettingsfromLocalStorage,
+  saveStreamConstraintsToLocalStorage,
+} from '../utils/streamConstraints'
 import type { StreamType } from '../types'
 import { createMediaStream } from '../utils'
 
@@ -13,6 +18,8 @@ type WebRTCStore = {
   createStream: (type: StreamType) => Promise<MediaStream | null>
   stopStream: (type: StreamType) => void
   restartStream: (type: StreamType) => void
+  holdGameScreenTile: () => void
+  releaseGameScreenTile: () => void
 
   streamConstraints: ObjectStreamConstraints
   setStreamConstraints: (streamConstraints: ObjectStreamConstraints) => void
@@ -22,6 +29,45 @@ type WebRTCStore = {
 
   bitrate: number
   setBitrate: (bitrate: number) => void
+}
+
+const applyContentHint = (type: StreamType, track: MediaStreamTrack) => {
+  try {
+    if (track.kind === 'audio') {
+      if (type === 'mic') track.contentHint = 'speech'
+      return
+    }
+
+    track.contentHint = 'motion'
+  } catch (error) {
+    // firefox not support contentHint
+    console.error('error set contentHint', error)
+  }
+}
+
+const gamePoster: { canvas: HTMLCanvasElement | null; stream: MediaStream | null } = {
+  canvas: null,
+  stream: null,
+}
+
+const createGamePosterStream = () => {
+  const canvas = document.createElement('canvas')
+  canvas.width = 1280
+  canvas.height = 720
+  const context = canvas.getContext('2d')
+  if (context) {
+    context.fillStyle = '#111418'
+    context.fillRect(0, 0, canvas.width, canvas.height)
+    context.fillStyle = '#ffffff'
+    context.font = '48px sans-serif'
+    context.textAlign = 'center'
+    context.fillText('Game session', canvas.width / 2, canvas.height / 2)
+  }
+
+  gamePoster.canvas = canvas
+  gamePoster.stream = canvas.captureStream(1)
+
+  return gamePoster.stream
 }
 
 const store: StateCreator<WebRTCStore> = (set, get) => ({
@@ -61,18 +107,7 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
     }
 
     stream?.getTracks().forEach((track) => {
-      try {
-        if (type === 'mic') {
-          track.contentHint = 'speech'
-        } else if (type === 'screen') {
-          track.contentHint = 'detail'
-        } else if (type === 'webCam') {
-          track.contentHint = 'motion'
-        }
-      } catch (error) {
-        // firefox not support contentHint
-        console.error('error set contentHint', error)
-      }
+      applyContentHint(type, track)
 
       track.onended = () => {
         set((state) => ({
@@ -101,10 +136,41 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
     const streamConstraints = get().streamConstraints
     const stream = await createMediaStream(type, streamConstraints)
     if (stream) {
+      stream.getTracks().forEach((track) => {
+        applyContentHint(type, track)
+      })
       set((state) => ({
         streams: { ...state.streams, [type]: stream },
       }))
     }
+  },
+
+  holdGameScreenTile() {
+    const currentStream = get().streams.screen
+    const livePoster = gamePoster.stream?.getVideoTracks().some((track) => track.readyState === 'live')
+    if (currentStream === gamePoster.stream && livePoster && gamePoster.canvas) return
+
+    currentStream?.getTracks().forEach((track) => {
+      track.onended = null
+      track.stop()
+    })
+
+    const poster = livePoster && gamePoster.stream ? gamePoster.stream : createGamePosterStream()
+
+    set((state) => ({
+      streams: { ...state.streams, screen: poster },
+    }))
+  },
+
+  releaseGameScreenTile() {
+    const currentStream = get().streams.screen
+    if (currentStream && currentStream === gamePoster.stream) get().stopStream('screen')
+
+    gamePoster.stream?.getTracks().forEach((track) => {
+      track.stop()
+    })
+    gamePoster.canvas = null
+    gamePoster.stream = null
   },
 
   stopStream(type) {
@@ -140,19 +206,34 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
     }
 
     Object.values(currentStreams).forEach((stream) => {
-      if (stream) {
-        stream.getTracks().forEach((track) => {
-          const trackConstraints = track.getConstraints()
+      if (!stream) return
 
-          const newConstraints = streamConstraints[track.kind as 'audio' | 'video']
-          if (typeof newConstraints === 'object') {
-            track.applyConstraints({
-              ...trackConstraints,
-              ...newConstraints,
-            })
-          }
-        })
-      }
+      const isScreenStream = stream === currentStreams.screen
+
+      stream.getTracks().forEach((track) => {
+        const trackConstraints = track.getConstraints()
+
+        if (isScreenStream && track.kind === 'video') {
+          track.applyConstraints(getScreenVideoConstraints(streamConstraints)).catch(console.error)
+          return
+        }
+
+        if (isScreenStream && track.kind === 'audio') {
+          track.applyConstraints({
+            ...trackConstraints,
+            ...getScreenAudioConstraints(streamConstraints),
+          }).catch(console.error)
+          return
+        }
+
+        const newConstraints = streamConstraints[track.kind as 'audio' | 'video']
+        if (typeof newConstraints === 'object') {
+          track.applyConstraints({
+            ...trackConstraints,
+            ...newConstraints,
+          })
+        }
+      })
     })
   },
 })

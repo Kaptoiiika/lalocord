@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
 import { memo, useCallback, useEffect, useId, useRef, useState } from 'react'
 
-import { DrawOutlined, MouseOutlined, PictureInPictureOutlined } from '@mui/icons-material'
+import { DrawOutlined, MouseOutlined, PictureInPictureOutlined, SportsEsportsOutlined } from '@mui/icons-material'
 import RemoveIcon from '@mui/icons-material/Remove'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { CanvasPainter } from 'src/features/CanvasPainter'
+import { openGameView } from 'src/features/GameSession/lib/openGameView'
 import { RemoteControlLayer } from 'src/features/RemoteControl'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
@@ -14,6 +15,7 @@ import { VideoPlayer } from 'src/shared/ui/VideoPlayer/VideoPlayer'
 
 import type { StreamType } from 'src/entities/WebRTC'
 import type { RoomUser } from 'src/features/WebRTCRoom'
+import type { GameSessionOffer } from 'src/shared/types/GameSession'
 
 import { useRoomStreamStore } from '../../model/store/RoomStreamStore'
 
@@ -54,7 +56,9 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   const [drawLine, setDrawLine] = useState(false)
   const [isRemoteControlAvailable, setIsRemoteControlAvailable] = useState(false)
   const [isRemoteControlActive, setIsRemoteControlActive] = useState(false)
+  const [gameSessionOffer, setGameSessionOffer] = useState<GameSessionOffer | null>(null)
   const isRemoteControlActiveRef = useRef(false)
+  const closeGameViewRef = useRef<(() => void) | null>(null)
   const { handleOpen: handleOpenfullscreen, handleClose: handleClosefullscreen, open: fullScreen } = useIsOpen()
   const videoRef = useRef<HTMLVideoElement>(null)
   const hide = hiddenStreams.includes(stream.id)
@@ -146,9 +150,46 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     stopRemoteControl()
   }, [isRemoteControlAvailable, stopRemoteControl])
 
+  useEffect(() => {
+    if (!user) return
+
+    const handleGameSession = (offer: GameSessionOffer | null) => {
+      setGameSessionOffer(offer)
+    }
+
+    setGameSessionOffer(user.peer.gameSessionOffer)
+    user.peer.on('onGameSession', handleGameSession)
+
+    return () => {
+      user.peer.off('onGameSession', handleGameSession)
+    }
+  }, [user])
+
+  useEffect(() => {
+    if (gameSessionOffer) return
+
+    closeGameViewRef.current?.()
+    closeGameViewRef.current = null
+  }, [gameSessionOffer])
+
+  useEffect(
+    () => () => {
+      closeGameViewRef.current?.()
+    },
+    []
+  )
+
   const hideIndex = Math.max(hiddenStreams.indexOf(stream.id), 0)
   const canDrawLine = type === 'screen'
   const canControl = canDrawLine && !isLocal && isRemoteControlAvailable
+  const canPlay = canDrawLine && !isLocal && Boolean(gameSessionOffer)
+
+  const handleStartGame = () => {
+    if (!gameSessionOffer) return
+
+    closeGameViewRef.current?.()
+    closeGameViewRef.current = openGameView(gameSessionOffer)
+  }
 
   let streamOverlay: ReactNode
 
@@ -253,6 +294,18 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
                   onClick={handleStartRemoteControl}
                 >
                   {isRemoteControlActive ? <MouseOutlined /> : <MouseOutlined color="disabled" />}
+                </IconButton>
+              </Tooltip>
+            )}
+
+            {canPlay && (
+              <Tooltip title="Play">
+                <IconButton
+                  color="primary"
+                  aria-label="Play"
+                  onClick={handleStartGame}
+                >
+                  <SportsEsportsOutlined />
                 </IconButton>
               </Tooltip>
             )}

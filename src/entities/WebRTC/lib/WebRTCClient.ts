@@ -2,9 +2,11 @@ import { socketClient } from 'src/shared/api'
 import { logger } from 'src/shared/lib/logger/Logger'
 import { Emitter } from 'src/shared/lib/utils'
 import { isRemoteControlEvent } from 'src/shared/types/ClientEvents'
+import { isGameSessionOffer } from 'src/shared/types/GameSession'
 
 import type { GameType } from 'src/entities/Game'
 import type { RemoteControlEvent } from 'src/shared/types/ClientEvents'
+import type { GameSessionOffer } from 'src/shared/types/GameSession'
 
 import { useWebRTCStore } from '../model/WebRTCStore'
 import { MessageCodec } from './Codec/MessageCodec'
@@ -30,6 +32,8 @@ type EventMessageToPeer =
   | 'stream_track_pause'
   | 'stream_track_resume'
   | 'remote_control_status'
+  | 'game_session'
+  | 'game_session_stop'
 
 type FileHeader = {
   id: Uint8Array
@@ -79,6 +83,7 @@ type WebRTCClientEvents = {
   onMiniGameRequsest: WebRTCMiniGameMessage
   onRemoteControlStatus: boolean
   onControlEvent: RemoteControlEvent
+  onGameSession: GameSessionOffer | null
 }
 
 export class WebRTCClient extends Emitter<WebRTCClientEvents> {
@@ -96,10 +101,11 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   channelInfo: DataChannel
   channelMiniGame: DataChannel
   private channelControl: DataChannel
-  private isRemoteControlEnabled = false
 
   remoteStreams: Partial<Record<StreamType, MediaStream | null>> = {}
   remoteControlAvailable = false
+  gameSessionOffer: GameSessionOffer | null = null
+  private isRemoteControlEnabled = false
   senders: {
     screenVideo: RTCRtpSender
     screenAudio: RTCRtpSender
@@ -192,6 +198,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
         this.sendMessageToPeer('stream_start', 'mic')
       }
       this.sendMessageToPeer('remote_control_status', { enabled: this.isRemoteControlEnabled })
+      if (this.gameSessionOffer) this.sendMessageToPeer('game_session', this.gameSessionOffer)
     }
     this.channelMiniGame = new DataChannel(this.peer, 'miniGame', {
       id: 3,
@@ -290,7 +297,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       priority: 'high' as RTCPriorityType,
       networkPriority: 'high' as RTCPriorityType,
     }))
-    screenVideoParams.degradationPreference = 'maintain-framerate'
+    screenVideoParams.degradationPreference = 'maintain-resolution'
 
     webCamParams.encodings = webCamParams.encodings.map((encoding) => ({
       ...encoding,
@@ -303,6 +310,8 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   }
 
   private onTrack(event: RTCTrackEvent) {
+    this.setLowLatencyPlayout(event.receiver)
+
     const [stream] = event.streams
     const tracks = stream?.getTracks() || []
 
@@ -312,9 +321,37 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     else if (tracks[0].kind === 'audio') this.remoteSenderStreams.mic = stream
   }
 
+  // Screen is the first video m-line and the first audio m-line. Camera and microphone keep the default buffer.
+  private setLowLatencyPlayout(receiver: RTCRtpReceiver) {
+    const kind = receiver.track?.kind
+    if (kind !== 'video' && kind !== 'audio') return
+
+    const firstOfKind = this.peer.getReceivers().find((item) => item.track?.kind === kind)
+    if (firstOfKind !== receiver) return
+
+    const lowLatencyReceiver = receiver as RTCRtpReceiver & { playoutDelayHint?: number }
+    lowLatencyReceiver.playoutDelayHint = 0
+
+    try {
+      receiver.jitterBufferTarget = 0
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   setRemoteControlEnabled(enabled: boolean) {
     this.isRemoteControlEnabled = enabled
     this.sendMessageToPeer('remote_control_status', { enabled })
+  }
+
+  setGameSession(offer: GameSessionOffer | null) {
+    this.gameSessionOffer = offer
+    if (offer) {
+      this.sendMessageToPeer('game_session', offer)
+      return
+    }
+
+    this.sendMessageToPeer('game_session_stop', null)
   }
 
   sendControlEvent(event: RemoteControlEvent) {
@@ -377,6 +414,16 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
         this.emit('onRemoteControlStatus', isAvailable)
         break
       }
+      case 'game_session': {
+        if (!isGameSessionOffer(data.message)) return
+        this.gameSessionOffer = data.message
+        this.emit('onGameSession', data.message)
+        break
+      }
+      case 'game_session_stop':
+        this.gameSessionOffer = null
+        this.emit('onGameSession', null)
+        break
     }
   }
 

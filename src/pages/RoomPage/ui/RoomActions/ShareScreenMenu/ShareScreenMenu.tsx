@@ -161,6 +161,25 @@ export const ShareScreenMenu = () => {
           </ListItemIcon>
           <ListItemText>{screenStream ? 'Change screen' : 'Share your screen'}</ListItemText>
         </MenuItem>
+        {__IS_ELECTRON__ && (
+          <MenuItem
+            onClick={() => {
+              handleClose()
+              if (!window.electron) return
+              window.electron.ipcRenderer.sendMessage(IpcChannels.closeOverlay, undefined)
+              useWebRTCStore.getState().holdGameScreenTile()
+              const source = getLastSelectedSource()
+              window.electron.ipcRenderer.sendMessage(IpcChannels.gameSessionStart, {
+                bounds: source?.isScreen ? source.bounds : undefined,
+              })
+            }}
+          >
+            <ListItemIcon>
+              <ScreenShareIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Game session</ListItemText>
+          </MenuItem>
+        )}
         {!!screenStream && (
           <MenuItem onClick={handleStopStream}>
             <ListItemIcon>
