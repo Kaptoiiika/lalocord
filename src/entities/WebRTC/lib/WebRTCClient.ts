@@ -1,8 +1,10 @@
 import { socketClient } from 'src/shared/api'
 import { logger } from 'src/shared/lib/logger/Logger'
 import { Emitter } from 'src/shared/lib/utils'
+import { isRemoteControlEvent } from 'src/shared/types/ClientEvents'
 
 import type { GameType } from 'src/entities/Game'
+import type { RemoteControlEvent } from 'src/shared/types/ClientEvents'
 
 import { useWebRTCStore } from '../model/WebRTCStore'
 import { MessageCodec } from './Codec/MessageCodec'
@@ -27,6 +29,7 @@ type EventMessageToPeer =
   | 'stream_status'
   | 'stream_track_pause'
   | 'stream_track_resume'
+  | 'remote_control_status'
 
 type FileHeader = {
   id: Uint8Array
@@ -74,6 +77,8 @@ type WebRTCClientEvents = {
   onChatMessageLoadFile: WebRTCTransmissionMessage
   onMiniGameMessage: unknown
   onMiniGameRequsest: WebRTCMiniGameMessage
+  onRemoteControlStatus: boolean
+  onControlEvent: RemoteControlEvent
 }
 
 export class WebRTCClient extends Emitter<WebRTCClientEvents> {
@@ -90,8 +95,11 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   private channelFile: DataChannel
   channelInfo: DataChannel
   channelMiniGame: DataChannel
+  private channelControl: DataChannel
+  private isRemoteControlEnabled = false
 
   remoteStreams: Partial<Record<StreamType, MediaStream | null>> = {}
+  remoteControlAvailable = false
   senders: {
     screenVideo: RTCRtpSender
     screenAudio: RTCRtpSender
@@ -183,6 +191,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
         resumeSender(this.senders.mic)
         this.sendMessageToPeer('stream_start', 'mic')
       }
+      this.sendMessageToPeer('remote_control_status', { enabled: this.isRemoteControlEnabled })
     }
     this.channelMiniGame = new DataChannel(this.peer, 'miniGame', {
       id: 3,
@@ -190,6 +199,12 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       negotiated: true,
     })
     this.channelMiniGame.onMessage = this.onMiniGameMessage.bind(this)
+    this.channelControl = new DataChannel(this.peer, 'control', {
+      id: 4,
+      protocol: 'json',
+      negotiated: true,
+    })
+    this.channelControl.onMessage = this.onControlMessage.bind(this)
   }
 
   async createOffer(): Promise<RTCSessionDescriptionInit> {
@@ -297,6 +312,23 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     else if (tracks[0].kind === 'audio') this.remoteSenderStreams.mic = stream
   }
 
+  setRemoteControlEnabled(enabled: boolean) {
+    this.isRemoteControlEnabled = enabled
+    this.sendMessageToPeer('remote_control_status', { enabled })
+  }
+
+  sendControlEvent(event: RemoteControlEvent) {
+    const channel = this.channelControl.channel
+    if (channel.readyState !== 'open') return
+    if (event.type === 'mousemove' && channel.bufferedAmount > 64 * 1024) return
+
+    try {
+      channel.send(JSON.stringify(event))
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   sendMessageToPeer(event: EventMessageToPeer, message: unknown) {
     this.channelInfo.send(JSON.stringify({ event, message }))
   }
@@ -339,6 +371,22 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       case 'miniGameRequsest':
         this.emit('onMiniGameRequsest', data.message)
         break
+      case 'remote_control_status': {
+        const isAvailable = Boolean(data.message?.enabled)
+        this.remoteControlAvailable = isAvailable
+        this.emit('onRemoteControlStatus', isAvailable)
+        break
+      }
+    }
+  }
+
+  private onControlMessage(event: MessageEvent) {
+    try {
+      const data: unknown = JSON.parse(event.data)
+      if (!isRemoteControlEvent(data)) return
+      this.emit('onControlEvent', data)
+    } catch (error) {
+      console.error(error)
     }
   }
 

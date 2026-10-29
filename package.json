@@ -34,6 +34,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
+    "@nut-tree-fork/nut-js": "^4.2.6",
     "axios": "^1.11.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -96,9 +97,16 @@
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
-      "!**/node_modules/**"
+      "!**/node_modules/**",
+      "node_modules/@nut-tree-fork/libnut-win32/**/*",
+      "node_modules/@nut-tree-fork/libnut-linux/**/*",
+      "node_modules/@nut-tree-fork/libnut-darwin/**/*",
+      "node_modules/bindings/**/*",
+      "node_modules/file-uri-to-path/**/*"
     ],
-    "asarUnpack": [],
+    "asarUnpack": [
+      "**/node_modules/**"
+    ],
     "publish": {
       "provider": "github",
       "owner": "Kaptoiiika",

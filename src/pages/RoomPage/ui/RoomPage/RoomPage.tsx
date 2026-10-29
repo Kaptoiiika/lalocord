@@ -3,9 +3,11 @@ import { useParams } from 'react-router-dom'
 
 import { useLocalUserStore } from 'src/entities/User'
 import { useWebRTCStore } from 'src/entities/WebRTC'
+import { useRemoteControlHost } from 'src/features/RemoteControl'
 import { WaitUserClick } from 'src/features/WaitUserClick'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import { socketClient } from 'src/shared/api'
+import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { PageWrapper } from 'src/widgets/Page'
 
 import { RoomLobby } from '../RoomLobby/RoomLobby'
@@ -25,6 +27,12 @@ const emitToJoinRoom = (id: string) => {
       name: id,
     })
   }
+}
+
+const ElectronRemoteControlHost = () => {
+  useRemoteControlHost()
+
+  return null
 }
 
 const RoomPageWrapper = () => {
@@ -78,7 +86,12 @@ const RoomPageWrapper = () => {
     }
   }, [id])
 
-  return <RoomLobby />
+  return (
+    <>
+      {__IS_ELECTRON__ && <ElectronRemoteControlHost />}
+      <RoomLobby />
+    </>
+  )
 }
 
 export const RoomPage = () => (

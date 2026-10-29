@@ -9,14 +9,17 @@ import type { StateCreator } from 'zustand'
 export interface SettingSchema {
   allowDrawLine: boolean
   overlayDrawEnabled: boolean
+  allowRemoteControl: boolean
 
   setAllowDrawLine: (allow: boolean) => void
   setOverlayDrawEnabled: (enabled: boolean) => void
+  setAllowRemoteControl: (allow: boolean) => void
 }
 
 const store: StateCreator<SettingSchema> = (set) => ({
   allowDrawLine: true,
   overlayDrawEnabled: false,
+  allowRemoteControl: false,
 
   setAllowDrawLine(allow) {
     set((state) => ({
@@ -31,6 +34,12 @@ const store: StateCreator<SettingSchema> = (set) => ({
     set((state) => ({
       ...state,
       overlayDrawEnabled: enabled,
+    }))
+  },
+  setAllowRemoteControl(allow) {
+    set((state) => ({
+      ...state,
+      allowRemoteControl: allow,
     }))
   },
 })

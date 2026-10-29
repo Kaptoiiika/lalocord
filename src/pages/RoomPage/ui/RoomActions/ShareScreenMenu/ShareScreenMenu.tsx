@@ -33,7 +33,8 @@ const getOverlayParams = (): OpenOverlayParams | undefined => {
 
 export const ShareScreenMenu = () => {
   const { handleClick, handleClose, anchorEl, open } = usePopup()
-  const { overlayDrawEnabled, setOverlayDrawEnabled, allowDrawLine, setAllowDrawLine } = useSettingStore()
+  const { overlayDrawEnabled, setOverlayDrawEnabled, allowDrawLine, setAllowDrawLine, allowRemoteControl, setAllowRemoteControl } =
+    useSettingStore()
   const screenStream = useWebRTCStore((state) => state.streams.screen)
   const createStream = useWebRTCStore((state) => state.createStream)
   const stopStream = useWebRTCStore((state) => state.stopStream)
@@ -136,6 +137,20 @@ export const ShareScreenMenu = () => {
                 />
               }
               label="Overlay draw"
+            />
+          </MenuItem>
+        )}
+        {__IS_ELECTRON__ && (
+          <MenuItem>
+            <FormControlLabel
+              control={
+                <Switch
+                  color="primary"
+                  checked={allowRemoteControl}
+                  onChange={() => setAllowRemoteControl(!allowRemoteControl)}
+                />
+              }
+              label="Allow remote control"
             />
           </MenuItem>
         )}

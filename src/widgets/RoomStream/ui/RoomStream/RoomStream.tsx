@@ -1,9 +1,11 @@
-import { memo, useId, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
+import { memo, useCallback, useEffect, useId, useRef, useState } from 'react'
 
-import { DrawOutlined, PictureInPictureOutlined } from '@mui/icons-material'
+import { DrawOutlined, MouseOutlined, PictureInPictureOutlined } from '@mui/icons-material'
 import RemoveIcon from '@mui/icons-material/Remove'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { CanvasPainter } from 'src/features/CanvasPainter'
+import { RemoteControlLayer } from 'src/features/RemoteControl'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
@@ -50,6 +52,9 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   const [autoplay, setAutoplay] = useState(!document.hidden)
   const [played, setPlayed] = useState(false)
   const [drawLine, setDrawLine] = useState(false)
+  const [isRemoteControlAvailable, setIsRemoteControlAvailable] = useState(false)
+  const [isRemoteControlActive, setIsRemoteControlActive] = useState(false)
+  const isRemoteControlActiveRef = useRef(false)
   const { handleOpen: handleOpenfullscreen, handleClose: handleClosefullscreen, open: fullScreen } = useIsOpen()
   const videoRef = useRef<HTMLVideoElement>(null)
   const hide = hiddenStreams.includes(stream.id)
@@ -76,9 +81,32 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     onPlay?.()
   }
 
+  const stopRemoteControl = useCallback(() => {
+    const wasActive = isRemoteControlActiveRef.current
+    isRemoteControlActiveRef.current = false
+    setIsRemoteControlActive(false)
+    if (wasActive) user?.peer.sendControlEvent({ type: 'release' })
+    handleClosefullscreen()
+  }, [handleClosefullscreen, user])
+
+  const handleStartRemoteControl = () => {
+    isRemoteControlActiveRef.current = true
+    setIsRemoteControlActive(true)
+    handleOpenfullscreen()
+  }
+
+  const handleFullscreenExit = () => {
+    handleClosefullscreen()
+    if (!isRemoteControlActiveRef.current) return
+
+    isRemoteControlActiveRef.current = false
+    setIsRemoteControlActive(false)
+    user?.peer.sendControlEvent({ type: 'release' })
+  }
+
   const handleHide = async () => {
     if (played) handlePause()
-    handleClosefullscreen()
+    stopRemoteControl()
     await startViewTransition()
     hideStreams(stream.id)
   }
@@ -97,8 +125,53 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     setDrawLine((prev) => !prev)
   }
 
+  useEffect(() => {
+    if (!user) return
+
+    const handleRemoteControlStatus = (isAvailable: boolean) => {
+      setIsRemoteControlAvailable(isAvailable)
+    }
+
+    setIsRemoteControlAvailable(user.peer.remoteControlAvailable)
+    user.peer.on('onRemoteControlStatus', handleRemoteControlStatus)
+
+    return () => {
+      user.peer.off('onRemoteControlStatus', handleRemoteControlStatus)
+    }
+  }, [user])
+
+  useEffect(() => {
+    if (isRemoteControlAvailable || !isRemoteControlActiveRef.current) return
+
+    stopRemoteControl()
+  }, [isRemoteControlAvailable, stopRemoteControl])
+
   const hideIndex = Math.max(hiddenStreams.indexOf(stream.id), 0)
   const canDrawLine = type === 'screen'
+  const canControl = canDrawLine && !isLocal && isRemoteControlAvailable
+
+  let streamOverlay: ReactNode
+
+  if (isRemoteControlActive && user) {
+    streamOverlay = (
+      <RemoteControlLayer
+        videoRef={videoRef}
+        onControlEvent={(event) => {
+          user.peer.sendControlEvent(event)
+        }}
+        onExit={stopRemoteControl}
+      />
+    )
+  } else if (canDrawLine) {
+    streamOverlay = (
+      <CanvasPainter
+        id={componentId}
+        user={user}
+        needCtrlKey={!drawLine}
+        isLocal={isLocal}
+      />
+    )
+  }
 
   return (
     <div
@@ -124,21 +197,13 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         onPause={handlePause}
         onPlay={handlePlay}
         fullScreen={fullScreen}
+        className={isRemoteControlActive ? styles.remoteControlVideo : undefined}
         onFullscreenEnter={handleOpenfullscreen}
-        onFullscreenExit={handleClosefullscreen}
+        onFullscreenExit={handleFullscreenExit}
         autoplay={autoplay ? propsAutoPlay : false}
         controls={!hide}
         mute={mute}
-        overlay={
-          canDrawLine ? (
-            <CanvasPainter
-              id={componentId}
-              user={user}
-              needCtrlKey={!drawLine}
-              isLocal={isLocal}
-            />
-          ) : undefined
-        }
+        overlay={streamOverlay}
       >
         <Stack
           direction="row"
@@ -179,6 +244,18 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
                 <PictureInPictureOutlined />
               </IconButton>
             </Tooltip>
+
+            {canControl && (
+              <Tooltip title="Remote control">
+                <IconButton
+                  color="primary"
+                  aria-label="Remote control"
+                  onClick={handleStartRemoteControl}
+                >
+                  {isRemoteControlActive ? <MouseOutlined /> : <MouseOutlined color="disabled" />}
+                </IconButton>
+              </Tooltip>
+            )}
 
             <Tooltip title="Hide stream">
               <IconButton

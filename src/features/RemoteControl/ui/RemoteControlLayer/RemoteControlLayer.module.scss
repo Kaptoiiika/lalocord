@@ -1,0 +1,21 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  touch-action: none;
+  cursor: none;
+  user-select: none;
+}
+
+.hint {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 45%);
+  color: #fff;
+  font-size: 12px;
+  pointer-events: none;
+}

@@ -51,10 +51,20 @@ export default ({ mode }: { mode: string }) => {
               options.startup()
             },
             vite: {
+              resolve: {
+                alias: {
+                  src: resolve(__dirname, 'src'),
+                },
+              },
               build: {
                 outDir: 'dist-electron',
                 rollupOptions: {
-                  external: ['electron'],
+                  external: [
+                    'electron',
+                    '@nut-tree-fork/libnut-win32',
+                    '@nut-tree-fork/libnut-linux',
+                    '@nut-tree-fork/libnut-darwin',
+                  ],
                 },
               },
               define: {

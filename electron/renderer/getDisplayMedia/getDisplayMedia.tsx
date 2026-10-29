@@ -26,7 +26,7 @@ export const getDisplayMedia = async (
       ...constatins.video,
       maxFrameRate: constatins.video.frameRate,
       chromeMediaSource: 'desktop',
-      cursor: 'motion',
+      cursor: 'always',
     };
     if (source) set.video.mandatory.chromeMediaSourceId = source.id;
   }
