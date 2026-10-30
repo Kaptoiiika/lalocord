@@ -15,6 +15,7 @@ const TYPE_START = 5
 const TYPE_FRAME = 6
 const TYPE_STOP = 7
 const TYPE_CONFIG = 8
+const TYPE_AUDIO = 9
 
 const textDecoder = new TextDecoder()
 
@@ -193,6 +194,10 @@ export const startWebTransportHost = async (options: {
       payload[0] = isKey ? 1 : 0
       payload.set(frame, 1)
       writeMessage(child.stdin, TYPE_FRAME, payload)
+    },
+    publishAudio: (pcm: Uint8Array) => {
+      if (!child.stdin || pcm.byteLength === 0) return
+      writeMessage(child.stdin, TYPE_AUDIO, pcm)
     },
     stop: () => {
       if (finished) return

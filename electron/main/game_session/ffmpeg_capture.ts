@@ -1,4 +1,4 @@
-import { execFile, spawn } from 'node:child_process'
+import { execFile, spawn, type ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { promisify } from 'node:util'
@@ -78,6 +78,39 @@ const encoderArguments = (encoder: HardwareEncoder, frameRate: number, bitrateBi
   ].concat(rate)
 }
 
+const resolveLoopbackPath = () => {
+  const packagedPath = path.join(process.resourcesPath, 'loopback', 'loopback_exclude.exe')
+  if (existsSync(packagedPath)) return packagedPath
+
+  return path.join(app.getAppPath(), 'vendor', 'loopback', 'loopback_exclude.exe')
+}
+
+// Process loopback records every app except this process tree, so Lalocord stays audible
+// for the host and its playback is not sent to the viewer.
+const startExcludedLoopback = (onAudio: (pcm: Uint8Array) => void) => {
+  const loopbackPath = resolveLoopbackPath()
+  if (!existsSync(loopbackPath)) {
+    console.error('Game session audio capture is unavailable. Run npm run build:loopback')
+    return null
+  }
+
+  const child = spawn(loopbackPath, [String(process.pid)], {
+    windowsHide: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  child.stdout?.on('data', (chunk: Buffer) => {
+    const copy = new Uint8Array(chunk.byteLength)
+    copy.set(chunk)
+    onAudio(copy)
+  })
+  child.stderr?.on('data', (chunk: Buffer) => {
+    const text = chunk.toString().trim()
+    if (text) console.error(text)
+  })
+
+  return child
+}
+
 const captureFilter = (
   encoder: HardwareEncoder,
   outputIndex: number,
@@ -111,6 +144,7 @@ export const startDesktopCapture = async (options: {
   bitrate: number
   isNativeSize: boolean
   onFrame: (frame: { data: Uint8Array; isKey: boolean }) => void
+  onAudio?: (pcm: Uint8Array) => void
   onExit: (error: Error | null) => void
 }): Promise<CaptureHandle> => {
   const ffmpegPath = resolveFfmpegPath()
@@ -135,12 +169,20 @@ export const startDesktopCapture = async (options: {
   const args = ['-hide_banner', '-loglevel', 'error', '-filter_complex', filter]
     .concat(encoderArguments(encoder, options.frameRate, options.bitrate))
     .concat(['-flags', 'low_delay', '-an', '-f', 'h264', 'pipe:1'])
-
-  const child = spawn(ffmpegPath, args, { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] })
+  const child = spawn(ffmpegPath, args, {
+    windowsHide: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
   if (!child.stdout || !child.stderr) throw new Error('ffmpeg pipes were not created')
+  let stopped = false
+  const audioChild: ChildProcess | null = options.onAudio
+    ? startExcludedLoopback((pcm) => {
+        if (stopped) return
+        options.onAudio?.(pcm)
+      })
+    : null
   const splitter = createAnnexBSplitter(options.onFrame)
   let stderr = ''
-  let stopped = false
   let exitError: Error | null = null
 
   child.stdout.on('data', (chunk: Buffer) => {
@@ -162,6 +204,7 @@ export const startDesktopCapture = async (options: {
     encoder,
     stop: () => {
       stopped = true
+      audioChild?.kill()
       child.kill()
     },
     exitError: () => exitError,

@@ -163,6 +163,10 @@ const launchCapture = async (generation: number) => {
       frameCount += 1
       hostServer.publishFrame(frame.data, frame.isKey)
     },
+    onAudio: (pcm) => {
+      if (generation !== sessionGeneration || serial !== captureSerial) return
+      hostServer.publishAudio(pcm)
+    },
     onExit: (error) => {
       if (!error || serial !== captureSerial || generation !== sessionGeneration) return
       sendToWindows(IpcChannels.gameSessionFailed, error.message)

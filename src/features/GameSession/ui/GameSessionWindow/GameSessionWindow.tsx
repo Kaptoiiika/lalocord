@@ -20,6 +20,7 @@ export const GameSessionWindow = (props: GameSessionWindowProps) => {
   const [errorText, setErrorText] = useState('')
   const offerKey = offer ? `${offer.url}\u0000${offer.token}` : ''
   const offerKeyRef = useRef(offerKey)
+  const audioContextRef = useRef<AudioContext | null>(null)
 
   useEffect(() => {
     if (offerKeyRef.current === offerKey) return
@@ -34,6 +35,18 @@ export const GameSessionWindow = (props: GameSessionWindowProps) => {
     event.stopPropagation()
     if (!offer) return
 
+    let playbackContext = audioContextRef.current
+    if (!playbackContext || playbackContext.state === 'closed') {
+      try {
+        playbackContext = new AudioContext({ sampleRate: 48000, latencyHint: 'interactive' })
+      } catch (error) {
+        console.error(error)
+        setErrorText('Не удалось подключиться')
+        return
+      }
+      audioContextRef.current = playbackContext
+    }
+    void playbackContext.resume()
     setErrorText('')
     setIsPlaybackOpen(true)
   }
@@ -49,10 +62,11 @@ export const GameSessionWindow = (props: GameSessionWindowProps) => {
 
   if (!offer) return null
 
-  if (isPlaybackOpen) {
+  if (isPlaybackOpen && audioContextRef.current) {
     return (
       <GameSessionPlayback
         offer={offer}
+        audioContext={audioContextRef.current}
         onExit={() => {
           setIsPlaybackOpen(false)
         }}

@@ -8,6 +8,7 @@ const TYPE_START = 5
 const TYPE_FRAME = 6
 const TYPE_STOP = 7
 const TYPE_CONFIG = 8
+const TYPE_AUDIO = 9
 
 const textDecoder = new TextDecoder()
 
@@ -151,21 +152,38 @@ const acceptSession = async (session) => {
     let isWriting = false
     let isClosed = false
 
+    const audioQueue = []
+
     const pump = async () => {
       if (isWriting || isClosed) return
       isWriting = true
-      while (pendingPacket && !isClosed) {
+      while (!isClosed && (pendingPacket || audioQueue.length > 0)) {
+        const audio = audioQueue.shift()
+        if (audio) await writer.write(audio)
+
         const packet = pendingPacket
         pendingPacket = null
-        await writer.write(packet.bytes)
+        if (packet) await writer.write(packet.bytes)
       }
       isWriting = false
+      if (!isClosed && (pendingPacket || audioQueue.length > 0)) {
+        pump().catch(() => {
+          subscriber.close()
+        })
+      }
     }
 
     const subscriber = {
       write: (packet) => {
         if (pendingPacket?.isKey && !packet.isKey) return
         pendingPacket = packet
+        pump().catch(() => {
+          subscriber.close()
+        })
+      },
+      writeAudio: (packet) => {
+        audioQueue.push(packet)
+        if (audioQueue.length > 6) audioQueue.shift()
         pump().catch(() => {
           subscriber.close()
         })
@@ -247,6 +265,12 @@ while (true) {
   }
   if (message.type === TYPE_FRAME) {
     publishFrame(message.payload.subarray(1), message.payload[0] === 1)
+  }
+  if (message.type === TYPE_AUDIO) {
+    const packet = encodePacket(3, message.payload)
+    subscribers.forEach((subscriber) => {
+      subscriber.writeAudio(packet)
+    })
   }
 }
 

@@ -12,6 +12,7 @@ import styles from './GameSessionWindow.module.scss'
 
 type GameSessionPlaybackProps = {
   offer: GameSessionOffer
+  audioContext: AudioContext
   onExit: () => void
   onFailed: () => void
 }
@@ -54,7 +55,7 @@ const readPackets = async (
 }
 
 export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
-  const { offer, onExit, onFailed } = props
+  const { offer, audioContext, onExit, onFailed } = props
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const surfaceRef = useRef<HTMLDivElement>(null)
   const sendInputRef = useRef<(event: RemoteControlEvent) => void>(() => undefined)
@@ -73,6 +74,39 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
 
     let isStopped = false
     let transport: WebTransport | null = null
+    let audioRemainder = new Uint8Array(0)
+    let nextAudioTime = 0
+    const audioSources: AudioBufferSourceNode[] = []
+
+    const playPcm = (chunk: Uint8Array) => {
+      if (isStopped || audioContext.state === 'closed') return
+
+      const combined = new Uint8Array(audioRemainder.length + chunk.length)
+      combined.set(audioRemainder)
+      combined.set(chunk, audioRemainder.length)
+      const usable = combined.length - (combined.length % 4)
+      audioRemainder = combined.slice(usable)
+      if (usable < 4) return
+
+      const view = new DataView(combined.buffer, combined.byteOffset, usable)
+      const frames = usable / 4
+      const audioBuffer = audioContext.createBuffer(2, frames, 48000)
+      const left = audioBuffer.getChannelData(0)
+      const right = audioBuffer.getChannelData(1)
+      for (let index = 0; index < frames; index += 1) {
+        left[index] = view.getInt16(index * 4, true) / 32768
+        right[index] = view.getInt16(index * 4 + 2, true) / 32768
+      }
+
+      const source = audioContext.createBufferSource()
+      source.buffer = audioBuffer
+      source.connect(audioContext.destination)
+      const now = audioContext.currentTime
+      if (nextAudioTime < now + 0.02 || nextAudioTime > now + 0.25) nextAudioTime = now + 0.05
+      source.start(nextAudioTime)
+      nextAudioTime += audioBuffer.duration
+      audioSources.push(source)
+    }
     let decoder: VideoDecoder | null = null
     let decoderConfig: DecoderConfig | null = null
     let timestamp = 0
@@ -160,6 +194,7 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
     }
 
     openDecoder()
+    void audioContext.resume()
 
     const connect = async () => {
       const hash = Uint8Array.from(atob(offer.certHash), (char) => char.charCodeAt(0))
@@ -189,6 +224,7 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
       setIsReady(true)
       await readPackets(stream.value.getReader(), (kind, payload) => {
         if (kind === 2) decodeFrame(payload)
+        if (kind === 3) playPcm(payload)
       })
     }
 
@@ -205,8 +241,15 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
       sendInput({ type: 'release' })
       closeDecoder()
       transport?.close()
+      audioSources.forEach((source) => {
+        try {
+          source.stop()
+        } catch {
+          // A buffer that already finished rejects stop().
+        }
+      })
     }
-  }, [offer])
+  }, [audioContext, offer])
 
   const handleExit = () => {
     sendInputRef.current({ type: 'release' })

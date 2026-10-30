@@ -247,7 +247,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         autoplay={autoplay ? propsAutoPlay : false}
         controls={!hide}
         playbackControls={!isGameSessionTile}
-        mute={mute}
+        mute={Boolean(mute) || isGameSessionTile}
         overlay={streamOverlay}
       >
         <Stack

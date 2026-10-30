@@ -28,7 +28,8 @@
     "prettier:fix": "prettier src/**/*.{js,jsx,ts,tsx} --write ",
     "prettier-lint": "npm run prettier && npm run lint",
     "format": "npm run prettier:fix && npm run lint:fix",
-    "fetch:ffmpeg": "node scripts/fetch-ffmpeg.mjs"
+    "fetch:ffmpeg": "node scripts/fetch-ffmpeg.mjs",
+    "build:loopback": "node scripts/build-loopback.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -139,6 +140,10 @@
       {
         "from": "vendor/ffmpeg/ffmpeg.exe",
         "to": "ffmpeg/ffmpeg.exe"
+      },
+      {
+        "from": "vendor/loopback/loopback_exclude.exe",
+        "to": "loopback/loopback_exclude.exe"
       },
       {
         "from": "electron/main/game_session/transport_host.mjs",

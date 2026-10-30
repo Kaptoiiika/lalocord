@@ -58,6 +58,10 @@ export const VideoPlayer = memo(
     const [volume, setVolume] = useState(clamp(initVolume, 0, 1))
     const videoRef = useRef<HTMLVideoElement | null>(null)
     const playerRef = useRef<HTMLDivElement | null>(null)
+    const muteRef = useRef(Boolean(mute))
+    const volumeRef = useRef(mute ? 0 : volume)
+    muteRef.current = Boolean(mute)
+    volumeRef.current = mute ? 0 : volume
     const { handleClose, handleOpen, open } = useIsOpen({
       time: 3000,
     })
@@ -154,6 +158,8 @@ export const VideoPlayer = memo(
         }
         videoRef.current = node
         if (!node) return
+        node.muted = muteRef.current
+        node.volume = volumeRef.current
         if (node.srcObject !== stream) {
           node.srcObject = stream
         }
@@ -167,7 +173,8 @@ export const VideoPlayer = memo(
     }, [])
 
     if (videoRef.current) {
-      videoRef.current.volume = volume
+      videoRef.current.muted = Boolean(mute)
+      videoRef.current.volume = mute ? 0 : volume
     }
 
     const toolsIsClosed = played && !open
