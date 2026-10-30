@@ -24,7 +24,6 @@ type RunningSession = {
 
 let runningSession: RunningSession | null = null
 let panelWindow: BrowserWindow | null = null
-let gameViewWindow: BrowserWindow | null = null
 let frameCount = 0
 let statsTimer: NodeJS.Timeout | null = null
 let isClosingPanel = false
@@ -271,32 +270,6 @@ export const handleAppProtocol = () => {
   })
 }
 
-const openGameView = async (offer: GameSessionOffer) => {
-  if (gameViewWindow && !gameViewWindow.isDestroyed()) {
-    gameViewWindow.focus()
-    gameViewWindow.webContents.send(IpcChannels.gameViewOffer, offer)
-    return
-  }
-
-  gameViewWindow = new BrowserWindow({
-    width: 1280,
-    height: 720,
-    autoHideMenuBar: true,
-    backgroundColor: '#000000',
-    fullscreen: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  })
-  gameViewWindow.on('closed', () => {
-    gameViewWindow = null
-  })
-  await gameViewWindow.loadURL(windowUrl('/game-view'))
-  gameViewWindow.webContents.send(IpcChannels.gameViewOffer, offer)
-}
-
 ipcMain.on(IpcChannels.gameSessionStart, (_event, value) => {
   void startGameSession(value.bounds).catch((error: unknown) => {
     const message = error instanceof Error ? error.message : 'Game session failed'
@@ -307,17 +280,6 @@ ipcMain.on(IpcChannels.gameSessionStart, (_event, value) => {
 
 ipcMain.on(IpcChannels.gameSessionStop, () => {
   stopGameSession(true)
-})
-
-ipcMain.on(IpcChannels.gameViewOpen, (_event, offer) => {
-  void openGameView(offer).catch((error: unknown) => {
-    console.error(error)
-  })
-})
-
-ipcMain.on(IpcChannels.gameViewClose, () => {
-  if (!gameViewWindow || gameViewWindow.isDestroyed()) return
-  gameViewWindow.close()
 })
 
 app.on('before-quit', () => {

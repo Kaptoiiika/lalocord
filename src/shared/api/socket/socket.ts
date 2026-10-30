@@ -7,12 +7,7 @@ const isGameWindow = () => {
   const path = window.location.pathname
   const hash = window.location.hash
 
-  return (
-    path.endsWith('/game-view') ||
-    path.endsWith('/game-session') ||
-    hash.startsWith('#/game-view') ||
-    hash.startsWith('#/game-session')
-  )
+  return path.endsWith('/game-session') || hash.startsWith('#/game-session')
 }
 
 export const socketClient = io(url.origin, {

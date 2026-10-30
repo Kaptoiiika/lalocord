@@ -6,7 +6,6 @@ export const enum AppRoutes {
   MAIN_PAGE = '/',
   ROOM_ID = '/room/:id',
   GAME = '/game',
-  GAME_VIEW = '/game-view',
   GAME_SESSION = '/game-session',
 }
 

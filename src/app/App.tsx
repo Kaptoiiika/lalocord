@@ -8,7 +8,7 @@ import { Navbar } from 'src/widgets/Navbar'
 
 import { AppRouter } from './providers/Router/ui/AppRouter'
 
-const bareRoutes: string[] = [AppRoutes.GAME_VIEW, AppRoutes.GAME_SESSION]
+const bareRoutes: string[] = [AppRoutes.GAME_SESSION]
 
 const App = () => {
   const { pathname } = useLocation()

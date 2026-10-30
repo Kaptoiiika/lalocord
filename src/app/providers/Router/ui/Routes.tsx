@@ -1,7 +1,6 @@
 import { Navigate } from 'react-router-dom'
 
 import { GameSessionPanel } from 'src/features/GameSession/ui/GameSessionPanel/GameSessionPanel'
-import { GameView } from 'src/features/GameSession/ui/GameView/GameView'
 import { MainPage } from 'src/pages/MainPage'
 import { RoomPage } from 'src/pages/RoomPage'
 import { AppRoutes } from 'src/shared/config/routeConfig/routeConfig'
@@ -25,10 +24,6 @@ export const RoutesConfig: Record<string, AppRouteProps> = {
 
   game: {
     element: <TicTacToe />,
-  },
-
-  [AppRoutes.GAME_VIEW]: {
-    element: <GameView />,
   },
 
   [AppRoutes.GAME_SESSION]: {

@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { IpcChannels } from 'electron/main/types/ipcChannels'
 import { RemoteControlLayer } from 'src/features/RemoteControl/ui/RemoteControlLayer/RemoteControlLayer'
-import { GAME_VIEW_CHANNEL, isGameSessionOffer } from 'src/shared/types/GameSession'
 
 import type { RemoteControlEvent } from 'src/shared/types/ClientEvents'
 import type { GameSessionOffer } from 'src/shared/types/GameSession'
 
 import { annexBToAvcc, buildAvcDecoderConfig, splitAnnexB } from '../../lib/h264Sample'
 
-import styles from './GameView.module.scss'
+import styles from './GamePlaySurface.module.scss'
+
+type GamePlaySurfaceProps = {
+  offer: GameSessionOffer
+  onExit: () => void
+}
 
 type DecoderConfig = {
   codec: string
@@ -42,58 +45,17 @@ const readPackets = async (
   }
 }
 
-const requestGameFullscreen = () => {
-  if (document.fullscreenElement) return
-
-  document.documentElement.requestFullscreen().catch(() => undefined)
-}
-
-export const GameView = () => {
+export const GamePlaySurface = (props: GamePlaySurfaceProps) => {
+  const { offer, onExit } = props
+  const { url, token, certHash } = offer
+  const [status, setStatus] = useState('Connecting')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const sendInputRef = useRef<(event: RemoteControlEvent) => void>(() => undefined)
-  const [offer, setOffer] = useState<GameSessionOffer | null>(null)
-  const [status, setStatus] = useState('Connecting')
-  const [isReady, setIsReady] = useState(false)
+  const onExitRef = useRef(onExit)
+
+  onExitRef.current = onExit
 
   useEffect(() => {
-    requestGameFullscreen()
-
-    const handlePointerDown = () => {
-      requestGameFullscreen()
-    }
-    window.addEventListener('pointerdown', handlePointerDown, { once: true })
-
-    return () => {
-      window.removeEventListener('pointerdown', handlePointerDown)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (window.electron) {
-      return window.electron.ipcRenderer.on(IpcChannels.gameViewOffer, (nextOffer) => {
-        if (!isGameSessionOffer(nextOffer)) return
-        setOffer(nextOffer)
-      })
-    }
-
-    const channel = new BroadcastChannel(GAME_VIEW_CHANNEL)
-    channel.postMessage({ type: 'ready' })
-    channel.onmessage = (event: MessageEvent<{ type?: string; offer?: unknown }>) => {
-      if (event.data?.type === 'offer' && isGameSessionOffer(event.data.offer)) {
-        setOffer(event.data.offer)
-        channel.postMessage({ type: 'ack' })
-      }
-      if (event.data?.type === 'close') window.close()
-    }
-
-    return () => {
-      channel.close()
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!offer) return
-
     const canvas = canvasRef.current
     const context = canvas?.getContext('2d')
     if (!canvas || !context) return
@@ -143,15 +105,17 @@ export const GameView = () => {
     }
 
     const connect = async () => {
-      const hash = Uint8Array.from(atob(offer.certHash), (char) => char.charCodeAt(0))
-      transport = new WebTransport(offer.url, {
+      const hash = Uint8Array.from(atob(certHash), (char) => char.charCodeAt(0))
+      transport = new WebTransport(url, {
         serverCertificateHashes: [{ algorithm: 'sha-256', value: hash }],
       })
       await transport.ready
       if (isStopped) return
 
       const datagramWriter = transport.datagrams.writable.getWriter()
-      await datagramWriter.write(new TextEncoder().encode(JSON.stringify({ type: 'hello', token: offer.token })))
+      await datagramWriter.write(new TextEncoder().encode(JSON.stringify({ type: 'hello', token })))
+      if (isStopped) return
+
       sendInputRef.current = (event) => {
         datagramWriter.write(new TextEncoder().encode(JSON.stringify(event))).catch(() => undefined)
       }
@@ -161,7 +125,6 @@ export const GameView = () => {
       if (stream.done || !stream.value || isStopped) return
 
       setStatus('')
-      setIsReady(true)
       await readPackets(stream.value.getReader(), (kind, payload) => {
         if (kind === 2) decodeFrame(payload)
       })
@@ -174,33 +137,33 @@ export const GameView = () => {
 
     return () => {
       isStopped = true
-      setIsReady(false)
+      const sendInput = sendInputRef.current
       sendInputRef.current = () => undefined
+      sendInput({ type: 'release' })
       if (decoder.state !== 'closed') decoder.close()
       transport?.close()
     }
-  }, [offer])
+  }, [certHash, token, url])
 
   const handleExit = () => {
     sendInputRef.current({ type: 'release' })
+    onExitRef.current()
   }
 
   return (
-    <div className={styles.view}>
+    <div className={styles.surface}>
       <canvas
         ref={canvasRef}
         className={styles.canvas}
       />
       {status && <p className={styles.status}>{status}</p>}
-      {isReady && (
-        <RemoteControlLayer
-          videoRef={canvasRef}
-          onControlEvent={(event) => {
-            sendInputRef.current(event)
-          }}
-          onExit={handleExit}
-        />
-      )}
+      <RemoteControlLayer
+        videoRef={canvasRef}
+        onControlEvent={(event) => {
+          sendInputRef.current(event)
+        }}
+        onExit={handleExit}
+      />
     </div>
   )
 }

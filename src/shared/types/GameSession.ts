@@ -10,8 +10,6 @@ export type GameSessionStats = {
   viewers: number
 }
 
-export const GAME_VIEW_CHANNEL = 'lalocord-game-view'
-
 export const isGameSessionOffer = (value: unknown): value is GameSessionOffer => {
   if (typeof value !== 'object' || value === null) return false
 

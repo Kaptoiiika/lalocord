@@ -5,7 +5,7 @@ import { DrawOutlined, MouseOutlined, PictureInPictureOutlined, SportsEsportsOut
 import RemoveIcon from '@mui/icons-material/Remove'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { CanvasPainter } from 'src/features/CanvasPainter'
-import { openGameView } from 'src/features/GameSession/lib/openGameView'
+import { GamePlaySurface } from 'src/features/GameSession/ui/GamePlaySurface/GamePlaySurface'
 import { RemoteControlLayer } from 'src/features/RemoteControl'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
@@ -56,9 +56,10 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   const [drawLine, setDrawLine] = useState(false)
   const [isRemoteControlAvailable, setIsRemoteControlAvailable] = useState(false)
   const [isRemoteControlActive, setIsRemoteControlActive] = useState(false)
+  const [isGamePlayActive, setIsGamePlayActive] = useState(false)
   const [gameSessionOffer, setGameSessionOffer] = useState<GameSessionOffer | null>(null)
   const isRemoteControlActiveRef = useRef(false)
-  const closeGameViewRef = useRef<(() => void) | null>(null)
+  const isGamePlayActiveRef = useRef(false)
   const { handleOpen: handleOpenfullscreen, handleClose: handleClosefullscreen, open: fullScreen } = useIsOpen()
   const videoRef = useRef<HTMLVideoElement>(null)
   const hide = hiddenStreams.includes(stream.id)
@@ -85,15 +86,30 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     onPlay?.()
   }
 
-  const stopRemoteControl = useCallback(() => {
+  const endRemoteControl = useCallback(() => {
     const wasActive = isRemoteControlActiveRef.current
     isRemoteControlActiveRef.current = false
     setIsRemoteControlActive(false)
     if (wasActive) user?.peer.sendControlEvent({ type: 'release' })
+  }, [user])
+
+  const stopRemoteControl = useCallback(() => {
+    endRemoteControl()
     handleClosefullscreen()
-  }, [handleClosefullscreen, user])
+  }, [endRemoteControl, handleClosefullscreen])
+
+  const endGamePlay = useCallback(() => {
+    isGamePlayActiveRef.current = false
+    setIsGamePlayActive(false)
+  }, [])
+
+  const stopGamePlay = useCallback(() => {
+    endGamePlay()
+    handleClosefullscreen()
+  }, [endGamePlay, handleClosefullscreen])
 
   const handleStartRemoteControl = () => {
+    endGamePlay()
     isRemoteControlActiveRef.current = true
     setIsRemoteControlActive(true)
     handleOpenfullscreen()
@@ -101,16 +117,14 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
 
   const handleFullscreenExit = () => {
     handleClosefullscreen()
-    if (!isRemoteControlActiveRef.current) return
-
-    isRemoteControlActiveRef.current = false
-    setIsRemoteControlActive(false)
-    user?.peer.sendControlEvent({ type: 'release' })
+    endRemoteControl()
+    endGamePlay()
   }
 
   const handleHide = async () => {
     if (played) handlePause()
     stopRemoteControl()
+    stopGamePlay()
     await startViewTransition()
     hideStreams(stream.id)
   }
@@ -166,18 +180,10 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   }, [user])
 
   useEffect(() => {
-    if (gameSessionOffer) return
+    if (gameSessionOffer || !isGamePlayActiveRef.current) return
 
-    closeGameViewRef.current?.()
-    closeGameViewRef.current = null
-  }, [gameSessionOffer])
-
-  useEffect(
-    () => () => {
-      closeGameViewRef.current?.()
-    },
-    []
-  )
+    stopGamePlay()
+  }, [gameSessionOffer, stopGamePlay])
 
   const hideIndex = Math.max(hiddenStreams.indexOf(stream.id), 0)
   const canDrawLine = type === 'screen'
@@ -187,13 +193,23 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
   const handleStartGame = () => {
     if (!gameSessionOffer) return
 
-    closeGameViewRef.current?.()
-    closeGameViewRef.current = openGameView(gameSessionOffer)
+    endRemoteControl()
+    isGamePlayActiveRef.current = true
+    setIsGamePlayActive(true)
+    handleOpenfullscreen()
   }
 
   let streamOverlay: ReactNode
+  const isControlSurface = isRemoteControlActive || isGamePlayActive
 
-  if (isRemoteControlActive && user) {
+  if (isGamePlayActive && gameSessionOffer) {
+    streamOverlay = (
+      <GamePlaySurface
+        offer={gameSessionOffer}
+        onExit={stopGamePlay}
+      />
+    )
+  } else if (isRemoteControlActive && user) {
     streamOverlay = (
       <RemoteControlLayer
         videoRef={videoRef}
@@ -238,7 +254,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         onPause={handlePause}
         onPlay={handlePlay}
         fullScreen={fullScreen}
-        className={isRemoteControlActive ? styles.remoteControlVideo : undefined}
+        className={isControlSurface ? styles.remoteControlVideo : undefined}
         onFullscreenEnter={handleOpenfullscreen}
         onFullscreenExit={handleFullscreenExit}
         autoplay={autoplay ? propsAutoPlay : false}
@@ -305,7 +321,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
                   aria-label="Play"
                   onClick={handleStartGame}
                 >
-                  <SportsEsportsOutlined />
+                  {isGamePlayActive ? <SportsEsportsOutlined /> : <SportsEsportsOutlined color="disabled" />}
                 </IconButton>
               </Tooltip>
             )}
