@@ -52,6 +52,8 @@ export const saveStreamConstraintsToLocalStorage = (streamConstraints: ObjectStr
 const SCREEN_WIDTH_RATIO = 16
 const SCREEN_HEIGHT_RATIO = 9
 
+export const defaultStreamBitrate = 10 * 1024 * 1024
+
 type NumericConstraint = number | { exact?: number; ideal?: number; max?: number }
 
 const readConstraintNumber = (value: NumericConstraint | undefined, fallback: number) => {
@@ -68,11 +70,17 @@ type LowLatencyVideoConstraints = MediaTrackConstraints & {
   latency?: { ideal: number }
 }
 
-// Desktop capture queues frames unless latency is requested, and an uncapped 4K frame misses real time.
-export const getScreenVideoConstraints = (streamConstraints: ObjectStreamConstraints): LowLatencyVideoConstraints => {
+export const getVideoCaptureSize = (streamConstraints: ObjectStreamConstraints) => {
   const height = readConstraintNumber(streamConstraints.video.height, 1080)
   const frameRate = readConstraintNumber(streamConstraints.video.frameRate, 30)
   const width = Math.round((height * SCREEN_WIDTH_RATIO) / SCREEN_HEIGHT_RATIO)
+
+  return { width, height, frameRate }
+}
+
+// Desktop capture queues frames unless latency is requested, and an uncapped 4K frame misses real time.
+export const getScreenVideoConstraints = (streamConstraints: ObjectStreamConstraints): LowLatencyVideoConstraints => {
+  const { width, height, frameRate } = getVideoCaptureSize(streamConstraints)
 
   return {
     ...streamConstraints.video,

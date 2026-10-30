@@ -9,11 +9,6 @@ import { createAnnexBSplitter } from './annexb'
 
 const execFileAsync = promisify(execFile)
 
-const MAX_WIDTH = 1920
-const MAX_HEIGHT = 1080
-const FRAME_RATE = 60
-const BITRATE = '15M'
-
 const encoderOrder = ['h264_nvenc', 'h264_amf', 'h264_qsv', 'libx264'] as const
 
 export type HardwareEncoder = (typeof encoderOrder)[number]
@@ -27,8 +22,8 @@ export const resolveFfmpegPath = () => {
 
 const evenSize = (value: number) => Math.max(2, Math.floor(value / 2) * 2)
 
-export const fitCaptureSize = (width: number, height: number) => {
-  const scale = Math.min(1, MAX_WIDTH / width, MAX_HEIGHT / height)
+export const fitCaptureSize = (width: number, height: number, maxWidth: number, maxHeight: number) => {
+  const scale = Math.min(1, maxWidth / width, maxHeight / height)
   return {
     width: evenSize(width * scale),
     height: evenSize(height * scale),
@@ -41,8 +36,12 @@ const readEncoders = async (ffmpegPath: string) => {
   return encoderOrder.find((encoder) => stdout.includes(encoder)) ?? null
 }
 
-const encoderArguments = (encoder: HardwareEncoder) => {
-  const rate = ['-b:v', BITRATE, '-maxrate', BITRATE, '-bufsize', '2M', '-bf', '0', '-g', '30']
+const encoderArguments = (encoder: HardwareEncoder, frameRate: number, bitrateBits: number) => {
+  const bitrate = String(Math.max(1, Math.round(bitrateBits)))
+  const buffer = String(Math.max(1, Math.round(bitrateBits / 4)))
+  // Half a second between keyframes, matching the previous 30-frame GOP at 60 fps.
+  const group = String(Math.max(1, Math.round(frameRate / 2)))
+  const rate = ['-b:v', bitrate, '-maxrate', bitrate, '-bufsize', buffer, '-bf', '0', '-g', group]
 
   if (encoder === 'h264_nvenc') {
     return ['-c:v', 'h264_nvenc', '-preset', 'p1', '-tune', 'ull', '-rc', 'cbr', '-forced-idr', '1', '-aud', '1'].concat(rate)
@@ -62,9 +61,10 @@ const captureFilter = (
   outputIndex: number,
   width: number,
   height: number,
+  frameRate: number,
   isNativeSize: boolean
 ) => {
-  const grab = `ddagrab=output_idx=${outputIndex}:framerate=${FRAME_RATE}:draw_mouse=1`
+  const grab = `ddagrab=output_idx=${outputIndex}:framerate=${frameRate}:draw_mouse=1`
 
   // scale_d3d11 fails to allocate its output texture in this build (0x80070057).
   // NVENC can take the desktop texture directly when the frame is already within the cap.
@@ -85,6 +85,8 @@ export const startDesktopCapture = async (options: {
   outputIndex: number
   width: number
   height: number
+  frameRate: number
+  bitrate: number
   isNativeSize: boolean
   onFrame: (frame: { data: Uint8Array; isKey: boolean }) => void
   onExit: (error: Error | null) => void
@@ -100,9 +102,16 @@ export const startDesktopCapture = async (options: {
   const { stdout: filters } = await execFileAsync(ffmpegPath, ['-hide_banner', '-filters'], { windowsHide: true })
   if (!filters.includes('ddagrab')) throw new Error('ffmpeg was built without ddagrab')
 
-  const filter = captureFilter(encoder, options.outputIndex, options.width, options.height, options.isNativeSize)
+  const filter = captureFilter(
+    encoder,
+    options.outputIndex,
+    options.width,
+    options.height,
+    options.frameRate,
+    options.isNativeSize
+  )
   const args = ['-hide_banner', '-loglevel', 'error', '-filter_complex', filter]
-    .concat(encoderArguments(encoder))
+    .concat(encoderArguments(encoder, options.frameRate, options.bitrate))
     .concat(['-flags', 'low_delay', '-an', '-f', 'h264', 'pipe:1'])
 
   const child = spawn(ffmpegPath, args, { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] })

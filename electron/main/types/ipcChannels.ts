@@ -1,7 +1,7 @@
 import type { MediaSource, MediaSourceBounds } from '../get_media_source/get_media_source'
 import type { ExternalLinePayload } from 'src/features/CanvasPainter/ui/CanvasPainter'
 import type { RemoteControlEvent } from 'src/shared/types/ClientEvents'
-import type { GameSessionOffer, GameSessionStats } from 'src/shared/types/GameSession'
+import type { GameCaptureSettings, GameSessionOffer, GameSessionStats } from 'src/shared/types/GameSession'
 
 export interface OpenOverlayParams {
   bounds?: MediaSourceBounds
@@ -22,6 +22,7 @@ export const enum IpcChannels {
   remoteControlStop = 'remoteControlStop',
   remoteControlInput = 'remoteControlInput',
   gameSessionStart = 'gameSessionStart',
+  gameSessionConfigure = 'gameSessionConfigure',
   gameSessionStop = 'gameSessionStop',
   gameSessionReady = 'gameSessionReady',
   gameSessionEnded = 'gameSessionEnded',
@@ -40,7 +41,8 @@ export interface IpcToMainEventMap {
   remoteControlStart: RemoteControlStartParams
   remoteControlStop: void
   remoteControlInput: RemoteControlEvent
-  gameSessionStart: { bounds?: MediaSourceBounds }
+  gameSessionStart: { bounds?: MediaSourceBounds; capture?: GameCaptureSettings }
+  gameSessionConfigure: GameCaptureSettings
   gameSessionStop: void
   gameSessionReady: void
   gameSessionEnded: void
@@ -58,6 +60,7 @@ export interface IpcToRendererEventMap {
   remoteControlStop: void
   remoteControlInput: void
   gameSessionStart: void
+  gameSessionConfigure: void
   gameSessionStop: void
   gameSessionReady: GameSessionOffer
   gameSessionEnded: void

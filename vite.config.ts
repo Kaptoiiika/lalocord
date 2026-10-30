@@ -105,7 +105,7 @@ export default ({ mode }: { mode: string }) => {
     },
 
     server: {
-      port: 4000,
+      port: 3000,
     },
     resolve: {
       alias: {

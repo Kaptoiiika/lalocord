@@ -14,11 +14,12 @@ import { IpcChannels } from 'electron/main/types/ipcChannels'
 import { getLastSelectedSource } from 'electron/renderer/getDisplayMedia/displayMediaSelector'
 import { useSettingStore } from 'src/entities/Settings'
 import { useWebRTCStore } from 'src/entities/WebRTC'
+import { toGameCaptureSettings } from 'src/features/GameSession/lib/captureSettings'
 import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { startViewTransition } from 'src/shared/lib/utils'
 
-import type { OpenOverlayParams } from 'electron/main/types/ipcChannels';
+import type { OpenOverlayParams } from 'electron/main/types/ipcChannels'
 
 const getOverlayParams = (): OpenOverlayParams | undefined => {
   const source = getLastSelectedSource()
@@ -169,8 +170,10 @@ export const ShareScreenMenu = () => {
               window.electron.ipcRenderer.sendMessage(IpcChannels.closeOverlay, undefined)
               useWebRTCStore.getState().holdGameScreenTile()
               const source = getLastSelectedSource()
+              const { streamConstraints, bitrate } = useWebRTCStore.getState()
               window.electron.ipcRenderer.sendMessage(IpcChannels.gameSessionStart, {
                 bounds: source?.isScreen ? source.bounds : undefined,
+                capture: toGameCaptureSettings(streamConstraints, bitrate),
               })
             }}
           >

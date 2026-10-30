@@ -7,8 +7,13 @@ import { isGameSessionOffer } from 'src/shared/types/GameSession'
 
 import type { GameSessionOffer } from 'src/shared/types/GameSession'
 
+import { useHostSessionStore } from './hostSessionStore'
+import { toGameCaptureSettings } from '../lib/captureSettings'
+
 export const useGameSessionHost = () => {
   const users = useWebRTCRoomStore((state) => state.users)
+  const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
+  const bitrate = useWebRTCStore((state) => state.bitrate)
   const offerRef = useRef<GameSessionOffer | null>(null)
 
   useEffect(() => {
@@ -23,18 +28,21 @@ export const useGameSessionHost = () => {
     const handleReady = (offer: GameSessionOffer) => {
       if (!isGameSessionOffer(offer)) return
       offerRef.current = offer
+      useHostSessionStore.getState().setHostOffer(offer)
       useWebRTCStore.getState().holdGameScreenTile()
       publish(offer)
     }
 
     const handleEnded = () => {
       offerRef.current = null
+      useHostSessionStore.getState().setHostOffer(null)
       useWebRTCStore.getState().releaseGameScreenTile()
       publish(null)
     }
 
     const handleFailed = (message: string) => {
       offerRef.current = null
+      useHostSessionStore.getState().setHostOffer(null)
       useWebRTCStore.getState().releaseGameScreenTile()
       window.alert(message)
     }
@@ -47,10 +55,17 @@ export const useGameSessionHost = () => {
       unsubscribeReady()
       unsubscribeEnded()
       unsubscribeFailed()
+      useHostSessionStore.getState().setHostOffer(null)
       if (!offerRef.current) return
       window.electron?.ipcRenderer.sendMessage(IpcChannels.gameSessionStop, undefined)
     }
   }, [])
+
+  useEffect(() => {
+    if (!window.electron) return
+
+    window.electron.ipcRenderer.sendMessage(IpcChannels.gameSessionConfigure, toGameCaptureSettings(streamConstraints, bitrate))
+  }, [bitrate, streamConstraints])
 
   useEffect(() => {
     const offer = offerRef.current

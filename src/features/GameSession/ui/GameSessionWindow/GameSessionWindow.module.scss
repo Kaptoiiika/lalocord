@@ -1,0 +1,34 @@
+.window {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 280px;
+  padding: 24px;
+  border-radius: 12px;
+  background: #1c2128;
+  color: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.text {
+  margin: 0;
+  font-size: 18px;
+}
+
+.note {
+  margin: 0;
+  font-size: 16px;
+}
+
+.connect {
+  width: fit-content;
+}
+
+.error {
+  margin: 0;
+  color: #ff8a80;
+}

@@ -4,30 +4,44 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 import { app, BrowserWindow, ipcMain, net, protocol, screen } from 'electron'
+import { defaultStreamBitrate, defaultStreamConstraints } from 'src/entities/WebRTC/utils/streamConstraints'
+import { toGameCaptureSettings } from 'src/features/GameSession/lib/captureSettings'
+import { isGameCaptureSettings } from 'src/shared/types/GameSession'
 
 import type { MediaSourceBounds } from '../get_media_source/get_media_source'
-import type { GameSessionOffer, GameSessionStats } from 'src/shared/types/GameSession'
+import type { GameCaptureSettings, GameSessionOffer, GameSessionStats } from 'src/shared/types/GameSession'
 
 import { createGameCertificate } from './certificate'
+import { listCaptureOutputs } from './display_output'
 import { fitCaptureSize, startDesktopCapture } from './ffmpeg_capture'
 import { startWebTransportHost } from './webtransport_host'
 import { injectRemoteControlEvent, setGameInputBounds } from '../remote_control/remote_control'
 import { IpcChannels } from '../types/ipcChannels'
-import { getRoomWindow } from '../windows'
-
-declare const __IS_DEV__: boolean
 
 type RunningSession = {
   offer: GameSessionOffer
   stop: () => void
 }
 
+type DesktopRect = {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 let runningSession: RunningSession | null = null
-let panelWindow: BrowserWindow | null = null
+let runningCapture: Awaited<ReturnType<typeof startDesktopCapture>> | null = null
+let sessionHost: Awaited<ReturnType<typeof startWebTransportHost>> | null = null
+let captureSettings: GameCaptureSettings = toGameCaptureSettings(defaultStreamConstraints, defaultStreamBitrate)
+let sessionBounds: MediaSourceBounds | undefined
+let sessionCodec = 'avc1.640028'
+let sessionViewers = 0
+let sessionEncoder = 'h264'
 let frameCount = 0
 let statsTimer: NodeJS.Timeout | null = null
-let isClosingPanel = false
 let sessionGeneration = 0
+let captureSerial = 0
 
 const sendToWindows = (channel: string, payload: unknown) => {
   BrowserWindow.getAllWindows().forEach((window) => {
@@ -44,69 +58,41 @@ const pickLanAddress = () => {
   return preferred?.address ?? addresses[0]?.address ?? '127.0.0.1'
 }
 
-const captureTarget = (bounds?: MediaSourceBounds) => {
-  const displays = screen.getAllDisplays()
-  const matchedIndex = bounds
-    ? displays.findIndex((display) => {
-        const item = display.bounds
-        return item.x === bounds.x && item.y === bounds.y && item.width === bounds.width && item.height === bounds.height
-      })
-    : -1
-  const index = matchedIndex >= 0 ? matchedIndex : 0
-  const display = displays[index] ?? displays[0]
-  if (!display) throw new Error('No display found')
+const sameRect = (left: DesktopRect, right: DesktopRect) =>
+  left.x === right.x && left.y === right.y && left.width === right.width && left.height === right.height
 
-  const physicalWidth = Math.round(display.bounds.width * display.scaleFactor)
-  const physicalHeight = Math.round(display.bounds.height * display.scaleFactor)
-  const size = fitCaptureSize(physicalWidth, physicalHeight)
+const sizedTarget = (display: Electron.Display, outputIndex: number, settings: GameCaptureSettings) => {
+  const physical = screen.dipToScreenRect(null, display.bounds)
+  const size = fitCaptureSize(physical.width, physical.height, settings.width, settings.height)
   const even = (value: number) => Math.max(2, Math.floor(value / 2) * 2)
 
   return {
-    outputIndex: index,
+    outputIndex,
     bounds: display.bounds,
     width: size.width,
     height: size.height,
-    physicalWidth: even(physicalWidth),
-    physicalHeight: even(physicalHeight),
+    physicalWidth: even(physical.width),
+    physicalHeight: even(physical.height),
   }
 }
 
-const windowUrl = (hashPath: string) => {
-  if (!__IS_DEV__) return `app://local/index.html#${hashPath}`
+const captureTarget = async (bounds: MediaSourceBounds | undefined, settings: GameCaptureSettings) => {
+  const displays = screen.getAllDisplays()
+  const matched = bounds
+    ? displays.find((display) => sameRect(display.bounds, bounds))
+    : undefined
+  // Without a chosen screen, follow the Windows primary. displays[0] is the first monitor, not that display.
+  const selected = matched ?? screen.getPrimaryDisplay()
+  const outputs = await listCaptureOutputs()
+  const selectedRect = screen.dipToScreenRect(null, selected.bounds)
+  const output = outputs.find((item) => sameRect(item, selectedRect))
+  const outputIndex = output ? output.index : 0
+  const captured = output ?? outputs.find((item) => item.index === outputIndex)
+  const capturedDisplay = captured
+    ? displays.find((display) => sameRect(screen.dipToScreenRect(null, display.bounds), captured)) ?? selected
+    : selected
 
-  const roomUrl = getRoomWindow()?.webContents.getURL()
-  const origin = roomUrl ? new URL(roomUrl).origin : 'http://localhost:3000'
-
-  return `${origin}/#${hashPath}`
-}
-
-const openPanel = () => {
-  if (panelWindow && !panelWindow.isDestroyed()) {
-    panelWindow.focus()
-    return
-  }
-
-  panelWindow = new BrowserWindow({
-    width: 420,
-    height: 280,
-    autoHideMenuBar: true,
-    backgroundColor: '#1c2128',
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  })
-  const openedPanel = panelWindow
-  void openedPanel.loadURL(windowUrl('/game-session'))
-  openedPanel.on('closed', () => {
-    if (panelWindow === openedPanel) panelWindow = null
-    if (isClosingPanel) {
-      isClosingPanel = false
-      return
-    }
-    stopGameSession(true)
-  })
+  return sizedTarget(capturedDisplay, outputIndex, settings)
 }
 
 const publishStats = (stats: GameSessionStats) => {
@@ -132,32 +118,86 @@ const codecFromFrame = (frame: Uint8Array) => {
 
 const stopGameSession = (notify: boolean) => {
   sessionGeneration += 1
+  captureSerial += 1
   const hadSession = runningSession !== null
   if (statsTimer) clearInterval(statsTimer)
   statsTimer = null
+  runningCapture?.stop()
+  runningCapture = null
+  sessionHost?.stop()
+  sessionHost = null
   runningSession?.stop()
   runningSession = null
   setGameInputBounds(null)
   if (notify && hadSession) sendToWindows(IpcChannels.gameSessionEnded, undefined)
-
-  const panel = panelWindow
-  if (!panel || panel.isDestroyed()) return
-  isClosingPanel = true
-  panel.close()
 }
 
-const startGameSession = async (bounds?: MediaSourceBounds) => {
+// ddagrab frame rate and scale are fixed for the ffmpeg process.
+// A settings change restarts that process and keeps the WebTransport offer, so the viewer stays in play.
+const launchCapture = async (generation: number) => {
+  const serial = captureSerial + 1
+  captureSerial = serial
+  const target = await captureTarget(sessionBounds, captureSettings)
+  if (generation !== sessionGeneration || serial !== captureSerial || !sessionHost) return null
+
+  runningCapture?.stop()
+  runningCapture = null
+  if (generation !== sessionGeneration || serial !== captureSerial || !sessionHost) return null
+
+  const hostServer = sessionHost
+  const capture = await startDesktopCapture({
+    outputIndex: target.outputIndex,
+    width: target.width,
+    height: target.height,
+    frameRate: captureSettings.frameRate,
+    bitrate: captureSettings.bitrate,
+    isNativeSize: target.width === target.physicalWidth && target.height === target.physicalHeight,
+    onFrame: (frame) => {
+      if (generation !== sessionGeneration || serial !== captureSerial) return
+
+      const nextCodec = codecFromFrame(frame.data)
+      if (nextCodec && nextCodec !== sessionCodec) {
+        sessionCodec = nextCodec
+        hostServer.setConfig(sessionCodec, target.width, target.height)
+      }
+      frameCount += 1
+      hostServer.publishFrame(frame.data, frame.isKey)
+    },
+    onExit: (error) => {
+      if (!error || serial !== captureSerial || generation !== sessionGeneration) return
+      sendToWindows(IpcChannels.gameSessionFailed, error.message)
+      stopGameSession(true)
+    },
+  })
+
+  if (generation !== sessionGeneration || serial !== captureSerial) {
+    capture.stop()
+    return null
+  }
+  if (capture.exitError()) throw capture.exitError()
+
+  runningCapture = capture
+  sessionEncoder = capture.encoder
+  hostServer.setConfig(sessionCodec, target.width, target.height)
+  setGameInputBounds(target.bounds)
+
+  return capture
+}
+
+const startGameSession = async (bounds?: MediaSourceBounds, capture?: GameCaptureSettings) => {
   if (process.platform !== 'win32') throw new Error('Game session is available on Windows')
+  if (isGameCaptureSettings(capture)) captureSettings = capture
+  sessionBounds = bounds
   stopGameSession(true)
   const generation = sessionGeneration
-
-  const target = captureTarget(bounds)
   const host = pickLanAddress()
   const certificate = await createGameCertificate(host)
+  if (generation !== sessionGeneration) return
+
   const token = randomBytes(32).toString('hex')
-  let encoder = 'h264'
-  let viewers = 0
-  let codec = 'avc1.640028'
+  sessionCodec = 'avc1.640028'
+  sessionViewers = 0
+  sessionEncoder = 'h264'
   frameCount = 0
 
   const hostServer = await startWebTransportHost({
@@ -167,7 +207,7 @@ const startGameSession = async (bounds?: MediaSourceBounds) => {
     token,
     onInput: injectRemoteControlEvent,
     onViewers: (nextViewers) => {
-      viewers = nextViewers
+      sessionViewers = nextViewers
     },
     onFailure: (message) => {
       if (generation !== sessionGeneration) return
@@ -175,45 +215,26 @@ const startGameSession = async (bounds?: MediaSourceBounds) => {
       stopGameSession(true)
     },
   })
+  if (generation !== sessionGeneration) {
+    hostServer.stop()
+    return
+  }
 
-  hostServer.setConfig(codec, target.width, target.height)
-  setGameInputBounds(target.bounds)
+  sessionHost = hostServer
 
-  let capture: Awaited<ReturnType<typeof startDesktopCapture>>
   try {
-    capture = await startDesktopCapture({
-      outputIndex: target.outputIndex,
-      width: target.width,
-      height: target.height,
-      isNativeSize: target.width === target.physicalWidth && target.height === target.physicalHeight,
-      onFrame: (frame) => {
-        const nextCodec = codecFromFrame(frame.data)
-        if (nextCodec && nextCodec !== codec) {
-          codec = nextCodec
-          hostServer.setConfig(codec, target.width, target.height)
-        }
-        frameCount += 1
-        hostServer.publishFrame(frame.data, frame.isKey)
-      },
-      onExit: (error) => {
-        if (!error || runningSession === null) return
-        sendToWindows(IpcChannels.gameSessionFailed, error.message)
-        stopGameSession(true)
-      },
-    })
+    const captureHandle = await launchCapture(generation)
+    if (!captureHandle) throw new Error('Game capture did not start')
   } catch (error) {
     hostServer.stop()
+    if (sessionHost === hostServer) sessionHost = null
     setGameInputBounds(null)
+    if (generation !== sessionGeneration) return
     throw error
   }
-  if (capture.exitError()) {
-    hostServer.stop()
-    setGameInputBounds(null)
-    throw capture.exitError()
-  }
-  encoder = capture.encoder
+
   if (generation !== sessionGeneration) {
-    capture.stop()
+    if (sessionHost === hostServer) sessionHost = null
     hostServer.stop()
     return
   }
@@ -227,18 +248,39 @@ const startGameSession = async (bounds?: MediaSourceBounds) => {
   runningSession = {
     offer,
     stop: () => {
-      capture.stop()
+      runningCapture?.stop()
+      runningCapture = null
       hostServer.stop()
+      if (sessionHost === hostServer) sessionHost = null
     },
   }
 
   statsTimer = setInterval(() => {
-    publishStats({ encoder, fps: frameCount, viewers })
+    publishStats({ encoder: sessionEncoder, fps: frameCount, viewers: sessionViewers })
     frameCount = 0
   }, 1000)
 
   sendToWindows(IpcChannels.gameSessionReady, offer)
-  openPanel()
+}
+
+const configureGameSession = (capture: GameCaptureSettings) => {
+  if (!isGameCaptureSettings(capture)) return
+
+  const isSame =
+    capture.width === captureSettings.width &&
+    capture.height === captureSettings.height &&
+    capture.frameRate === captureSettings.frameRate &&
+    capture.bitrate === captureSettings.bitrate
+  captureSettings = capture
+  if (isSame || !runningSession || !sessionHost) return
+
+  const generation = sessionGeneration
+  void launchCapture(generation).catch((error: unknown) => {
+    if (generation !== sessionGeneration) return
+    const message = error instanceof Error ? error.message : 'Game session failed'
+    sendToWindows(IpcChannels.gameSessionFailed, message)
+    stopGameSession(true)
+  })
 }
 
 export const registerAppProtocol = () => {
@@ -271,11 +313,15 @@ export const handleAppProtocol = () => {
 }
 
 ipcMain.on(IpcChannels.gameSessionStart, (_event, value) => {
-  void startGameSession(value.bounds).catch((error: unknown) => {
+  void startGameSession(value.bounds, value.capture).catch((error: unknown) => {
     const message = error instanceof Error ? error.message : 'Game session failed'
     sendToWindows(IpcChannels.gameSessionFailed, message)
     stopGameSession(true)
   })
+})
+
+ipcMain.on(IpcChannels.gameSessionConfigure, (_event, value) => {
+  configureGameSession(value)
 })
 
 ipcMain.on(IpcChannels.gameSessionStop, () => {
@@ -283,7 +329,10 @@ ipcMain.on(IpcChannels.gameSessionStop, () => {
 })
 
 app.on('before-quit', () => {
+  captureSerial += 1
   runningSession?.stop()
   runningSession = null
+  runningCapture = null
+  sessionHost = null
   setGameInputBounds(null)
 })

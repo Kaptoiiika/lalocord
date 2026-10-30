@@ -5,6 +5,7 @@ import type { ObjectStreamConstraints } from '../utils/streamConstraints'
 import type { StateCreator } from 'zustand'
 
 import {
+  defaultStreamBitrate,
   getScreenAudioConstraints,
   getScreenVideoConstraints,
   getStreamSettingsfromLocalStorage,
@@ -78,7 +79,7 @@ const store: StateCreator<WebRTCStore> = (set, get) => ({
   },
   streamConstraints: getStreamSettingsfromLocalStorage(),
   autoOnMic: Boolean(JSON.parse(localStorage.getItem(localstorageKeys.AUTO_ON_MIC) ?? 'true')),
-  bitrate: Number(localStorage.getItem(localstorageKeys.STREAM_BITRATE)) || 1024 * 1024 * 10,
+  bitrate: Number(localStorage.getItem(localstorageKeys.STREAM_BITRATE)) || defaultStreamBitrate,
 
   setAutoOnMic(autoOnMic) {
     localStorage.setItem(localstorageKeys.AUTO_ON_MIC, autoOnMic.toString())
