@@ -14,6 +14,7 @@ export const useGameSessionHost = () => {
   const users = useWebRTCRoomStore((state) => state.users)
   const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
   const bitrate = useWebRTCStore((state) => state.bitrate)
+  const screenStream = useWebRTCStore((state) => state.streams.screen)
   const offerRef = useRef<GameSessionOffer | null>(null)
 
   useEffect(() => {
@@ -75,4 +76,13 @@ export const useGameSessionHost = () => {
       peer.setGameSession(offer)
     })
   }, [users])
+
+  useEffect(() => {
+    if (screenStream || !offerRef.current || !window.electron) return
+
+    // The screen tile is the session window. Stopping the broadcast ends the session.
+    offerRef.current = null
+    useHostSessionStore.getState().setHostOffer(null)
+    window.electron.ipcRenderer.sendMessage(IpcChannels.gameSessionStop, undefined)
+  }, [screenStream])
 }

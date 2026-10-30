@@ -13,7 +13,7 @@ const encoderOrder = ['h264_nvenc', 'h264_amf', 'h264_qsv', 'libx264'] as const
 
 export type HardwareEncoder = (typeof encoderOrder)[number]
 
-export const resolveFfmpegPath = () => {
+const resolveFfmpegPath = () => {
   const packagedPath = path.join(process.resourcesPath, 'ffmpeg', 'ffmpeg.exe')
   if (existsSync(packagedPath)) return packagedPath
 
@@ -44,7 +44,20 @@ const encoderArguments = (encoder: HardwareEncoder, frameRate: number, bitrateBi
   const rate = ['-b:v', bitrate, '-maxrate', bitrate, '-bufsize', buffer, '-bf', '0', '-g', group]
 
   if (encoder === 'h264_nvenc') {
-    return ['-c:v', 'h264_nvenc', '-preset', 'p1', '-tune', 'ull', '-rc', 'cbr', '-forced-idr', '1', '-aud', '1'].concat(rate)
+    return [
+      '-c:v',
+      'h264_nvenc',
+      '-preset',
+      'p1',
+      '-tune',
+      'ull',
+      '-rc',
+      'cbr',
+      '-forced-idr',
+      '1',
+      '-aud',
+      '1',
+    ].concat(rate)
   }
   if (encoder === 'h264_amf') {
     return ['-c:v', 'h264_amf', '-usage', 'ultralowlatency', '-rc', 'cbr', '-quality', 'speed'].concat(rate)
@@ -53,7 +66,16 @@ const encoderArguments = (encoder: HardwareEncoder, frameRate: number, bitrateBi
     return ['-c:v', 'h264_qsv', '-preset', 'veryfast', '-look_ahead', '0'].concat(rate)
   }
 
-  return ['-c:v', 'libx264', '-preset', 'ultrafast', '-tune', 'zerolatency', '-x264-params', 'aud=1:repeat-headers=1'].concat(rate)
+  return [
+    '-c:v',
+    'libx264',
+    '-preset',
+    'ultrafast',
+    '-tune',
+    'zerolatency',
+    '-x264-params',
+    'aud=1:repeat-headers=1',
+  ].concat(rate)
 }
 
 const captureFilter = (

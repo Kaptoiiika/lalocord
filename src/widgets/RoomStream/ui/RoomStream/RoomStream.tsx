@@ -5,6 +5,7 @@ import { DrawOutlined, MouseOutlined, PictureInPictureOutlined } from '@mui/icon
 import RemoveIcon from '@mui/icons-material/Remove'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { CanvasPainter } from 'src/features/CanvasPainter'
+import { GameSessionWindow, useHostSessionStore } from 'src/features/GameSession'
 import { RemoteControlLayer } from 'src/features/RemoteControl'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
@@ -14,6 +15,7 @@ import { VideoPlayer } from 'src/shared/ui/VideoPlayer/VideoPlayer'
 
 import type { StreamType } from 'src/entities/WebRTC'
 import type { RoomUser } from 'src/features/WebRTCRoom'
+import type { GameSessionOffer } from 'src/shared/types/GameSession'
 
 import { useRoomStreamStore } from '../../model/store/RoomStreamStore'
 
@@ -48,12 +50,14 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     isLocal = false,
   } = props
   const { hiddenStreams, hideStreams, unHideStreams } = useRoomStreamStore()
+  const hostOffer = useHostSessionStore((state) => state.hostOffer)
   const componentId = useId().split(':').join('')
   const [autoplay, setAutoplay] = useState(!document.hidden)
   const [played, setPlayed] = useState(false)
   const [drawLine, setDrawLine] = useState(false)
   const [isRemoteControlAvailable, setIsRemoteControlAvailable] = useState(false)
   const [isRemoteControlActive, setIsRemoteControlActive] = useState(false)
+  const [remoteGameOffer, setRemoteGameOffer] = useState<GameSessionOffer | null>(null)
   const isRemoteControlActiveRef = useRef(false)
   const { handleOpen: handleOpenfullscreen, handleClose: handleClosefullscreen, open: fullScreen } = useIsOpen()
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -146,13 +150,52 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
     stopRemoteControl()
   }, [isRemoteControlAvailable, stopRemoteControl])
 
+  useEffect(() => {
+    if (!user || isLocal) return
+
+    const handleGameSession = (offer: GameSessionOffer | null) => {
+      setRemoteGameOffer(offer)
+    }
+
+    setRemoteGameOffer(user.peer.gameSessionOffer)
+    user.peer.on('onGameSession', handleGameSession)
+
+    return () => {
+      user.peer.off('onGameSession', handleGameSession)
+    }
+  }, [isLocal, user])
+
   const hideIndex = Math.max(hiddenStreams.indexOf(stream.id), 0)
   const canDrawLine = type === 'screen'
   const canControl = canDrawLine && !isLocal && isRemoteControlAvailable
+  const isHostGameTile = isLocal && type === 'screen' && Boolean(hostOffer)
+  let viewerOffer: GameSessionOffer | null = null
+  if (!isLocal && type === 'screen' && remoteGameOffer && remoteGameOffer.token !== hostOffer?.token) {
+    viewerOffer = remoteGameOffer
+  }
+  const isViewerGameTile = Boolean(viewerOffer)
+  const isGameSessionTile = isHostGameTile || isViewerGameTile
 
   let streamOverlay: ReactNode
+  let videoClassName: string | undefined
+  if (isViewerGameTile) videoClassName = styles.gameSessionVideo
+  else if (isRemoteControlActive) videoClassName = styles.remoteControlVideo
 
-  if (isRemoteControlActive && user) {
+  if (isHostGameTile) {
+    streamOverlay = (
+      <GameSessionWindow
+        isHost
+        offer={null}
+      />
+    )
+  } else if (viewerOffer) {
+    streamOverlay = (
+      <GameSessionWindow
+        isHost={false}
+        offer={viewerOffer}
+      />
+    )
+  } else if (isRemoteControlActive && user) {
     streamOverlay = (
       <RemoteControlLayer
         videoRef={videoRef}
@@ -183,7 +226,8 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
       }}
       className={classNames(styles.stream, {
         [styles.hideStream]: hide,
-        [styles.drawLine]: drawLine,
+        [styles.drawLine]: drawLine && !isGameSessionTile,
+        [styles.gameSessionTile]: isViewerGameTile,
       })}
       draggable="false"
       onDragStart={(e) => e.preventDefault()}
@@ -197,11 +241,12 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         onPause={handlePause}
         onPlay={handlePlay}
         fullScreen={fullScreen}
-        className={isRemoteControlActive ? styles.remoteControlVideo : undefined}
+        className={videoClassName}
         onFullscreenEnter={handleOpenfullscreen}
         onFullscreenExit={handleFullscreenExit}
         autoplay={autoplay ? propsAutoPlay : false}
         controls={!hide}
+        playbackControls={!isGameSessionTile}
         mute={mute}
         overlay={streamOverlay}
       >
@@ -223,7 +268,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
             direction="row"
             gap={2}
           >
-            {canDrawLine && !isLocal && (
+            {canDrawLine && !isLocal && !isGameSessionTile && (
               <Tooltip title="Draw a line">
                 <IconButton
                   color="primary"
@@ -235,17 +280,19 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
               </Tooltip>
             )}
 
-            <Tooltip title="Picture in picture">
-              <IconButton
-                color="primary"
-                aria-label="Picture in picture"
-                onClick={handlePictureInPictureEnter}
-              >
-                <PictureInPictureOutlined />
-              </IconButton>
-            </Tooltip>
+            {!isGameSessionTile && (
+              <Tooltip title="Picture in picture">
+                <IconButton
+                  color="primary"
+                  aria-label="Picture in picture"
+                  onClick={handlePictureInPictureEnter}
+                >
+                  <PictureInPictureOutlined />
+                </IconButton>
+              </Tooltip>
+            )}
 
-            {canControl && (
+            {canControl && !isGameSessionTile && (
               <Tooltip title="Remote control">
                 <IconButton
                   color="primary"

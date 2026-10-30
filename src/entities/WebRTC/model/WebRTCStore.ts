@@ -57,12 +57,8 @@ const createGamePosterStream = () => {
   canvas.height = 720
   const context = canvas.getContext('2d')
   if (context) {
-    context.fillStyle = '#111418'
+    context.fillStyle = '#000'
     context.fillRect(0, 0, canvas.width, canvas.height)
-    context.fillStyle = '#ffffff'
-    context.font = '48px sans-serif'
-    context.textAlign = 'center'
-    context.fillText('Game session', canvas.width / 2, canvas.height / 2)
   }
 
   gamePoster.canvas = canvas

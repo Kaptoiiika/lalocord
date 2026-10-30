@@ -28,6 +28,7 @@ type VideoPlayerProps = {
   autoplay?: boolean
   fullScreen?: boolean
   controls?: boolean
+  playbackControls?: boolean
   overlay?: React.ReactNode
 } & PropsWithChildren
 
@@ -48,6 +49,7 @@ export const VideoPlayer = memo(
       onFullscreenExit,
       children,
       controls = true,
+      playbackControls = true,
       overlay,
       ...other
     } = props
@@ -189,30 +191,30 @@ export const VideoPlayer = memo(
           {overlay}
           {debugMode && <VideoPlayerDebugInfo stream={stream} />}
           {controls && (
-            <>
-              <VideoPlayerTooltip
-                open={!toolsIsClosed}
-                top
-              >
-                {children}
-              </VideoPlayerTooltip>
-              <VideoPlayerActions
-                stream={stream}
-                open={!toolsIsClosed}
-                fullscreen={fullscreen}
-                played={played}
-                volume={volume}
-                mute={mute}
-                handleChangeVolume={handleChangeVolume}
-                handleExitFullscreen={handleExitFullscreen}
-                handleFullscreen={handleEnterFullscreen}
-                handlePlayPause={handlePlayPause}
-              />
-            </>
+            <VideoPlayerTooltip
+              open={!toolsIsClosed}
+              top
+            >
+              {children}
+            </VideoPlayerTooltip>
+          )}
+          {controls && playbackControls && (
+            <VideoPlayerActions
+              stream={stream}
+              open={!toolsIsClosed}
+              fullscreen={fullscreen}
+              played={played}
+              volume={volume}
+              mute={mute}
+              handleChangeVolume={handleChangeVolume}
+              handleExitFullscreen={handleExitFullscreen}
+              handleFullscreen={handleEnterFullscreen}
+              handlePlayPause={handlePlayPause}
+            />
           )}
           <video
             {...other}
-            onDoubleClick={handleFullscreenToggle}
+            onDoubleClick={playbackControls ? handleFullscreenToggle : undefined}
             ref={handleRefVideo}
             className={classNames(styles.video, className, {
               [styles.cursorHide]: toolsIsClosed,

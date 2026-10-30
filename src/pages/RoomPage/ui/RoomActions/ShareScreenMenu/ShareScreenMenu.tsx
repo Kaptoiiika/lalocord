@@ -43,6 +43,7 @@ export const ShareScreenMenu = () => {
   const handleStopStream = async () => {
     handleClose()
     await startViewTransition()
+    if (__IS_ELECTRON__) window.electron?.ipcRenderer.sendMessage(IpcChannels.gameSessionStop, undefined)
     stopStream('screen')
   }
 

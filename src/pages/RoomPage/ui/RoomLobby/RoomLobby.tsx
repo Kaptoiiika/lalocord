@@ -1,5 +1,4 @@
 import { Stack } from '@mui/material'
-import { GameSessionWindow } from 'src/features/GameSession'
 import { useWebRTCRoom } from 'src/features/WebRTCRoom'
 import { Chat } from 'src/widgets/Chat'
 import { RoomStreams } from 'src/widgets/RoomStream'
@@ -32,7 +31,6 @@ export const RoomLobby = (props: RoomLobbyProps) => {
         <RoomUsers />
         <RoomStreams />
         <RoomActions />
-        <GameSessionWindow />
       </div>
 
       <Chat

@@ -144,4 +144,13 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ['scripts/**/*.{mjs,cjs}', 'electron/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        fetch: 'readonly',
+      },
+    },
+  },
 ])

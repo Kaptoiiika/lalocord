@@ -1,6 +1,6 @@
 {
   "name": "lalocord",
-  "version": "2.0.9",
+  "version": "2.1.0",
   "description": "P2P streaming and chating",
   "author": {
     "name": "Nikita Ozhegov",
@@ -95,6 +95,12 @@
   "build": {
     "appId": "com.lalocord.app",
     "productName": "Lalocord",
+    "compression": "maximum",
+    "electronLanguages": [
+      "en-US",
+      "ru"
+    ],
+    "afterPack": "scripts/after-pack.mjs",
     "directories": {
       "output": "release"
     },
@@ -102,18 +108,32 @@
       "dist/**/*",
       "dist-electron/**/*",
       "!**/node_modules/**",
-      "node_modules/@nut-tree-fork/libnut-win32/**/*",
-      "node_modules/@nut-tree-fork/libnut-linux/**/*",
-      "node_modules/@nut-tree-fork/libnut-darwin/**/*",
-      "node_modules/bindings/**/*",
-      "node_modules/file-uri-to-path/**/*",
-      "node_modules/@fails-components/webtransport/**/*",
-      "node_modules/@fails-components/webtransport-transport-http3-quiche/**/*",
-      "node_modules/debug/**/*",
-      "node_modules/ms/**/*"
+      "node_modules/@nut-tree-fork/libnut-${platform}/package.json",
+      "node_modules/@nut-tree-fork/libnut-${platform}/index.js",
+      "node_modules/@nut-tree-fork/libnut-${platform}/permissionCheck.js",
+      "node_modules/@nut-tree-fork/libnut-${platform}/build/Release/*.node",
+      "node_modules/@nut-tree-fork/libnut-${platform}/build/Release/*.dll",
+      "node_modules/bindings/package.json",
+      "node_modules/bindings/bindings.js",
+      "node_modules/file-uri-to-path/package.json",
+      "node_modules/file-uri-to-path/index.js",
+      "node_modules/@fails-components/webtransport/package.json",
+      "node_modules/@fails-components/webtransport/lib/**/*.js",
+      "node_modules/@fails-components/webtransport-transport-http3-quiche/package.json",
+      "node_modules/@fails-components/webtransport-transport-http3-quiche/lib/**/*.js",
+      "node_modules/@fails-components/webtransport-transport-http3-quiche/build/Release/webtransport.node",
+      "node_modules/debug/package.json",
+      "node_modules/debug/src/**/*.js",
+      "node_modules/ms/package.json",
+      "node_modules/ms/index.js"
     ],
     "asarUnpack": [
-      "**/node_modules/**"
+      "node_modules/@fails-components/**",
+      "node_modules/@nut-tree-fork/**",
+      "node_modules/bindings/**",
+      "node_modules/file-uri-to-path/**",
+      "node_modules/debug/**",
+      "node_modules/ms/**"
     ],
     "extraResources": [
       {
