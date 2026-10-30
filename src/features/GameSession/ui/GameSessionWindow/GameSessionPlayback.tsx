@@ -13,6 +13,7 @@ import styles from './GameSessionWindow.module.scss'
 type GameSessionPlaybackProps = {
   offer: GameSessionOffer
   audioContext: AudioContext
+  isControlEnabled: boolean
   onExit: () => void
   onFailed: () => void
 }
@@ -55,7 +56,7 @@ const readPackets = async (
 }
 
 export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
-  const { offer, audioContext, onExit, onFailed } = props
+  const { offer, audioContext, isControlEnabled, onExit, onFailed } = props
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const surfaceRef = useRef<HTMLDivElement>(null)
   const sendInputRef = useRef<(event: RemoteControlEvent) => void>(() => undefined)
@@ -266,13 +267,15 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
         className={styles.canvas}
       />
       {!isReady && <p className={styles.status}>Подключение…</p>}
-      <RemoteControlLayer
-        videoRef={canvasRef}
-        onControlEvent={(event) => {
-          sendInputRef.current(event)
-        }}
-        onExit={handleExit}
-      />
+      {isControlEnabled && (
+        <RemoteControlLayer
+          videoRef={canvasRef}
+          onControlEvent={(event) => {
+            sendInputRef.current(event)
+          }}
+          onExit={handleExit}
+        />
+      )}
     </div>
   )
 }

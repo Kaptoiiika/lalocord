@@ -21,6 +21,11 @@
   pointer-events: none;
 }
 
+.viewerSurface:fullscreen {
+  width: 100%;
+  height: 100%;
+}
+
 .viewerPlaque {
   position: absolute;
   z-index: 2;
