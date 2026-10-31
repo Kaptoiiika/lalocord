@@ -28,6 +28,10 @@ export const enum IpcChannels {
   gameSessionEnded = 'gameSessionEnded',
   gameSessionStats = 'gameSessionStats',
   gameSessionFailed = 'gameSessionFailed',
+  gameSessionRelay = 'gameSessionRelay',
+  gameSessionCongestion = 'gameSessionCongestion',
+  gameSessionInput = 'gameSessionInput',
+  gameSessionPacket = 'gameSessionPacket',
 }
 
 export type IpcEventMap<T> = Record<IpcChannels, T>
@@ -48,6 +52,10 @@ export interface IpcToMainEventMap {
   gameSessionEnded: void
   gameSessionStats: void
   gameSessionFailed: void
+  gameSessionRelay: number
+  gameSessionCongestion: number
+  gameSessionInput: RemoteControlEvent
+  gameSessionPacket: void
 }
 
 //renderer sendMessage(key, (value)=>{})
@@ -66,4 +74,8 @@ export interface IpcToRendererEventMap {
   gameSessionEnded: void
   gameSessionStats: GameSessionStats
   gameSessionFailed: string
+  gameSessionRelay: void
+  gameSessionCongestion: void
+  gameSessionInput: void
+  gameSessionPacket: Uint8Array
 }

@@ -38,7 +38,8 @@ const readEncoders = async (ffmpegPath: string) => {
 
 const encoderArguments = (encoder: HardwareEncoder, frameRate: number, bitrateBits: number) => {
   const bitrate = String(Math.max(1, Math.round(bitrateBits)))
-  const buffer = String(Math.max(1, Math.round(bitrateBits / 4)))
+  // One frame of bitrate. A quarter-second bufsize lets ffmpeg hold the picture on a wired LAN.
+  const buffer = String(Math.max(1, Math.round(bitrateBits / Math.max(1, frameRate))))
   // Half a second between keyframes, matching the previous 30-frame GOP at 60 fps.
   const group = String(Math.max(1, Math.round(frameRate / 2)))
   const rate = ['-b:v', bitrate, '-maxrate', bitrate, '-bufsize', buffer, '-bf', '0', '-g', group]
@@ -53,6 +54,8 @@ const encoderArguments = (encoder: HardwareEncoder, frameRate: number, bitrateBi
       'ull',
       '-rc',
       'cbr',
+      '-rc-lookahead',
+      '0',
       '-forced-idr',
       '1',
       '-aud',

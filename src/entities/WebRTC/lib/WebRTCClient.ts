@@ -84,6 +84,8 @@ type WebRTCClientEvents = {
   onRemoteControlStatus: boolean
   onControlEvent: RemoteControlEvent
   onGameSession: GameSessionOffer | null
+  onGameChannel: string | ArrayBuffer
+  onGameChannelClose: boolean
 }
 
 export class WebRTCClient extends Emitter<WebRTCClientEvents> {
@@ -101,6 +103,7 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   channelInfo: DataChannel
   channelMiniGame: DataChannel
   private channelControl: DataChannel
+  private channelGame: DataChannel
 
   remoteStreams: Partial<Record<StreamType, MediaStream | null>> = {}
   remoteControlAvailable = false
@@ -212,6 +215,21 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
       negotiated: true,
     })
     this.channelControl.onMessage = this.onControlMessage.bind(this)
+    // Lost game frames must not stall the next ones. The viewer continues from the next keyframe.
+    this.channelGame = new DataChannel(this.peer, 'game', {
+      id: 5,
+      negotiated: true,
+      ordered: false,
+      maxRetransmits: 0,
+    })
+    this.channelGame.channel.binaryType = 'arraybuffer'
+    this.channelGame.onMessage = (event) => {
+      const data: unknown = event.data
+      if (typeof data === 'string' || data instanceof ArrayBuffer) this.emit('onGameChannel', data)
+    }
+    this.channelGame.onClose = () => {
+      this.emit('onGameChannelClose', true)
+    }
   }
 
   async createOffer(): Promise<RTCSessionDescriptionInit> {
@@ -364,6 +382,31 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     } catch (error) {
       console.error(error)
     }
+  }
+
+  sendGameChannel(data: string | Uint8Array) {
+    const channel = this.channelGame.channel
+    if (channel.readyState !== 'open') return false
+
+    try {
+      if (typeof data === 'string') {
+        channel.send(data)
+      } else {
+        const copy = new Uint8Array(data.byteLength)
+        copy.set(data)
+        channel.send(copy.buffer)
+      }
+
+      return true
+    } catch (error) {
+      console.error(error)
+
+      return false
+    }
+  }
+
+  gameChannelBufferedAmount() {
+    return this.channelGame.channel.bufferedAmount
   }
 
   sendMessageToPeer(event: EventMessageToPeer, message: unknown) {

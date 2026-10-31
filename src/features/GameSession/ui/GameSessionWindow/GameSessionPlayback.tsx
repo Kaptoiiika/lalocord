@@ -3,17 +3,21 @@ import { useEffect, useRef, useState } from 'react'
 import { RemoteControlLayer } from 'src/features/RemoteControl'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 
+import type { WebRTCClient } from 'src/entities/WebRTC'
 import type { RemoteControlEvent } from 'src/shared/types/ClientEvents'
 import type { GameSessionOffer } from 'src/shared/types/GameSession'
 
+import { createGamePacketAssembler, readGamePacket } from '../../lib/gameChannelPacket'
 import { annexBToAvcc, buildAvcDecoderConfig, splitAnnexB } from '../../lib/h264Sample'
 
 import styles from './GameSessionWindow.module.scss'
 
 type GameSessionPlaybackProps = {
   offer: GameSessionOffer
+  peer: WebRTCClient | null
   audioContext: AudioContext
   isControlEnabled: boolean
+  isRelativePointer: boolean
   onExit: () => void
   onFailed: () => void
 }
@@ -22,6 +26,10 @@ type DecoderConfig = {
   codec: string
   description: Uint8Array
 }
+
+const DIRECT_CONNECT_MS = 2500
+const CHANNEL_CONNECT_MS = 12000
+const HELLO_RETRY_MS = 300
 
 const sameBytes = (left: Uint8Array, right: Uint8Array) => {
   if (left.length !== right.length) return false
@@ -56,7 +64,7 @@ const readPackets = async (
 }
 
 export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
-  const { offer, audioContext, isControlEnabled, onExit, onFailed } = props
+  const { offer, peer, audioContext, isControlEnabled, isRelativePointer, onExit, onFailed } = props
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const surfaceRef = useRef<HTMLDivElement>(null)
   const sendInputRef = useRef<(event: RemoteControlEvent) => void>(() => undefined)
@@ -74,7 +82,9 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
     if (!canvas || !surface || !context) return
 
     let isStopped = false
+    let isDirectReady = false
     let transport: WebTransport | null = null
+    let stopChannel = () => undefined
     let audioRemainder = new Uint8Array(0)
     let nextAudioTime = 0
     const audioSources: AudioBufferSourceNode[] = []
@@ -103,7 +113,7 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
       source.buffer = audioBuffer
       source.connect(audioContext.destination)
       const now = audioContext.currentTime
-      if (nextAudioTime < now + 0.02 || nextAudioTime > now + 0.25) nextAudioTime = now + 0.05
+      if (nextAudioTime < now + 0.01 || nextAudioTime > now + 0.25) nextAudioTime = now + 0.02
       source.start(nextAudioTime)
       nextAudioTime += audioBuffer.duration
       audioSources.push(source)
@@ -194,28 +204,54 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
       }
     }
 
+    const handlePayload = (kind: number, payload: Uint8Array) => {
+      if (kind === 2) decodeFrame(payload)
+      if (kind === 3) playPcm(payload)
+    }
+
     openDecoder()
     void audioContext.resume()
 
-    const connect = async () => {
+    const connectDirect = async () => {
       const hash = Uint8Array.from(atob(offer.certHash), (char) => char.charCodeAt(0))
       const nextTransport = new WebTransport(offer.url, {
         serverCertificateHashes: [{ algorithm: 'sha-256', value: hash }],
       })
       transport = nextTransport
-      const readyTimeout = window.setTimeout(() => {
-        nextTransport.close()
-      }, 15000)
-      await nextTransport.ready
-      window.clearTimeout(readyTimeout)
+      await new Promise<void>((resolve, reject) => {
+        let isSettled = false
+        const timer = window.setTimeout(() => {
+          if (isSettled) return
+          isSettled = true
+          nextTransport.close()
+          reject(new Error('WebTransport timed out'))
+        }, DIRECT_CONNECT_MS)
+        nextTransport.ready.then(
+          () => {
+            if (isSettled) return
+            isSettled = true
+            window.clearTimeout(timer)
+            resolve()
+          },
+          (error: unknown) => {
+            if (isSettled) return
+            isSettled = true
+            window.clearTimeout(timer)
+            reject(error instanceof Error ? error : new Error('WebTransport failed'))
+          }
+        )
+      })
       if (isStopped) return
 
+      isDirectReady = true
       const datagramWriter = nextTransport.datagrams.writable.getWriter()
       await datagramWriter.write(new TextEncoder().encode(JSON.stringify({ type: 'hello', token: offer.token })))
       if (isStopped) return
 
       sendInputRef.current = (event) => {
-        datagramWriter.write(new TextEncoder().encode(JSON.stringify(event))).catch(() => undefined)
+        datagramWriter.write(new TextEncoder().encode(JSON.stringify(event))).catch((error: unknown) => {
+          console.error(error)
+        })
       }
 
       const incoming = nextTransport.incomingUnidirectionalStreams.getReader()
@@ -223,10 +259,86 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
       if (stream.done || !stream.value || isStopped) return
 
       setIsReady(true)
-      await readPackets(stream.value.getReader(), (kind, payload) => {
-        if (kind === 2) decodeFrame(payload)
-        if (kind === 3) playPcm(payload)
+      await readPackets(stream.value.getReader(), handlePayload)
+    }
+
+    const connectChannel = async () => {
+      if (!peer) throw new Error('Game data channel is unavailable')
+
+      const channelPeer = peer
+      await new Promise<void>((resolve, reject) => {
+        let isActive = true
+        let hasMedia = false
+        let helloTimer = 0
+        let failTimer = 0
+        const assembler = createGamePacketAssembler(
+          (packet) => {
+            if (!isActive) return
+            if (!hasMedia) {
+              hasMedia = true
+              window.clearInterval(helloTimer)
+              window.clearTimeout(failTimer)
+              setIsReady(true)
+            }
+            const parsed = readGamePacket(packet)
+            if (!parsed) return
+            handlePayload(parsed.kind, parsed.payload)
+          },
+          () => {
+            waitForKey = true
+          }
+        )
+        const onMessage = (data: string | ArrayBuffer) => {
+          if (!isActive || typeof data === 'string') return
+          assembler(new Uint8Array(data))
+        }
+        const finish = (error?: Error) => {
+          if (!isActive) return
+          isActive = false
+          window.clearInterval(helloTimer)
+          window.clearTimeout(failTimer)
+          channelPeer.off('onGameChannel', onMessage)
+          if (error) reject(error)
+          else resolve()
+        }
+        const sendHello = () => {
+          channelPeer.sendGameChannel(JSON.stringify({ type: 'hello', token: offer.token }))
+        }
+        sendInputRef.current = (event) => {
+          channelPeer.sendGameChannel(JSON.stringify(event))
+        }
+        channelPeer.on('onGameChannel', onMessage)
+        sendHello()
+        helloTimer = window.setInterval(sendHello, HELLO_RETRY_MS)
+        failTimer = window.setTimeout(() => {
+          finish(new Error('Game data channel timed out'))
+        }, CHANNEL_CONNECT_MS)
+        stopChannel = () => {
+          finish()
+        }
       })
+    }
+
+    const connect = async () => {
+      try {
+        await connectDirect()
+      } catch (error) {
+        if (isStopped) return
+        if (isDirectReady) {
+          console.error(error)
+          onFailedRef.current()
+          return
+        }
+
+        transport?.close()
+        transport = null
+        try {
+          await connectChannel()
+        } catch (channelError) {
+          console.error(channelError)
+          if (!isStopped) onFailedRef.current()
+        }
+      }
     }
 
     connect().catch((error: unknown) => {
@@ -240,6 +352,7 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
       const sendInput = sendInputRef.current
       sendInputRef.current = () => undefined
       sendInput({ type: 'release' })
+      stopChannel()
       closeDecoder()
       transport?.close()
       audioSources.forEach((source) => {
@@ -250,7 +363,7 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
         }
       })
     }
-  }, [audioContext, offer])
+  }, [audioContext, offer, peer])
 
   const handleExit = () => {
     sendInputRef.current({ type: 'release' })
@@ -270,6 +383,7 @@ export const GameSessionPlayback = (props: GameSessionPlaybackProps) => {
       {isControlEnabled && (
         <RemoteControlLayer
           videoRef={canvasRef}
+          isRelativePointer={isRelativePointer}
           onControlEvent={(event) => {
             sendInputRef.current(event)
           }}

@@ -9,6 +9,7 @@ const TYPE_FRAME = 6
 const TYPE_STOP = 7
 const TYPE_CONFIG = 8
 const TYPE_AUDIO = 9
+const TYPE_DROPPED = 10
 
 const textDecoder = new TextDecoder()
 
@@ -157,13 +158,16 @@ const acceptSession = async (session) => {
     const pump = async () => {
       if (isWriting || isClosed) return
       isWriting = true
+      // Write the waiting frame before PCM so a large audio chunk does not hold the picture.
       while (!isClosed && (pendingPacket || audioQueue.length > 0)) {
+        if (pendingPacket) {
+          const packet = pendingPacket
+          pendingPacket = null
+          await writer.write(packet.bytes)
+        }
+
         const audio = audioQueue.shift()
         if (audio) await writer.write(audio)
-
-        const packet = pendingPacket
-        pendingPacket = null
-        if (packet) await writer.write(packet.bytes)
       }
       isWriting = false
       if (!isClosed && (pendingPacket || audioQueue.length > 0)) {
@@ -175,7 +179,10 @@ const acceptSession = async (session) => {
 
     const subscriber = {
       write: (packet) => {
-        if (pendingPacket?.isKey && !packet.isKey) return
+        if (pendingPacket?.isKey && !packet.isKey) {
+          writeJson(TYPE_DROPPED, { dropped: 1 })
+          return
+        }
         pendingPacket = packet
         pump().catch(() => {
           subscriber.close()

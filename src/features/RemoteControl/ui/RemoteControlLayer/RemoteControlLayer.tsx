@@ -12,6 +12,7 @@ import styles from './RemoteControlLayer.module.scss'
 
 type RemoteControlLayerProps<T extends HTMLVideoElement | HTMLCanvasElement> = {
   videoRef: RefObject<T | null>
+  isRelativePointer?: boolean
   onControlEvent: (event: RemoteControlEvent) => void
   onExit: () => void
 }
@@ -36,16 +37,18 @@ const pointerButtonToRemote = (button: number): RemoteControlMouseButton | null 
 }
 
 export const RemoteControlLayer = <T extends HTMLVideoElement | HTMLCanvasElement>(props: RemoteControlLayerProps<T>) => {
-  const { videoRef, onControlEvent, onExit } = props
+  const { videoRef, onControlEvent, onExit, isRelativePointer = false } = props
   const layerRef = useRef<HTMLDivElement>(null)
   const onControlEventRef = useRef(onControlEvent)
   const onExitRef = useRef(onExit)
+  const isRelativePointerRef = useRef(isRelativePointer)
   const lastPointRef = useRef<{ x: number; y: number } | null>(null)
   const pendingPointRef = useRef<{ x: number; y: number } | null>(null)
   const frameRef = useRef<number | null>(null)
 
   onControlEventRef.current = onControlEvent
   onExitRef.current = onExit
+  isRelativePointerRef.current = isRelativePointer
 
   useEffect(() => {
     const release = () => {
@@ -120,6 +123,8 @@ export const RemoteControlLayer = <T extends HTMLVideoElement | HTMLCanvasElemen
     if (!layer) return
 
     const handleWheel = (event: WheelEvent) => {
+      if (isRelativePointerRef.current) return
+
       event.preventDefault()
       const video = videoRef.current
       if (!video) return
@@ -140,6 +145,69 @@ export const RemoteControlLayer = <T extends HTMLVideoElement | HTMLCanvasElemen
       layer.removeEventListener('wheel', handleWheel)
     }
   }, [videoRef])
+
+  useEffect(() => {
+    if (!isRelativePointer) return
+
+    // Pointer lock keeps the viewer's cursor still. The host receives the movement instead.
+    const handleMove = (event: MouseEvent) => {
+      if (!document.pointerLockElement) return
+      if (event.movementX === 0 && event.movementY === 0) return
+
+      onControlEventRef.current({
+        type: 'mousedelta',
+        dx: event.movementX * window.devicePixelRatio,
+        dy: event.movementY * window.devicePixelRatio,
+      })
+    }
+    const handleDown = (event: MouseEvent) => {
+      if (!document.pointerLockElement) return
+
+      const button = pointerButtonToRemote(event.button)
+      if (!button) return
+
+      event.preventDefault()
+      onControlEventRef.current({ type: 'mousebutton', button, pressed: true })
+    }
+    const handleUp = (event: MouseEvent) => {
+      if (!document.pointerLockElement) return
+
+      const button = pointerButtonToRemote(event.button)
+      if (!button) return
+
+      event.preventDefault()
+      onControlEventRef.current({ type: 'mousebutton', button, pressed: false })
+    }
+    const handleWheel = (event: WheelEvent) => {
+      if (!document.pointerLockElement) return
+
+      event.preventDefault()
+      const dx = getWheelNotches(event.deltaX, event.deltaMode)
+      const dy = getWheelNotches(event.deltaY, event.deltaMode)
+      if (dx === 0 && dy === 0) return
+
+      onControlEventRef.current({ type: 'wheel', dx, dy })
+    }
+    const handleContextMenu = (event: MouseEvent) => {
+      if (!document.pointerLockElement) return
+
+      event.preventDefault()
+    }
+
+    document.addEventListener('mousemove', handleMove, true)
+    document.addEventListener('mousedown', handleDown, true)
+    document.addEventListener('mouseup', handleUp, true)
+    document.addEventListener('wheel', handleWheel, { capture: true, passive: false })
+    document.addEventListener('contextmenu', handleContextMenu, true)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMove, true)
+      document.removeEventListener('mousedown', handleDown, true)
+      document.removeEventListener('mouseup', handleUp, true)
+      document.removeEventListener('wheel', handleWheel, true)
+      document.removeEventListener('contextmenu', handleContextMenu, true)
+    }
+  }, [isRelativePointer])
 
   const readPoint = (event: ReactPointerEvent<HTMLDivElement>) => {
     const video = videoRef.current
@@ -163,6 +231,8 @@ export const RemoteControlLayer = <T extends HTMLVideoElement | HTMLCanvasElemen
   }
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (isRelativePointer) return
+
     const button = pointerButtonToRemote(event.button)
     if (!button) return
 
@@ -176,6 +246,8 @@ export const RemoteControlLayer = <T extends HTMLVideoElement | HTMLCanvasElemen
   }
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (isRelativePointer) return
+
     const point = readPoint(event)
     if (!point) return
 
@@ -184,6 +256,8 @@ export const RemoteControlLayer = <T extends HTMLVideoElement | HTMLCanvasElemen
   }
 
   const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (isRelativePointer) return
+
     const button = pointerButtonToRemote(event.button)
     if (!button) return
 

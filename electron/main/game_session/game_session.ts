@@ -6,6 +6,8 @@ import { pathToFileURL } from 'node:url'
 import { app, BrowserWindow, ipcMain, net, protocol, screen } from 'electron'
 import { defaultStreamBitrate, defaultStreamConstraints } from 'src/entities/WebRTC/utils/streamConstraints'
 import { toGameCaptureSettings } from 'src/features/GameSession/lib/captureSettings'
+import { encodeGamePacket, GAME_CHANNEL_BUFFER_LIMIT } from 'src/features/GameSession/lib/gameChannelPacket'
+import { isRemoteControlEvent } from 'src/shared/types/ClientEvents'
 import { isGameCaptureSettings } from 'src/shared/types/GameSession'
 
 import type { MediaSourceBounds } from '../get_media_source/get_media_source'
@@ -42,6 +44,24 @@ let frameCount = 0
 let statsTimer: NodeJS.Timeout | null = null
 let sessionGeneration = 0
 let captureSerial = 0
+let relayViewers = 0
+let lastKeyPacket: Uint8Array | null = null
+let bitrateCeiling = captureSettings.bitrate
+let encodeBitrate = captureSettings.bitrate
+let lastBitrateChangeAt = 0
+let bufferHotSince = 0
+let dropWindowCount = 0
+let lastDropAt = 0
+let lastHotAt = 0
+let bitrateTimer: NodeJS.Timeout | null = null
+let inputOwner: 'none' | 'direct' | 'relay' = 'none'
+
+const BITRATE_FLOOR = 1024 * 1024
+const BITRATE_RESTART_GAP_MS = 2000
+const CONGESTION_HOLD_MS = 1000
+const RECOVERY_HOLD_MS = 3000
+const DROP_WINDOW_MS = 1000
+const DROP_CONGESTION_COUNT = 8
 
 const sendToWindows = (channel: string, payload: unknown) => {
   BrowserWindow.getAllWindows().forEach((window) => {
@@ -116,12 +136,101 @@ const codecFromFrame = (frame: Uint8Array) => {
   return null
 }
 
+const resetRelayState = () => {
+  relayViewers = 0
+  lastKeyPacket = null
+  bufferHotSince = 0
+  dropWindowCount = 0
+  lastDropAt = 0
+  lastHotAt = 0
+  lastBitrateChangeAt = 0
+  bitrateCeiling = captureSettings.bitrate
+  encodeBitrate = bitrateCeiling
+  inputOwner = 'none'
+}
+
+const failSession = (generation: number, error: unknown) => {
+  if (generation !== sessionGeneration) return
+
+  const message = error instanceof Error ? error.message : 'Game session failed'
+  sendToWindows(IpcChannels.gameSessionFailed, message)
+  stopGameSession(true)
+}
+
+const bitrateFloor = () => Math.min(BITRATE_FLOOR, bitrateCeiling)
+
+const applyEncodeBitrate = (nextBitrate: number) => {
+  if (!runningSession || !sessionHost || encodeBitrate <= 0 || nextBitrate === encodeBitrate) return
+
+  const change = Math.abs(nextBitrate - encodeBitrate) / encodeBitrate
+  if (change < 0.15 || Date.now() - lastBitrateChangeAt < BITRATE_RESTART_GAP_MS) return
+
+  encodeBitrate = nextBitrate
+  lastBitrateChangeAt = Date.now()
+  const generation = sessionGeneration
+  void launchCapture(generation).catch((error: unknown) => {
+    failSession(generation, error)
+  })
+}
+
+// The slider is the ceiling. A clean link never steps down, so a restart does not add a pause by itself.
+const adjustEncodeBitrate = () => {
+  if (!runningSession || !sessionHost) return
+
+  const now = Date.now()
+  if (lastDropAt !== 0 && now - lastDropAt >= DROP_WINDOW_MS) dropWindowCount = 0
+
+  const isBufferCongested = bufferHotSince > 0 && now - bufferHotSince >= CONGESTION_HOLD_MS
+  const isDropsCongested = dropWindowCount >= DROP_CONGESTION_COUNT
+  if (isBufferCongested || isDropsCongested) {
+    lastHotAt = now
+    applyEncodeBitrate(Math.max(bitrateFloor(), Math.round(encodeBitrate * 0.7)))
+    return
+  }
+
+  if (lastHotAt !== 0 && now - lastHotAt < RECOVERY_HOLD_MS) return
+  if (encodeBitrate >= bitrateCeiling) return
+
+  applyEncodeBitrate(Math.min(bitrateCeiling, Math.round(encodeBitrate * 1.15)))
+}
+
+const noteDroppedFrames = (count: number) => {
+  if (!Number.isFinite(count) || count <= 0) return
+
+  const now = Date.now()
+  if (lastDropAt !== 0 && now - lastDropAt > DROP_WINDOW_MS) dropWindowCount = 0
+  dropWindowCount += count
+  lastDropAt = now
+  if (dropWindowCount >= DROP_CONGESTION_COUNT) lastHotAt = now
+}
+
+const noteChannelBuffer = (amount: number) => {
+  if (!Number.isFinite(amount)) return
+  if (amount > GAME_CHANNEL_BUFFER_LIMIT) {
+    const now = Date.now()
+    if (!bufferHotSince) bufferHotSince = now
+    lastHotAt = now
+    return
+  }
+
+  bufferHotSince = 0
+}
+
+const relayPacket = (packet: Uint8Array) => {
+  if (relayViewers <= 0) return
+
+  sendToWindows(IpcChannels.gameSessionPacket, Buffer.from(packet))
+}
+
 const stopGameSession = (notify: boolean) => {
   sessionGeneration += 1
   captureSerial += 1
   const hadSession = runningSession !== null
   if (statsTimer) clearInterval(statsTimer)
   statsTimer = null
+  if (bitrateTimer) clearInterval(bitrateTimer)
+  bitrateTimer = null
+  resetRelayState()
   runningCapture?.stop()
   runningCapture = null
   sessionHost?.stop()
@@ -137,6 +246,7 @@ const stopGameSession = (notify: boolean) => {
 const launchCapture = async (generation: number) => {
   const serial = captureSerial + 1
   captureSerial = serial
+  lastKeyPacket = null
   const target = await captureTarget(sessionBounds, captureSettings)
   if (generation !== sessionGeneration || serial !== captureSerial || !sessionHost) return null
 
@@ -150,7 +260,7 @@ const launchCapture = async (generation: number) => {
     width: target.width,
     height: target.height,
     frameRate: captureSettings.frameRate,
-    bitrate: captureSettings.bitrate,
+    bitrate: encodeBitrate,
     isNativeSize: target.width === target.physicalWidth && target.height === target.physicalHeight,
     onFrame: (frame) => {
       if (generation !== sessionGeneration || serial !== captureSerial) return
@@ -162,10 +272,18 @@ const launchCapture = async (generation: number) => {
       }
       frameCount += 1
       hostServer.publishFrame(frame.data, frame.isKey)
+      const payload = new Uint8Array(1 + frame.data.byteLength)
+      payload[0] = frame.isKey ? 1 : 0
+      payload.set(frame.data, 1)
+      const packet = encodeGamePacket(2, payload)
+      if (frame.isKey) lastKeyPacket = packet
+      relayPacket(packet)
     },
     onAudio: (pcm) => {
       if (generation !== sessionGeneration || serial !== captureSerial) return
       hostServer.publishAudio(pcm)
+      if (pcm.byteLength === 0) return
+      relayPacket(encodeGamePacket(3, pcm))
     },
     onExit: (error) => {
       if (!error || serial !== captureSerial || generation !== sessionGeneration) return
@@ -209,10 +327,17 @@ const startGameSession = async (bounds?: MediaSourceBounds, capture?: GameCaptur
     privateKey: certificate.privateKey,
     secret: certificate.secret,
     token,
-    onInput: injectRemoteControlEvent,
-    onViewers: (nextViewers) => {
-      sessionViewers = nextViewers
+    onInput: (event) => {
+      if (inputOwner === 'relay') return
+      injectRemoteControlEvent(event)
     },
+    onViewers: (nextViewers) => {
+      const hadViewers = sessionViewers > 0
+      sessionViewers = nextViewers
+      if (nextViewers > 0 && inputOwner === 'none') inputOwner = 'direct'
+      if (hadViewers && nextViewers === 0 && inputOwner === 'direct') inputOwner = relayViewers > 0 ? 'relay' : 'none'
+    },
+    onDropped: noteDroppedFrames,
     onFailure: (message) => {
       if (generation !== sessionGeneration) return
       sendToWindows(IpcChannels.gameSessionFailed, message)
@@ -260,9 +385,10 @@ const startGameSession = async (bounds?: MediaSourceBounds, capture?: GameCaptur
   }
 
   statsTimer = setInterval(() => {
-    publishStats({ encoder: sessionEncoder, fps: frameCount, viewers: sessionViewers })
+    publishStats({ encoder: sessionEncoder, fps: frameCount, viewers: sessionViewers + relayViewers })
     frameCount = 0
   }, 1000)
+  bitrateTimer = setInterval(adjustEncodeBitrate, 500)
 
   sendToWindows(IpcChannels.gameSessionReady, offer)
 }
@@ -276,14 +402,14 @@ const configureGameSession = (capture: GameCaptureSettings) => {
     capture.frameRate === captureSettings.frameRate &&
     capture.bitrate === captureSettings.bitrate
   captureSettings = capture
+  bitrateCeiling = capture.bitrate
   if (isSame || !runningSession || !sessionHost) return
 
+  encodeBitrate = capture.bitrate
+  lastBitrateChangeAt = Date.now()
   const generation = sessionGeneration
   void launchCapture(generation).catch((error: unknown) => {
-    if (generation !== sessionGeneration) return
-    const message = error instanceof Error ? error.message : 'Game session failed'
-    sendToWindows(IpcChannels.gameSessionFailed, message)
-    stopGameSession(true)
+    failSession(generation, error)
   })
 }
 
@@ -330,6 +456,30 @@ ipcMain.on(IpcChannels.gameSessionConfigure, (_event, value) => {
 
 ipcMain.on(IpcChannels.gameSessionStop, () => {
   stopGameSession(true)
+})
+
+ipcMain.on(IpcChannels.gameSessionRelay, (_event, viewers: number) => {
+  if (typeof viewers !== 'number' || !Number.isFinite(viewers)) return
+
+  const nextViewers = Math.max(0, Math.trunc(viewers))
+  const hadRelay = relayViewers > 0
+  const grew = nextViewers > relayViewers
+  relayViewers = nextViewers
+  if (nextViewers > 0 && inputOwner === 'none') inputOwner = 'relay'
+  if (hadRelay && nextViewers === 0 && inputOwner === 'relay') inputOwner = sessionViewers > 0 ? 'direct' : 'none'
+  if (!grew || !lastKeyPacket) return
+
+  sendToWindows(IpcChannels.gameSessionPacket, Buffer.from(lastKeyPacket))
+})
+
+ipcMain.on(IpcChannels.gameSessionCongestion, (_event, amount: number) => {
+  noteChannelBuffer(amount)
+})
+
+ipcMain.on(IpcChannels.gameSessionInput, (_event, event) => {
+  if (inputOwner === 'direct' || !isRemoteControlEvent(event)) return
+
+  injectRemoteControlEvent(event)
 })
 
 app.on('before-quit', () => {

@@ -13,6 +13,7 @@ import { IpcChannels } from '../types/ipcChannels'
 type Libnut = {
   setMouseDelay: (delay: number) => void
   setKeyboardDelay: (delay: number) => void
+  getMousePos: () => { x: number; y: number }
   moveMouse: (x: number, y: number) => void
   mouseToggle: (state: 'down' | 'up', button: string) => void
   scrollMouse: (x: number, y: number) => void
@@ -86,6 +87,52 @@ const movePointer = (x: number, y: number) => {
   if (!point) return
 
   libnut.moveMouse(point.x, point.y)
+}
+
+const virtualDesktop = () => {
+  const displays = screen.getAllDisplays()
+  let minX = 0
+  let minY = 0
+  let maxX = 0
+  let maxY = 0
+  let hasDisplay = false
+
+  displays.forEach((display) => {
+    const rect = screen.dipToScreenRect(null, display.bounds)
+    const right = rect.x + rect.width
+    const bottom = rect.y + rect.height
+    if (!hasDisplay) {
+      minX = rect.x
+      minY = rect.y
+      maxX = right
+      maxY = bottom
+      hasDisplay = true
+      return
+    }
+
+    minX = Math.min(minX, rect.x)
+    minY = Math.min(minY, rect.y)
+    maxX = Math.max(maxX, right)
+    maxY = Math.max(maxY, bottom)
+  })
+
+  if (!hasDisplay) return null
+
+  return { minX, minY, maxX, maxY }
+}
+
+// Game mode sends a pixel delta. The cursor may cross every monitor, not only the captured one.
+const movePointerBy = (dx: number, dy: number) => {
+  if (!gameInputBounds) return
+  if (!Number.isFinite(dx) || !Number.isFinite(dy)) return
+
+  const desktop = virtualDesktop()
+  if (!desktop) return
+
+  const current = libnut.getMousePos()
+  const nextX = Math.min(desktop.maxX - 1, Math.max(desktop.minX, Math.round(current.x + dx)))
+  const nextY = Math.min(desktop.maxY - 1, Math.max(desktop.minY, Math.round(current.y + dy)))
+  libnut.moveMouse(nextX, nextY)
 }
 
 const scrollBy = (stepsX: number, stepsY: number) => {
@@ -185,6 +232,19 @@ const handleInput = (event: RemoteControlEvent) => {
       runInput(() => {
         if (activeBounds()) movePointer(event.x, event.y)
         releaseButton(event.button)
+      })
+      break
+    case 'mousedelta':
+      if (!gameInputBounds) return
+      runInput(() => {
+        movePointerBy(event.dx, event.dy)
+      })
+      break
+    case 'mousebutton':
+      if (!gameInputBounds) return
+      runInput(() => {
+        if (event.pressed) pressButton(event.button)
+        else releaseButton(event.button)
       })
       break
     case 'wheel':

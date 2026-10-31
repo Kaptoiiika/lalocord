@@ -215,6 +215,8 @@ export type RemoteControlEvent =
   | { type: 'mousemove'; x: number; y: number }
   | { type: 'mousedown'; x: number; y: number; button: RemoteControlMouseButton }
   | { type: 'mouseup'; x: number; y: number; button: RemoteControlMouseButton }
+  | { type: 'mousedelta'; dx: number; dy: number }
+  | { type: 'mousebutton'; button: RemoteControlMouseButton; pressed: boolean }
   | { type: 'wheel'; dx: number; dy: number }
   | { type: 'keydown'; code: ClientKeys }
   | { type: 'keyup'; code: ClientKeys }
@@ -245,6 +247,23 @@ export const isRemoteControlEvent = (value: unknown): value is RemoteControlEven
     if (event.type === 'mousemove') return true
 
     return isMouseButton(pointEvent.button)
+  }
+
+  if (event.type === 'mousedelta') {
+    const deltaEvent = value as { dx?: unknown; dy?: unknown }
+
+    return (
+      typeof deltaEvent.dx === 'number' &&
+      typeof deltaEvent.dy === 'number' &&
+      Number.isFinite(deltaEvent.dx) &&
+      Number.isFinite(deltaEvent.dy)
+    )
+  }
+
+  if (event.type === 'mousebutton') {
+    const buttonEvent = value as { button?: unknown; pressed?: unknown }
+
+    return isMouseButton(buttonEvent.button) && typeof buttonEvent.pressed === 'boolean'
   }
 
   if (event.type === 'wheel') {

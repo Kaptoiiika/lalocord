@@ -193,6 +193,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
       <GameSessionWindow
         isHost={false}
         offer={viewerOffer}
+        peer={user?.peer ?? null}
       />
     )
   } else if (isRemoteControlActive && user) {

@@ -16,6 +16,7 @@ const TYPE_FRAME = 6
 const TYPE_STOP = 7
 const TYPE_CONFIG = 8
 const TYPE_AUDIO = 9
+const TYPE_DROPPED = 10
 
 const textDecoder = new TextDecoder()
 
@@ -76,6 +77,7 @@ export const startWebTransportHost = async (options: {
   token: string
   onInput: (event: RemoteControlEvent) => void
   onViewers: (viewers: number) => void
+  onDropped: (count: number) => void
   onFailure: (message: string) => void
 }) => {
   const nodeBinary = resolveNodeBinary()
@@ -137,6 +139,12 @@ export const startWebTransportHost = async (options: {
       } catch (error) {
         console.error(error)
       }
+      return
+    }
+
+    if (type === TYPE_DROPPED) {
+      const message = JSON.parse(textDecoder.decode(payload)) as { dropped?: unknown }
+      if (typeof message.dropped === 'number') options.onDropped(message.dropped)
       return
     }
 
