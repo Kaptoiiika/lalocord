@@ -15,7 +15,6 @@
 .stream {
   overflow: hidden;
   background-color: var(--bg-app);
-  width: 100%;
 }
 
 .unhide {
@@ -30,20 +29,11 @@
   right: 0;
 }
 
-.drawLine {
+.drawLine{
   cursor: crosshair;
 }
 
 .remoteControlVideo {
   object-fit: contain;
   background-color: #000;
-}
-
-.gameSessionTile {
-  background: #000;
-}
-
-.gameSessionVideo {
-  visibility: hidden;
-  pointer-events: none;
 }

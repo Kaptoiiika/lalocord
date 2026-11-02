@@ -14,12 +14,11 @@ import { IpcChannels } from 'electron/main/types/ipcChannels'
 import { getLastSelectedSource } from 'electron/renderer/getDisplayMedia/displayMediaSelector'
 import { useSettingStore } from 'src/entities/Settings'
 import { useWebRTCStore } from 'src/entities/WebRTC'
-import { toGameCaptureSettings } from 'src/features/GameSession/lib/captureSettings'
 import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { startViewTransition } from 'src/shared/lib/utils'
 
-import type { OpenOverlayParams } from 'electron/main/types/ipcChannels'
+import type { OpenOverlayParams } from 'electron/main/types/ipcChannels';
 
 const getOverlayParams = (): OpenOverlayParams | undefined => {
   const source = getLastSelectedSource()
@@ -43,7 +42,6 @@ export const ShareScreenMenu = () => {
   const handleStopStream = async () => {
     handleClose()
     await startViewTransition()
-    if (__IS_ELECTRON__) window.electron?.ipcRenderer.sendMessage(IpcChannels.gameSessionStop, undefined)
     stopStream('screen')
   }
 
@@ -163,27 +161,6 @@ export const ShareScreenMenu = () => {
           </ListItemIcon>
           <ListItemText>{screenStream ? 'Change screen' : 'Share your screen'}</ListItemText>
         </MenuItem>
-        {__IS_ELECTRON__ && (
-          <MenuItem
-            onClick={() => {
-              handleClose()
-              if (!window.electron) return
-              window.electron.ipcRenderer.sendMessage(IpcChannels.closeOverlay, undefined)
-              useWebRTCStore.getState().holdGameScreenTile()
-              const source = getLastSelectedSource()
-              const { streamConstraints, bitrate } = useWebRTCStore.getState()
-              window.electron.ipcRenderer.sendMessage(IpcChannels.gameSessionStart, {
-                bounds: source?.isScreen ? source.bounds : undefined,
-                capture: toGameCaptureSettings(streamConstraints, bitrate),
-              })
-            }}
-          >
-            <ListItemIcon>
-              <ScreenShareIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Game session</ListItemText>
-          </MenuItem>
-        )}
         {!!screenStream && (
           <MenuItem onClick={handleStopStream}>
             <ListItemIcon>

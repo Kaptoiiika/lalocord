@@ -1,7 +1,6 @@
 import type { MediaSource, MediaSourceBounds } from '../get_media_source/get_media_source'
 import type { ExternalLinePayload } from 'src/features/CanvasPainter/ui/CanvasPainter'
 import type { RemoteControlEvent } from 'src/shared/types/ClientEvents'
-import type { GameCaptureSettings, GameSessionOffer, GameSessionStats } from 'src/shared/types/GameSession'
 
 export interface OpenOverlayParams {
   bounds?: MediaSourceBounds
@@ -21,17 +20,6 @@ export const enum IpcChannels {
   remoteControlStart = 'remoteControlStart',
   remoteControlStop = 'remoteControlStop',
   remoteControlInput = 'remoteControlInput',
-  gameSessionStart = 'gameSessionStart',
-  gameSessionConfigure = 'gameSessionConfigure',
-  gameSessionStop = 'gameSessionStop',
-  gameSessionReady = 'gameSessionReady',
-  gameSessionEnded = 'gameSessionEnded',
-  gameSessionStats = 'gameSessionStats',
-  gameSessionFailed = 'gameSessionFailed',
-  gameSessionRelay = 'gameSessionRelay',
-  gameSessionCongestion = 'gameSessionCongestion',
-  gameSessionInput = 'gameSessionInput',
-  gameSessionPacket = 'gameSessionPacket',
 }
 
 export type IpcEventMap<T> = Record<IpcChannels, T>
@@ -45,17 +33,6 @@ export interface IpcToMainEventMap {
   remoteControlStart: RemoteControlStartParams
   remoteControlStop: void
   remoteControlInput: RemoteControlEvent
-  gameSessionStart: { bounds?: MediaSourceBounds; capture?: GameCaptureSettings }
-  gameSessionConfigure: GameCaptureSettings
-  gameSessionStop: void
-  gameSessionReady: void
-  gameSessionEnded: void
-  gameSessionStats: void
-  gameSessionFailed: void
-  gameSessionRelay: number
-  gameSessionCongestion: number
-  gameSessionInput: RemoteControlEvent
-  gameSessionPacket: void
 }
 
 //renderer sendMessage(key, (value)=>{})
@@ -67,15 +44,4 @@ export interface IpcToRendererEventMap {
   remoteControlStart: void
   remoteControlStop: void
   remoteControlInput: void
-  gameSessionStart: void
-  gameSessionConfigure: void
-  gameSessionStop: void
-  gameSessionReady: GameSessionOffer
-  gameSessionEnded: void
-  gameSessionStats: GameSessionStats
-  gameSessionFailed: string
-  gameSessionRelay: void
-  gameSessionCongestion: void
-  gameSessionInput: void
-  gameSessionPacket: Uint8Array
 }

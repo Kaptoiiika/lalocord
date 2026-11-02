@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom'
 
 import { useLocalUserStore } from 'src/entities/User'
 import { useWebRTCStore } from 'src/entities/WebRTC'
-import { useGameSessionHost } from 'src/features/GameSession'
 import { useRemoteControlHost } from 'src/features/RemoteControl'
 import { WaitUserClick } from 'src/features/WaitUserClick'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
@@ -32,7 +31,6 @@ const emitToJoinRoom = (id: string) => {
 
 const ElectronRemoteControlHost = () => {
   useRemoteControlHost()
-  useGameSessionHost()
 
   return null
 }

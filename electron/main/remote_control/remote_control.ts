@@ -13,7 +13,6 @@ import { IpcChannels } from '../types/ipcChannels'
 type Libnut = {
   setMouseDelay: (delay: number) => void
   setKeyboardDelay: (delay: number) => void
-  getMousePos: () => { x: number; y: number }
   moveMouse: (x: number, y: number) => void
   mouseToggle: (state: 'down' | 'up', button: string) => void
   scrollMouse: (x: number, y: number) => void
@@ -43,9 +42,6 @@ const buttonByName: Record<RemoteControlMouseButton, string> = {
 }
 
 let screenBounds: MediaSourceBounds | null = null
-let gameInputBounds: MediaSourceBounds | null = null
-
-const activeBounds = () => gameInputBounds ?? screenBounds
 let wheelX = 0
 let wheelY = 0
 const pressedKeys = new Set<string>()
@@ -60,13 +56,12 @@ const limitSteps = (steps: number) => {
 
 // Electron display bounds are DIP. libnut addresses physical pixels.
 const toScreenPoint = (x: number, y: number) => {
-  const bounds = activeBounds()
-  if (!bounds) return null
+  if (!screenBounds) return null
   if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1) return null
 
   const dipPoint = {
-    x: Math.round(bounds.x + x * bounds.width),
-    y: Math.round(bounds.y + y * bounds.height),
+    x: Math.round(screenBounds.x + x * screenBounds.width),
+    y: Math.round(screenBounds.y + y * screenBounds.height),
   }
   let physicalPoint = dipPoint
 
@@ -89,54 +84,8 @@ const movePointer = (x: number, y: number) => {
   libnut.moveMouse(point.x, point.y)
 }
 
-const virtualDesktop = () => {
-  const displays = screen.getAllDisplays()
-  let minX = 0
-  let minY = 0
-  let maxX = 0
-  let maxY = 0
-  let hasDisplay = false
-
-  displays.forEach((display) => {
-    const rect = screen.dipToScreenRect(null, display.bounds)
-    const right = rect.x + rect.width
-    const bottom = rect.y + rect.height
-    if (!hasDisplay) {
-      minX = rect.x
-      minY = rect.y
-      maxX = right
-      maxY = bottom
-      hasDisplay = true
-      return
-    }
-
-    minX = Math.min(minX, rect.x)
-    minY = Math.min(minY, rect.y)
-    maxX = Math.max(maxX, right)
-    maxY = Math.max(maxY, bottom)
-  })
-
-  if (!hasDisplay) return null
-
-  return { minX, minY, maxX, maxY }
-}
-
-// Game mode sends a pixel delta. The cursor may cross every monitor, not only the captured one.
-const movePointerBy = (dx: number, dy: number) => {
-  if (!gameInputBounds) return
-  if (!Number.isFinite(dx) || !Number.isFinite(dy)) return
-
-  const desktop = virtualDesktop()
-  if (!desktop) return
-
-  const current = libnut.getMousePos()
-  const nextX = Math.min(desktop.maxX - 1, Math.max(desktop.minX, Math.round(current.x + dx)))
-  const nextY = Math.min(desktop.maxY - 1, Math.max(desktop.minY, Math.round(current.y + dy)))
-  libnut.moveMouse(nextX, nextY)
-}
-
 const scrollBy = (stepsX: number, stepsY: number) => {
-  if (!activeBounds() || (stepsX === 0 && stepsY === 0)) return
+  if (!screenBounds || (stepsX === 0 && stepsY === 0)) return
 
   libnut.scrollMouse(stepsX, -stepsY)
 }
@@ -165,7 +114,7 @@ const releaseButton = (name: RemoteControlMouseButton) => {
 }
 
 const pressKey = (code: ClientKeys) => {
-  if (!activeBounds()) return
+  if (!screenBounds) return
   const key = keyHtmlToNut(code)
   if (!key || pressedKeys.has(key)) return
   pressedKeys.add(key)
@@ -214,7 +163,7 @@ const runInput = (action: () => void) => {
 
 const handleInput = (event: RemoteControlEvent) => {
   if (!isRemoteControlEvent(event)) return
-  if (!activeBounds() && event.type !== 'release') return
+  if (!screenBounds && event.type !== 'release') return
 
   switch (event.type) {
     case 'mousemove':
@@ -230,21 +179,8 @@ const handleInput = (event: RemoteControlEvent) => {
       break
     case 'mouseup':
       runInput(() => {
-        if (activeBounds()) movePointer(event.x, event.y)
+        if (screenBounds) movePointer(event.x, event.y)
         releaseButton(event.button)
-      })
-      break
-    case 'mousedelta':
-      if (!gameInputBounds) return
-      runInput(() => {
-        movePointerBy(event.dx, event.dy)
-      })
-      break
-    case 'mousebutton':
-      if (!gameInputBounds) return
-      runInput(() => {
-        if (event.pressed) pressButton(event.button)
-        else releaseButton(event.button)
       })
       break
     case 'wheel':
@@ -270,18 +206,7 @@ const handleInput = (event: RemoteControlEvent) => {
 
 const stopControl = () => {
   screenBounds = null
-  if (gameInputBounds) return
-
   releasePressedInputs()
-}
-
-export const setGameInputBounds = (bounds: MediaSourceBounds | null) => {
-  gameInputBounds = bounds
-  if (!bounds) releasePressedInputs()
-}
-
-export const injectRemoteControlEvent = (event: RemoteControlEvent) => {
-  handleInput(event)
 }
 
 ipcMain.on(
@@ -305,6 +230,5 @@ ipcMain.on(
 
 app.on('before-quit', () => {
   screenBounds = null
-  gameInputBounds = null
   releasePressedInputs()
 })

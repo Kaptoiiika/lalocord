@@ -1,13 +1,8 @@
 import path from 'path'
 
 import { app, BrowserWindow, shell } from 'electron'
-import contextMenu from 'electron-context-menu'
-
-import { handleAppProtocol, registerAppProtocol } from './main/game_session/game_session'
-import { setRoomWindow } from './main/windows'
 import './main/index'
-
-registerAppProtocol()
+import contextMenu from 'electron-context-menu'
 
 declare const __IS_DEV__: boolean
 
@@ -46,15 +41,12 @@ const createWindow = () => {
     return { action: 'deny' as const }
   })
 
-  setRoomWindow(win)
-
   win.on('closed', () => {
     app.quit()
   })
 }
 
 app.whenReady().then(() => {
-  handleAppProtocol()
   createWindow()
 
   app.on('activate', () => {

@@ -28,7 +28,6 @@ type VideoPlayerProps = {
   autoplay?: boolean
   fullScreen?: boolean
   controls?: boolean
-  playbackControls?: boolean
   overlay?: React.ReactNode
 } & PropsWithChildren
 
@@ -49,7 +48,6 @@ export const VideoPlayer = memo(
       onFullscreenExit,
       children,
       controls = true,
-      playbackControls = true,
       overlay,
       ...other
     } = props
@@ -58,10 +56,6 @@ export const VideoPlayer = memo(
     const [volume, setVolume] = useState(clamp(initVolume, 0, 1))
     const videoRef = useRef<HTMLVideoElement | null>(null)
     const playerRef = useRef<HTMLDivElement | null>(null)
-    const muteRef = useRef(Boolean(mute))
-    const volumeRef = useRef(mute ? 0 : volume)
-    muteRef.current = Boolean(mute)
-    volumeRef.current = mute ? 0 : volume
     const { handleClose, handleOpen, open } = useIsOpen({
       time: 3000,
     })
@@ -158,8 +152,6 @@ export const VideoPlayer = memo(
         }
         videoRef.current = node
         if (!node) return
-        node.muted = muteRef.current
-        node.volume = volumeRef.current
         if (node.srcObject !== stream) {
           node.srcObject = stream
         }
@@ -173,8 +165,7 @@ export const VideoPlayer = memo(
     }, [])
 
     if (videoRef.current) {
-      videoRef.current.muted = Boolean(mute)
-      videoRef.current.volume = mute ? 0 : volume
+      videoRef.current.volume = volume
     }
 
     const toolsIsClosed = played && !open
@@ -198,30 +189,30 @@ export const VideoPlayer = memo(
           {overlay}
           {debugMode && <VideoPlayerDebugInfo stream={stream} />}
           {controls && (
-            <VideoPlayerTooltip
-              open={!toolsIsClosed}
-              top
-            >
-              {children}
-            </VideoPlayerTooltip>
-          )}
-          {controls && playbackControls && (
-            <VideoPlayerActions
-              stream={stream}
-              open={!toolsIsClosed}
-              fullscreen={fullscreen}
-              played={played}
-              volume={volume}
-              mute={mute}
-              handleChangeVolume={handleChangeVolume}
-              handleExitFullscreen={handleExitFullscreen}
-              handleFullscreen={handleEnterFullscreen}
-              handlePlayPause={handlePlayPause}
-            />
+            <>
+              <VideoPlayerTooltip
+                open={!toolsIsClosed}
+                top
+              >
+                {children}
+              </VideoPlayerTooltip>
+              <VideoPlayerActions
+                stream={stream}
+                open={!toolsIsClosed}
+                fullscreen={fullscreen}
+                played={played}
+                volume={volume}
+                mute={mute}
+                handleChangeVolume={handleChangeVolume}
+                handleExitFullscreen={handleExitFullscreen}
+                handleFullscreen={handleEnterFullscreen}
+                handlePlayPause={handlePlayPause}
+              />
+            </>
           )}
           <video
             {...other}
-            onDoubleClick={playbackControls ? handleFullscreenToggle : undefined}
+            onDoubleClick={handleFullscreenToggle}
             ref={handleRefVideo}
             className={classNames(styles.video, className, {
               [styles.cursorHide]: toolsIsClosed,

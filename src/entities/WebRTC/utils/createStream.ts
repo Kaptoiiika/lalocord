@@ -1,8 +1,5 @@
-import {
-  getScreenAudioConstraints,
-  getScreenVideoConstraints,
-  type ObjectStreamConstraints,
-} from './streamConstraints'
+import type { ObjectStreamConstraints } from './streamConstraints'
+
 import type { StreamType } from '../types'
 
 export const createSilentAudioTrack = () => {
@@ -27,8 +24,14 @@ export const createBlackVideoTrack = () => {
 export const createMediaStream = async (type: StreamType, streamConstraints: ObjectStreamConstraints) => {
   if (type === 'screen') {
     return await navigator.mediaDevices.getDisplayMedia({
-      audio: getScreenAudioConstraints(streamConstraints),
-      video: getScreenVideoConstraints(streamConstraints),
+      ...streamConstraints,
+      audio: {
+        ...streamConstraints.audio,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore experimental technology in 141chrome https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/restrictOwnAudio
+        restrictOwnAudio: true,
+      },
+      video: { ...streamConstraints.video },
     })
   } else if (type === 'webCam') {
     return await navigator.mediaDevices.getUserMedia({ video: streamConstraints.video })
