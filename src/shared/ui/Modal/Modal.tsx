@@ -1,26 +1,32 @@
-import type { ReactNode } from 'react'
+import type { PropsWithChildren } from 'react'
 
-import type { ModalProps as MuiModalProps } from '@mui/material'
-import { Modal as MuiModal, Paper } from '@mui/material'
-import { classNames } from 'src/shared/lib/classNames'
+import { cn } from 'src/shared/lib/utils/cn'
+import { Dialog, DialogContent } from 'src/shared/ui/shadcn/dialog'
 
-import styles from './Modal.module.scss'
-
-export type ModalProps = Omit<MuiModalProps, 'children' | 'onClose'> & {
-  children?: ReactNode
-  className?: string
+export type ModalProps = PropsWithChildren<{
+  open: boolean
   onClose?: () => void
-}
+  className?: string
+}>
 
 export const Modal = (props: ModalProps) => {
-  const { children, className, onClose } = props
+  const { open, onClose, className, children } = props
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) onClose?.()
+  }
 
   return (
-    <MuiModal
-      {...props}
-      onClose={onClose}
+    <Dialog
+      open={open}
+      onOpenChange={handleOpenChange}
     >
-      <Paper className={classNames(styles.root, className)}>{children}</Paper>
-    </MuiModal>
+      <DialogContent
+        className={cn(className)}
+        showCloseButton
+      >
+        {children}
+      </DialogContent>
+    </Dialog>
   )
 }

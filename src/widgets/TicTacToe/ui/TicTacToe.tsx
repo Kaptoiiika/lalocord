@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { Button, Typography } from '@mui/material'
 import { GameWrapper, useGameEngine } from 'src/entities/Game'
+import { Button } from 'src/shared/ui'
 
 import type { WebRTCClient } from 'src/entities/WebRTC'
 
@@ -10,24 +10,23 @@ import { TicTacToeGame } from '../model/lib/TicTacToeGame'
 import { TicTacToeContext } from '../model/store/TicTacToeContext'
 import { TicTacToePlayer } from '../model/types/TicTacToe'
 
-import styles from './TicTacToe.module.scss'
+const createLocalGame = () =>
+  new TicTacToeGame({
+    id: '0',
+    isCross: true,
+    peer: {
+      channelMiniGame: {
+        channel: {
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          send: () => {},
+        },
+      },
+    } as unknown as WebRTCClient,
+  })
 
 export const TicTacToe = () => {
-  const [game, setGame] = useState<TicTacToeGame>(
-    new TicTacToeGame({
-      id: '0',
-      isCross: true,
-      peer: {
-        channelMiniGame: {
-          channel: {
-            addEventListener: () => {},
-            removeEventListener: () => {},
-            send: () => {},
-          },
-        },
-      } as unknown as WebRTCClient,
-    })
-  )
+  const [game, setGame] = useState<TicTacToeGame>(createLocalGame)
   const board = game?.board
   const currentPlayer = game?.currentPlayer
   useGameEngine(game)
@@ -38,34 +37,15 @@ export const TicTacToe = () => {
   }
 
   const handleRestartGame = () => {
-    setGame(
-      new TicTacToeGame({
-        id: '0',
-        isCross: true,
-        peer: {
-          channelMiniGame: {
-            channel: {
-              addEventListener: () => {},
-              removeEventListener: () => {},
-              send: () => {},
-            },
-          },
-        } as unknown as WebRTCClient,
-      })
-    )
+    setGame(createLocalGame())
   }
 
   return (
     <TicTacToeContext.Provider value={{ game, onMove: handleCeilClick }}>
-      <div className={styles.TicTacToe}>
-        <div className={styles.header}>
-          <Button
-            variant="contained"
-            onClick={handleRestartGame}
-          >
-            restart
-          </Button>
-          <Typography variant="h4">Turn: {currentPlayer}</Typography>
+      <div className="flex w-full flex-col items-center justify-center">
+        <div className="mb-2.5 flex items-center gap-2.5">
+          <Button onClick={handleRestartGame}>restart</Button>
+          <h2 className="text-2xl font-semibold">Turn: {currentPlayer}</h2>
         </div>
         {board ? <TicTacToeBoard /> : null}
       </div>
@@ -94,10 +74,10 @@ export const TicTacToeMultiplayer = (props: TicTacToeMultiplayerProps) => {
     <TicTacToeContext.Provider value={contextValue}>
       <GameWrapper gameEngine={game}>
         <div
-          className={styles.TicTacToe}
+          className="flex w-full flex-col items-center justify-center"
           inert={activePlayer !== currentPlayer || isClosed}
         >
-          <div className={styles.header}>Turn: {activePlayer}</div>
+          <div className="mb-2.5 flex items-center gap-2.5">Turn: {activePlayer}</div>
 
           {board ? <TicTacToeBoard /> : null}
         </div>

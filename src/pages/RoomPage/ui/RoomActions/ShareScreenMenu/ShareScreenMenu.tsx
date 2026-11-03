@@ -1,15 +1,4 @@
-import ScreenShareIcon from '@mui/icons-material/ScreenShare'
-import StopScreenShareIcon from '@mui/icons-material/StopScreenShare'
-import {
-  IconButton,
-  Tooltip,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  FormControlLabel,
-  Switch,
-} from '@mui/material'
+import { MonitorUp, MonitorX } from 'lucide-react'
 import { IpcChannels } from 'electron/main/types/ipcChannels'
 import { getLastSelectedSource } from 'electron/renderer/getDisplayMedia/displayMediaSelector'
 import { useSettingStore } from 'src/entities/Settings'
@@ -17,8 +6,9 @@ import { useWebRTCStore } from 'src/entities/WebRTC'
 import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { startViewTransition } from 'src/shared/lib/utils'
+import { Button, IconButton, Popup, SwitchField } from 'src/shared/ui'
 
-import type { OpenOverlayParams } from 'electron/main/types/ipcChannels';
+import type { OpenOverlayParams } from 'electron/main/types/ipcChannels'
 
 const getOverlayParams = (): OpenOverlayParams | undefined => {
   const source = getLastSelectedSource()
@@ -32,9 +22,15 @@ const getOverlayParams = (): OpenOverlayParams | undefined => {
 }
 
 export const ShareScreenMenu = () => {
-  const { handleClick, handleClose, anchorEl, open } = usePopup()
-  const { overlayDrawEnabled, setOverlayDrawEnabled, allowDrawLine, setAllowDrawLine, allowRemoteControl, setAllowRemoteControl } =
-    useSettingStore()
+  const { handleOpen, handleClose, open, setOpen } = usePopup()
+  const {
+    overlayDrawEnabled,
+    setOverlayDrawEnabled,
+    allowDrawLine,
+    setAllowDrawLine,
+    allowRemoteControl,
+    setAllowRemoteControl,
+  } = useSettingStore()
   const screenStream = useWebRTCStore((state) => state.streams.screen)
   const createStream = useWebRTCStore((state) => state.createStream)
   const stopStream = useWebRTCStore((state) => state.stopStream)
@@ -72,104 +68,66 @@ export const ShareScreenMenu = () => {
     }
   }
 
-  return (
-    <>
-      {!screenStream ? (
-        <Tooltip
-          title="Share your screen"
-          arrow
-        >
-          <IconButton
-            aria-label="Share your screen"
-            onClick={handleStartStream}
-            onContextMenu={handleClick}
-          >
-            <StopScreenShareIcon />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip
-          title="Stop share"
-          arrow
-        >
-          <IconButton
-            aria-label="Stop share"
-            onClick={handleStopStream}
-            onContextMenu={handleClick}
-          >
-            <ScreenShareIcon color="success" />
-          </IconButton>
-        </Tooltip>
-      )}
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-      >
-        <MenuItem>
-          <FormControlLabel
-            control={
-              <Switch
-                color="primary"
-                checked={allowDrawLine}
-                onChange={() => setAllowDrawLine(!allowDrawLine)}
-              />
-            }
-            label="Allow draw line"
-          />
-        </MenuItem>
-        {__IS_ELECTRON__ && (
-          <MenuItem>
-            <FormControlLabel
-              control={
-                <Switch
-                  color="primary"
-                  checked={overlayDrawEnabled}
-                  onChange={() => handleOverlayDrawChange(!overlayDrawEnabled)}
-                />
-              }
-              label="Overlay draw"
-            />
-          </MenuItem>
-        )}
-        {__IS_ELECTRON__ && (
-          <MenuItem>
-            <FormControlLabel
-              control={
-                <Switch
-                  color="primary"
-                  checked={allowRemoteControl}
-                  onChange={() => setAllowRemoteControl(!allowRemoteControl)}
-                />
-              }
-              label="Allow remote control"
-            />
-          </MenuItem>
-        )}
+  const tooltipTitle = screenStream ? 'Stop share' : 'Share your screen'
+  const handleClick = screenStream ? handleStopStream : handleStartStream
+  const screenIcon = screenStream ? <MonitorUp /> : <MonitorX />
 
-        <MenuItem onClick={handleStartStream}>
-          <ListItemIcon>
-            <ScreenShareIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>{screenStream ? 'Change screen' : 'Share your screen'}</ListItemText>
-        </MenuItem>
-        {!!screenStream && (
-          <MenuItem onClick={handleStopStream}>
-            <ListItemIcon>
-              <StopScreenShareIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Stop share</ListItemText>
-          </MenuItem>
-        )}
-      </Menu>
-    </>
+  return (
+    <Popup
+      open={open}
+      onOpenChange={setOpen}
+      side="top"
+      align="center"
+      trigger={
+        <IconButton
+          tooltip={tooltipTitle}
+          tooltipSide="top"
+          aria-label={tooltipTitle}
+          isActive={Boolean(screenStream)}
+          onClick={handleClick}
+          onContextMenu={handleOpen}
+        >
+          {screenIcon}
+        </IconButton>
+      }
+    >
+      <SwitchField
+        label="Allow draw line"
+        checked={allowDrawLine}
+        onCheckedChange={setAllowDrawLine}
+      />
+      {__IS_ELECTRON__ && (
+        <SwitchField
+          label="Overlay draw"
+          checked={overlayDrawEnabled}
+          onCheckedChange={handleOverlayDrawChange}
+        />
+      )}
+      {__IS_ELECTRON__ && (
+        <SwitchField
+          label="Allow remote control"
+          checked={allowRemoteControl}
+          onCheckedChange={setAllowRemoteControl}
+        />
+      )}
+      <Button
+        variant="ghost"
+        className="w-full justify-start"
+        onClick={handleStartStream}
+      >
+        <MonitorUp />
+        {screenStream ? 'Change screen' : 'Share your screen'}
+      </Button>
+      {!!screenStream && (
+        <Button
+          variant="ghost"
+          className="w-full justify-start"
+          onClick={handleStopStream}
+        >
+          <MonitorX />
+          Stop share
+        </Button>
+      )}
+    </Popup>
   )
 }

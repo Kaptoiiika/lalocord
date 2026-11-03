@@ -13,10 +13,12 @@ export const useAsyncDataFetcher = <T, P>(
   const { error, isLoading, textError, setError, startLoading, stopLoading } = useLoading(Boolean(initialData))
 
   const refCallback = useRef(callback)
-  refCallback.current = callback
-
   const refCallbackParams = useRef(callbackParams)
-  refCallbackParams.current = callbackParams
+
+  useEffect(() => {
+    refCallback.current = callback
+    refCallbackParams.current = callbackParams
+  }, [callback, callbackParams])
 
   useEffect(() => {
     if (data) return

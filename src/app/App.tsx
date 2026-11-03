@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 
 import LoadingBars from 'src/shared/assets/icons/LoaderBars.svg?react'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+import { TooltipProvider } from 'src/shared/ui'
 import { Navbar } from 'src/widgets/Navbar'
 
 import { AppRouter } from './providers/Router/ui/AppRouter'
@@ -12,12 +13,14 @@ const App = () => {
   })
 
   return (
-    <Suspense fallback={<LoadingBars />}>
-      <div className="app">
-        <Navbar />
-        <AppRouter />
-      </div>
-    </Suspense>
+    <TooltipProvider>
+      <Suspense fallback={<LoadingBars />}>
+        <div className="app">
+          <Navbar />
+          <AppRouter />
+        </div>
+      </Suspense>
+    </TooltipProvider>
   )
 }
 

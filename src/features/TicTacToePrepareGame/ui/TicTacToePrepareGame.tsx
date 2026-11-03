@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
 
-import { Button } from '@mui/material'
 import { useIsOpen } from 'src/shared/lib/hooks'
+import { Button } from 'src/shared/ui'
 
 import { TicTacToeSelectOpponent } from './TicTacToeSelectOpponent/TicTacToeSelectOpponent'
 
@@ -20,7 +20,7 @@ export const TicTacToePrepareGame = (props: TicTacToePrepareGameProps) => {
   return (
     <>
       <Button
-        className="TicTacToePrepareGame"
+        variant="ghost"
         onClick={handleOpen}
       >
         Tic Tac Toe

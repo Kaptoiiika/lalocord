@@ -1,8 +1,7 @@
-import { useState } from 'react'
-
-import { Link as MuiLink, Typography, Button, Menu, Stack } from '@mui/material'
 import Linkify from 'react-linkify'
 import { useImagePreviewStore, getActionSeletFileToImagePreview } from 'src/features/ImagePreview'
+import { cn } from 'src/shared/lib/utils/cn'
+import { TextLink } from 'src/shared/ui'
 
 import type { MessageModelNew } from '../../model/types/ChatSchema'
 import type { WebRTCChatMessage } from 'src/entities/WebRTC'
@@ -11,7 +10,6 @@ import { MessageFile } from './MessageFile'
 import { MessageLoadingFile } from './MessageLoadingFile'
 import { MessageMiniGameRequest } from './MessageMiniGameRequest'
 import { MessageTransmission } from './MessageTransmission'
-import { useChatStore } from '../../model/store/ChatStore'
 
 type MessageProps = {
   data: MessageModelNew
@@ -24,43 +22,14 @@ function checkURLisImageLink(url: string) {
 
 export const Message = (props: MessageProps) => {
   const { data, className } = props
-  const deleteMessageAction = useChatStore((state) => state.deleteMessage)
   const selectImage = useImagePreviewStore(getActionSeletFileToImagePreview)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-  const handleClick = (e: React.MouseEvent<HTMLImageElement>) => {
-    selectImage(e.currentTarget.src)
-  }
 
-  const handleDeleteMessage = () => {
-    deleteMessageAction(data.message.id)
-  }
-
-  // const handleOpenContextMenu = (e: React.MouseEvent<HTMLElement>) => {
-  //   e.preventDefault()
-  //   setAnchorEl(e.currentTarget)
-  // }
-
-  const handleCloseContextMenu = () => {
-    setAnchorEl(null)
+  const handleClick = (event: React.MouseEvent<HTMLImageElement>) => {
+    selectImage(event.currentTarget.src)
   }
 
   return (
-    <Typography
-      // onContextMenu={handleOpenContextMenu}
-      component="pre"
-      className={className}
-    >
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleCloseContextMenu}
-      >
-        <Stack>
-          <Button onClick={handleDeleteMessage}>Delete message</Button>
-        </Stack>
-      </Menu>
-
+    <pre className={cn('m-0 ml-1 font-sans whitespace-break-spaces [overflow-wrap:break-word]', className)}>
       <Linkify
         componentDecorator={(href, text, key) => {
           if (checkURLisImageLink(href))
@@ -69,22 +38,19 @@ export const Message = (props: MessageProps) => {
                 onClick={handleClick}
                 alt=""
                 src={href}
-                style={{
-                  width: '100%',
-                  objectFit: 'contain',
-                }}
+                className="w-full object-contain"
               />
             )
 
           return (
-            <MuiLink
+            <TextLink
               key={key}
               href={href}
               target="_blank"
               rel="noreferrer"
             >
               {text}
-            </MuiLink>
+            </TextLink>
           )
         }}
       >
@@ -94,6 +60,6 @@ export const Message = (props: MessageProps) => {
       {!!data.message.blobParams && <MessageLoadingFile data={data.message} />}
       {!!data.message.transmission && <MessageTransmission data={data} />}
       {!!data.message.gameType && <MessageMiniGameRequest data={data} />}
-    </Typography>
+    </pre>
   )
 }

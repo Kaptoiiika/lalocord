@@ -1,20 +1,17 @@
 import { memo } from 'react'
 
-import { Typography } from '@mui/material'
-import { classNames } from 'src/shared/lib/classNames/classNames'
-
 import type { MessageModelNew } from '../../model/types/ChatSchema'
 
 import { getMessages } from '../../model/selectors/ChatStoreSelectors'
 import { useChatStore } from '../../model/store/ChatStore'
 import { Message } from '../Message/Message'
 
-import styles from './MessageList.module.scss'
-
 type MessageItemProps = {
   message: MessageModelNew
   prevMessage: MessageModelNew
 }
+
+const messageTextClassName = 'm-0 ml-1 whitespace-break-spaces [overflow-wrap:break-word]'
 
 const MessageItemComponent = (props: MessageItemProps) => {
   const { prevMessage, message } = props
@@ -24,7 +21,7 @@ const MessageItemComponent = (props: MessageItemProps) => {
       <Message
         key={message.message.id}
         data={message}
-        className={styles.messageText}
+        className={messageTextClassName}
       />
     )
   }
@@ -32,12 +29,12 @@ const MessageItemComponent = (props: MessageItemProps) => {
   if (prevMessage?.user.id === message.user.id) {
     return (
       <li
-        className={classNames(styles.message, styles.messageGroup)}
+        className="mt-1 hover:bg-foreground/10"
         key={`${message.message.id}-${message.message.blobParams?.loaded}`}
       >
         <Message
           data={message}
-          className={styles.messageText}
+          className={messageTextClassName}
         />
       </li>
     )
@@ -45,18 +42,15 @@ const MessageItemComponent = (props: MessageItemProps) => {
 
   return (
     <li
-      className={styles.message}
+      className="mt-2 hover:bg-foreground/10"
       key={`${message.message.id}-${message.message.blobParams?.loaded}`}
     >
-      <Typography
-        component="h6"
-        className={styles.messageUser}
-      >
+      <h6 className="m-0 text-[1.25em] font-bold [overflow-wrap:break-word]">
         {message.user.username || message.user.id}
-      </Typography>
+      </h6>
       <Message
         data={message}
-        className={styles.messageText}
+        className={messageTextClassName}
       />
     </li>
   )
@@ -71,7 +65,7 @@ export const MessageList = memo(function MessageList() {
 
   return (
     <ul
-      className={styles.list}
+      className="overflow-auto pb-4"
       ref={(node) => {
         if (!node) return
         node.scrollTop = node.scrollHeight - node.clientHeight

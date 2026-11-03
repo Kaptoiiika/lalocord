@@ -1,10 +1,7 @@
 import type { PropsWithChildren } from 'react'
 import { useState } from 'react'
 
-import { Typography } from '@mui/material'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
-
-import styles from './WaitUserClick.module.scss'
 
 type WaitUserClickProps = PropsWithChildren
 
@@ -14,14 +11,14 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
   const [, update] = useState(0)
 
   useMountedEffect(() => {
-    const fn = (e: MouseEvent) => {
-      if (e.isTrusted || navigator.userActivation?.hasBeenActive === true) {
+    const fn = (event: MouseEvent) => {
+      if (event.isTrusted || navigator.userActivation?.hasBeenActive === true) {
         update((prev) => prev + 1)
         document.removeEventListener('click', fn)
       }
     }
-    const fnKey = (e: KeyboardEvent) => {
-      if (e.isTrusted || navigator.userActivation?.hasBeenActive === true) {
+    const fnKey = (event: KeyboardEvent) => {
+      if (event.isTrusted || navigator.userActivation?.hasBeenActive === true) {
         update((prev) => prev + 1)
         document.removeEventListener('keypress', fnKey)
       }
@@ -38,8 +35,8 @@ export const WaitUserClick = (props: WaitUserClickProps) => {
 
   if (navigator.userActivation && !navigator.userActivation?.hasBeenActive) {
     return (
-      <div className={styles.WaitUserClick}>
-        <Typography variant="h4">Click anywhere to continue</Typography>
+      <div className="flex h-full w-full items-center justify-center text-center">
+        <h2 className="text-2xl font-semibold">Click anywhere to continue</h2>
       </div>
     )
   }

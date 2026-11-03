@@ -1,8 +1,7 @@
 import { useState } from 'react'
 
-import { Link as MUILink, Typography, useMediaQuery } from '@mui/material'
-
-import styles from './AppFooter.module.scss'
+import { useMediaQuery } from 'src/shared/lib/hooks/useMediaQuery/useMediaQuery'
+import { TextLink } from 'src/shared/ui'
 
 export const AppFooter = () => {
   const [buildVersionIsDate, setBuildVersion] = useState(false)
@@ -12,19 +11,21 @@ export const AppFooter = () => {
     setBuildVersion((prev) => !prev)
   }
 
+  const versionAlignClassName = isSmallScreen ? 'text-left' : 'text-right'
+
   return (
-    <footer className={styles.footer}>
+    <footer className="flex justify-between p-2 [border-top:var(--box-border)] max-[385px]:flex-col max-[385px]:items-start">
       <div>
-        <Typography variant="h6">Contact</Typography>
+        <h2 className="text-lg font-semibold">Contact</h2>
         <ul>
-          <MUILink href="mailto:nikita.ozhegov8@mail.ru">nikita.ozhegov8@mail.ru</MUILink>
+          <li>
+            <TextLink href="mailto:nikita.ozhegov8@mail.ru">nikita.ozhegov8@mail.ru</TextLink>
+          </li>
         </ul>
       </div>
       <div onClick={handleChangeVersion}>
-        <Typography variant="h6">Build version</Typography>
-        <Typography align={isSmallScreen ? 'left' : 'right'}>
-          {buildVersionIsDate ? __BUILD_DATE_VERSION__ : __BUILD_VERSION__}
-        </Typography>
+        <h2 className="text-lg font-semibold">Build version</h2>
+        <p className={versionAlignClassName}>{buildVersionIsDate ? __BUILD_DATE_VERSION__ : __BUILD_VERSION__}</p>
       </div>
     </footer>
   )

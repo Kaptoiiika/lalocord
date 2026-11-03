@@ -1,4 +1,4 @@
-import { LinearProgress } from '@mui/material'
+import { Progress } from 'src/shared/ui'
 
 import type { MessageModelNew } from '../../model/types/ChatSchema'
 
@@ -20,10 +20,7 @@ export const MessageTransmission = (props: MessageFileProps) => {
   return (
     <i>
       {data.user.username} is loading
-      <LinearProgress
-        variant="determinate"
-        value={progress * 100}
-      />
+      <Progress value={progress * 100} />
     </i>
   )
 }

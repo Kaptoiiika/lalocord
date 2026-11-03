@@ -1,12 +1,10 @@
 import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import { Button, Checkbox, FormControlLabel } from '@mui/material'
 import { localstorageKeys } from 'src/shared/const/localstorageKeys'
+import { Button, CheckboxField } from 'src/shared/ui'
 
 import type { MediaSource } from '../../main/get_media_source/get_media_source'
-
-import styles from './displayMediaSelector.module.scss'
 
 let lastSelectedSource: MediaSource | null = null
 
@@ -57,32 +55,33 @@ export const displayMediaSelector = (): Promise<{
 
     const Selector = () => {
       const [allowAudio, setAllowAudio] = useState(getDesktopAudio())
-      const handleChangeAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setAllowAudio(e.target.checked)
-        setDesktopAudio(e.target.checked)
+      const handleChangeAudio = (checked: boolean) => {
+        setAllowAudio(checked)
+        setDesktopAudio(checked)
       }
 
       return (
-        <div className={styles.wrapper}>
-          <div className={styles.container}>
-            <h2 className={styles.title}>Choose screen for translation</h2>
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 p-8 backdrop-blur-md">
+          <div className="flex w-[75vw] max-w-[1400px] flex-col items-center justify-center gap-6 rounded-2xl bg-[rgb(var(--bg-primary-color))] p-6 shadow-2xl">
+            <h2 className="m-0 text-xl font-semibold text-[rgb(var(--primary-color))]">Choose screen for translation</h2>
 
-            <div className={styles.sourceList}>
+            <div className="grid max-h-[400px] w-full grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4 overflow-y-auto p-1">
               {sources.map((source) => (
                 <div
-                  className={styles.sourceCard}
+                  className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border-2 border-transparent bg-white/[0.03] transition hover:-translate-y-0.5 hover:border-[rgba(var(--primary-color),0.5)] hover:bg-white/[0.08] hover:shadow-xl active:translate-y-0"
                   key={source.id}
                   onClick={() => accept(source, allowAudio)}
                 >
-                  <div className={styles.sourceCardImgWrapper}>
+                  <div className="relative aspect-video w-full overflow-hidden bg-black/30">
                     <img
-                      className={styles.sourceCardImg}
+                      className="h-full w-full object-cover"
                       src={source.thumbnailDataUrl}
                       alt={source.name}
                     />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(var(--primary-color),0.15)] to-transparent opacity-0 transition group-hover:opacity-100" />
                   </div>
                   <div
-                    className={styles.sourceCardName}
+                    className="truncate bg-black/20 px-3 py-3 text-center text-xs font-medium text-white/90"
                     title={source.name}
                   >
                     {source.name}
@@ -91,16 +90,15 @@ export const displayMediaSelector = (): Promise<{
               ))}
             </div>
 
-            <div className={styles.footer}>
-              <FormControlLabel
-                className={styles.allowAudioCheckbox}
+            <div className="flex w-full items-center justify-between border-t border-white/10 pt-2">
+              <CheckboxField
+                className="text-[rgb(var(--primary-color))]"
                 checked={allowAudio}
                 label="Capture audio"
-                control={<Checkbox onChange={handleChangeAudio} />}
+                onCheckedChange={handleChangeAudio}
               />
               <Button
-                variant="outlined"
-                className={styles.cancelButton}
+                variant="outline"
                 onClick={cancel}
               >
                 Cancel

@@ -1,15 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { Typography, IconButton, Slider, Stack, Tooltip, Popover } from '@mui/material'
 import { useAudioEffectStore } from 'src/entities/AudioEffect'
 import { UserCard } from 'src/entities/User'
 import { VolumeMeter } from 'src/features/VolumeMetter'
-import { AvatarUserWithBadge } from 'src/shared/ui/Avatar'
+import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
+import { AvatarUserWithBadge, IconButton, Popup, Slider } from 'src/shared/ui'
 
 import type { RoomUser } from 'src/features/WebRTCRoom'
-import type { AvatarUserWithBadgeStatus } from 'src/shared/ui/Avatar'
-
-import styles from './RoomUserItem.module.scss'
+import type { AvatarUserWithBadgeStatus } from 'src/shared/ui'
 
 type RoomUserItemProps = {
   user: RoomUser
@@ -36,21 +34,11 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
   const changeVolumeHandle = useAudioEffectStore((state) => state.changeUserVolume)
   const microphoneStream = user.peer.remoteStreams.mic
   const userVolume = audioUserSettings[user.user.username]?.mic ?? 1
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
+  const { open, setOpen, handleOpen } = usePopup()
   const username = user.user.username ?? user.id
   const audioRef = useRef<HTMLAudioElement>(new Audio())
-  const [gainNode, setGainNode] = useState<GainNode>()
+  const gainNodeRef = useRef<GainNode | null>(null)
   const [, update] = useState(0)
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
 
   useEffect(() => {
     const updateFn = () => {
@@ -85,89 +73,74 @@ export const RoomUserItem = (props: RoomUserItemProps) => {
     const gainNode = context.createGain()
     source.connect(gainNode)
     gainNode.connect(context.destination)
-
-    setGainNode(gainNode)
+    gainNodeRef.current = gainNode
     context.resume()
 
     audioRef.current.srcObject = microphoneStream
 
     return () => {
-      setGainNode(undefined)
+      gainNodeRef.current = null
       context.close()
     }
   }, [microphoneStream])
 
   useEffect(() => {
-    if (gainNode) {
-      gainNode.gain.value = userVolume
-    }
-  }, [userVolume, gainNode])
+    const gainNode = gainNodeRef.current
+    if (!gainNode) return
 
-  const handleChangeVolume = (event: Event, value: number | number[]) => {
-    if (typeof value === 'number') {
-      changeVolumeHandle(user.user.username, 'mic', value)
-    }
+    gainNode.gain.value = userVolume
+  }, [userVolume, microphoneStream])
+
+  const handleChangeVolume = (value: number) => {
+    changeVolumeHandle(user.user.username, 'mic', value)
   }
 
   const formatedMicroVolume = (userVolume * 100).toFixed(0)
 
   return (
-    <>
-      <Tooltip
-        title={username}
-        describeChild
-      >
+    <Popup
+      open={open}
+      onOpenChange={setOpen}
+      side="bottom"
+      align="start"
+      className="w-auto bg-transparent p-0 shadow-none ring-0"
+      trigger={
         <IconButton
-          sx={{
-            p: 0,
-          }}
-          onContextMenu={handleClick}
-          onClick={handleClick}
+          tooltip={username}
+          className="size-auto p-0"
+          onContextMenu={handleOpen}
+          onClick={handleOpen}
           aria-label={username}
         >
-          <AvatarUserWithBadge
-            username={username}
-            avatarUrl={user.user.avatar}
-            borderColor={microphoneStream?.active ? 'green' : 'grey'}
-            status={status}
-            size="small"
-          />
-          {!!microphoneStream && microphoneStream.active && <VolumeMeter stream={microphoneStream} />}
-        </IconButton>
-      </Tooltip>
-      <Popover
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        sx={{ background: 'none', backgroundImage: 'none' }}
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        keepMounted
-        disablePortal
-      >
-        <UserCard
-          username={username}
-          avatarUrl={user.user.avatar}
-        >
-          <Stack className={styles.menu}>
-            <Typography>Volume: {formatedMicroVolume}</Typography>
-            <Slider
-              aria-label="microphone volume"
-              value={userVolume}
-              onChange={handleChangeVolume}
-              step={0.01}
-              min={0}
-              max={3}
+          <span className="relative">
+            <AvatarUserWithBadge
+              username={username}
+              avatarUrl={user.user.avatar}
+              borderColor={microphoneStream?.active ? 'green' : 'grey'}
+              status={status}
+              size="small"
             />
-          </Stack>
-        </UserCard>
-      </Popover>
-    </>
+            {!!microphoneStream && microphoneStream.active && <VolumeMeter stream={microphoneStream} />}
+          </span>
+        </IconButton>
+      }
+    >
+      <UserCard
+        username={username}
+        avatarUrl={user.user.avatar}
+      >
+        <div className="flex min-w-[280px] flex-col gap-2">
+          <p>Volume: {formatedMicroVolume}</p>
+          <Slider
+            aria-label="microphone volume"
+            value={userVolume}
+            onValueChange={handleChangeVolume}
+            step={0.01}
+            min={0}
+            max={3}
+          />
+        </div>
+      </UserCard>
+    </Popup>
   )
 }

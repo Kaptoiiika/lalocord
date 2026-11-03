@@ -90,7 +90,7 @@ export default defineConfig([
               position: 'before',
             },
             {
-              pattern: '{axios,@mui/**}',
+              pattern: '{axios,lucide-react,radix-ui}',
               group: 'external',
               position: 'before',
             },

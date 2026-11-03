@@ -8,7 +8,7 @@ import App from './app/App'
 import { DebugModeProvider } from './shared/lib/hooks/useDebugMode/useDebugModeProvider'
 import { ErrorBoundary } from './shared/ui/ErrorBoundary'
 
-import 'src/app/styles/index.scss'
+import 'src/app/styles/index.css'
 
 if (window.electron) {
   import('electron/renderer/electronInit').then(({ initElectron }) => {
@@ -25,13 +25,15 @@ if (!container) {
 const root = createRoot(container)
 
 root.render(
-  <ErrorBoundary errorText="App is down">
-    <AppRouterProvider>
-      <ThemeProvider>
-        <DebugModeProvider>
-          <App />
-        </DebugModeProvider>
-      </ThemeProvider>
-    </AppRouterProvider>
-  </ErrorBoundary>
+  <React.StrictMode>
+    <ErrorBoundary errorText="App is down">
+      <AppRouterProvider>
+        <ThemeProvider>
+          <DebugModeProvider>
+            <App />
+          </DebugModeProvider>
+        </ThemeProvider>
+      </AppRouterProvider>
+    </ErrorBoundary>
+  </React.StrictMode>
 )

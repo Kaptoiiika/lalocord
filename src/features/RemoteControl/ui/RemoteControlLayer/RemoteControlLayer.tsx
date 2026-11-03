@@ -44,8 +44,10 @@ export const RemoteControlLayer = (props: RemoteControlLayerProps) => {
   const pendingPointRef = useRef<{ x: number; y: number } | null>(null)
   const frameRef = useRef<number | null>(null)
 
-  onControlEventRef.current = onControlEvent
-  onExitRef.current = onExit
+  useEffect(() => {
+    onControlEventRef.current = onControlEvent
+    onExitRef.current = onExit
+  }, [onControlEvent, onExit])
 
   useEffect(() => {
     const release = () => {

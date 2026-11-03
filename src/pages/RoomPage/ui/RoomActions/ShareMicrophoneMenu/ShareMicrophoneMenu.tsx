@@ -1,17 +1,16 @@
 import { useCallback, useState } from 'react'
 
-import MicIcon from '@mui/icons-material/Mic'
-import MicOffIcon from '@mui/icons-material/MicOff'
-import { Tooltip, IconButton, FormControlLabel, Switch, Stack, Menu, Typography } from '@mui/material'
+import { Mic, MicOff } from 'lucide-react'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { FormateError } from 'src/shared/api'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
+import { IconButton, Popup, SwitchField } from 'src/shared/ui'
 
 import { SelectMicrophone } from './SelectMicrophone'
 
 export const ShareMicrophoneMenu = () => {
-  const { handleClick, handleClose, anchorEl, open } = usePopup()
+  const { handleOpen, open, setOpen } = usePopup()
   const autoOn = useWebRTCStore((state) => state.autoOnMic)
   const micStream = useWebRTCStore((state) => state.streams.mic)
   const createStream = useWebRTCStore((state) => state.createStream)
@@ -44,20 +43,13 @@ export const ShareMicrophoneMenu = () => {
       })
   }, [createStream])
 
-  const handleChangeAutoOn = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-      setAutoOnMic(checked)
-    },
-    [setAutoOnMic]
-  )
-
   const handleChangeAudioSettings = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (name: 'noiseSuppression' | 'echoCancellation' | 'autoGainControl', checked: boolean) => {
       setStreamConstraints({
         ...streamConstraints,
         audio: {
           ...streamConstraints.audio,
-          [event.target.name]: event.target.checked,
+          [name]: checked,
         },
       })
     },
@@ -68,102 +60,56 @@ export const ShareMicrophoneMenu = () => {
     if (autoOn) handleStartStream()
   })
 
+  const tooltipTitle = error || (micStream ? 'Turn off microphone' : 'Turn on microphone')
+  const handleClick = micStream ? handleStopStream : handleStartStream
+  const microphoneIcon = micStream ? <Mic /> : <MicOff />
+
   return (
-    <>
-      {micStream ? (
-        <Tooltip
-          title={error || 'Turn off microphone'}
-          arrow
+    <Popup
+      open={open}
+      onOpenChange={setOpen}
+      side="top"
+      align="center"
+      trigger={
+        <IconButton
+          tooltip={tooltipTitle}
+          tooltipSide="top"
+          isError={Boolean(error)}
+          isActive={Boolean(micStream)}
+          onClick={handleClick}
+          onContextMenu={handleOpen}
         >
-          <IconButton
-            color={error ? 'error' : 'default'}
-            onClick={handleStopStream}
-            onContextMenu={handleClick}
-          >
-            <MicIcon color="success" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip
-          title={error || 'Turn on microphone'}
-          arrow
-        >
-          <IconButton
-            color={error ? 'error' : 'default'}
-            onClick={handleStartStream}
-            onContextMenu={handleClick}
-          >
-            <MicOffIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-      <Menu
-        className="flex"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-      >
-        <Stack>
-          <Stack
-            gap={1}
-            padding={1}
-          >
-            <Typography>Audio settings</Typography>
-            <FormControlLabel
-              control={
-                <Switch
-                  color="primary"
-                  checked={autoOn}
-                  onChange={handleChangeAutoOn}
-                />
-              }
-              label="Auto on microphone"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  color="primary"
-                  name="noiseSuppression"
-                  checked={Boolean(noiseSuppression)}
-                  onChange={handleChangeAudioSettings}
-                />
-              }
-              label="Noise suppression"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  color="primary"
-                  name="echoCancellation"
-                  checked={Boolean(echoCancellation)}
-                  onChange={handleChangeAudioSettings}
-                />
-              }
-              label="Echo cancellation"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  color="primary"
-                  name="autoGainControl"
-                  checked={Boolean(autoGainControl)}
-                  onChange={handleChangeAudioSettings}
-                />
-              }
-              label="Auto gain control"
-            />
-          </Stack>
-          <SelectMicrophone />
-        </Stack>
-      </Menu>
-    </>
+          {microphoneIcon}
+        </IconButton>
+      }
+    >
+      <div className="flex flex-col gap-2">
+        <p>Audio settings</p>
+        <SwitchField
+          label="Auto on microphone"
+          checked={autoOn}
+          onCheckedChange={setAutoOnMic}
+        />
+        <SwitchField
+          name="noiseSuppression"
+          label="Noise suppression"
+          checked={Boolean(noiseSuppression)}
+          onCheckedChange={(checked) => handleChangeAudioSettings('noiseSuppression', checked)}
+        />
+        <SwitchField
+          name="echoCancellation"
+          label="Echo cancellation"
+          checked={Boolean(echoCancellation)}
+          onCheckedChange={(checked) => handleChangeAudioSettings('echoCancellation', checked)}
+        />
+        <SwitchField
+          name="autoGainControl"
+          label="Auto gain control"
+          checked={Boolean(autoGainControl)}
+          onCheckedChange={(checked) => handleChangeAudioSettings('autoGainControl', checked)}
+        />
+      </div>
+      <SelectMicrophone />
+    </Popup>
   )
 }

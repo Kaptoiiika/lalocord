@@ -1,30 +1,17 @@
-import type { MouseEvent } from 'react'
-import { useState } from 'react'
-
-import SettingsIcon from '@mui/icons-material/Settings'
-import { Menu, Stack, Typography, Slider, IconButton, Tooltip } from '@mui/material'
+import { Settings } from 'lucide-react'
 import { useWebRTCStore } from 'src/entities/WebRTC'
+import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { bitrateToShortValue, bitrateValueText } from 'src/shared/lib/utils/Numbers'
-import { InlineSelectPrimitive } from 'src/shared/ui/InlineSelect/InlineSelectPrimitive'
-
-import styles from './VideoSettingsMenu.module.scss'
+import { IconButton, InlineSelectPrimitive, Popup, Slider } from 'src/shared/ui'
 
 export const VideoSettingsMenu = () => {
   const bitrate = useWebRTCStore((state) => state.bitrate)
   const setBitrate = useWebRTCStore((state) => state.setBitrate)
   const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
   const setStreamConstraints = useWebRTCStore((state) => state.setStreamConstraints)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-  const handleOpen = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    setAnchorEl(event.currentTarget)
-  }
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-  const handleBitrateChange = (event: React.SyntheticEvent | Event, newValue: number | Array<number>) => {
-    if (Array.isArray(newValue)) return
+  const { open, setOpen, handleOpen } = usePopup()
+
+  const handleBitrateChange = (newValue: number) => {
     setBitrate(newValue * 1024 * 1024)
   }
 
@@ -64,72 +51,56 @@ export const VideoSettingsMenu = () => {
   const isCustomResolution = resolutionList.includes(String(currentResolution)) ? '1440' : `${currentResolution}`
 
   return (
-    <>
-      <Tooltip
-        title="Settings"
-        arrow
-      >
+    <Popup
+      open={open}
+      onOpenChange={setOpen}
+      side="top"
+      align="center"
+      className="min-w-80"
+      trigger={
         <IconButton
+          tooltip="Settings"
+          tooltipSide="top"
           aria-label="Settings"
           onClick={handleOpen}
         >
-          <SettingsIcon />
+          <Settings />
         </IconButton>
-      </Tooltip>
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-      >
-        <Stack
-          gap={1}
-          className={styles.Settingmenu}
-        >
-          <InlineSelectPrimitive
-            title={`Frame Rate ${currentFrameRate}`}
-            value={`${currentFrameRate}`}
-            list={frameRateList}
-            onSelect={handleChangeFrameRate}
-            allowCustomValue
-            customValue={isCustomFrameRate}
-            onCustomValueChange={handleChangeFrameRate}
-          />
-          <InlineSelectPrimitive
-            title={`Resolution ${currentResolution}p`}
-            value={`${currentResolution}`}
-            list={['144', '720', '1080']}
-            onSelect={handleChangeResolution}
-            allowCustomValue
-            customValue={isCustomResolution}
-            onCustomValueChange={handleChangeResolution}
-          />
+      }
+    >
+      <InlineSelectPrimitive
+        title={`Frame Rate ${currentFrameRate}`}
+        value={`${currentFrameRate}`}
+        list={frameRateList}
+        onSelect={handleChangeFrameRate}
+        allowCustomValue
+        customValue={isCustomFrameRate}
+        onCustomValueChange={handleChangeFrameRate}
+      />
+      <InlineSelectPrimitive
+        title={`Resolution ${currentResolution}p`}
+        value={`${currentResolution}`}
+        list={resolutionList}
+        onSelect={handleChangeResolution}
+        allowCustomValue
+        customValue={isCustomResolution}
+        onCustomValueChange={handleChangeResolution}
+      />
 
-          <div className={styles.slider}>
-            <Typography className={styles.sliderLabel}>
-              Max bitrate: <span>{bitrateToShortValue(bitrate || 0)} Mb/s</span>
-            </Typography>
-            <Slider
-              defaultValue={bitrateToShortValue(bitrate || 0)}
-              onChangeCommitted={handleBitrateChange}
-              aria-label="bitrate"
-              valueLabelDisplay="auto"
-              getAriaValueText={bitrateValueText}
-              valueLabelFormat={bitrateValueText}
-              step={0.1}
-              min={0.1}
-              max={50}
-            />
-          </div>
-        </Stack>
-      </Menu>
-    </>
+      <div className="flex flex-col gap-2">
+        <p className="flex w-full justify-between">
+          Max bitrate: <span>{bitrateToShortValue(bitrate || 0)} Mb/s</span>
+        </p>
+        <Slider
+          defaultValue={bitrateToShortValue(bitrate || 0)}
+          onValueCommit={handleBitrateChange}
+          aria-label="bitrate"
+          step={0.1}
+          min={0.1}
+          max={50}
+        />
+        <span className="sr-only">{bitrateValueText(bitrateToShortValue(bitrate || 0))}</span>
+      </div>
+    </Popup>
   )
 }

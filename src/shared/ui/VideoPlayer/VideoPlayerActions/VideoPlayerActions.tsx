@@ -1,14 +1,8 @@
-import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
-import PauseIcon from '@mui/icons-material/Pause'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import VolumeDown from '@mui/icons-material/VolumeDown'
-import VolumeUp from '@mui/icons-material/VolumeUp'
-import { Stack, Slider, IconButton } from '@mui/material'
+import { Maximize, Minimize, Pause, Play, Volume1, Volume2 } from 'lucide-react'
+import { IconButton } from 'src/shared/ui/IconButton'
+import { Slider } from 'src/shared/ui/Slider'
 
 import { VideoPlayerTooltip } from '../VideoPlayerTooltip/VideoPlayerTooltip'
-
-import styles from './VideoPlayerActions.module.scss'
 
 type VideoPlayerActionsProps = {
   stream: MediaStream | null
@@ -20,10 +14,15 @@ type VideoPlayerActionsProps = {
   handlePlayPause?: () => void
   handleExitFullscreen?: () => void
   handleFullscreen?: () => void
-  handleChangeVolume?: (event: Event, newValue: number | number[]) => void
+  handleChangeVolume?: (value: number) => void
 }
 
 const hasAudioOnStream = (stream: MediaStream | null) => !!stream?.getAudioTracks().length
+
+const overlayGlyphClassName = 'text-white [filter:drop-shadow(0_0_1px_#000)_drop-shadow(0_1px_2px_rgba(0,0,0,0.9))]'
+
+const overlaySliderClassName =
+  '[&_[data-slot=slider-track]]:bg-black/60 [&_[data-slot=slider-range]]:bg-white [&_[data-slot=slider-thumb]]:border-black [&_[data-slot=slider-thumb]]:bg-white [&_[data-slot=slider-thumb]]:shadow-[0_0_0_1px_#000,0_1px_3px_rgba(0,0,0,0.65)]'
 
 export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
   const {
@@ -40,66 +39,59 @@ export const VideoPlayerActions = (props: VideoPlayerActionsProps) => {
   } = props
 
   const hasAudio = hasAudioOnStream(stream)
+
   return (
     <VideoPlayerTooltip
-      className={styles.actions}
+      className="grid grid-cols-[1fr_minmax(100px,3fr)_1fr] items-center"
       open={open}
       bottom
     >
-      <Stack
-        direction="row"
-        justifyContent="flex-start"
-      >
+      <div className="flex flex-row justify-start">
         <IconButton
+          isOverlay
           aria-label={played ? 'pause video' : 'play video'}
           onClick={handlePlayPause}
         >
-          {played ? <PauseIcon color="primary" /> : <PlayArrowIcon color="primary" />}
+          {played ? <Pause /> : <Play />}
         </IconButton>
-      </Stack>
+      </div>
       {!mute && hasAudio ? (
-        <Stack
-          className={styles.volume}
-          direction="row"
-          alignItems="center"
-          gap={2}
-        >
-          <VolumeDown color="primary" />
+        <div className="mx-auto flex w-full min-w-[100px] max-w-[300px] flex-row items-center gap-2">
+          <Volume1 className={overlayGlyphClassName} />
           <Slider
-            disabled={mute || !hasAudioOnStream(stream)}
+            className={overlaySliderClassName}
+            disabled={mute || !hasAudio}
             aria-label="Volume"
-            value={hasAudioOnStream(stream) ? volume : 0}
-            onChange={handleChangeVolume}
+            value={hasAudio ? volume : 0}
+            onValueChange={handleChangeVolume}
             step={0.01}
             min={0}
             max={1}
           />
-          <VolumeUp color="primary" />
-        </Stack>
+          <Volume2 className={overlayGlyphClassName} />
+        </div>
       ) : (
         <div />
       )}
-      <Stack
-        direction="row"
-        justifyContent="flex-end"
-        gap={2}
-      >
+      <div className="flex flex-row justify-end gap-2">
         {fullscreen ? (
           <IconButton
+            isOverlay
             aria-label="Exit fullscreen"
             onClick={handleExitFullscreen}
           >
-            <FullscreenExitIcon color="primary" />
+            <Minimize />
           </IconButton>
         ) : (
           <IconButton
+            isOverlay
             aria-label="Enter fullscreen"
             onClick={handleFullscreen}
           >
-            <FullscreenIcon color="primary" />
+            <Maximize />
           </IconButton>
         )}
-      </Stack>
+      </div>
     </VideoPlayerTooltip>
   )
 }

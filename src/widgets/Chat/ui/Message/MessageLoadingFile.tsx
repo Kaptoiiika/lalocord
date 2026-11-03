@@ -1,5 +1,5 @@
-import { LinearProgress } from '@mui/material'
 import { readablizeBytes } from 'src/shared/lib/utils/Numbers'
+import { Progress } from 'src/shared/ui'
 
 import type { WebRTCChatMessage } from 'src/entities/WebRTC'
 
@@ -21,10 +21,7 @@ export const MessageLoadingFile = (props: MessageFileProps) => {
       loading {data.blobParams?.name || data.blobParams?.type}
       <br />
       {readablizeBytes(data.blobParams?.loaded)} / {readablizeBytes(data.blobParams?.length)}
-      <LinearProgress
-        variant="determinate"
-        value={progress * 100}
-      />
+      <Progress value={progress * 100} />
     </i>
   )
 }

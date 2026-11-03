@@ -1,12 +1,11 @@
 import { useCallback, useState } from 'react'
 
-import VideocamIcon from '@mui/icons-material/Videocam'
-import VideocamOffIcon from '@mui/icons-material/VideocamOff'
-import { IconButton, Tooltip, Menu } from '@mui/material'
+import { Video, VideoOff } from 'lucide-react'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { FormateError } from 'src/shared/api'
 import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
 import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition'
+import { IconButton, Popup } from 'src/shared/ui'
 
 import { SelectCamera } from './SelectCamera/SelectCamera'
 
@@ -14,7 +13,7 @@ export const ShareWebCamMenu = () => {
   const webCamStream = useWebRTCStore((state) => state.streams.webCam)
   const createStream = useWebRTCStore((state) => state.createStream)
   const stopStream = useWebRTCStore((state) => state.stopStream)
-  const { handleClick, handleClose, anchorEl, open } = usePopup()
+  const { handleOpen, open, setOpen } = usePopup()
   const [error, setError] = useState<React.ReactNode>('')
 
   const handleStartWebCamStream = async () => {
@@ -39,50 +38,30 @@ export const ShareWebCamMenu = () => {
     stopStream('webCam')
   }, [stopStream])
 
+  const tooltipTitle = error || (webCamStream ? 'Turn off camera' : 'Turn on camera')
+  const handleClick = webCamStream ? handleStopStream : handleStartWebCamStream
+  const cameraIcon = webCamStream ? <Video /> : <VideoOff />
+
   return (
-    <>
-      {webCamStream ? (
-        <Tooltip
-          title={error || 'Turn off camera'}
-          arrow
+    <Popup
+      open={open}
+      onOpenChange={setOpen}
+      side="top"
+      align="center"
+      trigger={
+        <IconButton
+          tooltip={tooltipTitle}
+          tooltipSide="top"
+          isError={Boolean(error)}
+          isActive={Boolean(webCamStream)}
+          onClick={handleClick}
+          onContextMenu={handleOpen}
         >
-          <IconButton
-            color={error ? 'error' : 'default'}
-            onClick={handleStopStream}
-            onContextMenu={handleClick}
-          >
-            <VideocamIcon color="success" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip
-          title={error || 'Turn on camera'}
-          arrow
-        >
-          <IconButton
-            color={error ? 'error' : 'default'}
-            onClick={handleStartWebCamStream}
-            onContextMenu={handleClick}
-          >
-            <VideocamOffIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-      >
-        <SelectCamera />
-      </Menu>
-    </>
+          {cameraIcon}
+        </IconButton>
+      }
+    >
+      <SelectCamera />
+    </Popup>
   )
 }

@@ -1,20 +1,25 @@
 import { useContext } from 'react'
 
-import type { Theme } from '@mui/material'
 import { ThemeContext, ThemeName } from 'src/app/providers/ThemeProvider/lib/ThemeContext'
 import { localstorageKeys } from 'src/shared/const/localstorageKeys'
 
 interface UseThemeResult {
   toggleTheme: () => void
   theme: keyof typeof ThemeName
-  MuiTheme: Theme | null
+}
+
+const nextThemeByCurrent: Record<ThemeName, ThemeName> = {
+  [ThemeName.light]: ThemeName.dark,
+  [ThemeName.dark]: ThemeName.pink,
+  [ThemeName.pink]: ThemeName.purple,
+  [ThemeName.purple]: ThemeName.light,
 }
 
 export function useTheme(): UseThemeResult {
-  const { theme, setTheme, MuiTheme } = useContext(ThemeContext)
+  const { theme, setTheme } = useContext(ThemeContext)
 
   const toggleTheme = () => {
-    const newTheme = theme === ThemeName.dark ? ThemeName.light : ThemeName.dark
+    const newTheme = nextThemeByCurrent[theme]
 
     setTheme(newTheme)
     localStorage.setItem(localstorageKeys.THEME, newTheme)
@@ -23,6 +28,5 @@ export function useTheme(): UseThemeResult {
   return {
     theme,
     toggleTheme,
-    MuiTheme,
   }
 }

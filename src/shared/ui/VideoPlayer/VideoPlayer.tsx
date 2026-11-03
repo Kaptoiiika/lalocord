@@ -89,11 +89,11 @@ export const VideoPlayer = memo(
     }, [played, handlePlay, handlePause])
 
     const handleChangeVolume = useCallback(
-      (event: Event, newValue: number | number[]) => {
-        if (videoRef.current && !Array.isArray(newValue)) {
-          setVolume(newValue)
-          onVolumeChange?.(newValue)
-        }
+      (newValue: number) => {
+        if (!videoRef.current) return
+
+        setVolume(newValue)
+        onVolumeChange?.(newValue)
       },
       [onVolumeChange]
     )

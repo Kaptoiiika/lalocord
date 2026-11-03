@@ -1,18 +1,18 @@
-import VideogameAssetIcon from '@mui/icons-material/VideogameAsset'
-import { IconButton, Menu, Stack, Tooltip } from '@mui/material'
+import { Gamepad2 } from 'lucide-react'
 import { TicTacToePrepareGame } from 'src/features/TicTacToePrepareGame'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
-import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
+import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
+import { IconButton, Popup } from 'src/shared/ui'
 import { useChatStore } from 'src/widgets/Chat/model/store/ChatStore'
 
 import type { WebRTCMiniGameMessage } from 'src/entities/WebRTC'
 
 export const StartMiniGame = () => {
-  const { open, anchorEl, handleClose, handleOpen } = useIsOpen()
+  const { open, setOpen, handleClose, handleOpen } = usePopup()
   const users = useWebRTCRoomStore((state) => state.users)
 
   const handleStartTicTacToe = (userId: string) => {
-    const user = users.find((user) => user.id === userId)
+    const user = users.find((roomUser) => roomUser.id === userId)
     if (!user) return
 
     const id = crypto.randomUUID()
@@ -29,39 +29,23 @@ export const StartMiniGame = () => {
   }
 
   return (
-    <>
-      <Tooltip
-        title="Start mini game"
-        arrow
-      >
+    <Popup
+      open={open}
+      onOpenChange={setOpen}
+      side="top"
+      align="center"
+      trigger={
         <IconButton
+          tooltip="Start mini game"
+          tooltipSide="top"
           aria-label="Start mini game"
           onClick={handleOpen}
         >
-          <VideogameAssetIcon />
+          <Gamepad2 />
         </IconButton>
-      </Tooltip>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-      >
-        <Stack
-          padding={1}
-          gap={1}
-        >
-          <TicTacToePrepareGame onStart={handleStartTicTacToe}>TicTacToe</TicTacToePrepareGame>
-        </Stack>
-      </Menu>
-    </>
+      }
+    >
+      <TicTacToePrepareGame onStart={handleStartTicTacToe}>TicTacToe</TicTacToePrepareGame>
+    </Popup>
   )
 }

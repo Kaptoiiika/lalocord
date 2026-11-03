@@ -1,9 +1,6 @@
-import { Badge } from '@mui/material'
-import { classNames } from 'src/shared/lib/classNames/classNames'
+import { cn } from 'src/shared/lib/utils/cn'
 
 import { AvatarUser, type AvatarUserProps } from '../AvatarUser'
-
-import styles from './AvatarUserWithBadge.module.scss'
 
 export type AvatarUserWithBadgeStatus = 'online' | 'offline' | 'idle'
 
@@ -11,19 +8,26 @@ type AvatarUserWithBadgeProps = {
   status?: AvatarUserWithBadgeStatus
 } & AvatarUserProps
 
+const statusClassName: Record<AvatarUserWithBadgeStatus, string> = {
+  offline: 'bg-[var(--color-red)]',
+  idle: 'bg-[var(--color-yellow)]',
+  online: 'bg-[var(--color-green)]',
+}
+
 export const AvatarUserWithBadge = (props: AvatarUserWithBadgeProps) => {
   const { status, ...other } = props
 
   return (
-    <Badge
-      className={classNames(styles.badgeStatus, {
-        [styles.red]: status === 'offline',
-        [styles.yellow]: status === 'idle',
-        [styles.green]: status === 'online',
-      })}
-      overlap="circular"
-    >
+    <span className="relative inline-flex">
       <AvatarUser {...other} />
-    </Badge>
+      {status && (
+        <span
+          className={cn(
+            'absolute right-px bottom-px z-[3] size-2 rounded-full border border-[var(--box-border-color)]',
+            statusClassName[status]
+          )}
+        />
+      )}
+    </span>
   )
 }

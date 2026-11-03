@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-import { Button, Dialog, IconButton, Paper, Stack, TextField } from '@mui/material'
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
-import { AvatarUser } from 'src/shared/ui/Avatar'
+import { AvatarUser, Button, IconButton, Modal, TextField } from 'src/shared/ui'
 
 import { useLocalUserStore } from '../../model/store/LocalUserStore'
 
@@ -11,19 +10,21 @@ export const UserChangeAvatar = () => {
   const srcAvatar = localUser.avatar ?? ''
   const [testSrc, setTestSrc] = useState(srcAvatar)
   const [tempSrc, setTempSrc] = useState(srcAvatar)
+  const [syncedSrcAvatar, setSyncedSrcAvatar] = useState(srcAvatar)
   const { open, handleOpen, handleClose: handleCloseModal } = useIsOpen()
 
-  useEffect(() => {
+  if (srcAvatar !== syncedSrcAvatar) {
+    setSyncedSrcAvatar(srcAvatar)
     setTestSrc(srcAvatar)
     setTempSrc(srcAvatar)
-  }, [srcAvatar])
+  }
 
   const handleChangeAvatar = (src: string) => {
     setLocalAvatar(src)
   }
 
-  const handleChangeSrc = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTempSrc(e.currentTarget.value)
+  const handleChangeSrc = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTempSrc(event.currentTarget.value)
   }
 
   const handleTest = () => {
@@ -44,9 +45,7 @@ export const UserChangeAvatar = () => {
   return (
     <>
       <IconButton
-        sx={{
-          p: 0,
-        }}
+        className="size-auto p-0"
         onClick={handleOpen}
         aria-label="change avatar"
       >
@@ -57,59 +56,41 @@ export const UserChangeAvatar = () => {
         />
       </IconButton>
 
-      <Dialog
+      <Modal
         open={open}
         onClose={handleClose}
       >
-        <Paper
-          sx={{
-            p: 1,
-          }}
-        >
-          <Stack gap={1}>
-            <Stack
-              direction="row"
-              gap={1}
-              alignItems="center"
-            >
-              <AvatarUser
-                username={localUser.username}
-                avatarUrl={testSrc}
-                size="medium"
-              />
-              <TextField
-                placeholder="image src"
-                value={tempSrc}
-                onChange={handleChangeSrc}
-              />
-            </Stack>
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-row items-center gap-1">
+            <AvatarUser
+              username={localUser.username}
+              avatarUrl={testSrc}
+              size="medium"
+            />
+            <TextField
+              placeholder="image src"
+              value={tempSrc}
+              onChange={handleChangeSrc}
+            />
+          </div>
 
-            <Stack
-              direction="row"
-              gap={1}
+          <div className="flex flex-row gap-1">
+            <Button
+              variant="outline"
+              onClick={handleTest}
             >
-              <Button
-                variant="outlined"
-                onClick={handleTest}
-              >
-                Test
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={handleClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleAccept}
-              >
-                Accept
-              </Button>
-            </Stack>
-          </Stack>
-        </Paper>
-      </Dialog>
+              Test
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleClose}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleAccept}>Accept</Button>
+          </div>
+        </div>
+      </Modal>
     </>
   )
 }

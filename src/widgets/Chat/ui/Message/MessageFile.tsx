@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
-import { Link } from '@mui/material'
 import { getActionSeletFileToImagePreview } from 'src/features/ImagePreview'
 import { useImagePreviewStore } from 'src/features/ImagePreview/model/store/ImagePreviewStore'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
 import { readablizeBytes } from 'src/shared/lib/utils/Numbers/readablizeBytes/ReadablizeBytes'
+import { TextLink } from 'src/shared/ui'
 
 import type { WebRTCChatMessage } from 'src/entities/WebRTC'
 
@@ -18,8 +18,8 @@ export const MessageFile = (props: MessageFileProps) => {
   const { data } = props
   const [blobUrl, setBlobUrl] = useState<string>()
 
-  const handleClick = (e: React.MouseEvent<HTMLImageElement>) => {
-    selectImage(e.currentTarget.src)
+  const handleClick = (event: React.MouseEvent<HTMLImageElement>) => {
+    selectImage(event.currentTarget.src)
   }
 
   const handleError = () => {
@@ -41,14 +41,14 @@ export const MessageFile = (props: MessageFileProps) => {
   }
   if (error) {
     return (
-      <Link
+      <TextLink
         href={blobUrl}
         download={data.blobParams?.name}
         target="_blank"
         rel="noreferrer"
       >
         {data.blobParams?.name || data.blob.type || 'unknown file'} - {readablizeBytes(data.blob.size)}
-      </Link>
+      </TextLink>
     )
   }
 
@@ -58,10 +58,7 @@ export const MessageFile = (props: MessageFileProps) => {
       onClick={handleClick}
       alt=""
       src={blobUrl}
-      style={{
-        width: '100%',
-        objectFit: 'contain',
-      }}
+      className="w-full object-contain"
     />
   )
 }

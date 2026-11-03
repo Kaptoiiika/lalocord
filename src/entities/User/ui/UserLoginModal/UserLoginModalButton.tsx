@@ -1,18 +1,19 @@
-import type { ButtonProps } from '@mui/material'
-import { Button } from '@mui/material'
+import type { ComponentProps } from 'react'
+
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
+import { Button } from 'src/shared/ui'
 
 import { UserLoginModal } from './UserLoginModal'
 
-type UserLoginModalButtonProps = ButtonProps
+type UserLoginModalButtonProps = ComponentProps<typeof Button>
 
 export const UserLoginModalButton = (props: UserLoginModalButtonProps) => {
   const { children, onClick, ...otherProps } = props
 
   const { handleOpen, open, handleClose } = useIsOpen()
 
-  const handleOpenModal = (e: React.MouseEvent<HTMLButtonElement>) => {
-    onClick?.(e)
+  const handleOpenModal = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onClick?.(event)
     handleOpen()
   }
 

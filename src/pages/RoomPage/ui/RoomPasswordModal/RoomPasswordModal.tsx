@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
-import { Button, Stack, TextField, Typography } from '@mui/material'
-import { Modal } from 'src/shared/ui'
+import { Button, Modal, TextField } from 'src/shared/ui'
 
 type RoomPasswordModalProps = {
   open: boolean
@@ -22,14 +21,16 @@ export const RoomPasswordModal = (props: RoomPasswordModalProps) => {
     onSubmit(password)
   }
 
+  const helperText = isWrongPassword ? 'Wrong password' : undefined
+
   return (
     <Modal
       open={open}
       onClose={onCancel}
     >
       <form onSubmit={handleSubmit}>
-        <Stack gap={2}>
-          <Typography variant="h6">Room password</Typography>
+        <div className="flex flex-col gap-2">
+          <h2 className="text-lg font-semibold">Room password</h2>
           <TextField
             required
             autoFocus
@@ -37,31 +38,25 @@ export const RoomPasswordModal = (props: RoomPasswordModalProps) => {
             type="password"
             value={password}
             error={isWrongPassword}
-            helperText={isWrongPassword ? 'Wrong password' : undefined}
+            helperText={helperText}
             onChange={(event) => setPassword(event.target.value)}
           />
-          <Stack
-            direction="row"
-            gap={1}
-            justifyContent="flex-end"
-          >
+          <div className="flex flex-row justify-end gap-1">
             <Button
-              color="secondary"
-              variant="contained"
+              variant="secondary"
               type="button"
               onClick={onCancel}
             >
               Cancel
             </Button>
             <Button
-              variant="contained"
               type="submit"
               disabled={!password}
             >
               Join
             </Button>
-          </Stack>
-        </Stack>
+          </div>
+        </div>
       </form>
     </Modal>
   )

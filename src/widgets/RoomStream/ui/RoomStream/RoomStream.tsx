@@ -1,23 +1,20 @@
 import type { ReactNode } from 'react'
 import { memo, useCallback, useEffect, useId, useRef, useState } from 'react'
 
-import { DrawOutlined, MouseOutlined, PictureInPictureOutlined } from '@mui/icons-material'
-import RemoveIcon from '@mui/icons-material/Remove'
-import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Minus, Mouse, Pencil, PictureInPicture } from 'lucide-react'
 import { CanvasPainter } from 'src/features/CanvasPainter'
 import { RemoteControlLayer } from 'src/features/RemoteControl'
-import { classNames } from 'src/shared/lib/classNames/classNames'
 import { useIsOpen } from 'src/shared/lib/hooks/useIsOpen/useIsOpen'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+import { cn } from 'src/shared/lib/utils/cn'
 import { startViewTransition } from 'src/shared/lib/utils/ViewTransition/ViewTransition'
+import { IconButton } from 'src/shared/ui'
 import { VideoPlayer } from 'src/shared/ui/VideoPlayer/VideoPlayer'
 
 import type { StreamType } from 'src/entities/WebRTC'
 import type { RoomUser } from 'src/features/WebRTCRoom'
 
 import { useRoomStreamStore } from '../../model/store/RoomStreamStore'
-
-import styles from './RoomStream.module.scss'
 
 type RoomStreamProps = {
   user?: RoomUser
@@ -181,10 +178,11 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         left: hideIndex * 100,
         position: hide ? 'absolute' : 'relative',
       }}
-      className={classNames(styles.stream, {
-        [styles.hideStream]: hide,
-        [styles.drawLine]: drawLine,
-      })}
+      className={cn(
+        'w-full overflow-hidden bg-[var(--bg-app)]',
+        hide && 'pointer-events-none absolute bottom-0 left-0 h-[50px] w-[100px] overflow-hidden',
+        drawLine && 'cursor-crosshair'
+      )}
       draggable="false"
       onDragStart={(e) => e.preventDefault()}
     >
@@ -197,7 +195,7 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         onPause={handlePause}
         onPlay={handlePlay}
         fullScreen={fullScreen}
-        className={isRemoteControlActive ? styles.remoteControlVideo : undefined}
+        className={isRemoteControlActive ? 'bg-black object-contain' : undefined}
         onFullscreenEnter={handleOpenfullscreen}
         onFullscreenExit={handleFullscreenExit}
         autoplay={autoplay ? propsAutoPlay : false}
@@ -205,82 +203,65 @@ export const RoomStream = memo(function RoomStream(props: RoomStreamProps) {
         mute={mute}
         overlay={streamOverlay}
       >
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          className={styles.streamTooltip}
-        >
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            color="primary"
-          >
+        <div className="flex flex-row items-center justify-between">
+          <p className="text-lg font-semibold text-white [filter:drop-shadow(0_0_1px_#000)_drop-shadow(0_1px_2px_rgba(0,0,0,0.9))]">
             {title}
-          </Typography>
+          </p>
 
-          <Stack
-            direction="row"
-            gap={2}
-          >
+          <div className="flex flex-row gap-2">
             {canDrawLine && !isLocal && (
-              <Tooltip title="Draw a line">
-                <IconButton
-                  color="primary"
-                  aria-label="Draw a line"
-                  onClick={handleDrawLine}
-                >
-                  {drawLine ? <DrawOutlined /> : <DrawOutlined color="disabled" />}
-                </IconButton>
-              </Tooltip>
+              <IconButton
+                isOverlay
+                tooltip="Draw a line"
+                aria-label="Draw a line"
+                onClick={handleDrawLine}
+              >
+                <Pencil className={drawLine ? undefined : 'text-white/65'} />
+              </IconButton>
             )}
 
-            <Tooltip title="Picture in picture">
-              <IconButton
-                color="primary"
-                aria-label="Picture in picture"
-                onClick={handlePictureInPictureEnter}
-              >
-                <PictureInPictureOutlined />
-              </IconButton>
-            </Tooltip>
+            <IconButton
+              isOverlay
+              tooltip="Picture in picture"
+              aria-label="Picture in picture"
+              onClick={handlePictureInPictureEnter}
+            >
+              <PictureInPicture />
+            </IconButton>
 
             {canControl && (
-              <Tooltip title="Remote control">
-                <IconButton
-                  color="primary"
-                  aria-label="Remote control"
-                  onClick={handleStartRemoteControl}
-                >
-                  {isRemoteControlActive ? <MouseOutlined /> : <MouseOutlined color="disabled" />}
-                </IconButton>
-              </Tooltip>
+              <IconButton
+                isOverlay
+                tooltip="Remote control"
+                aria-label="Remote control"
+                onClick={handleStartRemoteControl}
+              >
+                <Mouse className={isRemoteControlActive ? undefined : 'text-white/65'} />
+              </IconButton>
             )}
 
-            <Tooltip title="Hide stream">
-              <IconButton
-                color="primary"
-                aria-label="Hide stream"
-                onClick={handleHide}
-              >
-                <RemoveIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Stack>
+            <IconButton
+              isOverlay
+              tooltip="Hide stream"
+              aria-label="Hide stream"
+              onClick={handleHide}
+            >
+              <Minus />
+            </IconButton>
+          </div>
+        </div>
       </VideoPlayer>
 
       {hide && (
-        <div className={styles.unhide}>
-          <Tooltip title="Unhide stream">
-            <IconButton
-              color="primary"
-              aria-label="Unhide stream"
-              onClick={handleUnHide}
-            >
-              <RemoveIcon />
-            </IconButton>
-          </Tooltip>
+        <div className="pointer-events-auto absolute top-0 right-0">
+          <IconButton
+            isOverlay
+            tooltip="Unhide stream"
+            aria-label="Unhide stream"
+            onClick={handleUnHide}
+          >
+            <Minus />
+          </IconButton>
         </div>
       )}
     </div>

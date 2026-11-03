@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
-import { Button, Stack, TextField, Typography } from '@mui/material'
-import { Modal } from 'src/shared/ui'
+import { Button, Modal, TextField } from 'src/shared/ui'
 
 interface UserLoginModalProps {
   isOpen: boolean
@@ -13,8 +12,8 @@ export const UserLoginModal = (props: UserLoginModalProps) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
     // onLogin(username, password)
   }
 
@@ -28,44 +27,34 @@ export const UserLoginModal = (props: UserLoginModalProps) => {
       onClose={onClose}
     >
       <form onSubmit={handleSubmit}>
-        <Stack gap={1}>
-          <Typography variant="h6">Вход в аккаунт</Typography>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">Вход в аккаунт</h2>
           <TextField
             autoFocus
             label="username"
             type="text"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(event) => setUsername(event.target.value)}
           />
 
           <TextField
             label="password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
           />
 
-          <Stack
-            direction="row"
-            gap={1}
-            justifyContent="flex-end"
-          >
+          <div className="flex flex-row justify-end gap-1">
             <Button
-              color="secondary"
-              variant="contained"
+              variant="secondary"
               type="button"
               onClick={onClose}
             >
               Отмена
             </Button>
-            <Button
-              variant="contained"
-              type="submit"
-            >
-              Войти
-            </Button>
-          </Stack>
-        </Stack>
+            <Button type="submit">Войти</Button>
+          </div>
+        </div>
       </form>
     </Modal>
   )

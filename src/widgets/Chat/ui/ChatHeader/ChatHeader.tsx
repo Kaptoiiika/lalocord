@@ -1,14 +1,13 @@
-import { memo, useState } from 'react'
+import { memo } from 'react'
 
-import ChatIcon from '@mui/icons-material/Chat'
-import { Button, Badge, Menu, Stack } from '@mui/material'
+import { MessageCircle } from 'lucide-react'
 import { useAudioEffectStore } from 'src/entities/AudioEffect'
 import { AudioName } from 'src/entities/AudioEffect/model/types/AudioEffectSchema'
-import { classNames } from 'src/shared/lib/classNames/classNames'
+import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
+import { cn } from 'src/shared/lib/utils/cn'
+import { Button, CounterBadge, Popup } from 'src/shared/ui'
 
 import { useChatStore } from '../../model/store/ChatStore'
-
-import styles from './ChatHeader.module.scss'
 
 type ChatHeaderProps = {
   handleCollapse: () => void
@@ -22,58 +21,67 @@ export const ChatHeader = memo(function ChatHeader(props: ChatHeaderProps) {
   const handleChangeMode = useAudioEffectStore((state) => state.changeMuted)
   const handleClearChat = useChatStore((state) => state.clearMessages)
   const isSilent = audioVolumes.notification.muted
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-
-  const handleOpenContextMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    setAnchorEl(e.currentTarget)
-  }
+  const { open, setOpen, handleOpen, handleClose } = usePopup()
 
   const handleChangeSilentMode = () => {
     handleChangeMode(AudioName.notification, !isSilent)
+    handleClose()
   }
 
-  const handleCloseContextMenu = () => {
-    setAnchorEl(null)
+  const handleClearChatHistory = () => {
+    handleClearChat()
+    handleClose()
   }
+
+  const anchorClassName = cn(
+    'absolute right-0 block min-w-16 transition-[width] duration-300 max-[625px]:w-full',
+    collapsed
+      ? 'h-[calc(var(--header-height)-var(--box-border-width))] w-16'
+      : 'h-[var(--header-height)] w-[var(--chat-width)] [border-bottom:var(--box-border)]'
+  )
 
   return (
-    <>
-      <header
-        className={classNames(styles.header, {
-          [styles.collapsed]: collapsed,
-        })}
-        onContextMenu={handleOpenContextMenu}
-      >
-        <Button
-          sx={{
-            borderRadius: 0,
-          }}
-          className={styles.headerButton}
-          onClick={handleCollapse}
-          aria-label={collapsed ? 'Open chat' : 'Hide chat'}
+    <Popup
+      open={open}
+      onOpenChange={setOpen}
+      side="bottom"
+      align="start"
+      anchorClassName={anchorClassName}
+      className="min-w-[calc(var(--chat-width)/2)]"
+      trigger={
+        <header
+          className="h-full w-full"
+          onContextMenu={handleOpen}
         >
-          <Badge
-            color="secondary"
-            badgeContent={unreadedMessage}
+          <Button
+            variant="ghost"
+            className="h-full w-full rounded-none [border-left:var(--box-border)] max-[625px]:border-l-0"
+            onClick={handleCollapse}
+            aria-label={collapsed ? 'Open chat' : 'Hide chat'}
           >
-            <ChatIcon color={isSilent ? 'disabled' : 'primary'} />
-          </Badge>
+            <CounterBadge count={unreadedMessage}>
+              <MessageCircle className={isSilent ? 'text-muted-foreground' : 'text-foreground'} />
+            </CounterBadge>
+          </Button>
+        </header>
+      }
+    >
+      <div className="flex flex-col gap-2">
+        <Button
+          variant="ghost"
+          className="justify-start"
+          onClick={handleChangeSilentMode}
+        >
+          {isSilent ? 'unmute' : 'mute'}
         </Button>
-      </header>
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleCloseContextMenu}
-        keepMounted
-        disablePortal
-      >
-        <Stack className={styles.contextMenu}>
-          <Button onClick={handleChangeSilentMode}>{isSilent ? 'unmute' : 'mute'}</Button>
-          <Button onClick={handleClearChat}>Clear chat history</Button>
-        </Stack>
-      </Menu>
-    </>
+        <Button
+          variant="ghost"
+          className="justify-start"
+          onClick={handleClearChatHistory}
+        >
+          Clear chat history
+        </Button>
+      </div>
+    </Popup>
   )
 })

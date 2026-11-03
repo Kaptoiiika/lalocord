@@ -30,7 +30,14 @@ const RoomPageWrapper = () => {
   const createPassword = (location.state as RoomPageLocationState | null)?.password
   const [isPasswordRequired, setIsPasswordRequired] = useState(false)
   const [isWrongPassword, setIsWrongPassword] = useState(false)
+  const [syncedJoin, setSyncedJoin] = useState({ id, createPassword })
   const { joinRoom, leaveRoom } = useWebRTCRoomStore()
+
+  if (syncedJoin.id !== id || syncedJoin.createPassword !== createPassword) {
+    setSyncedJoin({ id, createPassword })
+    setIsPasswordRequired(false)
+    setIsWrongPassword(false)
+  }
 
   const emitJoin = useCallback(
     (password?: string, isReconnect = false) => {
@@ -53,8 +60,6 @@ const RoomPageWrapper = () => {
     const prevName = document.title
 
     document.title = `${document.title} - ${id}`
-    setIsPasswordRequired(false)
-    setIsWrongPassword(false)
 
     const handlePasswordRequired = (payload: { isWrongPassword?: boolean }) => {
       removeRoomToken(id)

@@ -27,7 +27,10 @@ export const useWebRTCRoom = () => {
   const playAudio = useAudioEffectStore((state) => state.play)
   const { mic, screen, webCam } = streams
   const userMapRef = useRef(users)
-  userMapRef.current = users
+
+  useEffect(() => {
+    userMapRef.current = users
+  }, [users])
 
   useEffect(() => {
     userMapRef.current.forEach(({ peer }) => {

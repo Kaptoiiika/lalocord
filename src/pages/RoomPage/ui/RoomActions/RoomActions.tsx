@@ -1,29 +1,17 @@
-import { Stack } from '@mui/material'
-
 import { VideoSettingsMenu } from './SettingsMenu/VideoSettingsMenu'
 import { ShareMicrophoneMenu } from './ShareMicrophoneMenu/ShareMicrophoneMenu'
 import { ShareScreenMenu } from './ShareScreenMenu/ShareScreenMenu'
 import { ShareWebCamMenu } from './ShareWebCamMenu/ShareWebCamMenu'
 import { StartMiniGame } from './StartMiniGame/StartMiniGame'
 
-import styles from './RoomActions.module.scss'
-
 export const RoomActions = () => (
-  <Stack
-    className={styles.root}
-    direction="row"
-    alignItems="center"
-  >
+  <div className="flex shrink-0 flex-row items-center [border-top:var(--box-border)] max-[625px]:[border-bottom:var(--box-border)]">
     <ShareMicrophoneMenu />
     <ShareWebCamMenu />
     <ShareScreenMenu />
     <StartMiniGame />
-    <Stack
-      className={styles.group}
-      direction="row"
-      alignItems="center"
-    >
+    <div className="flex h-full flex-row items-center [border-left:var(--box-border)]">
       <VideoSettingsMenu />
-    </Stack>
-  </Stack>
+    </div>
+  </div>
 )

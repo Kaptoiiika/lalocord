@@ -1,19 +1,17 @@
-import type { SkeletonProps } from '@mui/material'
-import { Skeleton } from '@mui/material'
-import { classNames } from 'src/shared/lib/classNames'
+import type { ComponentProps } from 'react'
 
-import styles from './SkeletonText.module.scss'
+import { cn } from 'src/shared/lib/utils/cn'
+import { Skeleton } from 'src/shared/ui/shadcn/skeleton'
 
-type SkeletonTextProps = Omit<SkeletonProps, 'variant'>
+type SkeletonTextProps = ComponentProps<typeof Skeleton>
 
 export function SkeletonText(props: SkeletonTextProps) {
-  const { ...otherProps } = props
+  const { className, ...otherProps } = props
 
   return (
     <Skeleton
+      className={cn('h-4 w-full bg-[rgb(var(--secondary-color))]', className)}
       {...otherProps}
-      variant="text"
-      className={classNames(otherProps.className, styles.root)}
     />
   )
 }

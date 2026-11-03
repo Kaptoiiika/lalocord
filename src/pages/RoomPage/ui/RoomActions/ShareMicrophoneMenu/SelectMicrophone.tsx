@@ -1,11 +1,16 @@
 import { useState } from 'react'
 
-import type { SelectChangeEvent } from '@mui/material'
-import { FormControl, Typography, Select, MenuItem } from '@mui/material'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+import { SelectField } from 'src/shared/ui'
 
 import type { ObjectStreamConstraints } from 'src/entities/WebRTC/utils/streamConstraints'
+
+const getDeviceId = (deviceId: MediaTrackConstraints['deviceId']) => {
+  if (typeof deviceId === 'string' && deviceId) return deviceId
+
+  return undefined
+}
 
 export const SelectMicrophone = () => {
   const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
@@ -17,57 +22,49 @@ export const SelectMicrophone = () => {
     navigator.mediaDevices
       ?.enumerateDevices()
       .then((devices) => {
-        const microphones = devices.filter((device) => device.kind === 'audioinput')
+        const nextMicrophones = devices.filter((device) => device.kind === 'audioinput')
 
-        if (microphones.length === 0) {
+        if (nextMicrophones.length === 0) {
           return setError('No microphones found')
         }
 
-        setmicrophones(microphones)
+        setmicrophones(nextMicrophones)
       })
       .catch(() => {
         setError('No access')
       })
   })
 
-  const handleChangeMicorphone = (event: SelectChangeEvent) => {
+  const handleChangeMicorphone = (deviceId: string) => {
     const newstreamSettings: ObjectStreamConstraints = {
       ...streamConstraints,
       audio: {
         ...streamConstraints.audio,
-        deviceId: event.target.value,
+        deviceId,
       },
     }
 
     setStreamConstraints(newstreamSettings)
   }
 
-  const selectedMicrophone = microphones.find((microphone) => microphone.deviceId === streamConstraints.audio.deviceId)
+  const options = microphones
+    .filter((microphone) => microphone.deviceId)
+    .map((microphone) => ({
+      value: microphone.deviceId,
+      label: microphone.label || microphone.deviceId,
+    }))
 
   return (
-    <FormControl
-      sx={{
-        p: 1,
-        width: 200,
-      }}
-    >
-      <Typography>Microphone</Typography>
-      {error && <Typography color="error">{error}</Typography>}
-      <Select
-        disabled={!!error}
-        fullWidth
-        value={selectedMicrophone?.deviceId || ''}
-        onChange={handleChangeMicorphone}
-      >
-        {microphones.map((microphone) => (
-          <MenuItem
-            key={microphone.deviceId}
-            value={microphone.deviceId}
-          >
-            {microphone.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <div className="flex w-[200px] flex-col gap-2">
+      <SelectField
+        label="Microphone"
+        error={Boolean(error)}
+        disabled={Boolean(error)}
+        value={getDeviceId(streamConstraints.audio.deviceId)}
+        onValueChange={handleChangeMicorphone}
+        options={options}
+      />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
   )
 }

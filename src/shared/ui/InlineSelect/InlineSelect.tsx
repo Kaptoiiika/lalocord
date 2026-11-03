@@ -1,11 +1,9 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 
-import { Button, Typography } from '@mui/material'
+import { ToggleGroup, ToggleGroupItem } from 'src/shared/ui/shadcn/toggle-group'
 
-import styles from './InlineSelect.module.scss'
-
-type InlineSelectProps<T> = {
+type InlineSelectProps<T extends string> = {
   list: T[]
   value?: T
   itemTitle?: (item: T) => string
@@ -13,34 +11,41 @@ type InlineSelectProps<T> = {
   onSelect?: (newValue: T) => void
 }
 
-export const InlineSelect = <T,>(props: InlineSelectProps<T>) => {
+export const InlineSelect = <T extends string>(props: InlineSelectProps<T>) => {
   const { title, list, value, onSelect, itemTitle } = props
   const [selectedValue, setSelectedValue] = useState(value)
-  const handleSelect = (value: T) => {
-    setSelectedValue(value)
-    onSelect?.(value)
+
+  const handleSelect = (nextValue: T) => {
+    setSelectedValue(nextValue)
+    onSelect?.(nextValue)
   }
 
-  const isCurrentValue = (item: T) => {
-    if (value) return item === value
-
-    return item === selectedValue
-  }
+  const currentValue = value || selectedValue
 
   return (
-    <div className={styles.selector}>
-      {title && <Typography>{title}</Typography>}
-      <div className={styles.buttonlist}>
-        {list.map((item, index) => (
-          <Button
-            key={index}
-            variant={isCurrentValue(item) ? 'contained' : undefined}
-            onClick={() => handleSelect(item)}
+    <div className="flex flex-col gap-1">
+      {title && <p className="text-sm">{title}</p>}
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        spacing={0}
+        className="w-full"
+        value={currentValue}
+        onValueChange={(nextValue) => {
+          if (!nextValue) return
+          handleSelect(nextValue as T)
+        }}
+      >
+        {list.map((item) => (
+          <ToggleGroupItem
+            key={item}
+            value={item}
+            className="flex-1"
           >
-            {itemTitle ? itemTitle(item) : String(item)}
-          </Button>
+            {itemTitle ? itemTitle(item) : item}
+          </ToggleGroupItem>
         ))}
-      </div>
+      </ToggleGroup>
     </div>
   )
 }

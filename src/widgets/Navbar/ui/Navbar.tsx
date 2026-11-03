@@ -1,47 +1,26 @@
-import HomeIcon from '@mui/icons-material/Home'
-import { IconButton } from '@mui/material'
-import { Stack } from '@mui/material'
+import { House } from 'lucide-react'
 import { ThemeSwitcher } from 'src/features/ThemeSwitcher'
 import { AppRoutes } from 'src/shared/config/routeConfig/routeConfig'
+import { IconButton } from 'src/shared/ui'
 import { Link } from 'src/shared/ui/Link/Link'
 
-import styles from './Navbar.module.scss'
-// import { UserSettingsModal } from "src/entities/UserSettings"
-
-// const links = [
-//   {
-//     to: AppRoutes.MAIN_PAGE,
-//     label: "home",
-//     icon: <HomeIcon />,
-//   },
-// ]
-
 export const Navbar = () => (
-  <nav className={styles.NavbarContainer}>
-    <Stack
-      className={styles.stack}
-      justifyContent="space-between"
-      alignItems="center"
-      gap={4}
-    >
-      <Stack
-        alignItems="center"
-        gap={1}
-      >
+  <nav className="w-[var(--navbar-size)] shrink-0 bg-[rgb(var(--bg-primary-color))] [border-right:var(--box-border)] max-[625px]:h-[var(--navbar-size)] max-[625px]:w-full max-[625px]:border-r-0 max-[625px]:[border-bottom:var(--box-border)]">
+    <div className="flex h-full flex-col items-center justify-between gap-4 max-[625px]:flex-row">
+      <div className="flex flex-col items-center gap-1">
         <Link
-          className={styles.headerLink}
+          className="flex w-full items-center justify-center"
           to={AppRoutes.MAIN_PAGE}
         >
           <IconButton aria-label="home page">
-            <HomeIcon />
+            <House />
           </IconButton>
         </Link>
-      </Stack>
+      </div>
 
-      <Stack>
-        {/* <UserSettingsModal /> */}
+      <div className="flex">
         <ThemeSwitcher />
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   </nav>
 )

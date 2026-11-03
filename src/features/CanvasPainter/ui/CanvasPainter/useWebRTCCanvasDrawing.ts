@@ -54,7 +54,10 @@ export const useWebRTCCanvasDrawing = (options: UseWebRTCCanvasDrawingOptions) =
 
   // Сохраняем drawExternalLine в ref для избежания пересоздания callback
   const drawExternalLineRef = useRef(drawExternalLine)
-  drawExternalLineRef.current = drawExternalLine
+
+  useEffect(() => {
+    drawExternalLineRef.current = drawExternalLine
+  }, [drawExternalLine])
 
   const handleDrawLine = useCallback(
     (payload: ExternalLinePayload) => {

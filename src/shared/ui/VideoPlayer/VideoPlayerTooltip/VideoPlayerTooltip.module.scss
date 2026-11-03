@@ -1,16 +1,24 @@
 .tooltip {
   z-index: 1;
   position: absolute;
+  right: 0;
+  left: 0;
   transition: opacity 0.15s;
   opacity: 1;
   padding: 8px;
-  width: calc(100% - 16px);
+  pointer-events: none;
 
   &.tooltipTop {
     top: 0;
 
     .shadowTooltip {
       top: 0;
+    }
+
+    .shadow {
+      top: 0;
+      height: 88px;
+      background: linear-gradient(to bottom, rgb(0 0 0 / 72%), rgb(0 0 0 / 0));
     }
   }
 
@@ -20,6 +28,12 @@
     .shadowTooltip {
       bottom: 0;
     }
+
+    .shadow {
+      bottom: 0;
+      height: 104px;
+      background: linear-gradient(to top, rgb(0 0 0 / 72%), rgb(0 0 0 / 0));
+    }
   }
 }
 
@@ -28,9 +42,23 @@
   right: 0;
   left: 0;
   z-index: -1;
-
+  pointer-events: none;
 }
 
-.closed {
+.shadow {
+  position: absolute;
+  right: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  pointer-events: auto;
+}
+
+.closed,
+.closed .content {
   opacity: 0;
+  pointer-events: none;
 }

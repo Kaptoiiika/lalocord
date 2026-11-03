@@ -1,11 +1,16 @@
 import { useState } from 'react'
 
-import type { SelectChangeEvent } from '@mui/material'
-import { Select, MenuItem, FormControl, Typography } from '@mui/material'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { useMountedEffect } from 'src/shared/lib/hooks/useMountedEffect/useMountedEffect'
+import { SelectField } from 'src/shared/ui'
 
 import type { ObjectStreamConstraints } from 'src/entities/WebRTC/utils/streamConstraints'
+
+const getDeviceId = (deviceId: MediaTrackConstraints['deviceId']) => {
+  if (typeof deviceId === 'string' && deviceId) return deviceId
+
+  return undefined
+}
 
 export const SelectCamera = () => {
   const streamConstraints = useWebRTCStore((state) => state.streamConstraints)
@@ -17,55 +22,47 @@ export const SelectCamera = () => {
     navigator.mediaDevices
       ?.enumerateDevices()
       .then((devices) => {
-        const cameras = devices.filter((device) => device.kind === 'videoinput')
-        if (cameras.length === 0) {
+        const nextCameras = devices.filter((device) => device.kind === 'videoinput')
+        if (nextCameras.length === 0) {
           return setError('No cameras found')
         }
-        setCameras(cameras)
+        setCameras(nextCameras)
       })
       .catch(() => {
         setError('No access')
       })
   })
 
-  const handleChange = (event: SelectChangeEvent) => {
+  const handleChange = (deviceId: string) => {
     const newstreamSettings: ObjectStreamConstraints = {
       ...streamConstraints,
       video: {
         ...streamConstraints.video,
-        deviceId: event.target.value,
+        deviceId,
       },
     }
 
     setStreamConstraints(newstreamSettings)
   }
 
-  const selectedCamera = cameras.find((camera) => camera.deviceId === streamConstraints.video.deviceId)
+  const options = cameras
+    .filter((camera) => camera.deviceId)
+    .map((camera) => ({
+      value: camera.deviceId,
+      label: camera.label || camera.deviceId,
+    }))
 
   return (
-    <FormControl
-      sx={{
-        p: 1,
-        width: 200,
-      }}
-    >
-      <Typography>Camera</Typography>
-      {error && <Typography color="error">{error}</Typography>}
-      <Select
-        disabled={!!error}
-        fullWidth
-        value={selectedCamera?.deviceId || ''}
-        onChange={handleChange}
-      >
-        {cameras.map((camera) => (
-          <MenuItem
-            key={camera.deviceId}
-            value={camera.deviceId}
-          >
-            {camera.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <div className="flex w-[200px] flex-col gap-2">
+      <SelectField
+        label="Camera"
+        error={Boolean(error)}
+        disabled={Boolean(error)}
+        value={getDeviceId(streamConstraints.video.deviceId)}
+        onValueChange={handleChange}
+        options={options}
+      />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
   )
 }

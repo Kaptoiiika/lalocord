@@ -1,9 +1,7 @@
 import { useState } from 'react'
 
-import type { SelectChangeEvent } from '@mui/material'
-import { Button, MenuItem, Select, Stack } from '@mui/material'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
-import { Modal } from 'src/shared/ui'
+import { Button, Modal, SelectField } from 'src/shared/ui'
 
 type TicTacToeSelectOpponentProps = {
   open: boolean
@@ -16,63 +14,46 @@ export const TicTacToeSelectOpponent = (props: TicTacToeSelectOpponentProps) => 
   const { users } = useWebRTCRoomStore()
   const [selectedUserId, setUserId] = useState<string>()
 
-  const handleChangeUser = (event: SelectChangeEvent<string>) => {
-    setUserId(event.target.value)
-  }
-
   const handleSelect = () => {
     if (!selectedUserId) return
     onSelect?.(selectedUserId)
     onClose()
   }
 
+  const options = users
+    .filter((client) => client.id)
+    .map((client) => ({
+      value: client.id,
+      label: client.user.username || client.id,
+    }))
+
   return (
     <Modal
       open={open}
       onClose={onClose}
-      className="TicTacToeSelectOpponent"
     >
-      <Stack gap={1}>
-        <Select
-          fullWidth
-          value={selectedUserId || ''}
-          displayEmpty
-          onChange={handleChangeUser}
-        >
-          <MenuItem value="">
-            <i>Select opponent</i>
-          </MenuItem>
-
-          {Object.values(users).map((client) => (
-            <MenuItem
-              key={client.id}
-              value={client.id}
-            >
-              {client.user.username}
-            </MenuItem>
-          ))}
-        </Select>
-        <Stack
-          gap={1}
-          direction="row"
-          justifyContent="flex-end"
-        >
+      <div className="flex flex-col gap-1">
+        <SelectField
+          placeholder="Select opponent"
+          value={selectedUserId}
+          onValueChange={setUserId}
+          options={options}
+        />
+        <div className="flex flex-row justify-end gap-1">
           <Button
-            color="secondary"
-            variant="contained"
+            variant="secondary"
             onClick={onClose}
           >
             Cancel
           </Button>
           <Button
             disabled={!selectedUserId}
-            variant="contained"
             onClick={handleSelect}
           >
             Start
           </Button>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </Modal>
   )
 }

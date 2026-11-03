@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "es2022",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "types": ["*"],
     "jsx": "react-jsx",
     "lib": ["ESNext", "dom", "dom.iterable"],
     "strict": true,
@@ -20,7 +21,10 @@
     "experimentalDecorators": true,
     "rootDir": ".",
     "rootDirs": ["src", "electron"],
-    "baseUrl": ".",
+    "paths": {
+      "electron/*": ["./electron/*"],
+      "src/*": ["./src/*"]
+    },
     "allowJs": true
   },
   "include": ["src/**/**/*", "electron/**/*"],

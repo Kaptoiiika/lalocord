@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { ImagePreview } from 'src/features/ImagePreview'
 import { localstorageKeys } from 'src/shared/const/localstorageKeys'
@@ -36,20 +36,19 @@ export const Chat = (props: ChatProps) => {
   const [readedMessage, setReadedMessage] = useState(messagesLength)
 
   const handleCollapse = useCallback(() => {
-    setCollapsed((prev) => {
-      saveChatCollapsedToLocalStorage(!prev)
-
-      return !prev
-    })
-  }, [])
-
-  useEffect(() => {
     if (!collapsed) {
       setReadedMessage(messagesLength)
     }
-  }, [messagesLength, collapsed])
 
-  const unreadedMessage = Math.max(messagesLength - readedMessage, 0)
+    setCollapsed((prev) => {
+      const next = !prev
+      saveChatCollapsedToLocalStorage(next)
+
+      return next
+    })
+  }, [collapsed, messagesLength])
+
+  const unreadedMessage = collapsed ? Math.max(messagesLength - readedMessage, 0) : 0
 
   return (
     <aside

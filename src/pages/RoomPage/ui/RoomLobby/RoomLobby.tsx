@@ -1,4 +1,3 @@
-import { Stack } from '@mui/material'
 import { useRoomScreenWakeLock, useWebRTCRoom } from 'src/features/WebRTCRoom'
 import { Chat } from 'src/widgets/Chat'
 import { RoomStreams } from 'src/widgets/RoomStream'
@@ -6,8 +5,6 @@ import { RoomStreams } from 'src/widgets/RoomStream'
 import { RoomActions } from '../RoomActions/RoomActions'
 import { RoomIsFull } from '../RoomIsFull/RoomIsFull'
 import { RoomUsers } from '../RoomUsers/RoomUsers'
-
-import styles from './RoomLobby.module.scss'
 
 type RoomLobbyProps = {
   isFull?: boolean
@@ -23,12 +20,8 @@ export const RoomLobby = (props: RoomLobbyProps) => {
   }
 
   return (
-    <Stack
-      className={styles.lobby}
-      justifyContent="space-between"
-      height="100%"
-    >
-      <div className={styles.mainScreen}>
+    <div className="flex h-full flex-row justify-between max-[625px]:flex-col">
+      <div className="relative flex h-full w-full flex-col max-[625px]:overflow-auto">
         <RoomUsers />
         <RoomStreams />
         <RoomActions />
@@ -38,6 +31,6 @@ export const RoomLobby = (props: RoomLobbyProps) => {
         onSendMessage={handleSendMessage}
         onSendFile={handleSendFile}
       />
-    </Stack>
+    </div>
   )
 }

@@ -25,7 +25,7 @@ export const VideoPlayerTooltip = (props: VideoPlayerTooltipProps) => {
       <div className={styles.shadowTooltip}>
         <div className={styles.shadow} />
       </div>
-      <div className={className}>{children}</div>
+      <div className={classNames(styles.content, className)}>{children}</div>
     </div>
   )
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
-import { Button, Checkbox, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
-import { Modal } from 'src/shared/ui'
+import { Button, CheckboxField, Modal, TextField } from 'src/shared/ui'
 
 import type { ModalProps } from 'src/shared/ui'
 
@@ -19,8 +18,8 @@ export const RoomCreateModal = (props: RoomCreateModalProps) => {
     onClose?.()
   }
 
-  const handleCreateRoom = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleCreateRoom = (event: React.FormEvent) => {
+    event.preventDefault()
     onCreateRoom?.(roomName, withPassword ? password : undefined)
   }
 
@@ -34,24 +33,20 @@ export const RoomCreateModal = (props: RoomCreateModalProps) => {
         autoComplete="off"
         onSubmit={handleCreateRoom}
       >
-        <Stack gap={2}>
-          <Typography variant="h6">Create room</Typography>
+        <div className="flex flex-col gap-2">
+          <h2 className="text-lg font-semibold">Create room</h2>
           <TextField
             required
             autoFocus
             autoComplete="off"
             label="Room name"
             value={roomName}
-            onChange={(e) => setRoomName(e.target.value)}
+            onChange={(event) => setRoomName(event.target.value)}
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={withPassword}
-                onChange={(e) => setWithPassword(e.target.checked)}
-              />
-            }
+          <CheckboxField
             label="With password"
+            checked={withPassword}
+            onCheckedChange={setWithPassword}
           />
           {/* type="password" заставляет менеджер паролей браузера подставлять и сохранять данные, поэтому символы скрываются через CSS */}
           {withPassword && (
@@ -61,33 +56,27 @@ export const RoomCreateModal = (props: RoomCreateModalProps) => {
               label="Password"
               type="text"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              sx={{ '& input': { WebkitTextSecurity: 'disc' } }}
+              onChange={(event) => setPassword(event.target.value)}
+              className="[-webkit-text-security:disc]"
             />
           )}
-          <Stack
-            direction="row"
-            gap={1}
-            justifyContent="flex-end"
-          >
+          <div className="flex flex-row justify-end gap-1">
             <Button
-              color="secondary"
-              variant="contained"
+              variant="secondary"
               type="button"
               onClick={handleCancel}
             >
               Cancel
             </Button>
             <Button
-              variant="contained"
               type="submit"
               onClick={handleCreateRoom}
               disabled={!roomName}
             >
               Create
             </Button>
-          </Stack>
-        </Stack>
+          </div>
+        </div>
       </form>
     </Modal>
   )

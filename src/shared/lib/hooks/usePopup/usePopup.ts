@@ -1,22 +1,21 @@
-import type { MouseEvent } from 'react'
 import { useState } from 'react'
 
 export const usePopup = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
+  const [open, setOpen] = useState(false)
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleOpen = (event: { preventDefault: () => void }) => {
     event.preventDefault()
-    setAnchorEl(event.currentTarget)
+    setOpen(true)
   }
+
   const handleClose = () => {
-    setAnchorEl(null)
+    setOpen(false)
   }
 
   return {
-    anchorEl,
     open,
-    handleClick,
+    setOpen,
+    handleOpen,
     handleClose,
   }
 }

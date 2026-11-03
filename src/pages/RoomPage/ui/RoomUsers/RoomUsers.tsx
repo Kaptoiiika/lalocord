@@ -1,65 +1,59 @@
-import { useState } from 'react'
-
-import { IconButton, Popover, Stack, Typography } from '@mui/material'
-import { Tooltip } from '@mui/material'
 import { useLocalUserStore, UserCard } from 'src/entities/User'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { VolumeMeter } from 'src/features/VolumeMetter/ui/VolumeMeter'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
-import { AvatarUser } from 'src/shared/ui/Avatar'
+import { usePopup } from 'src/shared/lib/hooks/usePopup/usePopup'
+import { AvatarUser, IconButton, Popup, Tooltip } from 'src/shared/ui'
 
 import { RoomUserItem } from './RoomUserItem/RoomUserItem'
-
-import styles from './RoomUsers.module.scss'
 
 export const RoomUsers = () => {
   const users = useWebRTCRoomStore((state) => state.users)
   const roomName = useWebRTCRoomStore((state) => state.roomId)
   const microphoneStream = useWebRTCStore((state) => state.streams.mic)
   const localUsername = useLocalUserStore((state) => state.localUser)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const { open, setOpen, handleOpen } = usePopup()
   const userList = Object.values(users)
-  const open = Boolean(anchorEl)
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
+  const username = localUsername.username || 'You'
 
   return (
-    <div className={styles['RoomUsers']}>
-      <Stack
-        className={styles.users}
-        direction="row"
-        gap={1}
-      >
-        <IconButton
-          sx={{
-            p: 0,
-          }}
-          onContextMenu={handleClick}
-          onClick={handleClick}
-          aria-label={localUsername.username || 'You'}
+    <div className="flex h-[var(--header-height)] shrink-0 items-center [border-bottom:var(--box-border)]">
+      <div className="mx-2 flex flex-row items-center gap-1">
+        <Popup
+          open={open}
+          onOpenChange={setOpen}
+          side="bottom"
+          align="start"
+          className="w-auto bg-transparent p-0 shadow-none ring-0"
+          trigger={
+            <IconButton
+              className="size-auto p-0"
+              onContextMenu={handleOpen}
+              onClick={handleOpen}
+              aria-label={username}
+            >
+              <Tooltip
+                title={username}
+                side="bottom"
+              >
+                <div className="relative">
+                  <AvatarUser
+                    borderColor={microphoneStream?.active ? 'green' : 'grey'}
+                    username={username}
+                    avatarUrl={localUsername.avatar}
+                    size="small"
+                  />
+                  {microphoneStream && <VolumeMeter stream={microphoneStream} />}
+                </div>
+              </Tooltip>
+            </IconButton>
+          }
         >
-          <Tooltip
-            title={localUsername.username || 'You'}
-            describeChild
-          >
-            <div className={styles.localUser}>
-              <AvatarUser
-                borderColor={microphoneStream?.active ? 'green' : 'grey'}
-                username={localUsername.username || 'You'}
-                avatarUrl={localUsername.avatar}
-                size="small"
-              />
-              {microphoneStream && <VolumeMeter stream={microphoneStream} />}
-            </div>
-          </Tooltip>
-        </IconButton>
+          <UserCard
+            username={username}
+            avatarUrl={localUsername.avatar}
+          />
+        </Popup>
 
         {userList.map((user) => (
           <RoomUserItem
@@ -67,35 +61,10 @@ export const RoomUsers = () => {
             user={user}
           />
         ))}
-      </Stack>
-      <Stack
-        className={styles.roomName}
-        justifyContent="center"
-      >
-        <Typography variant="h6" fontWeight={600}>{roomName}</Typography>
-      </Stack>
-
-      <Popover
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        sx={{ background: 'none', backgroundImage: 'none' }}
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        keepMounted
-        disablePortal
-      >
-        <UserCard
-          username={localUsername.username || 'You'}
-          avatarUrl={localUsername.avatar}
-        />
-      </Popover>
+      </div>
+      <div className="flex h-full w-full items-center justify-center [border-left:var(--box-border)]">
+        <p className="text-lg font-semibold">{roomName}</p>
+      </div>
     </div>
   )
 }

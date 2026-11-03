@@ -1,5 +1,6 @@
 import { resolve } from 'path'
 
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 import eslint from 'vite-plugin-eslint'
@@ -61,6 +62,7 @@ export default ({ mode }: { mode: string }) => {
                 rollupOptions: {
                   external: [
                     'electron',
+                    'electron-context-menu',
                     '@nut-tree-fork/libnut-win32',
                     '@nut-tree-fork/libnut-linux',
                     '@nut-tree-fork/libnut-darwin',
@@ -92,7 +94,7 @@ export default ({ mode }: { mode: string }) => {
     : []
 
   return defineConfig({
-    plugins: [react(), eslint(), viteTsconfigPaths(), svgr(), ...electronPlugins],
+    plugins: [react(), tailwindcss(), eslint(), viteTsconfigPaths(), svgr(), ...electronPlugins],
     build: {
       rollupOptions: {
         input: {

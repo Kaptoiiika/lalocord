@@ -1,5 +1,5 @@
-import { Button, Stack } from '@mui/material'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
+import { Button } from 'src/shared/ui'
 
 import type { MessageModelNew } from '../../model/types/ChatSchema'
 
@@ -12,7 +12,7 @@ type MessageMiniGameRequestProps = {
 export const MessageMiniGameRequest = (props: MessageMiniGameRequestProps) => {
   const { data } = props
   const { users, addMiniGame } = useWebRTCRoomStore()
-  const user = users.find((user) => user.id === data.user.id)
+  const user = users.find((roomUser) => roomUser.id === data.user.id)
 
   const gameType = data.message.gameType
   const gameId = data.message.gameId
@@ -44,23 +44,22 @@ export const MessageMiniGameRequest = (props: MessageMiniGameRequestProps) => {
     <div>
       <b>Request to play</b> <i>{gameType}</i>
       {actionVariants === 'request' && (
-        <Stack
-          direction="row"
-          gap={1}
-        >
+        <div className="flex flex-row gap-1">
           <Button
-            fullWidth
+            variant="outline"
+            className="flex-1"
             onClick={handleAccept}
           >
             Accept
           </Button>
           <Button
-            fullWidth
+            variant="outline"
+            className="flex-1"
             onClick={handleDecline}
           >
             Declin
           </Button>
-        </Stack>
+        </div>
       )}
       <div>
         {actionVariants === 'accept' && <>Starting...</>}
@@ -70,4 +69,3 @@ export const MessageMiniGameRequest = (props: MessageMiniGameRequestProps) => {
     </div>
   )
 }
-

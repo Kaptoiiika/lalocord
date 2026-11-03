@@ -1,13 +1,11 @@
 import type { PropsWithChildren } from 'react'
 import { useCallback, useEffect } from 'react'
 
-import { Button } from '@mui/material'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
-import { classNames } from 'src/shared/lib/classNames/classNames'
+import { cn } from 'src/shared/lib/utils/cn'
+import { Button } from 'src/shared/ui'
 
 import type { GameEngine } from '../../model/GameEngine/GameEngine'
-
-import styles from './GameWrapper.module.scss'
 
 type GameWrapperProps = PropsWithChildren & {
   gameEngine: GameEngine
@@ -36,14 +34,9 @@ export const GameWrapper = (props: GameWrapperProps) => {
   return (
     <div
       inert={gameEngine.isClosed}
-      className={classNames(styles.root, className)}
+      className={cn('relative', className)}
     >
-      <Button
-        variant="contained"
-        onClick={handleCloseGame}
-      >
-        close
-      </Button>
+      <Button onClick={handleCloseGame}>close</Button>
       {children}
     </div>
   )

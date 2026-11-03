@@ -1,13 +1,10 @@
 import { useState, useCallback, memo, useRef } from 'react'
 
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
-import SendIcon from '@mui/icons-material/Send'
-import { FilledInput, IconButton, Stack, Tooltip } from '@mui/material'
+import { File, Send } from 'lucide-react'
 import { useLocalUserStore, getLocalUser } from 'src/entities/User'
+import { IconButton, Textarea } from 'src/shared/ui'
 
 import { useChatStore } from '../../model/store/ChatStore'
-
-import styles from './ChatInput.module.scss'
 
 type ChatInputProps = {
   onSendMessage?: (msg: string) => void
@@ -21,8 +18,8 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
   const [text, setText] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleChangeText = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setText(e.currentTarget.value)
+  const handleChangeText = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(event.currentTarget.value)
   }, [])
 
   const handleSendFile = async (blob: Blob, name?: string) => {
@@ -39,25 +36,25 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const handlePasteFile = (e: React.ClipboardEvent) => {
-    const items = Array.from(e.clipboardData.items)
-    const item = items.find((item) => !!item.getAsFile())
+  const handlePasteFile = (event: React.ClipboardEvent) => {
+    const items = Array.from(event.clipboardData.items)
+    const item = items.find((clipboardItem) => !!clipboardItem.getAsFile())
     const blob = item?.getAsFile()
 
     if (blob) handleSendFile(blob)
   }
 
-  const handleDropFile = (e: React.DragEvent) => {
-    e.preventDefault()
-    const items = Array.from(e.dataTransfer.items)
-    const item = items.find((item) => !!item.getAsFile())
+  const handleDropFile = (event: React.DragEvent) => {
+    event.preventDefault()
+    const items = Array.from(event.dataTransfer.items)
+    const item = items.find((transferItem) => !!transferItem.getAsFile())
     const blob = item?.getAsFile()
 
     if (blob) handleSendFile(blob, blob.name)
   }
 
-  const handleSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
 
     if (file) {
       handleSendFile(file, file.name)
@@ -80,76 +77,49 @@ export const ChatInput = memo(function ChatInput(props: ChatInputProps) {
     setText('')
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.shiftKey || e.altKey || e.ctrlKey) return
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.shiftKey || event.altKey || event.ctrlKey) return
 
-    if (e.key === 'Enter') {
-      e.preventDefault()
+    if (event.key === 'Enter') {
+      event.preventDefault()
       handleSendMessage()
     }
   }
 
   return (
-    <div className={styles.form}>
-      <div className={styles.inputWrapper}>
-        <FilledInput
-          sx={{
-            p: 1,
-            pr: 6,
-            borderRadius: 0,
-            lineHeight: 1.5,
-          }}
-          onPaste={handlePasteFile}
-          onDrop={handleDropFile}
-          onChange={handleChangeText}
-          onKeyDown={handleKeyDown}
-          autoComplete="off"
-          value={text}
-          multiline
-          maxRows={3}
-          className={styles.input}
-          type="text"
-          inputProps={{
-            'aria-label': 'message from chat',
-          }}
-        />
-      </div>
-      <Stack
-        className={styles.buttons}
-        direction="column-reverse"
-        alignItems="end"
-        justifyContent="end"
-        gap={1}
-      >
+    <div className="flex items-end bg-[rgb(var(--bg-primary-color))]">
+      <Textarea
+        className="min-w-0 flex-1 rounded-none border-0 bg-transparent shadow-none"
+        onPaste={handlePasteFile}
+        onDrop={handleDropFile}
+        onChange={handleChangeText}
+        onKeyDown={handleKeyDown}
+        autoComplete="off"
+        value={text}
+        aria-label="message from chat"
+      />
+      <div className="flex shrink-0">
+        <IconButton
+          tooltip="send file"
+          tooltipSide="top"
+          aria-label="send file"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <File />
+        </IconButton>
         <IconButton
           onClick={handleSendMessage}
           aria-label="send button"
         >
-          <SendIcon />
+          <Send />
         </IconButton>
-        <Tooltip
-          title="send file"
-          placement="top"
-        >
-          <IconButton
-            aria-label="send file"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <label
-              inert
-              className={styles.selectInputFile}
-            >
-              <InsertDriveFileIcon />
-              <input
-                ref={fileInputRef}
-                onChange={handleSelectFile}
-                hidden
-                type="file"
-              />
-            </label>
-          </IconButton>
-        </Tooltip>
-      </Stack>
+        <input
+          ref={fileInputRef}
+          onChange={handleSelectFile}
+          className="hidden"
+          type="file"
+        />
+      </div>
     </div>
   )
 })
