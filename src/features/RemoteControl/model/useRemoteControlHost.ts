@@ -32,6 +32,7 @@ export const useRemoteControlHost = () => {
     window.electron.ipcRenderer.sendMessage(IpcChannels.remoteControlStop, undefined)
   }, [allowRemoteControl, screenStream, users])
 
+
   useEffect(() => {
     const handleControlEvent = (event: RemoteControlEvent) => {
       const liveBounds = getRemoteControlScreenBounds(

@@ -18,8 +18,10 @@ export const MainPage = () => {
     setLocalUsername(e.currentTarget.value)
   }
 
-  const handleCreateRoom = async (roomName: string) => {
-    navigate(AppRoutes.ROOM_ID.replace(':id', roomName))
+  const handleCreateRoom = (roomName: string, password?: string) => {
+    navigate(AppRoutes.ROOM_ID.replace(':id', roomName), {
+      state: { password },
+    })
   }
 
   const handleNavigateToGame = (e: React.MouseEvent<HTMLAnchorElement>) => {

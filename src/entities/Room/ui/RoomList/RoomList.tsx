@@ -1,5 +1,6 @@
 import { memo } from 'react'
 
+import LockIcon from '@mui/icons-material/Lock'
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt'
 import { Divider, Skeleton, Stack, Typography } from '@mui/material'
 import { apiClient } from 'src/shared/api/apiClient'
@@ -49,7 +50,14 @@ export const RoomList = memo(function RoomList() {
                 justifyContent="space-between"
                 padding={1}
               >
-                <Typography className={styles.roomlinkName}>{room.name}</Typography>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  gap={1}
+                >
+                  {room.hasPassword && <LockIcon fontSize="small" />}
+                  <Typography className={styles.roomlinkName}>{room.name}</Typography>
+                </Stack>
                 <Stack
                   direction="row"
                   alignItems="center"

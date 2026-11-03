@@ -15,4 +15,5 @@ export enum localstorageKeys {
   experementalEncoding = 'experementalEncoding',
   AUTO_ON_MIC = 'autoOnMic',
   STREAM_BITRATE = 'streamBitrate',
+  ROOM_TOKENS = 'roomTokens',
 }

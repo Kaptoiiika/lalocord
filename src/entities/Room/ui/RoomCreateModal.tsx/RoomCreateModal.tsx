@@ -6,12 +6,13 @@ import { Modal } from 'src/shared/ui'
 import type { ModalProps } from 'src/shared/ui'
 
 export type RoomCreateModalProps = {
-  onCreateRoom: (roomName: string) => void
+  onCreateRoom: (roomName: string, password?: string) => void
 } & ModalProps
 
 export const RoomCreateModal = (props: RoomCreateModalProps) => {
   const { open, onClose, onCreateRoom, ...otherProps } = props
   const [roomName, setRoomName] = useState('')
+  const [password, setPassword] = useState('')
 
   const handleCancel = () => {
     onClose?.()
@@ -19,7 +20,7 @@ export const RoomCreateModal = (props: RoomCreateModalProps) => {
 
   const handleCreateRoom = (e: React.FormEvent) => {
     e.preventDefault()
-    onCreateRoom?.(roomName)
+    onCreateRoom?.(roomName, password || undefined)
   }
 
   return (
@@ -36,6 +37,12 @@ export const RoomCreateModal = (props: RoomCreateModalProps) => {
             label="Room name"
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
+          />
+          <TextField
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <Stack
             direction="row"

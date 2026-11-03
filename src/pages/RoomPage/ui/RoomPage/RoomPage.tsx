@@ -1,33 +1,21 @@
-import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
+import { getRoomToken, removeRoomToken, saveRoomToken } from 'src/entities/Room'
 import { useLocalUserStore } from 'src/entities/User'
 import { useWebRTCStore } from 'src/entities/WebRTC'
 import { useRemoteControlHost } from 'src/features/RemoteControl'
 import { WaitUserClick } from 'src/features/WaitUserClick'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import { socketClient } from 'src/shared/api'
+import { AppRoutes } from 'src/shared/config'
 import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { PageWrapper } from 'src/widgets/Page'
 
+import type { RoomPageLocationState } from 'src/entities/Room'
+
 import { RoomLobby } from '../RoomLobby/RoomLobby'
-
-const emitToJoinRoom = (id: string) => {
-  const localUser = useLocalUserStore.getState().localUser
-
-  socketClient.emit('join', {
-    name: id,
-    username: localUser.username,
-    avatar: localUser.avatar,
-  })
-
-  return () => {
-    useWebRTCRoomStore.getState().leaveRoom()
-    socketClient.emit('leave', {
-      name: id,
-    })
-  }
-}
+import { RoomPasswordModal } from '../RoomPasswordModal/RoomPasswordModal'
 
 const ElectronRemoteControlHost = () => {
   useRemoteControlHost()
@@ -37,14 +25,54 @@ const ElectronRemoteControlHost = () => {
 
 const RoomPageWrapper = () => {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const createPassword = (location.state as RoomPageLocationState | null)?.password
+  const [isPasswordRequired, setIsPasswordRequired] = useState(false)
+  const [isWrongPassword, setIsWrongPassword] = useState(false)
   const { joinRoom, leaveRoom } = useWebRTCRoomStore()
+
+  const emitJoin = useCallback(
+    (password?: string, isReconnect = false) => {
+      const localUser = useLocalUserStore.getState().localUser
+
+      socketClient.emit('join', {
+        name: id,
+        username: localUser.username,
+        avatar: localUser.avatar,
+        token: getRoomToken(id),
+        ...(password ? { password } : {}),
+        ...(isReconnect ? { reconnect: true } : {}),
+      })
+    },
+    [id]
+  )
 
   useEffect(() => {
     joinRoom(id)
-    const fn = emitToJoinRoom(id)
     const prevName = document.title
 
     document.title = `${document.title} - ${id}`
+    setIsPasswordRequired(false)
+    setIsWrongPassword(false)
+
+    const handlePasswordRequired = (payload: { isWrongPassword?: boolean }) => {
+      removeRoomToken(id)
+      setIsPasswordRequired(true)
+      setIsWrongPassword(Boolean(payload?.isWrongPassword))
+    }
+
+    const handleRoomToken = (payload: { token?: string }) => {
+      if (!payload?.token) return
+
+      saveRoomToken(id, payload.token)
+      setIsPasswordRequired(false)
+      setIsWrongPassword(false)
+    }
+
+    socketClient.on('room_password_required', handlePasswordRequired)
+    socketClient.on('room_token', handleRoomToken)
+    emitJoin(createPassword)
 
     return () => {
       document.title = prevName
@@ -52,23 +80,19 @@ const RoomPageWrapper = () => {
       useWebRTCStore.getState().stopStream('mic')
       useWebRTCStore.getState().stopStream('screen')
       useWebRTCStore.getState().stopStream('webCam')
-      fn()
+      useWebRTCRoomStore.getState().leaveRoom()
+      socketClient.emit('leave', { name: id })
+      socketClient.off('room_password_required', handlePasswordRequired)
+      socketClient.off('room_token', handleRoomToken)
     }
-  }, [id, joinRoom, leaveRoom])
+  }, [createPassword, emitJoin, id, joinRoom, leaveRoom])
 
   useEffect(() => {
     let isConnected = socketClient.active
 
     const handleConnect = () => {
       if (isConnected === false) {
-        const localUser = useLocalUserStore.getState().localUser
-
-        socketClient.emit('join', {
-          name: id,
-          username: localUser.username,
-          avatar: localUser.avatar,
-          reconnect: true,
-        })
+        emitJoin(undefined, true)
       }
       isConnected = true
     }
@@ -84,12 +108,28 @@ const RoomPageWrapper = () => {
       socketClient.off('connect', handleConnect)
       socketClient.off('disconnect', handleDisconnect)
     }
-  }, [id])
+  }, [emitJoin])
+
+  const handleSubmitPassword = (password: string) => {
+    emitJoin(password)
+  }
+
+  const handleCancelPassword = () => {
+    navigate(AppRoutes.MAIN_PAGE)
+  }
 
   return (
     <>
       {__IS_ELECTRON__ && <ElectronRemoteControlHost />}
       <RoomLobby />
+      {isPasswordRequired && (
+        <RoomPasswordModal
+          open
+          isWrongPassword={isWrongPassword}
+          onSubmit={handleSubmitPassword}
+          onCancel={handleCancelPassword}
+        />
+      )}
     </>
   )
 }
