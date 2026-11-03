@@ -84,7 +84,7 @@
     "@electron/rebuild": "^4.2.1",
     "electron": "^45.2.1",
     "electron-builder": "^26.18.0",
-    "electron-context-menu": "^5.1.0",
+    "electron-context-menu": "^4.1.2",
     "vite-plugin-electron": "^1.2.0",
     "vite-plugin-electron-renderer": "^1.0.0"
   },

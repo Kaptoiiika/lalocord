@@ -32,9 +32,7 @@ export default ({ mode }: { mode: string }) => {
   const isElectron = mode === 'electron'
 
   if (isElectron && (!electron || !electronRenderer)) {
-    throw new Error(
-      'Electron plugins are not installed. Run "npm run install:electron" to install them.'
-    )
+    throw new Error('Electron plugins are not installed. Run "npm run install:electron" to install them.')
   }
 
   const electronHtml: Record<string, string> = isElectron
@@ -43,55 +41,55 @@ export default ({ mode }: { mode: string }) => {
       }
     : {}
 
-  const electronPlugins: PluginOption[] = isElectron && electron && electronRenderer
-    ? [
-        electron([
-          {
-            entry: 'electron/main.ts',
-            onstart(options) {
-              options.startup()
-            },
-            vite: {
-              resolve: {
-                alias: {
-                  src: resolve(__dirname, 'src'),
+  const electronPlugins: PluginOption[] =
+    isElectron && electron && electronRenderer
+      ? [
+          electron([
+            {
+              entry: 'electron/main.ts',
+              onstart(options) {
+                options.startup()
+              },
+              vite: {
+                resolve: {
+                  alias: {
+                    src: resolve(__dirname, 'src'),
+                  },
                 },
-              },
-              build: {
-                outDir: 'dist-electron',
-                rollupOptions: {
-                  external: [
-                    'electron',
-                    'electron-context-menu',
-                    '@nut-tree-fork/libnut-win32',
-                    '@nut-tree-fork/libnut-linux',
-                    '@nut-tree-fork/libnut-darwin',
-                  ],
+                build: {
+                  outDir: 'dist-electron',
+                  rollupOptions: {
+                    external: [
+                      'electron',
+                      '@nut-tree-fork/libnut-win32',
+                      '@nut-tree-fork/libnut-linux',
+                      '@nut-tree-fork/libnut-darwin',
+                    ],
+                  },
                 },
-              },
-              define: {
-                __IS_DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
-              },
-            },
-          },
-          {
-            entry: 'electron/preload.ts',
-            onstart(options) {
-              options.reload()
-            },
-            vite: {
-              build: {
-                outDir: 'dist-electron',
-                rollupOptions: {
-                  external: ['electron'],
+                define: {
+                  __IS_DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
                 },
               },
             },
-          },
-        ]),
-        electronRenderer(),
-      ]
-    : []
+            {
+              entry: 'electron/preload.ts',
+              onstart(options) {
+                options.reload()
+              },
+              vite: {
+                build: {
+                  outDir: 'dist-electron',
+                  rollupOptions: {
+                    external: ['electron'],
+                  },
+                },
+              },
+            },
+          ]),
+          electronRenderer(),
+        ]
+      : []
 
   return defineConfig({
     plugins: [react(), tailwindcss(), eslint(), viteTsconfigPaths(), svgr(), ...electronPlugins],
