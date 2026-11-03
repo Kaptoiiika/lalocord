@@ -25,16 +25,13 @@ if (!container) {
 const root = createRoot(container)
 
 root.render(
-  <React.StrictMode>
-    <ErrorBoundary errorText="App is down">
-      <AppRouterProvider>
-        <ThemeProvider>
-          <DebugModeProvider>
-            <App />
-          </DebugModeProvider>
-        </ThemeProvider>
-      </AppRouterProvider>
-    </ErrorBoundary>
-  </React.StrictMode>
+  <ErrorBoundary errorText="App is down">
+    <AppRouterProvider>
+      <ThemeProvider>
+        <DebugModeProvider>
+          <App />
+        </DebugModeProvider>
+      </ThemeProvider>
+    </AppRouterProvider>
+  </ErrorBoundary>
 )
-

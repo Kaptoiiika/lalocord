@@ -21,6 +21,7 @@ type WebRTCRoomStore = {
   removeMiniGame: (gameId: string) => void
 
   addUser: (user: RoomUser) => void
+  replaceUsers: (users: RoomUser[]) => void
   removeUser: (userId: string) => void
 
   joinRoom: (room: string) => void
@@ -43,17 +44,36 @@ const store: StateCreator<WebRTCRoomStore> = (set, get) => ({
 
   addUser: (user: RoomUser) => {
     const users = get().users
-    const existingUser = users.find((u) => u.id === user.id)
-    if (existingUser) return console.log(`User #${user.id} already exists`)
-    set((state) => ({ users: [...state.users, user] }))
+    const existingUserIndex = users.findIndex((roomUser) => roomUser.id === user.id)
+
+    if (existingUserIndex === -1) {
+      set((state) => ({ users: state.users.concat(user) }))
+      return
+    }
+
+    const nextUsers = users.slice()
+    nextUsers[existingUserIndex].peer.close()
+    nextUsers[existingUserIndex] = user
+    set({ users: nextUsers })
+  },
+  replaceUsers: (users: RoomUser[]) => {
+    get().users.forEach((roomUser) => {
+      roomUser.peer.close()
+    })
+    set({ users })
   },
   removeUser: (userId: string) => {
+    const roomUser = get().users.find((user) => user.id === userId)
+    roomUser?.peer.close()
     set((state) => ({ users: state.users.filter((user) => user.id !== userId) }))
   },
   joinRoom: (room: string) => {
     set(() => ({ roomId: room }))
   },
   leaveRoom: () => {
+    get().users.forEach((roomUser) => {
+      roomUser.peer.close()
+    })
     set(() => ({ roomId: undefined, users: [], miniGame: [] }))
   },
 })

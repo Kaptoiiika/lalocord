@@ -36,16 +36,13 @@ export class DataChannel extends Emitter<DataChannelEvents> {
 
   private onDataOpen(event: Event) {
     this.isOpen = true
+    const queuedMessages = this.messageQueue.splice(0)
+
+    queuedMessages.forEach((message) => {
+      this.send(message)
+    })
     this.onOpen?.(event)
     this.emit('onOpen', event)
-
-    if (this.messageQueue.length) {
-      this.messageQueue.forEach((message) => {
-        this.send(message)
-      })
-    }
-
-    return
   }
 
   private onDataClose(event: Event) {

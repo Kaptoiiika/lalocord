@@ -19,7 +19,12 @@ import {
   resumeSender,
 } from '../utils'
 
-type WebRTCClientConfig = { id: string }
+type WebRTCClientConfig = { id: string; isInitiator: boolean }
+
+type PendingIceCandidate = {
+  ice: RTCIceCandidateInit
+  connectionId?: string
+}
 
 type EventMessageToSocket = 'new_answer' | 'new_offer' | 'new_ice'
 
@@ -83,14 +88,16 @@ type WebRTCClientEvents = {
 
 export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   id: string
+  readonly isInitiator: boolean
+  connectionId?: string
   private peer: RTCPeerConnection
   private codec: MessageCodec
   private chatFileTempData: Map<string, Uint8Array> = new Map()
-  private remoteSenderStreams: Record<StreamType, MediaStream | null> = {
-    screen: null,
-    webCam: null,
-    mic: null,
-  }
+  private remoteSenderStreams: Record<StreamType, MediaStream>
+  private pendingCandidates: PendingIceCandidate[] = []
+  private signalingQueue: Promise<void> = Promise.resolve()
+  private isClosed = false
+  private isNewOfferRequested = false
   private channelChat: DataChannel
   private channelFile: DataChannel
   channelInfo: DataChannel
@@ -110,40 +117,54 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   constructor(config: WebRTCClientConfig) {
     super()
     this.id = config.id
+    this.isInitiator = config.isInitiator
+    if (config.isInitiator) {
+      this.connectionId = crypto.randomUUID()
+    }
     this.peer = new RTCPeerConnection({
       iceServers: getIceServers(),
     })
 
-    const { streams: storeStreams, bitrate: storeBitrate } = useWebRTCStore.getState()
-    const screenVideoTrack = storeStreams?.screen?.getVideoTracks()[0] ?? createBlackVideoTrack()
-    const screenAudioTrack = storeStreams?.screen?.getAudioTracks()[0] ?? createSilentAudioTrack()
-    const webCamVideoTrack = storeStreams?.webCam?.getVideoTracks()[0] ?? createBlackVideoTrack()
-    const micAudioTrack = storeStreams?.mic?.getAudioTracks()[0] ?? createSilentAudioTrack()
+    const { streams: storeStreams } = useWebRTCStore.getState()
+    const screenVideoPlaceholder = createBlackVideoTrack()
+    const webCamVideoPlaceholder = createBlackVideoTrack()
+    const screenAudioPlaceholder = createSilentAudioTrack()
+    const micAudioPlaceholder = createSilentAudioTrack()
+    const screenPlaceholderStream = new MediaStream([screenVideoPlaceholder, screenAudioPlaceholder.track])
+    const webCamPlaceholderStream = new MediaStream([webCamVideoPlaceholder])
+    const micPlaceholderStream = new MediaStream([micAudioPlaceholder.track])
 
-    const screenStream = storeStreams?.screen ?? new MediaStream([screenVideoTrack, screenAudioTrack])
-    const webCamStream = storeStreams?.webCam ?? new MediaStream([webCamVideoTrack])
-    const micStream = storeStreams?.mic ?? new MediaStream([micAudioTrack])
+    // addTrack в фиксированном порядке: screen video, screen audio, webcam, mic.
+    // На отвечающей стороне эти transceiver сопоставляются со строками m= из offer.
+    // Заглушки нужны только чтобы создать transceiver и сразу заменяются реальной дорожкой или null.
     this.senders = {
-      screenVideo: this.peer.addTrack(screenVideoTrack, screenStream),
-      screenAudio: this.peer.addTrack(screenAudioTrack, screenStream),
-      webCam: this.peer.addTrack(webCamVideoTrack, webCamStream),
-      mic: this.peer.addTrack(micAudioTrack, micStream),
+      screenVideo: this.peer.addTrack(screenVideoPlaceholder, screenPlaceholderStream),
+      screenAudio: this.peer.addTrack(screenAudioPlaceholder.track, screenPlaceholderStream),
+      webCam: this.peer.addTrack(webCamVideoPlaceholder, webCamPlaceholderStream),
+      mic: this.peer.addTrack(micAudioPlaceholder.track, micPlaceholderStream),
+    }
+    this.remoteSenderStreams = this.createRemoteSenderStreams()
+
+    const releasePlaceholders = () => {
+      screenVideoPlaceholder.stop()
+      webCamVideoPlaceholder.stop()
+      screenAudioPlaceholder.close()
+      micAudioPlaceholder.close()
     }
 
-    if (!storeStreams?.screen) {
-      pauseSender(this.senders.screenVideo)
-      pauseSender(this.senders.screenAudio)
-    }
-    if (!storeStreams?.webCam) {
-      pauseSender(this.senders.webCam)
-    }
-    if (!storeStreams?.mic) {
-      pauseSender(this.senders.mic)
-    }
+    void Promise.all([
+      this.senders.screenVideo.replaceTrack(storeStreams.screen?.getVideoTracks()[0] ?? null),
+      this.senders.screenAudio.replaceTrack(storeStreams.screen?.getAudioTracks()[0] ?? null),
+      this.senders.webCam.replaceTrack(storeStreams.webCam?.getVideoTracks()[0] ?? null),
+      this.senders.mic.replaceTrack(storeStreams.mic?.getAudioTracks()[0] ?? null),
+    ])
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(releasePlaceholders)
 
     this.peer.onicecandidate = this.onIceCandidate.bind(this)
-    this.peer.ontrack = this.onTrack.bind(this)
-    this.peer.ondatachannel = console.log
+    this.peer.onconnectionstatechange = this.onConnectionStateChange.bind(this)
     this.channelChat = new DataChannel(this.peer, 'chat', {
       id: 0,
       protocol: 'json',
@@ -177,17 +198,19 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     })
     this.channelInfo.onMessage = this.onInfoMessage.bind(this)
     this.channelInfo.onOpen = () => {
-      this.setVideoBitrate(storeBitrate)
-      if (storeStreams?.screen) {
+      const { streams, bitrate } = useWebRTCStore.getState()
+
+      this.setVideoBitrate(bitrate)
+      if (streams.screen) {
         resumeSender(this.senders.screenVideo)
         resumeSender(this.senders.screenAudio)
         this.sendMessageToPeer('stream_start', 'screen')
       }
-      if (storeStreams?.webCam) {
+      if (streams.webCam) {
         resumeSender(this.senders.webCam)
         this.sendMessageToPeer('stream_start', 'webCam')
       }
-      if (storeStreams?.mic) {
+      if (streams.mic) {
         resumeSender(this.senders.mic)
         this.sendMessageToPeer('stream_start', 'mic')
       }
@@ -207,30 +230,73 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     this.channelControl.onMessage = this.onControlMessage.bind(this)
   }
 
-  async createOffer(): Promise<RTCSessionDescriptionInit> {
-    this.peer.getTransceivers().forEach((tr) => {
-      changeVideoCodecs(tr, 'H264')
+  createOffer(options?: { isIceRestart?: boolean }): Promise<void> {
+    return this.enqueueSignaling(async () => {
+      // Пока answer не применён, второй offer оставляет signaling в have-local-offer и срывает рукопожатие.
+      if (this.peer.signalingState === 'have-local-offer') return
+
+      this.peer.getTransceivers().forEach((transceiver) => {
+        changeVideoCodecs(transceiver, 'H264')
+      })
+
+      const offer = await this.peer.createOffer({
+        iceRestart: Boolean(options?.isIceRestart),
+      })
+      await this.peer.setLocalDescription(offer)
+      if (this.isClosed) return
+      this.sendMessageToSocket('new_offer', { offer })
     })
-
-    const offer = await this.peer.createOffer()
-    await this.peer.setLocalDescription(offer)
-    this.sendMessageToSocket('new_offer', { offer })
-    return offer
   }
 
-  async createAnswer(): Promise<RTCSessionDescriptionInit> {
-    const answer = await this.peer.createAnswer()
-    await this.peer.setLocalDescription(answer)
-    this.sendMessageToSocket('new_answer', { answer })
-    return answer
+  handleOffer(offer: RTCSessionDescriptionInit, connectionId?: string): Promise<void> {
+    return this.enqueueSignaling(async () => {
+      if (connectionId && this.connectionId && connectionId !== this.connectionId) return
+      if (connectionId && !this.connectionId) {
+        this.connectionId = connectionId
+      }
+
+      try {
+        if (this.peer.signalingState === 'have-local-offer') {
+          if (this.isInitiator) return
+          await this.peer.setLocalDescription({ type: 'rollback' })
+        }
+
+        await this.peer.setRemoteDescription(new RTCSessionDescription(offer))
+        await this.flushPendingCandidates()
+        const answer = await this.peer.createAnswer()
+        await this.peer.setLocalDescription(answer)
+        if (this.isClosed) return
+        this.sendMessageToSocket('new_answer', { answer })
+      } catch (error) {
+        console.error('handleOffer error', error)
+        if (this.isClosed || this.isNewOfferRequested) return
+        this.isNewOfferRequested = true
+        socketClient.emit('request_new_offer', { id: this.id })
+      }
+    })
   }
 
-  async setRemoteDescription(desc: RTCSessionDescriptionInit): Promise<void> {
-    await this.peer.setRemoteDescription(new RTCSessionDescription(desc))
+  handleAnswer(answer: RTCSessionDescriptionInit, connectionId?: string): Promise<void> {
+    return this.enqueueSignaling(async () => {
+      if (this.peer.signalingState !== 'have-local-offer') return
+      // Старый сервер не прокидывает connectionId. Такой ответ всё равно относится к единственному локальному offer.
+      if (connectionId && this.connectionId && connectionId !== this.connectionId) return
+
+      await this.peer.setRemoteDescription(new RTCSessionDescription(answer))
+      await this.flushPendingCandidates()
+    })
   }
 
-  async addIceCandidate(candidate: RTCIceCandidateInit): Promise<void> {
-    await this.peer.addIceCandidate(new RTCIceCandidate(candidate))
+  handleIce(ice: RTCIceCandidateInit, connectionId?: string): Promise<void> {
+    return this.enqueueSignaling(async () => {
+      if (connectionId && this.connectionId && connectionId !== this.connectionId) return
+      if (!this.peer.remoteDescription) {
+        this.pendingCandidates.push({ ice, connectionId })
+        return
+      }
+
+      await this.addIceCandidate(ice)
+    })
   }
 
   sendStream(stream: MediaStream, type: StreamType) {
@@ -267,49 +333,110 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
     this.sendMessageToPeer('stream_stop', type)
   }
 
-  private sendMessageToSocket(event: EventMessageToSocket, message: Record<string, unknown>) {
-    const resp = {
-      id: this.id,
-      ...message,
+  private enqueueSignaling(task: () => Promise<void>): Promise<void> {
+    const run = this.signalingQueue
+      .then(async () => {
+        if (this.isClosed) return
+        await task()
+      })
+      .catch((error) => {
+        console.error('signaling error', error)
+      })
+
+    this.signalingQueue = run
+    return run
+  }
+
+  private async flushPendingCandidates() {
+    const pendingCandidates = this.pendingCandidates.splice(0)
+
+    for (const pendingCandidate of pendingCandidates) {
+      if (pendingCandidate.connectionId && this.connectionId && pendingCandidate.connectionId !== this.connectionId) {
+        continue
+      }
+
+      await this.addIceCandidate(pendingCandidate.ice)
     }
-    socketClient.emit(event, resp)
+  }
+
+  private async addIceCandidate(ice: RTCIceCandidateInit) {
+    try {
+      await this.peer.addIceCandidate(new RTCIceCandidate(ice))
+    } catch (error) {
+      console.error('addIceCandidate error', error)
+    }
+  }
+
+  private getSenderTransceiver(sender: RTCRtpSender) {
+    const transceiver = this.peer.getTransceivers().find((item) => item.sender === sender)
+    if (!transceiver) {
+      throw new Error('Transceiver for sender was not created')
+    }
+
+    return transceiver
+  }
+
+  private createRemoteSenderStreams(): Record<StreamType, MediaStream> {
+    const screenVideoTrack = this.getSenderTransceiver(this.senders.screenVideo).receiver.track
+    const screenAudioTrack = this.getSenderTransceiver(this.senders.screenAudio).receiver.track
+    const webCamTrack = this.getSenderTransceiver(this.senders.webCam).receiver.track
+    const micTrack = this.getSenderTransceiver(this.senders.mic).receiver.track
+
+    return {
+      screen: new MediaStream([screenVideoTrack, screenAudioTrack]),
+      webCam: new MediaStream([webCamTrack]),
+      mic: new MediaStream([micTrack]),
+    }
+  }
+
+  private sendMessageToSocket(event: EventMessageToSocket, message: Record<string, unknown>) {
+    if (this.isClosed) return
+
+    socketClient.emit(event, {
+      id: this.id,
+      connectionId: this.connectionId,
+      ...message,
+    })
   }
 
   private onIceCandidate(event: RTCPeerConnectionIceEvent) {
-    if (event.candidate) {
-      this.sendMessageToSocket('new_ice', { ice: event.candidate })
+    if (!event.candidate || this.isClosed) return
+    this.sendMessageToSocket('new_ice', { ice: event.candidate })
+  }
+
+  private onConnectionStateChange() {
+    if (this.isClosed) return
+    if (this.peer.connectionState === 'connected') {
+      this.isNewOfferRequested = false
+      return
+    }
+    if (!this.isInitiator || this.peer.connectionState !== 'failed') return
+
+    void this.createOffer({ isIceRestart: true })
+  }
+
+  private applyVideoBitrate(sender: RTCRtpSender, bitrate: number, isHighPriority: boolean) {
+    try {
+      const parameters = sender.getParameters()
+      if (!parameters.encodings?.length) return
+
+      parameters.encodings = parameters.encodings.map((encoding) => ({
+        ...encoding,
+        maxBitrate: bitrate,
+        ...(isHighPriority ? { priority: 'high' as const, networkPriority: 'high' as const } : {}),
+      }))
+      parameters.degradationPreference = 'maintain-framerate'
+      void sender.setParameters(parameters).catch((error) => {
+        console.error(error)
+      })
+    } catch (error) {
+      console.error(error)
     }
   }
 
   setVideoBitrate(bitrate: number) {
-    const screenVideoParams = { ...this.senders.screenVideo.getParameters() }
-    const webCamParams = { ...this.senders.webCam.getParameters() }
-    screenVideoParams.encodings = screenVideoParams.encodings.map((encoding) => ({
-      ...encoding,
-      maxBitrate: bitrate,
-      priority: 'high' as RTCPriorityType,
-      networkPriority: 'high' as RTCPriorityType,
-    }))
-    screenVideoParams.degradationPreference = 'maintain-framerate'
-
-    webCamParams.encodings = webCamParams.encodings.map((encoding) => ({
-      ...encoding,
-      maxBitrate: bitrate,
-    }))
-    webCamParams.degradationPreference = 'maintain-framerate'
-
-    this.senders.screenVideo.setParameters(screenVideoParams)
-    this.senders.webCam.setParameters(webCamParams)
-  }
-
-  private onTrack(event: RTCTrackEvent) {
-    const [stream] = event.streams
-    const tracks = stream?.getTracks() || []
-
-    if (tracks.length === 0) return
-    else if (tracks.length === 2) this.remoteSenderStreams.screen = stream
-    else if (tracks[0].kind === 'video') this.remoteSenderStreams.webCam = stream
-    else if (tracks[0].kind === 'audio') this.remoteSenderStreams.mic = stream
+    this.applyVideoBitrate(this.senders.screenVideo, bitrate, true)
+    this.applyVideoBitrate(this.senders.webCam, bitrate, false)
   }
 
   setRemoteControlEnabled(enabled: boolean) {
@@ -559,6 +686,15 @@ export class WebRTCClient extends Emitter<WebRTCClientEvents> {
   }
 
   close() {
+    if (this.isClosed) return
+
+    this.isClosed = true
+    this.pendingCandidates = []
+    this.chatFileTempData.clear()
+    this.peer.onicecandidate = null
+    this.peer.onconnectionstatechange = null
+    this.peer.ontrack = null
+    this.peer.ondatachannel = null
     this.peer.close()
   }
 }

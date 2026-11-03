@@ -5,7 +5,15 @@ import type { StreamType } from '../types'
 export const createSilentAudioTrack = () => {
   const ctx = new AudioContext()
   const dst = ctx.createMediaStreamDestination()
-  return dst.stream.getAudioTracks()[0]
+  const track = dst.stream.getAudioTracks()[0]
+
+  return {
+    track,
+    close: () => {
+      track.stop()
+      void ctx.close()
+    },
+  }
 }
 
 export const createBlackVideoTrack = () => {

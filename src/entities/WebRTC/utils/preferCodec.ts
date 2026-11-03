@@ -28,7 +28,7 @@ export const preferCodec = (codecs: RTCRtpCodec[] = [], mimeType: string) => {
 }
 
 export const changeVideoCodecs = (transceiver: RTCRtpTransceiver, mimeType: string) => {
-  const kind = transceiver.sender.track?.kind
+  const kind = transceiver.receiver.track?.kind ?? transceiver.sender.track?.kind
 
   if (kind !== 'video') return
 

@@ -31,6 +31,7 @@ export const RoomPasswordModal = (props: RoomPasswordModalProps) => {
         <Stack gap={2}>
           <Typography variant="h6">Room password</Typography>
           <TextField
+            required
             autoFocus
             label="Password"
             type="password"

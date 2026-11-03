@@ -14,14 +14,15 @@ import type {
 
 import { useWebRTCRoomStore } from '../model/WebRTCRoomStore'
 
-type Answer = { answer: RTCSessionDescription }
-type Offer = { offer: RTCSessionDescription }
+type Answer = { answer: RTCSessionDescriptionInit }
+type Offer = { offer: RTCSessionDescriptionInit }
 type Ice = { ice: RTCIceCandidateInit }
 type ClientId = { id: string }
+type ConnectionId = { connectionId?: string }
 type UserConnectModel = UserModel
 
 export const useWebRTCRoom = () => {
-  const { users, addUser, addMiniGame, removeUser } = useWebRTCRoomStore()
+  const { users, addUser, replaceUsers, addMiniGame, removeUser } = useWebRTCRoomStore()
   const { streams, bitrate } = useWebRTCStore()
   const playAudio = useAudioEffectStore((state) => state.play)
   const { mic, screen, webCam } = streams
@@ -33,21 +34,6 @@ export const useWebRTCRoom = () => {
       peer.setVideoBitrate(bitrate)
     })
   }, [bitrate])
-
-  const handleGetUserPeer = useCallback(
-    (userId: string) => userMapRef.current.find((user) => user.id === userId)?.peer,
-    []
-  )
-
-  const handleAddUser = useCallback(
-    (user: UserConnectModel, peer: WebRTCClient) =>
-      addUser({
-        id: user.id,
-        user,
-        peer,
-      }),
-    [addUser]
-  )
 
   useEffect(() => {
     if (screen) {
@@ -133,66 +119,90 @@ export const useWebRTCRoom = () => {
   }, [users, playAudio, addMiniGame])
 
   useEffect(() => {
-    const addUser = (user: UserConnectModel, waitOffer = false) => {
-      const webRTCClient = new WebRTCClient({ id: user.id })
-      handleAddUser(user, webRTCClient)
-      if (!waitOffer) playAudio(AudioName.joinToRoom)
-      if (!waitOffer) webRTCClient.createOffer()
+    const handleUserJoin = (user: UserConnectModel) => {
+      const peer = new WebRTCClient({ id: user.id, isInitiator: true })
+      addUser({
+        id: user.id,
+        user,
+        peer,
+      })
+      playAudio(AudioName.joinToRoom)
+      void peer.createOffer()
     }
 
-    const initClients = (users: UserConnectModel[]) => {
-      users.map((user) => addUser(user, true))
+    const handleUsersInRoom = (roomUsers: UserConnectModel[]) => {
+      replaceUsers(
+        roomUsers.map((user) => ({
+          id: user.id,
+          user,
+          peer: new WebRTCClient({ id: user.id, isInitiator: false }),
+        }))
+      )
     }
 
-    const saveAnswer = (data: Answer & ClientId) => {
-      const { id, answer } = data
-      const webRTCClient = handleGetUserPeer(id)
-      webRTCClient?.setRemoteDescription(answer)
+    const handleOffer = (data: Offer & ClientId & ConnectionId) => {
+      const roomUser = useWebRTCRoomStore.getState().users.find((user) => user.id === data.id)
+      if (!roomUser) return
+
+      const isForeignConnection =
+        Boolean(roomUser.peer.connectionId) &&
+        Boolean(data.connectionId) &&
+        roomUser.peer.connectionId !== data.connectionId
+
+      if (isForeignConnection) {
+        const peer = new WebRTCClient({ id: data.id, isInitiator: false })
+        addUser({
+          id: data.id,
+          user: roomUser.user,
+          peer,
+        })
+        void peer.handleOffer(data.offer, data.connectionId)
+        return
+      }
+
+      void roomUser.peer.handleOffer(data.offer, data.connectionId)
     }
 
-    const createAnswer = async (data: Offer & ClientId) => {
-      const { id, offer } = data
-      const webRTCClient = handleGetUserPeer(id)
-      webRTCClient?.setRemoteDescription(offer)
-      webRTCClient?.createAnswer()
+    const handleAnswer = (data: Answer & ClientId & ConnectionId) => {
+      const peer = useWebRTCRoomStore.getState().users.find((user) => user.id === data.id)?.peer
+      void peer?.handleAnswer(data.answer, data.connectionId)
     }
 
-    const saveIce = (data: Ice & ClientId) => {
-      const { id, ice } = data
-      const webRTCClient = handleGetUserPeer(id)
-      webRTCClient?.addIceCandidate(ice)
+    const handleIce = (data: Ice & ClientId & ConnectionId) => {
+      const peer = useWebRTCRoomStore.getState().users.find((user) => user.id === data.id)?.peer
+      void peer?.handleIce(data.ice, data.connectionId)
     }
 
-    const userDisconnect = (user: ClientId) => {
-      const webRTCClient = handleGetUserPeer(user.id)
-      webRTCClient?.close()
+    const handleRequestNewOffer = (data: ClientId) => {
+      const peer = useWebRTCRoomStore.getState().users.find((user) => user.id === data.id)?.peer
+      if (!peer?.isInitiator) return
+
+      void peer.createOffer({ isIceRestart: true })
+    }
+
+    const handleUserLeave = (user: ClientId) => {
       removeUser(user.id)
       playAudio(AudioName.exitFromRoom)
     }
 
-    const reconnect = (user: UserConnectModel) => {
-      userDisconnect({ id: user.id })
-      addUser(user)
-    }
-
-    socketClient.on('new_answer', saveAnswer)
-    socketClient.on('new_offer', createAnswer)
-    socketClient.on('new_ice', saveIce)
-    socketClient.on('user_join', addUser)
-    socketClient.on('users_in_room', initClients)
-    socketClient.on('user_leave', userDisconnect)
-    socketClient.on('reconnect', reconnect)
+    socketClient.on('new_answer', handleAnswer)
+    socketClient.on('new_offer', handleOffer)
+    socketClient.on('new_ice', handleIce)
+    socketClient.on('request_new_offer', handleRequestNewOffer)
+    socketClient.on('user_join', handleUserJoin)
+    socketClient.on('users_in_room', handleUsersInRoom)
+    socketClient.on('user_leave', handleUserLeave)
 
     return () => {
-      socketClient.off('new_answer', saveAnswer)
-      socketClient.off('new_offer', createAnswer)
-      socketClient.off('new_ice', saveIce)
-      socketClient.off('user_join', addUser)
-      socketClient.off('users_in_room', initClients)
-      socketClient.off('user_leave', userDisconnect)
-      socketClient.off('reconnect', reconnect)
+      socketClient.off('new_answer', handleAnswer)
+      socketClient.off('new_offer', handleOffer)
+      socketClient.off('new_ice', handleIce)
+      socketClient.off('request_new_offer', handleRequestNewOffer)
+      socketClient.off('user_join', handleUserJoin)
+      socketClient.off('users_in_room', handleUsersInRoom)
+      socketClient.off('user_leave', handleUserLeave)
     }
-  }, [handleAddUser, handleGetUserPeer, playAudio, removeUser])
+  }, [addUser, playAudio, removeUser, replaceUsers])
 
   const handleSendMessage = useCallback((message: string) => {
     userMapRef.current.forEach(({ peer }) => {

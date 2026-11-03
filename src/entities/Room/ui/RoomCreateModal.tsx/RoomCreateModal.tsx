@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Button, Stack, TextField, Typography } from '@mui/material'
+import { Button, Checkbox, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
 import { Modal } from 'src/shared/ui'
 
 import type { ModalProps } from 'src/shared/ui'
@@ -12,6 +12,7 @@ export type RoomCreateModalProps = {
 export const RoomCreateModal = (props: RoomCreateModalProps) => {
   const { open, onClose, onCreateRoom, ...otherProps } = props
   const [roomName, setRoomName] = useState('')
+  const [withPassword, setWithPassword] = useState(false)
   const [password, setPassword] = useState('')
 
   const handleCancel = () => {
@@ -20,7 +21,7 @@ export const RoomCreateModal = (props: RoomCreateModalProps) => {
 
   const handleCreateRoom = (e: React.FormEvent) => {
     e.preventDefault()
-    onCreateRoom?.(roomName, password || undefined)
+    onCreateRoom?.(roomName, withPassword ? password : undefined)
   }
 
   return (
@@ -29,21 +30,41 @@ export const RoomCreateModal = (props: RoomCreateModalProps) => {
       onClose={handleCancel}
       {...otherProps}
     >
-      <form onSubmit={handleCreateRoom}>
+      <form
+        autoComplete="off"
+        onSubmit={handleCreateRoom}
+      >
         <Stack gap={2}>
           <Typography variant="h6">Create room</Typography>
           <TextField
+            required
             autoFocus
+            autoComplete="off"
             label="Room name"
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
           />
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={withPassword}
+                onChange={(e) => setWithPassword(e.target.checked)}
+              />
+            }
+            label="With password"
           />
+          {/* type="password" заставляет менеджер паролей браузера подставлять и сохранять данные, поэтому символы скрываются через CSS */}
+          {withPassword && (
+            <TextField
+              required
+              autoComplete="off"
+              label="Password"
+              type="text"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              sx={{ '& input': { WebkitTextSecurity: 'disc' } }}
+            />
+          )}
           <Stack
             direction="row"
             gap={1}
