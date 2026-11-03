@@ -16,6 +16,7 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "postinstall": "node scripts/ensure-native-bindings.mjs",
     "install:electron": "npm i --include=optional",
     "electron:dev": "vite --mode electron",
     "electron:build": "vite build --mode electron && electron-builder",
@@ -31,7 +32,6 @@
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
-    "@nut-tree-fork/nut-js": "^4.2.6",
     "axios": "^1.21.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
@@ -82,6 +82,7 @@
   },
   "optionalDependencies": {
     "@electron/rebuild": "^4.2.1",
+    "@nut-tree-fork/nut-js": "^4.2.6",
     "electron": "^45.2.1",
     "electron-builder": "^26.18.0",
     "electron-context-menu": "^4.1.2",
