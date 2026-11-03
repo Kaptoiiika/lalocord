@@ -14,7 +14,7 @@ export const AppFooter = () => {
   const versionAlignClassName = isSmallScreen ? 'text-left' : 'text-right'
 
   return (
-    <footer className="flex justify-between p-2 [border-top:var(--box-border)] max-[385px]:flex-col max-[385px]:items-start">
+    <footer className="bg-background flex justify-between p-2 [border-top:var(--box-border)] max-[385px]:flex-col max-[385px]:items-start">
       <div>
         <h2 className="text-lg font-semibold">Contact</h2>
         <ul>

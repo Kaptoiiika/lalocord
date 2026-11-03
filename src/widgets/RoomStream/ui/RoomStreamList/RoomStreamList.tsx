@@ -3,6 +3,7 @@ import { memo, useEffect, useState } from 'react'
 import { useAudioEffectStore } from 'src/entities/AudioEffect'
 import { getLocalUser, useLocalUserStore } from 'src/entities/User'
 import { useWebRTCStore } from 'src/entities/WebRTC'
+import { ThemeBackground } from 'src/features/ThemeBackground'
 import { useWebRTCRoomStore } from 'src/features/WebRTCRoom/model/WebRTCRoomStore'
 import { classNames } from 'src/shared/lib/classNames/classNames'
 import { useThrottle } from 'src/shared/lib/hooks/useThrottle/useThrottle'
@@ -95,6 +96,8 @@ export const RoomStreams = memo(function RoomStreams() {
         [styles.RoomStreamsWithHiddenStream]: !!someStreamIsHide,
       })}
     >
+      <ThemeBackground />
+
       {miniGame.map((engine) => (
         <div key={engine.id}>
           {engine.type === 'TicTacToe' && <TicTacToeMultiplayer game={engine as TicTacToeGame} />}
@@ -137,4 +140,3 @@ export const RoomStreams = memo(function RoomStreams() {
     </StreamViewer>
   )
 })
-

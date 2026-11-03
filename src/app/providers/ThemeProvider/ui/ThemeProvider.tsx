@@ -11,6 +11,7 @@ const bodyClassByTheme: Record<ThemeName, string> = {
   [ThemeName.dark]: ThemeName.dark,
   [ThemeName.pink]: ThemeName.pink,
   [ThemeName.purple]: `${ThemeName.dark} ${ThemeName.purple}`,
+  [ThemeName.leopard]: ThemeName.leopard,
 }
 
 const applyBodyTheme = (nextTheme: ThemeName) => {

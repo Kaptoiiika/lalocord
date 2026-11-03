@@ -5,6 +5,7 @@ export enum ThemeName {
   dark = 'dark',
   pink = 'pink',
   purple = 'purple',
+  leopard = 'leopard',
 }
 
 export interface ThemeContextProps {

@@ -9,7 +9,6 @@ $animationTime: 0.3s;
   width: $chatWidth;
   height: 100%;
   transition: width $animationTime, height $animationTime;
-  background: var(--bg-app);
 
   @media (max-width: 625px) {
     flex-shrink: 0;

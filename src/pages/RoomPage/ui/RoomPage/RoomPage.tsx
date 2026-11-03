@@ -140,7 +140,7 @@ const RoomPageWrapper = () => {
 }
 
 export const RoomPage = () => (
-  <PageWrapper>
+  <PageWrapper className="relative isolate">
     <WaitUserClick>
       <RoomPageWrapper />
     </WaitUserClick>

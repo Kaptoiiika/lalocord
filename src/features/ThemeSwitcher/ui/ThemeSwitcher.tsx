@@ -1,34 +1,62 @@
 import { memo } from 'react'
 
-import { Grape, Heart, Moon, Sun } from 'lucide-react'
+import { Grape, Heart, Moon, PawPrint, Sun } from 'lucide-react'
 import { ThemeName } from 'src/app/providers/ThemeProvider/lib/ThemeContext'
 import { useTheme } from 'src/shared/lib/hooks/useTheme/useTheme'
-import { IconButton } from 'src/shared/ui'
+import { startViewTransition } from 'src/shared/lib/utils'
+import { Select, SelectContent, SelectItem, SelectTrigger } from 'src/shared/ui/shadcn/select'
 
-const themeIcon: Record<ThemeName, typeof Sun> = {
-  [ThemeName.light]: Sun,
-  [ThemeName.dark]: Moon,
-  [ThemeName.pink]: Heart,
-  [ThemeName.purple]: Grape,
-}
+const themes: { value: ThemeName; label: string; Icon: typeof Sun }[] = [
+  { value: ThemeName.light, label: 'Light', Icon: Sun },
+  { value: ThemeName.dark, label: 'Dark', Icon: Moon },
+  { value: ThemeName.pink, label: 'Pink', Icon: Heart },
+  { value: ThemeName.purple, label: 'Purple', Icon: Grape },
+  { value: ThemeName.leopard, label: 'Leopard', Icon: PawPrint },
+]
 
-const nextThemeLabel: Record<ThemeName, string> = {
-  [ThemeName.light]: 'Switch to dark theme',
-  [ThemeName.dark]: 'Switch to pink theme',
-  [ThemeName.pink]: 'Switch to purple theme',
-  [ThemeName.purple]: 'Switch to light theme',
-}
+const themeByName = Object.fromEntries(themes.map((item) => [item.value, item])) as Record<
+  ThemeName,
+  (typeof themes)[number]
+>
 
 export const ThemeSwitcher = memo(function ThemeSwitcher() {
-  const { theme, toggleTheme } = useTheme()
-  const Icon = themeIcon[theme]
+  const { theme, setTheme } = useTheme()
+  const CurrentIcon = themeByName[theme].Icon
+
+  const handleChange = async (value: string) => {
+    if (!(value in themeByName)) return
+
+    await startViewTransition()
+    setTheme(value as ThemeName)
+  }
 
   return (
-    <IconButton
-      onClick={toggleTheme}
-      aria-label={nextThemeLabel[theme]}
+    <Select
+      value={theme}
+      onValueChange={handleChange}
     >
-      <Icon />
-    </IconButton>
+      <SelectTrigger
+        aria-label={`Theme: ${themeByName[theme].label}`}
+        className="size-10 justify-center border-0 bg-transparent shadow-none hover:bg-foreground/10 dark:bg-transparent dark:hover:bg-foreground/10 [&_svg:last-child]:hidden"
+      >
+        <CurrentIcon className="size-5" />
+      </SelectTrigger>
+      <SelectContent
+        side="right"
+        align="end"
+        position="popper"
+        collisionPadding={12}
+      >
+        {themes.map(({ value, label, Icon }) => (
+          <SelectItem
+            key={value}
+            value={value}
+          >
+            <Icon />
+            {label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 })

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { RoomList } from 'src/entities/Room'
 import { RoomCreateButton } from 'src/entities/Room/ui/RoomCreateModal.tsx/RoomCreateButton'
 import { useLocalUserStore } from 'src/entities/User'
+import { ThemeBackground } from 'src/features/ThemeBackground'
 import { AppRoutes } from 'src/shared/config'
 import { __IS_ELECTRON__ } from 'src/shared/const/config'
 import { TextField, TextLink } from 'src/shared/ui'
@@ -33,6 +34,7 @@ export const MainPage = () => {
       className="flex w-full flex-col justify-between overflow-auto"
     >
       <main className="m-2 flex h-full flex-col justify-between gap-1">
+        <ThemeBackground />
         <div className="flex flex-col items-start gap-1">
           <div className="flex flex-row gap-1">
             <TextField
