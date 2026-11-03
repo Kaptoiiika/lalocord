@@ -1,5 +1,5 @@
 import { Stack } from '@mui/material'
-import { useWebRTCRoom } from 'src/features/WebRTCRoom'
+import { useRoomScreenWakeLock, useWebRTCRoom } from 'src/features/WebRTCRoom'
 import { Chat } from 'src/widgets/Chat'
 import { RoomStreams } from 'src/widgets/RoomStream'
 
@@ -16,6 +16,7 @@ type RoomLobbyProps = {
 export const RoomLobby = (props: RoomLobbyProps) => {
   const { isFull } = props
   const { handleSendMessage, handleSendFile } = useWebRTCRoom()
+  useRoomScreenWakeLock()
 
   if (isFull) {
     return <RoomIsFull />

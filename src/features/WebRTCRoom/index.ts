@@ -1,5 +1,5 @@
 export { useWebRTCRoomStore } from './model/WebRTCRoomStore'
 
-
 export type { RoomUser } from './model/WebRTCRoomStore'
+export { useRoomScreenWakeLock } from './hooks/useRoomScreenWakeLock'
 export { useWebRTCRoom } from './hooks/useWebRTCRoom'
